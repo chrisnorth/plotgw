@@ -36,6 +36,11 @@ getLabelUnit = function(col){
     }else{
         return(columns[col].label);
     }
+}
+
+resizeGraph = function(){
+    pageWidth = $(window).width()
+    pageHeight = $(window).width()
 
 }
 
@@ -73,9 +78,15 @@ for (col in columns){
 }
 
 
-var margin = {top: 20, right: 60, bottom: 50, left: 60},
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+// var margin = {top: 20, right: 60, bottom: 50, left: 60}
+var margin = {top: 20, right: 60, bottom: 50, left: 60}
+var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
+var width = document.getElementById("graphcontainer").offsetWidth - margin.left - margin.right;
+var height = document.getElementById("graphcontainer").offsetHeight - margin.top - margin.bottom;
+
+var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
+var widthSketch = document.getElementById("sketchcontainer").offsetWidth - marginSketch.left - marginSketch.right;
+var heightSketch = document.getElementById("sketchcontainer").offsetHeight - marginSketch.top - marginSketch.bottom;
 
 //set axes
 var xvar = "initmass1", yvar = "initmass2"
@@ -110,28 +121,46 @@ var tttext = function(d){
   " "+columns[yvar].unit+"</span>");
 }
 
-// add the graph canvas to the body of the webpage
-var svg = d3.select("body").append("svg")
+// var svg = d3.select("div.svg-container").append("svg")
+var svg = d3.select("div#graphcontainer").append("svg")
     .attr("width", width + margin.left + margin.right)
     .attr("height", height + margin.top + margin.bottom)
     .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
 // add the tooltip area to the webpage
-var tooltip = d3.select("body").append("div")
+var tooltip = d3.select("div#graphcontainer").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+
+var svgSketch = d3.select("div#sketchcontainer").append("svg")
+    .attr("width", widthSketch + marginSketch.left + marginSketch.right)
+    .attr("height", heightSketch + marginSketch.top + marginSketch.bottom)
+    .append("g")
+    .attr("transform", "translate(" + marginSketch.left + "," + marginSketch.top + ")");
+var sketchName;
+var skPri = svgSketch.append("circle")
+    .attr("class","sketch pri")
+    .attr("cx",30)
+    .attr("cy",30)
+    .attr("r",20);
+
+var skSec = svgSketch.append("circle")
+    .attr("class","sketch sec")
+    .attr("cx",120)
+    .attr("cy",30)
+    .attr("r",10);
+
+var skFin = svgSketch.append("circle")
+    .attr("class","sketch final")
+    .attr("cx",60)
+    .attr("cy",120)
+    .attr("r",30);
 
 //set global variable for later use
 var data;
 
-// var tttext = function(d){
-//     return("<span class='ttname'>"+d["name"]+"</span>"+
-//     "<span class='ttx'>"+columns[xvar].label+": "+xValue(d)+
-//     " "+columns[xvar].unit+"</span>"+
-//     "<span class='tty'>"+columns[yvar].label+": "+yValue(d)+
-//     " "+columns[yvar].unit+"</span>");
-// }
 // load data
 d3.csv("csv/gwcat.csv", function(error, data) {
 
@@ -180,20 +209,42 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .attr("cy", yMap)
       .style("fill", function(d) { return color(cValue(d));})
       .on("mouseover", function(d) {
-          tooltip.transition()
-               .duration(200)
-               .style("opacity", .9);
-          tooltip.html(tttext(d))
-               .style("left", (d3.event.pageX + 10) + "px")
-               .style("top", (d3.event.pageY - 28) + "px")
-               .style("width","auto")
-               .style("height","auto");
+        tooltip.transition()
+           .duration(200)
+           .style("opacity", .9);
+        tooltip.html(tttext(d))
+           .style("left", (d3.event.pageX + 10) + "px")
+           .style("top", (d3.event.pageY - 28) + "px")
+           .style("width","auto")
+           .style("height","auto");
       })
       .on("mouseout", function(d) {
           tooltip.transition()
                .duration(500)
                .style("opacity", 0);
+        //   document.getElementById("sketchcontainer").style.opacity=0.;
+      })
+      .on("click", function(d) {
+          if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&(sketchName==d["name"])){
+              document.getElementById("sketchcontainer").classList.remove("nothidden");
+              document.getElementById("sketchcontainer").classList.add("hidden");
+          }else{
+              svgSketch.select('circle.pri')
+               .transition().duration(200)
+               .attr("r",d["initmass1"]);
+              svgSketch.select('circle.sec')
+               .transition().duration(200)
+               .attr("r",d["initmass2"]);
+              svgSketch.select('circle.final')
+               .transition().duration(200)
+               .attr("r",d["finalmass"]);
+              document.getElementById("sketchcontainer").classList.remove("hidden");
+              document.getElementById("sketchcontainer").classList.add("nothidden");
+            //   document.getElementById("sketchcontainer").style.opacity = 1.;
+              sketchName=d["name"];
+          }
       });
+
     // draw legend
     var legend = svg.selectAll(".legend")
       .data(color.domain())
