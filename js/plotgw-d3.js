@@ -12,7 +12,7 @@ var columns = {
     finalmass:{code:"finalmass",type:"flt",label:"Final Mass",
         avail:true,unit:'solar masses'},
     massratio:{code:"massratio",type:"flt",label:"Mass Ratio",
-        avail:true,unit:'Secondary/Primary'},
+        avail:true,unit:''},
     initspineff:{code:"initspineff",type:"flt",avail:false},
     initspin1:{code:"initspin1",type:"flt",avail:false},
     initspin2:{code:"initspin2",type:"flt",avail:false},
@@ -102,6 +102,14 @@ var yAxis = d3.svg.axis()
 var cValue = function(d) {return d.type;},
     color = d3.scale.category10();
 
+var tttext = function(d){
+  return("<span class='ttname'>"+d["name"]+"</span>"+
+  "<span class='ttx'>"+columns[xvar].label+": "+xValue(d)+
+  " "+columns[xvar].unit+"</span>"+
+  "<span class='tty'>"+columns[yvar].label+": "+yValue(d)+
+  " "+columns[yvar].unit+"</span>");
+}
+
 // add the graph canvas to the body of the webpage
 var svg = d3.select("body").append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -117,6 +125,13 @@ var tooltip = d3.select("body").append("div")
 //set global variable for later use
 var data;
 
+// var tttext = function(d){
+//     return("<span class='ttname'>"+d["name"]+"</span>"+
+//     "<span class='ttx'>"+columns[xvar].label+": "+xValue(d)+
+//     " "+columns[xvar].unit+"</span>"+
+//     "<span class='tty'>"+columns[yvar].label+": "+yValue(d)+
+//     " "+columns[yvar].unit+"</span>");
+// }
 // load data
 d3.csv("csv/gwcat.csv", function(error, data) {
 
@@ -126,7 +141,6 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         for (col in columns){
             if (columns[col].type=="flt"){d[col] = +d[col]}
         }
-        //console.log(d);
     });
 
     // don't want dots overlapping axis, so add in buffer to data domain
@@ -169,11 +183,11 @@ d3.csv("csv/gwcat.csv", function(error, data) {
           tooltip.transition()
                .duration(200)
                .style("opacity", .9);
-          tooltip.html(d["name"] + "<br/> (" + xValue(d)
-            + ", " + yValue(d) + ")")
-               .style("left", (d3.event.pageX + 5) + "px")
-               .style("top", (d3.event.pageY - 28) + "px");
-          console.log('moving tooltip to',xMap(d),yMap(d));
+          tooltip.html(tttext(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY - 28) + "px")
+               .style("width","auto")
+               .style("height","auto");
       })
       .on("mouseout", function(d) {
           tooltip.transition()
@@ -206,14 +220,8 @@ d3.csv("csv/gwcat.csv", function(error, data) {
 
 
 function updateXaxis(xvarNew) {
-    // xvarNew = 'totalmass';
-    var xValueNew = function(d) { return d[xvarNew];} // data -> value
-    var xScaleNew = d3.scale.linear().range([0, width]) // value -> display
-    var xMapNew = function(d) { return xScaleNew(xValueNew(d));} // data -> display
-    var xAxisNew = d3.svg.axis()
-        .scale(xScaleNew)
-        .orient("bottom")
-        .innerTickSize(-height);
+    // set global variable
+    xvar = xvarNew;
 
     d3.csv("csv/gwcat.csv", function(error, data) {
 
@@ -224,7 +232,7 @@ function updateXaxis(xvarNew) {
             }
         });
         // don't want dots overlapping axis, so add in buffer to data domain
-        xScaleNew.domain([d3.min(data, xValueNew)-2, d3.max(data, xValueNew)+2]);
+        xScale.domain([d3.min(data, xValue)-2, d3.max(data, xValue)+2]);
 
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
@@ -232,26 +240,20 @@ function updateXaxis(xvarNew) {
         // Make the changes
         svg.selectAll(".dot")   // change the line
           .duration(750)
-          .attr("cx", xMapNew)
+          .attr("cx", xMap)
         svg.select(".x.axis") // change the x axis
           .duration(750)
-          .call(xAxisNew);
+          .call(xAxis);
         svg.select(".x.label")
             .duration(750)
-            .text(getLabelUnit(xvarNew));
+            .text(getLabelUnit(xvar));
     });
 
 }
 
 function updateYaxis(yvarNew) {
-    // yvarNew = 'massratio';
-    var yValueNew = function(d) { return d[yvarNew];} // data -> value
-    var yScaleNew = d3.scale.linear().range([height, 0]) // value -> display
-    var yMapNew = function(d) { return yScaleNew(yValueNew(d));} // data -> display
-    var yAxisNew = d3.svg.axis()
-        .scale(yScaleNew)
-        .orient("left")
-        .innerTickSize(-width);
+    // set global variable
+    yvar = yvarNew;
 
     d3.csv("csv/gwcat.csv", function(error, data) {
 
@@ -262,7 +264,7 @@ function updateYaxis(yvarNew) {
             }
         });
         // don't want dots overlapping axis, so add in buffer to data domain
-        yScaleNew.domain([d3.min(data, yValueNew)-2, d3.max(data, yValueNew)+2]);
+        yScale.domain([d3.min(data, yValue)-2, d3.max(data, yValue)+2]);
 
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
@@ -270,13 +272,13 @@ function updateYaxis(yvarNew) {
         // Make the changes
         svg.selectAll(".dot")   // change the line
           .duration(750)
-          .attr("cy", yMapNew)
+          .attr("cy", yMap)
         svg.select(".y.axis") // change the y axis
           .duration(750)
-          .call(yAxisNew);
+          .call(yAxis);
         svg.select(".y.label")
             .duration(750)
-            .text(getLabelUnit(yvarNew));
+            .text(getLabelUnit(yvar));
     });
 
 }
