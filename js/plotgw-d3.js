@@ -12,7 +12,7 @@ var columns = {
     finalmass:{code:"finalmass",type:"flt",label:"Final Mass",
         avail:true,unit:'solar masses'},
     massratio:{code:"massratio",type:"flt",label:"Mass Ratio",
-        avail:true,unit='Secondary/Primary'},
+        avail:true,unit:'Secondary/Primary'},
     initspineff:{code:"initspineff",type:"flt",avail:false},
     initspin1:{code:"initspin1",type:"flt",avail:false},
     initspin2:{code:"initspin2",type:"flt",avail:false},
