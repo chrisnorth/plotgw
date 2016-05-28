@@ -35,7 +35,10 @@ div#options{
     transition:1s;
     moz-transition:1s;
 }
-
+span.sketchtitle{
+    width:100%;
+    text-align:center;
+}
 .svg-container {
     display: inline-block;
     position: relative;

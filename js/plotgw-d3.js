@@ -84,10 +84,6 @@ var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
 var width = document.getElementById("graphcontainer").offsetWidth - margin.left - margin.right;
 var height = document.getElementById("graphcontainer").offsetHeight - margin.top - margin.bottom;
 
-var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
-var widthSketch = document.getElementById("sketchcontainer").offsetWidth - marginSketch.left - marginSketch.right;
-var heightSketch = document.getElementById("sketchcontainer").offsetHeight - marginSketch.top - marginSketch.bottom;
-
 //set axes
 var xvar = "initmass1", yvar = "initmass2"
 
@@ -134,30 +130,60 @@ var tooltip = d3.select("div#graphcontainer").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
+// Add svg to sketch container
+var marginSketch = {top: 50, right: 0, bottom: 0, left: 0}
+var widthSketch = document.getElementById("sketchcontainer").offsetWidth - marginSketch.left - marginSketch.right;
+var heightSketch = document.getElementById("sketchcontainer").offsetHeight - marginSketch.top - marginSketch.bottom;
+
 var svgSketch = d3.select("div#sketchcontainer").append("svg")
     .attr("width", widthSketch + marginSketch.left + marginSketch.right)
     .attr("height", heightSketch + marginSketch.top + marginSketch.bottom)
     .append("g")
     .attr("transform", "translate(" + marginSketch.left + "," + marginSketch.top + ")");
-var sketchName;
+
+//Name of object shown in sketch
+var sketchName = d3.select("div#sketchcontainer").append("span")
+    .html("hello");
+
 var skPri = svgSketch.append("circle")
     .attr("class","sketch pri")
-    .attr("cx",30)
-    .attr("cy",30)
+    .attr("cx",widthSketch*0.3)
+    .attr("cy",heightSketch*0.1)
     .attr("r",20);
 
 var skSec = svgSketch.append("circle")
     .attr("class","sketch sec")
-    .attr("cx",120)
-    .attr("cy",30)
+    .attr("cx",widthSketch*0.7)
+    .attr("cy",heightSketch*0.1)
     .attr("r",10);
 
 var skFin = svgSketch.append("circle")
     .attr("class","sketch final")
-    .attr("cx",60)
-    .attr("cy",120)
+    .attr("cx",widthSketch*0.5)
+    .attr("cy",heightSketch*0.7)
     .attr("r",30);
 
+updateSketch = function(d){
+    if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&
+    (sketchName==d["name"])){
+        document.getElementById("sketchcontainer").classList.remove("nothidden");
+        document.getElementById("sketchcontainer").classList.add("hidden");
+    }else{
+        svgSketch.select('circle.pri')
+         .transition().duration(200)
+         .attr("r",d["initmass1"]);
+        svgSketch.select('circle.sec')
+         .transition().duration(200)
+         .attr("r",d["initmass2"]);
+        svgSketch.select('circle.final')
+         .transition().duration(200)
+         .attr("r",d["finalmass"]);
+        document.getElementById("sketchcontainer").classList.remove("hidden");
+        document.getElementById("sketchcontainer").classList.add("nothidden");
+      //   document.getElementById("sketchcontainer").style.opacity = 1.;
+        sketchName.html(d["name"]);
+    }
+}
 //set global variable for later use
 var data;
 
@@ -224,26 +250,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
                .style("opacity", 0);
         //   document.getElementById("sketchcontainer").style.opacity=0.;
       })
-      .on("click", function(d) {
-          if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&(sketchName==d["name"])){
-              document.getElementById("sketchcontainer").classList.remove("nothidden");
-              document.getElementById("sketchcontainer").classList.add("hidden");
-          }else{
-              svgSketch.select('circle.pri')
-               .transition().duration(200)
-               .attr("r",d["initmass1"]);
-              svgSketch.select('circle.sec')
-               .transition().duration(200)
-               .attr("r",d["initmass2"]);
-              svgSketch.select('circle.final')
-               .transition().duration(200)
-               .attr("r",d["finalmass"]);
-              document.getElementById("sketchcontainer").classList.remove("hidden");
-              document.getElementById("sketchcontainer").classList.add("nothidden");
-            //   document.getElementById("sketchcontainer").style.opacity = 1.;
-              sketchName=d["name"];
-          }
-      });
+      .on("click", function(d) {updateSketch(d)});
 
     // draw legend
     var legend = svg.selectAll(".legend")
@@ -267,8 +274,6 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .style("text-anchor", "end")
       .text(function(d) { return d;})
 });
-
-
 
 function updateXaxis(xvarNew) {
     // set global variable
