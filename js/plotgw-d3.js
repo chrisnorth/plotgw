@@ -116,6 +116,119 @@ var tttext = function(d){
   "<span class='tty'>"+columns[yvar].label+": "+yValue(d)+
   " "+columns[yvar].unit+"</span>");
 }
+//
+// Create sketch panel
+//
+
+// add title
+var sketchName="";
+d3.select("div#sketchcontainer").append("span")
+    .attr("id","sketchtitle")
+    .html(sketchName);
+
+var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
+var widthSketch = document.getElementById("sketchcontainer").offsetWidth -
+    marginSketch.left - marginSketch.right;
+var heightSketch = document.getElementById("sketchcontainer").offsetHeight -
+    document.getElementById("sketchtitle").offsetHeight -
+     marginSketch.top - marginSketch.bottom;
+var aspectSketch = heightSketch/widthSketch
+
+// Add svg to sketch container
+var svgSketch = d3.select("div#sketchcontainer").append("svg")
+    .attr("width", widthSketch + marginSketch.left + marginSketch.right)
+    .attr("height", heightSketch + marginSketch.top + marginSketch.bottom)
+    .append("g")
+    .attr("transform", "translate(" + marginSketch.left + "," + marginSketch.top + ")");
+
+// set scaleing functions for sketch
+scaleRadius = function(mass,ref){return(0.2*widthSketch*(mass/100.))}
+var xScaleSk = function(x){return(x*widthSketch)}
+var xScaleSkAspect = function(x){return(x*widthSketch*aspectSketch)}
+var yScaleSk = function(y){return(y*heightSketch)}
+var colBH = "rgba(0,0,0,0.5)";
+var bhpos = {
+    pri:{cx:0.25,cy:0.1,xicon:0.1,yicon:0,xtxt:0.1,ytxt:0.1},
+    sec:{cx:0.25,cy:0.4,xicon:0.1,yicon:0.3,xtxt:0.1,ytxt:0.4},
+    final:{cx:0.6,cy:0.25,xicon:0.85,yicon:0.15,xtxt:0.85,ytxt:0.25}};
+var micon = {w:0.1,h:0.1,gap:0.005};
+
+var skMasses = function(bh){
+    // add mass text
+    svgSketch.append("circle")
+        .attr("class","sketch "+bh)
+        .attr("cx",xScaleSk(bhpos[bh].cx))
+        .attr("cy",yScaleSk(bhpos[bh].cy))
+        .attr("r",scaleRadius(1,1))
+        .attr("fill",colBH);
+    svgSketch.append("text")
+        .attr("class","mtxt"+bh)
+        .attr("x",xScaleSk(bhpos[bh].xtxt)-xScaleSk(micon.gap))
+        .attr("y",yScaleSk(bhpos[bh].ytxt))
+        .attr("dy",yScaleSk(micon.h/2.))
+        .attr("text-anchor","end")
+        // .append("span")
+        // .attr("class","mtxt")
+        .html("1");
+    // add solar mass icon
+    svgSketch.append("image")
+        .attr("xlink:href","img/msun.svg")
+        .attr("width",xScaleSk(micon.w/2)*aspectSketch)
+        .attr("height",yScaleSk(micon.h/2))
+        .attr("x",xScaleSk(bhpos[bh].xtxt)+xScaleSk(micon.gap))
+        .attr("y",yScaleSk(bhpos[bh].ytxt)+yScaleSk(micon.h/8))
+        .attr("type","image/svg+xml");
+    // add mass icon
+    svgSketch.append("image")
+        .attr("xlink:href","img/mass.svg")
+        .attr("width",xScaleSk(micon.w))
+        .attr("height",yScaleSk(micon.h))
+        .attr("x",xScaleSk(bhpos[bh].xicon)-xScaleSkAspect(micon.w))
+        .attr("y",yScaleSk(bhpos[bh].yicon))
+        .attr("type","image/svg+xml");
+}
+skMasses("pri");
+skMasses("sec");
+skMasses("final");
+
+updateSketch = function(d){
+    if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&
+    (sketchName==d["name"])){
+        document.getElementById("sketchcontainer").classList.remove("nothidden");
+        document.getElementById("sketchcontainer").classList.add("hidden");
+    }else{
+        // update circle radii
+        svgSketch.select('circle.pri')
+         .transition().duration(200)
+         .attr("r",scaleRadius(d["initmass1"],d["finalmass"]))
+        //  .attr("cy",scaleRadius(d["initmass1"]));
+        svgSketch.select('circle.sec')
+         .transition().duration(200)
+         .attr("r",scaleRadius(d["initmass2"],d["finalmass"]))
+        //  .attr("cy",scaleRadius(d["initmass2"]));
+        svgSketch.select('circle.final')
+         .transition().duration(200)
+         .attr("r",scaleRadius(d["finalmass"],d["finalmass"]));
+        // update masses
+        svgSketch.select('text.mtxtpri')
+         .html(d["initmass1"]);
+        svgSketch.select('text.mtxtsec')
+         .html(d["initmass2"]);
+        svgSketch.select('text.mtxtfinal')
+         .html(d["finalmass"]);
+        document.getElementById("sketchcontainer").classList.remove("hidden");
+        document.getElementById("sketchcontainer").classList.add("nothidden");
+        // replace title
+        sketchName = d["name"];
+        document.getElementById("sketchtitle").innerHTML = sketchName;
+    }
+}
+
+//
+// Make graph
+//
+//set global variable for later use
+var data;
 
 // var svg = d3.select("div.svg-container").append("svg")
 var svg = d3.select("div#graphcontainer").append("svg")
@@ -129,63 +242,6 @@ var svg = d3.select("div#graphcontainer").append("svg")
 var tooltip = d3.select("div#graphcontainer").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
-
-// Add svg to sketch container
-var marginSketch = {top: 50, right: 0, bottom: 0, left: 0}
-var widthSketch = document.getElementById("sketchcontainer").offsetWidth - marginSketch.left - marginSketch.right;
-var heightSketch = document.getElementById("sketchcontainer").offsetHeight - marginSketch.top - marginSketch.bottom;
-
-var svgSketch = d3.select("div#sketchcontainer").append("svg")
-    .attr("width", widthSketch + marginSketch.left + marginSketch.right)
-    .attr("height", heightSketch + marginSketch.top + marginSketch.bottom)
-    .append("g")
-    .attr("transform", "translate(" + marginSketch.left + "," + marginSketch.top + ")");
-
-//Name of object shown in sketch
-var sketchName = d3.select("div#sketchcontainer").append("span")
-    .html("hello");
-
-var skPri = svgSketch.append("circle")
-    .attr("class","sketch pri")
-    .attr("cx",widthSketch*0.3)
-    .attr("cy",heightSketch*0.1)
-    .attr("r",20);
-
-var skSec = svgSketch.append("circle")
-    .attr("class","sketch sec")
-    .attr("cx",widthSketch*0.7)
-    .attr("cy",heightSketch*0.1)
-    .attr("r",10);
-
-var skFin = svgSketch.append("circle")
-    .attr("class","sketch final")
-    .attr("cx",widthSketch*0.5)
-    .attr("cy",heightSketch*0.7)
-    .attr("r",30);
-
-updateSketch = function(d){
-    if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&
-    (sketchName==d["name"])){
-        document.getElementById("sketchcontainer").classList.remove("nothidden");
-        document.getElementById("sketchcontainer").classList.add("hidden");
-    }else{
-        svgSketch.select('circle.pri')
-         .transition().duration(200)
-         .attr("r",d["initmass1"]);
-        svgSketch.select('circle.sec')
-         .transition().duration(200)
-         .attr("r",d["initmass2"]);
-        svgSketch.select('circle.final')
-         .transition().duration(200)
-         .attr("r",d["finalmass"]);
-        document.getElementById("sketchcontainer").classList.remove("hidden");
-        document.getElementById("sketchcontainer").classList.add("nothidden");
-      //   document.getElementById("sketchcontainer").style.opacity = 1.;
-        sketchName.html(d["name"]);
-    }
-}
-//set global variable for later use
-var data;
 
 // load data
 d3.csv("csv/gwcat.csv", function(error, data) {
