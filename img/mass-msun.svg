@@ -16,7 +16,7 @@
    id="svg4219"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="msun.svg">
+   sodipodi:docname="mass-msun.svg">
   <defs
      id="defs4221">
     <inkscape:perspective
@@ -55,16 +55,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="31.678384"
-     inkscape:cx="12.466326"
-     inkscape:cy="7.3963087"
+     inkscape:zoom="44.8"
+     inkscape:cx="10.126579"
+     inkscape:cy="3.846707"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:window-width="1680"
      inkscape:window-height="952"
-     inkscape:window-x="30"
-     inkscape:window-y="7"
+     inkscape:window-x="74"
+     inkscape:window-y="11"
      inkscape:window-maximized="0"
      units="px">
     <inkscape:grid
@@ -88,28 +88,38 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-1036.3622)">
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:12.81025696px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       x="0.2578105"
-       y="1050.4365"
-       id="text5208"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan5210"
-         x="0.2578105"
-         y="1050.4365">M</tspan></text>
-    <circle
-       style="opacity:0.98999999;fill:none;fill-opacity:1;stroke:#000000;stroke-width:0.63010204;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="path5212"
-       cx="12.84375"
-       cy="1050.1605"
-       r="1.8903061" />
-    <circle
-       style="opacity:0.98999999;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="path5218"
-       cx="12.84375"
-       cy="1050.1605"
-       r="0.68303573" />
+    <path
+       inkscape:connector-curvature="0"
+       style="fill:#000000;fill-opacity:1;stroke:none"
+       d="m 8,1038.3622 c -1.380712,0 -2.5,1.1194 -2.5,2.5 0,0.8215 0.388193,1.5443 1,2 -0.195367,0.1455 -0.354477,0.3046 -0.5,0.5 l -2,0 -2,7 12,0 -2,-7 -2,0 c -0.1455229,-0.1954 -0.3046329,-0.3545 -0.4999998,-0.5 0.6118068,-0.4557 0.9999998,-1.1785 0.9999998,-2 0,-1.3806 -1.1192868,-2.5 -2.4999998,-2.5 z m 0,1 c 0.8333332,0 1.5000001,0.6667 1.5000001,1.5 0,0.8333 -0.666667,1.5 -1.5,1.5 -0.833333,0 -1.5000001,-0.6667 -1.5000001,-1.5 0,-0.8333 0.6666671,-1.5 1.5000001,-1.5 z"
+       id="path4298" />
+    <g
+       id="g5805"
+       transform="translate(-0.69587927,-0.46875)">
+      <text
+         sodipodi:linespacing="125%"
+         id="text5791"
+         y="1048.6204"
+         x="5.013658"
+         style="font-style:normal;font-weight:normal;font-size:5.38875866px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:sans-serif;-inkscape-font-specification:sans-serif;fill:#ffffff;fill-opacity:1"
+           y="1048.6204"
+           x="5.013658"
+           id="tspan5793"
+           sodipodi:role="line">M</tspan></text>
+      <circle
+         r="1.026491"
+         cy="1048.5607"
+         cx="10.65165"
+         id="path5795"
+         style="opacity:0.98999999;fill:none;fill-opacity:1;stroke:#ffffff;stroke-width:0.34216365;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <circle
+         r="0.34216368"
+         cy="1048.5607"
+         cx="10.65165"
+         id="path5803"
+         style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
   </g>
 </svg>
