@@ -2,15 +2,33 @@
   <head>
     <title>Gravitational Wave Catalogue</title>
     <!--<link rel="icon" type="image/vnd.microsoft.icon" href="planck_logo.ico" />-->
-    <link rel="stylesheet" href="css/plotgw.css" type="text/css" />
-    <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
-    <script type="text/javascript" src="js/plotly-latest.min.js"></script>
+    <link rel="stylesheet" href="css/style-d3.css" type="text/css" />
+    <!-- <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script> -->
     <!-- <script type="application/json" src="json/gwcat.json"></script>
     <script type="application/json" src="json/test.json"></script> -->
-    <script type="text/javascript" src="js/plotgw.js"></script>
+    <script type="text/javascript" src="js/d3.v3.min.js"></script>
+    <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
+
 </head>
 <body>
-    <div id="masses" style="width:600px;height:250px;"></div>
-    <div id="tester" style="width:600px;height:250px;"></div>
+    <div id="hdr">
+        <h1>Gravitational Waves Catalogue</h1>
+    </div>
+    <div id="full">
+        <div id="graphcontainer">
+            <div id="options">
+                <div id="xoptions">
+                    X axis:
+                    <!-- Buttons will be inserted bere -->
+                </div>
+                <div id="yoptions">
+                    Y axis:
+                    <!-- Buttons will be inserted bere -->
+                </div>
+            </div>
+        </div>
+        <div id="sketchcontainer"></div>
+    </div>
+    <script type="text/javascript" src="js/plotgw-d3.js"></script>
 </body>
 </html>
