@@ -147,6 +147,10 @@ var svgSketch = d3.select("div#sketchcontainer").append("svg")
     .append("g")
     .attr("transform", "translate(" + marginSketch.left + "," + marginSketch.top + ")");
 
+// labContainer = document.createElement("div")
+// labContainer.setAttribute("id","labcontainer");
+// document.getElementById("sketchcontainer").appendChild(labContainer)
+//
 // set scaleing functions for sketch
 scaleRadius = function(mass,ref){return(0.2*widthSketch*(mass/100.))}
 var xScaleSk = function(x){return(x*widthSketch)}
@@ -182,9 +186,9 @@ gradShadow.append("stop")
 
 // set positions
 var bhpos = {
-    pri:{cx:0.25,cy:0.3,xicon:0.1,yicon:0.125,xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.3},
-    sec:{cx:0.25,cy:0.6,xicon:0.1,yicon:0.425,xtxt:0.1,ytxt:0.55,scx:0.25,scy:0.6},
-    final:{cx:0.6,cy:0.45,xicon:0.85,yicon:0.275,xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.45},
+    pri:{cx:0.3,cy:0.5,xicon:"10%",yicon:"30%",xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.5},
+    sec:{cx:0.3,cy:0.8,xicon:"10%",yicon:"70%",xtxt:0.1,ytxt:0.55,scx:0.25,scy:0.8},
+    final:{cx:0.7,cy:0.7,xicon:"85%",yicon:"50%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
     date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
     dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
     typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
@@ -223,8 +227,24 @@ var sketchTitle = svgSketch.append("text")
     .attr("x",xScaleSk(0.5))
     .attr("y",yScaleSk(0.1))
     .attr("text-anchor","middle")
-    .attr("font-size","2em")
+    .attr("font-size","1.5em")
     .html("Information Panel");
+var showTooltip = function(e,tttxt){
+    ttSk = document.getElementById("tooltipSk")
+    ttSk.style.transitionDuration = "200";
+    ttSk.style.opacity = 0.9;
+    ttSk.style.left = e.pageX + 10 - document.getElementById("infoouter").offsetLeft +"px";
+    ttSk.style.top = e.pageY - 10 - document.getElementById("infoouter").offsetTop + "px";
+    ttSk.style.width = "auto";
+    ttSk.style.height = "auto";
+    ttSk.innerHTML = ttlabels[tttxt];
+}
+var hideTooltip = function(){
+    ttSk = document.getElementById("tooltipSk");
+    ttSk.style.transitionDuration = "500";
+    ttSk.style.opacity = 0.;
+}
+
 var addMasses = function(bh){
     // add ellipse for shadow
     svgSketch.append("ellipse")
@@ -245,114 +265,69 @@ var addMasses = function(bh){
         .attr("fill","url(#gradBH)");
     // add mass icon
     massicondiv = document.createElement('div');
-    massicondiv.className = 'icon';
+    massicondiv.className = 'icon massicon';
     massicondiv.setAttribute("id",'icon'+bh);
-    massicondiv.style.width = xScaleSkAspect(micon.w);
-    massicondiv.style.height = xScaleSk(micon.h);
-    massicondiv.style.left =
-        xScaleSk(bhpos[bh].xicon)-xScaleSkAspect(micon.w)/2;
-    massicondiv.style.top = yScaleSk(bhpos[bh].yicon);
+    massicondiv.style.width = "10%";
+    massicondiv.style.height = "20%";
+    massicondiv.style.left = bhpos[bh].xicon;
+        // xScaleSk(bhpos[bh].xicon)-xScaleSkAspect(micon.w)/2;
+    massicondiv.style.top = bhpos[bh].yicon;
     massicondiv.style.position = "absolute";
     massicondiv.innerHTML =
         "<img src='"+icons.mass+"'>"
     massicondiv.onmouseover = function(e){
         showTooltip(e,this.id.split("icon")[1])}
     massicondiv.onmouseout = function(){hideTooltip()};
-    document.getElementById('sketchcontainer').appendChild(massicondiv);
     // add mass text
     masstxtdiv = document.createElement('div');
     masstxtdiv.className = 'sketchlab mtxt';
     masstxtdiv.setAttribute('id','mtxt-'+bh);
-    masstxtdiv.style.position = "absolute";
-    masstxtdiv.style.left =
-        xScaleSk(bhpos[bh].xtxt)-xScaleSkAspect(micon.w/2);
-    masstxtdiv.style.top =
-        yScaleSk(bhpos[bh].ytxt);//-yScaleSk(micon.h/2.);
-    masstxtdiv.style.width = xScaleSkAspect(micon.w);
-    masstxtdiv.style["text-align"] = "center";
     masstxtdiv.innerHTML = labBlank;
-    document.getElementById('sketchcontainer').appendChild(masstxtdiv);
-    masstxtdiv.onmouseover = function(e){
-        showTooltip(e,this.id.split("mtxt-")[1])}
-    masstxtdiv.onmouseout = function(){hideTooltip()};
+    massicondiv.appendChild(masstxtdiv);
+    document.getElementById('sketchcontainer').appendChild(massicondiv);
+    // document.getElementById('sketchcontainer').appendChild(masstxtdiv);
+    // masstxtdiv.onmouseover = function(e){
+    //     showTooltip(e,this.id.split("mtxt-")[1])}
+    // masstxtdiv.onmouseout = function(){hideTooltip()};
 
-}
-// append other icons
-// addLabSvg = function(lab){
-//     // add labels sd svg elements (OBSOLETE)
-//     svgSketch.append("image")
-//         .attr("xlink:href",icons[lab])
-//         .attr("class","icon "+lab)
-//         .attr("width",xScaleSkAspect(micon.w))
-//         .attr("height",yScaleSk(micon.h))
-//         .attr("x",xScaleSk(bhpos[lab].xicon)-xScaleSkAspect(micon.w)/2)
-//         .attr("y",yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2)
-//         .attr("type","image/svg+xml");
-//     svgSketch.append("text")
-//         .attr("class","sketchlab "+lab+"txt")
-//         .attr("font-size","1.5em")
-//         .attr("x",xScaleSk(bhpos[lab].xtxt))
-//         .attr("y",yScaleSk(bhpos[lab].ytxt)-yScaleSk(micon.h)/2)
-//         .html(labBlank);
-// }
-var showTooltip = function(e,tttxt){
-    ttSk = document.getElementById("tooltipSk")
-    ttSk.style.transitionDuration = "200";
-    ttSk.style.opacity = 0.9;
-    ttSk.style.left = e.pageX + 10 - document.getElementById("sketchcontainer").offsetLeft +"px";
-    ttSk.style.top = e.pageY - 10 - document.getElementById("sketchcontainer").offsetTop + "px";
-    ttSk.style.width = "auto";
-    ttSk.style.height = "auto";
-    ttSk.innerHTML = ttlabels[tttxt];
-}
-var hideTooltip = function(){
-    ttSk = document.getElementById("tooltipSk");
-    ttSk.style.transitionDuration = "500";
-    ttSk.style.opacity = 0.;
 }
 addLab = function(lab){
     // add labels as html elements
+    labimgdiv = document.createElement('div');
+    labimgdiv.className = 'icon labcont';
+    labimgdiv.setAttribute("id",lab+'icon');
+    // console.log(labimgdiv.classList);
+    // labimgdiv.style.width = "40%";
+    labimgdiv.style.height = xScaleSk(micon.h);
+    labimgdiv.style.left =
+        xScaleSk(bhpos[lab].xicon)-xScaleSkAspect(micon.w)/2;
+    labimgdiv.style.top = yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2;
+    // labimgdiv.style.position = "absolute";
+    labimgdiv.style.display = "inline-block";
     if (icons[lab]){
-        labimgdiv = document.createElement('div');
-        labimgdiv.className = 'icon';
-        labimgdiv.setAttribute("id",lab+'icon');
-        // console.log(labimgdiv.classList);
-        labimgdiv.style.width = xScaleSkAspect(micon.w);
-        labimgdiv.style.height = xScaleSk(micon.h);
-        labimgdiv.style.left =
-            xScaleSk(bhpos[lab].xicon)-xScaleSkAspect(micon.w)/2;
-        labimgdiv.style.top = yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2;
-        labimgdiv.style.position = "absolute";
-        labimgdiv.innerHTML =
-            "<img src='"+icons[lab]+"'>"
-        document.getElementById('sketchcontainer').appendChild(labimgdiv);
-        labimgdiv.onmouseover = function(e){
-            showTooltip(e,this.id.split("icon")[0])}
-        labimgdiv.onmouseout = function(){hideTooltip()};
+        labimgdiv.innerHTML ="<img src='"+icons[lab]+"'>"
     }
+    labimgdiv.onmouseover = function(e){
+        showTooltip(e,this.id.split("icon")[0])}
+    labimgdiv.onmouseout = function(){hideTooltip()};
     var labtxtdiv = document.createElement('div');
-    labtxtdiv.className = 'sketchlab';
+    labtxtdiv.className = 'sketchlab info';
     labtxtdiv.setAttribute("id",lab+'txt');
-    labtxtdiv.style.left = xScaleSk(bhpos[lab].xtxt);
-    labtxtdiv.style.top = yScaleSk(bhpos[lab].ytxt)-yScaleSk(micon.h)/2;
-    labtxtdiv.style.position = "absolute";
+    // labtxtdiv.style.left = xScaleSk(bhpos[lab].xtxt);
+    // labtxtdiv.style.top = yScaleSk(bhpos[lab].ytxt)-yScaleSk(micon.h)/2;
+    // labtxtdiv.style.display = "inline-block";
+    labtxtdiv.style.height = "100%";
     labtxtdiv.innerHTML = '--';
     // console.log(labtxtdiv);
-    document.getElementById('sketchcontainer').appendChild(labtxtdiv);
+    labimgdiv.appendChild(labtxtdiv);
     labtxtdiv.onmouseover = function(e){
         showTooltip(e,this.id.split("txt")[0])}
     labtxtdiv.onmouseout = function(){hideTooltip()};
+    document.getElementById('labcontainer').appendChild(labimgdiv);
 }
 
 //labels to add and keep updated
-for (lab in labels){
-    // if(svgLabs){
-    // OBSOLETE
-    //     addLabSvg(lab);
-    // }else{
-        addLab(lab);
-    // }
-}
+for (lab in labels){addLab(lab)};
 
 // define fly-in & fly-out
 var flySp=1000;
@@ -417,7 +392,7 @@ var tooltipSk = document.createElement('div');
 tooltipSk.className = "tooltip";
 tooltipSk.setAttribute("id","tooltipSk");
 tooltipSk.style.opacity = 0;
-document.getElementById('sketchcontainer').appendChild(tooltipSk);
+document.getElementById('infoouter').appendChild(tooltipSk);
 
 updateSketch = function(d){
     // if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&

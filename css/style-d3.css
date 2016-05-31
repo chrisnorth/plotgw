@@ -35,43 +35,74 @@ input.down{
     width:70%;
     height:80%;
 }
-#sketchcontainer{
-    position:relative;
+#infoouter{
+    position:absolute;
     display:inline-block;
     width:25%;
     height:80%;
     border:2px solid black;
     border-radius: 10px;
-    background-color: #ccc
+    background-color: #eee;
 }
-#sketchcontainer.hidden{
-    opacity:0;
-    transition:1s;
-    moz-transition:1s;
+#sketchcontainer{
+    position:relative;
+    display:inline-block;
+    width:100%;
+    height:50%;
+    /*border:2px solid black;*/
+    /*border-radius: 10px;*/
+    /*background-color: #ccc*/
 }
-#sketchcontainer.nothidden{
-    opacity:1;
-    transition:1s;
-    moz-transition:1s;
+#labcontainer{
+    /*position:absolute;*/
+    display:inline-block;
+    width:100%;
+    height:50%;
+    /*border:2px solid black;*/
+    /*border-radius: 10px;*/
+    /*background-color: #ccc*/
 }
 #sketchtitle{
     width:100%;
     text-align:center;
     display:block;
     padding-top:10px;
-    font-size:2em;
+    font-size:1.5em;
     height:30px;
 }
-div.sketchlab{
-    font-size:1.2em;
+.labcont{
+    /*border:1px solid black;*/
 }
-.icon img{
-    width: 100%;
-    height: 100%;
-}
-img.icon{
+.sketchlab.mtxt{
     width:100%;
-    height:100%;
+    font-size:1.2em;
+    text-align:center;
+    display:inline-block;
+    padding-top:3px;
+    padding-left:0px;
+}
+.massicon {
+    text-align:center;
+}
+.massicon img{
+    /*width:100%;*/
+    height:50%;
+}
+
+.labcont{
+    margin-left:5%;
+    width:40%;
+    margin-top:5%;
+}
+.labcont img, .labcont div{
+    height: 100%;
+    float:left;
+}
+.sketchlab.info{
+    font-size:1.2em;
+    padding-left:10px;
+    padding-top:10px;
+    display:inline-block;
 }
 .svg-container {
     display: inline-block;
