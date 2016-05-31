@@ -64,6 +64,9 @@ columns.faptxt = {
     'unit':'%'
 }
 
+//set initial axes
+var xvar = "initmass1", yvar = "initmass2"
+
 getLabel = function(col){
     return(columns[col].label);
 }
@@ -85,14 +88,19 @@ for (col in columns){
     if (columns[col].avail){
         var divx = document.getElementById('xoptions');
         var newoptdivx = document.createElement('div');
-        newoptdivx.class = 'option '+col;
+        newoptdivx.classNm = 'option '+col;
         newoptdivx.style.display = 'inline-block';
         divx.appendChild(newoptdivx);
         var newoptinputx = document.createElement('input');
         newoptinputx.type = 'button';
         newoptinputx.name = col;
         newoptinputx.value = getLabel(col);
+        newoptinputx.setAttribute("id","buttonx-"+col);
+        if (col==xvar){newoptinputx.classList.add("down")};
         newoptinputx.addEventListener('click',function(){
+            oldXvar = xvar;
+            document.getElementById("buttonx-"+oldXvar).classList.remove("down")
+            this.classList.add("down");
             updateXaxis(this.name);
         });
         newoptdivx.appendChild(newoptinputx);
@@ -106,7 +114,12 @@ for (col in columns){
         newoptinputy.type = 'button';
         newoptinputy.name = col;
         newoptinputy.value = getLabel(col);
+        newoptinputy.setAttribute("id","buttony-"+col);
+        if (col==yvar){newoptinputy.classList.add("down")};
         newoptinputy.addEventListener('click',function(){
+            oldYvar = yvar;
+            document.getElementById("buttony-"+oldYvar).classList.remove("down")
+            this.classList.add("down");
             updateYaxis(this.name);
         });
         newoptdivy.appendChild(newoptinputy);
@@ -174,6 +187,7 @@ var bhpos = {
     dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
     typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
     prob:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
+//icon size and files
 var micon = {w:0.1,h:0.1};
 var icons = {
     mass:"img/mass-msun.svg",
@@ -181,14 +195,26 @@ var icons = {
     dist:"img/ruler.svg",
     typedesc:"img/mass.svg",
     prob:"img/dice.svg"};
+// data columns to read from for labels
 var cols={
     pri:["initmass1"],sec:["initmass2"],final:["finalmass"],
     date:["datestr","timestr"],
     dist:["distance","distanceLy"],
     typedesc:["typedesc"],
     prob:["percent"]};
+// dolumns to show
 var labels={"date":0,"dist":0,"typedesc":0,'prob':0};
+// y-location of BH when they fly out
 var yout = -0.3;
+// tooltip labels
+var ttlabels = {
+    pri:"Primary Black Hole Mass",
+    sec:"Secondary Black Hole Mass",
+    final:"Final Black Hole Mass",
+    date:"Date of detection",
+    typedesc:"Category of detection",
+    prob:"Likelihood",
+    dist:"Distance"};
 var labBlank="--";
 // add title
 var sketchTitle = svgSketch.append("text")
@@ -227,6 +253,9 @@ var addMasses = function(bh){
     massicondiv.style.position = "absolute";
     massicondiv.innerHTML =
         "<img src='"+icons.mass+"'>"
+    massicondiv.onmouseover = function(e){
+        showTooltip(e,this.id.split("icon")[1])}
+    massicondiv.onmouseout = function(){hideTooltip()};
     document.getElementById('sketchcontainer').appendChild(massicondiv);
     // add mass text
     masstxtdiv = document.createElement('div');
@@ -241,6 +270,10 @@ var addMasses = function(bh){
     masstxtdiv.style["text-align"] = "center";
     masstxtdiv.innerHTML = labBlank;
     document.getElementById('sketchcontainer').appendChild(masstxtdiv);
+    masstxtdiv.onmouseover = function(e){
+        showTooltip(e,this.id.split("mtxt-")[1])}
+    masstxtdiv.onmouseout = function(){hideTooltip()};
+
 }
 // append other icons
 // addLabSvg = function(lab){
@@ -260,6 +293,21 @@ var addMasses = function(bh){
 //         .attr("y",yScaleSk(bhpos[lab].ytxt)-yScaleSk(micon.h)/2)
 //         .html(labBlank);
 // }
+var showTooltip = function(e,tttxt){
+    ttSk = document.getElementById("tooltipSk")
+    ttSk.style.transitionDuration = "200";
+    ttSk.style.opacity = 0.9;
+    ttSk.style.left = e.pageX + 10 - document.getElementById("sketchcontainer").offsetLeft +"px";
+    ttSk.style.top = e.pageY - 10 - document.getElementById("sketchcontainer").offsetTop + "px";
+    ttSk.style.width = "auto";
+    ttSk.style.height = "auto";
+    ttSk.innerHTML = ttlabels[tttxt];
+}
+var hideTooltip = function(){
+    ttSk = document.getElementById("tooltipSk");
+    ttSk.style.transitionDuration = "500";
+    ttSk.style.opacity = 0.;
+}
 addLab = function(lab){
     // add labels as html elements
     if (icons[lab]){
@@ -276,6 +324,9 @@ addLab = function(lab){
         labimgdiv.innerHTML =
             "<img src='"+icons[lab]+"'>"
         document.getElementById('sketchcontainer').appendChild(labimgdiv);
+        labimgdiv.onmouseover = function(e){
+            showTooltip(e,this.id.split("icon")[0])}
+        labimgdiv.onmouseout = function(){hideTooltip()};
     }
     var labtxtdiv = document.createElement('div');
     labtxtdiv.className = 'sketchlab';
@@ -286,6 +337,9 @@ addLab = function(lab){
     labtxtdiv.innerHTML = '--';
     // console.log(labtxtdiv);
     document.getElementById('sketchcontainer').appendChild(labtxtdiv);
+    labtxtdiv.onmouseover = function(e){
+        showTooltip(e,this.id.split("txt")[0])}
+    labtxtdiv.onmouseout = function(){hideTooltip()};
 }
 
 //labels to add and keep updated
@@ -353,6 +407,16 @@ addMasses("pri");
 addMasses("sec");
 addMasses("final");
 
+// add the tooltip area to the sketch
+// var tooltipSk = d3.select("div#sketchcontainer").append("div")
+//     .attr("class", "tooltipsk")
+//     .style("opacity", 0);
+var tooltipSk = document.createElement('div');
+tooltipSk.className = "tooltip";
+tooltipSk.setAttribute("id","tooltipSk");
+tooltipSk.style.opacity = 0;
+document.getElementById('sketchcontainer').appendChild(tooltipSk);
+
 updateSketch = function(d){
     // if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&
     // (sketchName==d["name"])){
@@ -413,9 +477,6 @@ var margin = {top: 20, right: 60, bottom: 50, left: 60}
 var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
 var width = document.getElementById("graphcontainer").offsetWidth - margin.left - margin.right;
 var height = document.getElementById("graphcontainer").offsetHeight - margin.top - margin.bottom;
-
-//set axes
-var xvar = "initmass1", yvar = "initmass2"
 
 // setup x
 var xValue = function(d) { return d[xvar];} // data -> value

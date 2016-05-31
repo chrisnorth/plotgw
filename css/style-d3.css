@@ -22,6 +22,14 @@ div#options{
     padding-left:5%;
     padding-top:1%;
 }
+/*input{
+    background-color:#fc0;
+}*/
+input.down{
+    background-color:#0cf;
+    border-left:7px;
+    border-right:7px;
+}
 #graphcontainer{
     display:inline-block;
     width:70%;
