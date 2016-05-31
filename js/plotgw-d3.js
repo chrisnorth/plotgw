@@ -452,26 +452,28 @@ updateSketch = function(d){
 // var margin = {top: 20, right: 60, bottom: 50, left: 60}
 var margin = {top: 20, right: 60, bottom: 50, left: 60}
 var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
-var width = document.getElementById("graphcontainer").offsetWidth - margin.left - margin.right;
-var height = document.getElementById("graphcontainer").offsetHeight - margin.top - margin.bottom;
+var fullWidth = document.getElementById("graphcontainer").offsetWidth;
+var fullHeight = document.getElementById("graphcontainer").offsetHeight;
+var width = fullWidth - margin.left - margin.right;
+var height = fullHeight - margin.top - margin.bottom;
 
 // setup x
 var xValue = function(d) { return d[xvar];} // data -> value
-var xScale = d3.scale.linear().domain([0,100]).range([0, width]) // value -> display
+var xScale = d3.scale.linear().domain([0,100]).range([0, 0.9*width]) // value -> display
 var xMap = function(d) { return xScale(xValue(d));} // data -> display
 var xAxis = d3.svg.axis()
         .scale(xScale)
         .orient("bottom")
-        .innerTickSize(-height);
+        .innerTickSize(-0.9*height);
 
 // setup y
 var yValue = function(d) { return d[yvar];} // data -> value
-var yScale = d3.scale.linear().range([height, 0]) // value -> display
+var yScale = d3.scale.linear().range([height, 0.1*height]) // value -> display
 var yMap = function(d) { return yScale(yValue(d));} // data -> display
 var yAxis = d3.svg.axis()
         .scale(yScale)
         .orient("left")
-        .innerTickSize(-width);
+        .innerTickSize(-0.9*width);
 
 // setup fill color
 var cValue = function(d) {return d.type;};
@@ -489,12 +491,19 @@ var tttext = function(d){
 }
 var data;
 
-// var svg = d3.select("div.svg-container").append("svg")
-var svg = d3.select("div#graphcontainer").insert("svg",":first-child")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+svgcont = d3.select("div#graphcontainer").insert("div",":first-child")
+    .classed("svg-container",true)
+console.log(width,height);
+var svg = d3.select(".svg-container").append("svg")
+    .attr("preserveAspectRatio", "xMidYMid meet")
+    .attr("viewBox","0 0 "+width+" " +1.2*height)
+        // height+margin.top+margin.bottom)
+    .classed("svg-content-responsive",true);
+    // .attr("width", width + margin.left + margin.right)
+    // .attr("height", height + margin.top + margin.bottom);
+
+svg.append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
 
 
 // add the tooltip area to the webpage
@@ -526,7 +535,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // x-axis
     svg.append("g")
       .attr("class", "x-axis axis")
-      .attr("transform", "translate(0," + height + ")")
+      .attr("transform", "translate("+margin.left+"," + height + ")")
       .call(xAxis)
     .append("text")
       .attr("class", "x-axis axis-label")
@@ -538,9 +547,11 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // y-axis
     svg.append("g")
       .attr("class", "y-axis axis")
+      .attr("transform", "translate("+margin.left+",0)")
       .call(yAxis)
     .append("text")
       .attr("class", "y-axis axis-label")
+    //   .attr("transform", "translate(," + height + ")")
       .attr("transform", "rotate(-90)")
       .attr("y", 6)
       .attr("x",-height/2)
@@ -586,12 +597,12 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .data(color.domain())
     .enter().append("g")
       .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(0," +0+ (i * 20) + ")"; });
+      .attr("transform", function(d, i) { return "translate(0," +(i * 24) + ")"; });
 
     // draw legend colored rectangles
     legend.append("rect")
-      .attr("x", width + 24)
-      .attr("y",height - 48)
+      .attr("x", 0.1*width)
+      .attr("y",0.1 * height)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color)
@@ -600,11 +611,11 @@ d3.csv("csv/gwcat.csv", function(error, data) {
 
     // draw legend text
     legend.append("text")
-      .attr("x", width + 18)
-      .attr("y", height-48+9)
+      .attr("x", 0.1*width + 24)
+      .attr("y", 0.1*height + 9)
       .attr("dy", ".35em")
       .attr("font-size","1.2em")
-      .style("text-anchor", "end")
+      .style("text-anchor", "start")
       .text(function(d) { return legenddescs[d];})
 });
 
