@@ -43,6 +43,8 @@ columns.timestr = {
     'fn':function(d){return(d['date'].split('T')[1]+" GMT")},
     'unit':''
 };
+var legenddescs = {GW:'Detections',
+    LVT:'Candidates'}
 var typedescs = {GW:'Detection',
     LVT:'Candidate'}
 columns.typedesc = {
@@ -605,11 +607,12 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .data(color.domain())
     .enter().append("g")
       .attr("class", "legend")
-      .attr("transform", function(d, i) { return "translate(0," + i * 20 + ")"; });
+      .attr("transform", function(d, i) { return "translate(0," +0+ (i * 20) + ")"; });
 
     // draw legend colored rectangles
     legend.append("rect")
       .attr("x", width + 24)
+      .attr("y",height - 48)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color)
@@ -619,10 +622,11 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // draw legend text
     legend.append("text")
       .attr("x", width + 18)
-      .attr("y", 9)
+      .attr("y", height-48+9)
       .attr("dy", ".35em")
+      .attr("font-size","1.2em")
       .style("text-anchor", "end")
-      .text(function(d) { return d;})
+      .text(function(d) { return legenddescs[d];})
 });
 
 function updateXaxis(xvarNew) {
