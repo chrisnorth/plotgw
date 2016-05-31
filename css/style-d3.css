@@ -7,25 +7,34 @@ body {
 #full{
     height:100%;
 }
-
+#hdr{
+    width:100%;
+    text-align:center;
+    max-height:10%;
+}
+#hdr h1{
+    margin-bottom:0;
+}
 div#options{
     float:left;
-    width:100%;
+    width:95%;
     height:9%;
     padding-left:5%;
     padding-top:1%;
 }
 #graphcontainer{
     display:inline-block;
-    width:60%;
-    height:90%;
+    width:70%;
+    height:80%;
 }
 #sketchcontainer{
-    position:absolute;
+    position:relative;
     display:inline-block;
-    width:35%;
-    height:90%;
+    width:25%;
+    height:80%;
     border:2px solid black;
+    border-radius: 10px;
+    background-color: #ccc
 }
 #sketchcontainer.hidden{
     opacity:0;
@@ -44,6 +53,17 @@ div#options{
     padding-top:10px;
     font-size:2em;
     height:30px;
+}
+div.sketchlab{
+    font-size:1.2em;
+}
+.icon img{
+    width: 100%;
+    height: 100%;
+}
+img.icon{
+    width:100%;
+    height:100%;
 }
 .svg-container {
     display: inline-block;
@@ -68,8 +88,12 @@ div#options{
   shape-rendering: crispEdges;
 }
 
-.dot {
+/*.dot {
   stroke: #000;
+}*/
+
+.axis-label{
+    font-size:1.5em;
 }
 
 .tick line {
