@@ -199,7 +199,7 @@ var icons = {
     mass:"img/mass-msun.svg",
     date:"img/time.svg",
     dist:"img/ruler.svg",
-    typedesc:"img/mass.svg",
+    typedesc:"img/blank.svg",
     prob:"img/dice.svg"};
 // data columns to read from for labels
 var cols={
@@ -468,7 +468,7 @@ var xAxis = d3.svg.axis()
 
 // setup y
 var yValue = function(d) { return d[yvar];} // data -> value
-var yScale = d3.scale.linear().range([height, 0.1*height]) // value -> display
+var yScale = d3.scale.linear().range([0.8*height, 0]) // value -> display
 var yMap = function(d) { return yScale(yValue(d));} // data -> display
 var yAxis = d3.svg.axis()
         .scale(yScale)
@@ -491,7 +491,8 @@ var tttext = function(d){
 }
 var data;
 
-svgcont = d3.select("div#graphcontainer").insert("div",":first-child")
+// svgcont = d3.select("div#graphcontainer").insert("div",":first-child")
+svgcont = d3.select("div#graphcontainer").append("div")
     .classed("svg-container",true)
 console.log(width,height);
 var svg = d3.select(".svg-container").append("svg")
@@ -535,7 +536,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // x-axis
     svg.append("g")
       .attr("class", "x-axis axis")
-      .attr("transform", "translate("+margin.left+"," + height + ")")
+      .attr("transform", "translate("+margin.left+"," + 0.8*height + ")")
       .call(xAxis)
     .append("text")
       .attr("class", "x-axis axis-label")
