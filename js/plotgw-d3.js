@@ -581,6 +581,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .attr("r", 7)
       .attr("cx", xMap)
       .attr("cy", yMap)
+      .attr("cursor","pointer")
     //   .style("fill", function(d) { return color(cValue(d));})
       .style("fill", function(d){return color(cValue(d));})
       .style("stroke",function(d){return linestyles[d.type];})
@@ -590,7 +591,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
            .style("opacity", .9);
         tooltip.html(tttext(d))
            .style("left", (d3.event.pageX + 10) + "px")
-           .style("top", (d3.event.pageY - 28) + "px")
+           .style("top", (d3.event.pageY-10) + "px")
            .style("width","auto")
            .style("height","auto");
       })
@@ -600,7 +601,10 @@ d3.csv("csv/gwcat.csv", function(error, data) {
                .style("opacity", 0);
         //   document.getElementById("sketchcontainer").style.opacity=0.;
       })
-      .on("click", function(d) {updateSketch(d)});
+      .on("click", function(d) {
+          updateSketch(d)
+        //   add highlight to selected circle
+        });
 
     // draw legend
     var legend = svg.selectAll(".legend")
