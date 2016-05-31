@@ -186,15 +186,16 @@ gradShadow.append("stop")
 
 // set positions
 var bhpos = {
-    pri:{cx:0.3,cy:0.5,xicon:"10%",yicon:"30%",xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.5},
+    pri:{cx:0.3,cy:0.5,xicon:"10%",yicon:"40%",xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.5},
     sec:{cx:0.3,cy:0.8,xicon:"10%",yicon:"70%",xtxt:0.1,ytxt:0.55,scx:0.25,scy:0.8},
-    final:{cx:0.7,cy:0.7,xicon:"85%",yicon:"50%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
+    final:{cx:0.7,cy:0.7,xicon:"85%",yicon:"60%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
     date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
     dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
     typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
     prob:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
 //icon size and files
-var micon = {w:0.1,h:0.1};
+var micon = {w:"10%",h:"20%"}; //mass icons
+var iicon = {w:"10%",h:"10%"}; //info icons
 var icons = {
     mass:"img/mass-msun.svg",
     date:"img/time.svg",
@@ -267,8 +268,8 @@ var addMasses = function(bh){
     massicondiv = document.createElement('div');
     massicondiv.className = 'icon massicon';
     massicondiv.setAttribute("id",'icon'+bh);
-    massicondiv.style.width = "10%";
-    massicondiv.style.height = "20%";
+    massicondiv.style.width = micon.w;
+    massicondiv.style.height = micon.h;
     massicondiv.style.left = bhpos[bh].xicon;
         // xScaleSk(bhpos[bh].xicon)-xScaleSkAspect(micon.w)/2;
     massicondiv.style.top = bhpos[bh].yicon;
@@ -298,10 +299,10 @@ addLab = function(lab){
     labimgdiv.setAttribute("id",lab+'icon');
     // console.log(labimgdiv.classList);
     // labimgdiv.style.width = "40%";
-    labimgdiv.style.height = xScaleSk(micon.h);
-    labimgdiv.style.left =
-        xScaleSk(bhpos[lab].xicon)-xScaleSkAspect(micon.w)/2;
-    labimgdiv.style.top = yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2;
+    labimgdiv.style.height = iicon.h;
+    // labimgdiv.style.left =
+    //     xScaleSk(bhpos[lab].xicon)-xScaleSkAspect(micon.w)/2;
+    // labimgdiv.style.top = yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2;
     // labimgdiv.style.position = "absolute";
     labimgdiv.style.display = "inline-block";
     if (icons[lab]){
@@ -450,51 +451,17 @@ updateSketch = function(d){
 //
 //set global variable for later use
 // var margin = {top: 20, right: 60, bottom: 50, left: 60}
-var margin = {top: 20, right: 60, bottom: 50, left: 60}
-var marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
+svgcont = d3.select("div#graphcontainer").append("div")
+    .attr("id","svg-container")
+    .classed("svg-container",true);
+
+
+var margin = {top: 10, right: 60, bottom: 50, left: 60}
 var fullWidth = document.getElementById("graphcontainer").offsetWidth;
 var fullHeight = document.getElementById("graphcontainer").offsetHeight;
 var width = fullWidth - margin.left - margin.right;
 var height = fullHeight - margin.top - margin.bottom;
 
-// setup x
-var xValue = function(d) { return d[xvar];} // data -> value
-var xScale = d3.scale.linear().domain([0,100]).range([0, 0.9*width]) // value -> display
-var xMap = function(d) { return xScale(xValue(d));} // data -> display
-var xAxis = d3.svg.axis()
-        .scale(xScale)
-        .orient("bottom")
-        .innerTickSize(-0.9*height);
-
-// setup y
-var yValue = function(d) { return d[yvar];} // data -> value
-var yScale = d3.scale.linear().range([0.8*height, 0]) // value -> display
-var yMap = function(d) { return yScale(yValue(d));} // data -> display
-var yAxis = d3.svg.axis()
-        .scale(yScale)
-        .orient("left")
-        .innerTickSize(-0.9*width);
-
-// setup fill color
-var cValue = function(d) {return d.type;};
-var color = d3.scale.category10();
-var linestyles = {GW:"#000",LVT:"#999"}
-
-// tooltip text
-var tttext = function(d){
-    return("<span class='ttname'>"+d["name"]+"</span>");
-    // return("<span class='ttname'>"+d["name"]+"</span>"+
-    // "<span class='ttx'>"+columns[xvar].label+": "+xValue(d)+
-    // " "+columns[xvar].unit+"</span>"+
-    // "<span class='tty'>"+columns[yvar].label+": "+yValue(d)+
-    // " "+columns[yvar].unit+"</span>");
-}
-var data;
-
-// svgcont = d3.select("div#graphcontainer").insert("div",":first-child")
-svgcont = d3.select("div#graphcontainer").append("div")
-    .classed("svg-container",true)
-console.log(width,height);
 var svg = d3.select(".svg-container").append("svg")
     .attr("preserveAspectRatio", "xMidYMid meet")
     .attr("viewBox","0 0 "+width+" " +1.2*height)
@@ -511,6 +478,41 @@ svg.append("g")
 var tooltip = d3.select("div#graphcontainer").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
+
+// setup x
+var relh = [0.05,0.8];
+var relw = [0,0.85];
+var xValue = function(d) { return d[xvar];} // data -> value
+var xScale = d3.scale.linear().domain([0,100])
+    .range([relw[0]*width, relw[1]*width]) // value -> display
+var xMap = function(d) { return xScale(xValue(d));} // data -> display
+var xAxis = d3.svg.axis()
+        .scale(xScale)
+        .orient("bottom")
+        .innerTickSize(-(relh[1]-relh[0])*height);
+
+// setup y
+var yValue = function(d) { return d[yvar];} // data -> value
+var yScale = d3.scale.linear().
+    range([relh[1]*height, relh[0]*height]) // value -> display
+var yMap = function(d) { return yScale(yValue(d));} // data -> display
+var yAxis = d3.svg.axis()
+        .scale(yScale)
+        .orient("left")
+        .innerTickSize(-(relw[1]-relw[0])*width);
+
+// setup fill color
+var cValue = function(d) {return d.type;};
+var color = d3.scale.category10();
+var linestyles = {GW:"#000",LVT:"#999"}
+
+// tooltip text
+var tttext = function(d){
+    return("<span class='ttname'>"+d["name"]+"</span>");
+}
+var data;
+
+// svgcont = d3.select("div#graphcontainer").insert("div",":first-child")
 
 //
 // load data and plot graph
@@ -531,12 +533,12 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-    xScale.domain([0, d3.max(data, xValue)+1]);
-    yScale.domain([0, d3.max(data, yValue)+1]);
+    xScale.domain([0, d3.max(data, xValue)+2]);
+    yScale.domain([0, d3.max(data, yValue)+2]);
     // x-axis
     svg.append("g")
       .attr("class", "x-axis axis")
-      .attr("transform", "translate("+margin.left+"," + 0.8*height + ")")
+      .attr("transform", "translate("+margin.left+"," + relh[1]*height + ")")
       .call(xAxis)
     .append("text")
       .attr("class", "x-axis axis-label")
@@ -602,8 +604,8 @@ d3.csv("csv/gwcat.csv", function(error, data) {
 
     // draw legend colored rectangles
     legend.append("rect")
-      .attr("x", 0.1*width)
-      .attr("y",0.1 * height)
+      .attr("x", margin.left + 12)
+      .attr("y",relh[0] * height + 12)
       .attr("width", 18)
       .attr("height", 18)
       .style("fill", color)
@@ -612,8 +614,8 @@ d3.csv("csv/gwcat.csv", function(error, data) {
 
     // draw legend text
     legend.append("text")
-      .attr("x", 0.1*width + 24)
-      .attr("y", 0.1*height + 9)
+      .attr("x", margin.left + 36)
+      .attr("y", relh[0]*height + 21)
       .attr("dy", ".35em")
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
@@ -634,7 +636,7 @@ function updateXaxis(xvarNew) {
         });
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        xScale.domain([0, d3.max(data, xValue)+1]);
+        xScale.domain([0, d3.max(data, xValue)+2]);
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
 
@@ -668,7 +670,7 @@ function updateYaxis(yvarNew) {
         });
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        yScale.domain([0, d3.max(data, yValue)+1]);
+        yScale.domain([0, d3.max(data, yValue)+2]);
 
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
