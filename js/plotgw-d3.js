@@ -754,7 +754,6 @@ d3.csv("csv/gwcat.csv", function(error, data) {
           updateSketch(d)
         //   add highlight to selected circle
         });
-
     // draw legend
     var legend = svg.selectAll(".legend")
       .data(color.domain())
