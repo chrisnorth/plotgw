@@ -99,9 +99,9 @@ input.down{
     float:left;
 }
 .sketchlab.info{
-    font-size:1.2em;
+    font-size:1em;
     padding-left:10px;
-    padding-top:10px;
+    /*padding-top:10px;*/
     display:inline-block;
 }
 .svg-container {
