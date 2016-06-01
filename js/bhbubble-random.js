@@ -14,7 +14,7 @@ function comparitor(a,b){
     return a.value * Math.random()- b.value*Math.random();
 }
 
-var dorandom=false;
+var dorandom=true;
 if (dorandom){
     var bubble = d3.layout.pack()
         .sort(comparitor)
