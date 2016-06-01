@@ -1,38 +1,78 @@
 var columns = {
     name:{code:"name",type:"str"},
     type:{code:"type",type:"str"},
-    totalmass:{code:"totalmass",type:"flt",label:"Total Mass",
+    totalmass:{code:"totalmass",errcode:"totalmasserr",
+        type:"flt",label:"Total Mass",
         avail:true,unit:'solar masses'},
-    chirpmass:{code:"chirpmass",type:"flt",label:"Chirp Mass",
+    chirpmass:{code:"chirpmass",errcode:"chirpmasserr",
+        type:"flt",label:"Chirp Mass",
         avail:true,unit:'solar masses'},
-    initmass1:{code:"initmass1",type:"flt",label:"Primary Mass",
+    initmass1:{code:"initmass1",errcode:"initmass1err",
+        type:"flt",label:"Primary Mass",
         avail:true,unit:'solar masses'},
-    initmass2:{code:"initmass2",type:"flt",label:"Secondary Mass",
+    initmass2:{code:"initmass2",errcode:"initmass2err",
+        type:"flt",label:"Secondary Mass",
         avail:true,unit:'solar masses'},
-    finalmass:{code:"finalmass",type:"flt",label:"Final Mass",
+    finalmass:{code:"finalmass",errcode:"finalmasserr",
+        type:"flt",label:"Final Mass",
         avail:true,unit:'solar masses'},
-    massratio:{code:"massratio",type:"flt",label:"Mass Ratio",
+    massratio:{code:"massratio",errcode:"massratioerr",
+        type:"flt",label:"Mass Ratio",
         avail:true,unit:''},
-    initspineff:{code:"initspineff",type:"flt",avail:false},
-    initspin1:{code:"initspin1",type:"flt",avail:false},
-    initspin2:{code:"initspin2",type:"flt",avail:false},
-    finalspin:{code:"finalspin",type:"flt",avail:false},
-    distance:{code:"distance",type:"flt",
-        avail:false,unit:'MPc'},
-    redshift:{code:"redshift",type:"flt",avail:false},
-    date:{code:"date",type:"date",avail:false},
-    far:{code:"far",type:"flt",avail:false},
-    fap:{code:"fap",type:"flt",avail:false},
-    dtHL:{code:"dtHL",type:"flt",avail:false},
-    sigma:{code:"sigma",type:"flt",avail:false},
-    skyarea:{code:"skyarea",type:"flt",avail:false},
+    initspineff:{code:"initspineff",errcode:"initspinefferr",
+        type:"flt",avail:false},
+    initspin1:{code:"initspin1",errcode:"initspin1err",
+        type:"flt",avail:false},
+    initspin2:{code:"initspin2",errcode:"initspin2err",
+        type:"flt",avail:false},
+    finalspin:{code:"finalspin",errcode:"finalspinerr",
+        type:"flt",avail:false},
+    distance:{code:"distance",errcode:"distanceerr",
+        type:"flt",avail:false,unit:'MPc'},
+    redshift:{code:"redshift",errcode:"redshifterr",
+        type:"flt",avail:false},
+    date:{code:"date",
+        type:"date",avail:false},
+    far:{code:"far",
+        type:"flt",avail:false},
+    fap:{code:"fap",
+        type:"flt",avail:false},
+    dtHL:{code:"dtHL",
+        type:"flt",avail:false},
+    sigma:{code:"sigma",
+        type:"flt",avail:false},
+    skyarea:{code:"skyarea",
+        type:"flt",avail:false},
 }
 // var svgLabs=false;
+// for (col in columns){
+//     console.log(col);
+//     if (columns[col]['errcode']){
+//         columns[col+'Str'] = {
+//             'type':'fn',
+//             'fn':function(d){return parseFloat(d[col+'minus'].toPrecision(3))+'-'+
+//                     parseFloat(d[col+'plus'].toPrecision(3))},
+//             'unit':columns[col].unit
+//         }
+//     }
+// }
 columns.distanceLy = {
     'type':'fn',
     'fn':function(d){return(Math.round(d['distance']*3.26))},
     'unit':'Mly'
 };
+// columns.distanceStr = {
+//     'type':'fn',
+//     'fn':function(d){return parseFloat(d['distanceminus'].toPrecision(3))+'-'+
+//             parseFloat(d['distanceplus'].toPrecision(3))},
+//     'unit':'Mly'
+// };
+columns.distanceLyStr = {
+    'type':'fn',
+    'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'-'+
+            parseFloat((d['distanceplus']*3.26).toPrecision(3))},
+    'unit':'Mly'
+}
 columns.datestr = {
     'type':'fn',
     'fn':function(d){return(d['date'].split('T')[0])},
@@ -43,6 +83,11 @@ columns.timestr = {
     'fn':function(d){return(d['date'].split('T')[1]+" GMT")},
     'unit':''
 };
+num2Errstr = function(col){
+    return parseFloat((d[col+'plus']*3.26).toPrecision(3))+'-'+
+            parseFloat((d[col+'plus']*3.26).toPrecision(3))
+};
+
 var legenddescs = {GW:'Detections',
     LVT:'Candidates'}
 var typedescs = {GW:'Detection',
@@ -186,15 +231,15 @@ gradShadow.append("stop")
 
 // set positions
 var bhpos = {
-    pri:{cx:0.3,cy:0.5,xicon:"10%",yicon:"40%",xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.5},
-    sec:{cx:0.3,cy:0.8,xicon:"10%",yicon:"70%",xtxt:0.1,ytxt:0.55,scx:0.25,scy:0.8},
-    final:{cx:0.7,cy:0.7,xicon:"85%",yicon:"60%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
+    pri:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.5},
+    sec:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",xtxt:0.1,ytxt:0.55,scx:0.25,scy:0.8},
+    final:{cx:0.7,cy:0.7,xicon:"80%",yicon:"60%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
     date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
     dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
     typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
     prob:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
 //icon size and files
-var micon = {w:"10%",h:"20%"}; //mass icons
+var micon = {w:"20%",h:"20%"}; //mass icons
 var iicon = {w:"10%",h:"10%"}; //info icons
 var icons = {
     mass:"img/mass-msun.svg",
@@ -206,7 +251,7 @@ var icons = {
 var cols={
     pri:["initmass1"],sec:["initmass2"],final:["finalmass"],
     date:["datestr","timestr"],
-    dist:["distance","distanceLy"],
+    dist:["distanceStr","distanceLyStr"],
     typedesc:["typedesc"],
     prob:["percent"]};
 // dolumns to show
@@ -378,7 +423,7 @@ var flyInMasses = function(d,bh,resize){
     // OBSOLETE
     //     svgSketch.select("text.mtxt-"+bh).html(d[cols[bh][0]]);
     // }else{
-        document.getElementById("mtxt-"+bh).innerHTML = d[cols[bh][0]];
+        document.getElementById("mtxt-"+bh).innerHTML = d[cols[bh][0]+'Str'];
     // }
 };
 addMasses("pri");
@@ -429,6 +474,7 @@ updateSketch = function(d){
                 labTxt=''
                 for (i in cols[lab]){
                     labTxt += " "+d[cols[lab][i]];
+                    console.log(cols[lab][i])
                     if (columns[cols[lab][i]].unit){
                         labTxt += " "+columns[cols[lab][i]].unit;
                     }
@@ -462,6 +508,14 @@ var fullHeight = document.getElementById("graphcontainer").offsetHeight;
 var width = fullWidth - margin.left - margin.right;
 var height = fullHeight - margin.top - margin.bottom;
 
+// set errorbar marker width
+var relh = [0.05,0.8];
+var relw = [0,0.85];
+var xyAspect = width/height;
+var errh = 0.01*(relh[1]-relh[0]);
+var errw = 0.01*(relw[1]-relw[0]);//*xyAspect;
+
+// add SVG
 var svg = d3.select(".svg-container").append("svg")
     .attr("preserveAspectRatio", "xMidYMid meet")
     .attr("viewBox","0 0 "+width+" " +1.2*height)
@@ -480,22 +534,37 @@ var tooltip = d3.select("div#graphcontainer").append("div")
     .style("opacity", 0);
 
 // setup x
-var relh = [0.05,0.8];
-var relw = [0,0.85];
-var xValue = function(d) { return d[xvar];} // data -> value
+var xValue = function(d) {return d[xvar];} // data -> value
 var xScale = d3.scale.linear().domain([0,100])
     .range([relw[0]*width, relw[1]*width]) // value -> display
 var xMap = function(d) { return xScale(xValue(d));} // data -> display
+// x error bars
+var xErrP = function(d) {return d[xvar+'plus'];} //error+ -> value
+var xErrM = function(d) {return d[xvar+'minus'];} //error- -> value
+var xMapErrP = function(d) { return xScale(xErrP(d))} // error+ -> display
+var xMapErrM = function(d) { return xScale(xErrM(d));} // error- -> display
+var xMapErrY0 = function(d) { return yScale(yValue(d)) - (errh*height);}
+var xMapErrY1 = function(d) { return yScale(yValue(d)) + (errh*height);}
+
+// x axis
 var xAxis = d3.svg.axis()
         .scale(xScale)
         .orient("bottom")
         .innerTickSize(-(relh[1]-relh[0])*height);
-
 // setup y
-var yValue = function(d) { return d[yvar];} // data -> value
+var yValue = function(d) {return d[yvar];} //data -> value
 var yScale = d3.scale.linear().
     range([relh[1]*height, relh[0]*height]) // value -> display
 var yMap = function(d) { return yScale(yValue(d));} // data -> display
+// y error bars
+var yErrP = function(d) {return d[yvar+'plus'];} //error+ -> value
+var yErrM = function(d) {return d[yvar+'minus'];} //error- -> value
+var yMapErrP = function(d) { return yScale(yErrP(d));} // error+ -> display
+var yMapErrM = function(d) { return yScale(yErrM(d));} // error- -> display
+var yMapErrX0 = function(d) { return xScale(xValue(d)) - (errw*width);}
+var yMapErrX1 = function(d) { return xScale(xValue(d)) + (errw*width);}
+
+// y axis
 var yAxis = d3.svg.axis()
         .scale(yScale)
         .orient("left")
@@ -505,7 +574,9 @@ var yAxis = d3.svg.axis()
 var cValue = function(d) {return d.type;};
 var color = d3.scale.category10();
 var linestyles = {GW:"#000",LVT:"#999"}
-
+var colorErr = "#555";
+var swErr = 2;
+var opErr = 0.7;
 // tooltip text
 var tttext = function(d){
     return("<span class='ttname'>"+d["name"]+"</span>");
@@ -518,49 +589,129 @@ var data;
 // load data and plot graph
 //
 
+// var makeerrors = function(d){
+//     d.errplus=d.col d.errcode.split('-')[0]
+// }
+
+var formatData = function(d){
+    for (col in columns){
+        if (columns[col].type=="fn"){d[col]=columns[col].fn(d)};
+        if (columns[col].type=="flt"){
+            d[col] = +d[col];
+            if (columns[col]['errcode']){
+                errcode=d[columns[col]['errcode']].split('-')
+                d[col+'plus'] = +errcode[0] + d[col];
+                d[col+'minus'] = -errcode[1] + d[col];
+                d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'-'+
+                        parseFloat(d[col+'plus'].toPrecision(3))
+                columns[col+'Str']={'type':'str','unit':columns[col].unit}
+            }
+        }
+        // console.log(col,d[col]);
+    }
+}
+
 d3.csv("csv/gwcat.csv", function(error, data) {
 
     // change string (from CSV) into number format
-    var dataIn=data;
-    dataIn.forEach(function(d) {
-        for (col in columns){
-            if (columns[col].type=="flt"){d[col] = +d[col]};
-            if (columns[col].type=="fn"){d[col]=columns[col].fn(d)};
-            // console.log(col,d[col]);
-        }
-    });
+    var data=data;
+    data.forEach(formatData);
 
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
     xScale.domain([0, d3.max(data, xValue)+2]);
     yScale.domain([0, d3.max(data, yValue)+2]);
+
     // x-axis
     svg.append("g")
-      .attr("class", "x-axis axis")
-      .attr("transform", "translate("+margin.left+"," + relh[1]*height + ")")
-      .call(xAxis)
+        .attr("class", "x-axis axis")
+        .attr("transform", "translate("+margin.left+"," + relh[1]*height + ")")
+        .call(xAxis)
     .append("text")
-      .attr("class", "x-axis axis-label")
-      .attr("x", width/2)
-      .attr("y", "2em")
-      .style("text-anchor", "middle")
-      .text(getLabelUnit(xvar));
+        .attr("class", "x-axis axis-label")
+        .attr("x", (relw[0]+relw[1])*width/2)
+        .attr("y", "2em")
+        .style("text-anchor", "middle")
+        .text(getLabelUnit(xvar));
 
     // y-axis
     svg.append("g")
-      .attr("class", "y-axis axis")
-      .attr("transform", "translate("+margin.left+",0)")
-      .call(yAxis)
+        .attr("class", "y-axis axis")
+        .attr("transform", "translate("+margin.left+",0)")
+        .call(yAxis)
     .append("text")
-      .attr("class", "y-axis axis-label")
-    //   .attr("transform", "translate(," + height + ")")
-      .attr("transform", "rotate(-90)")
-      .attr("y", 6)
-      .attr("x",-height/2)
-      .attr("dy", "-30px")
-      .style("text-anchor", "middle")
-      .text(getLabelUnit(yvar));
+        .attr("class", "y-axis axis-label")
+        //   .attr("transform", "translate(," + height + ")")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("x",-(relh[0]+relh[1])*height/2)
+        .attr("dy", "-30px")
+        .style("text-anchor", "middle")
+        .text(getLabelUnit(yvar));
+
+    // add x error bar
+    svg.selectAll(".errorX")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorX")
+        .attr("x1",xMapErrP).attr("x2",xMapErrM)
+        .attr("y1",yMap).attr("y2",yMap)
+        .attr("stroke",colorErr)
+        .attr("stroke-width",swErr)
+        .attr("opacity",opErr);
+    // add top of y error bar
+    svg.selectAll(".errorXp")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorXp")
+        .attr("x1",xMapErrP).attr("x2",xMapErrP)
+        .attr("y1",xMapErrY0).attr("y2",xMapErrY1)
+        .attr("stroke",colorErr)
+        .attr("stroke-width",swErr)
+        .attr("opacity",opErr);
+    // add bottom of y error bar
+    svg.selectAll(".errorXm")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorXm")
+        .attr("x1",xMapErrM).attr("x2",xMapErrM)
+        .attr("y1",xMapErrY0).attr("y2",xMapErrY1)
+        .attr("stroke",colorErr)
+        .attr("stroke-width",swErr)
+        .attr("opacity",opErr);
+
+
+    // add y error bar
+    svg.selectAll(".errorY")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorY")
+        .attr("x1",xMap).attr("x2",xMap)
+        .attr("y1",yMapErrP).attr("y2",yMapErrM)
+        .attr("stroke",colorErr)
+        .attr("stroke-width",swErr)
+        .attr("opacity",opErr);
+    // add top of y error bar
+    svg.selectAll(".errorYp")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorYp")
+        .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
+        .attr("y1",yMapErrP).attr("y2",yMapErrP)
+        .attr("stroke",colorErr)
+        .attr("stroke-width",swErr)
+        .attr("opacity",opErr);
+    // add bottom of y error bar
+    svg.selectAll(".errorYm")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorYm")
+        .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
+        .attr("y1",yMapErrM).attr("y2",yMapErrM)
+        .attr("stroke",colorErr)
+        .attr("stroke-width",swErr)
+        .attr("opacity",opErr);
 
     // draw dots
     svg.selectAll(".dot")
@@ -622,18 +773,48 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .text(function(d) { return legenddescs[d];})
 });
 
+function updateErrors(){
+    var svg = d3.select("body").transition();
+    svg.selectAll(".errorX")
+        .duration(750)
+        .attr("x1",xMapErrP).attr("x2",xMapErrM)
+        .attr("y1",yMap).attr("y2",yMap);
+    svg.selectAll(".errorXp")
+        .duration(750)
+        .attr("x1",xMapErrP).attr("x2",xMapErrP)
+        .attr("y1",xMapErrY0).attr("y2",xMapErrY1);
+    svg.selectAll(".errorXm")
+        .duration(750)
+        .attr("x1",xMapErrM).attr("x2",xMapErrM)
+        .attr("y1",xMapErrY0).attr("y2",xMapErrY1);
+    svg.selectAll(".errorY")
+        .duration(750)
+        .attr("x1",xMap).attr("x2",xMap)
+        .attr("y1",yMapErrP).attr("y2",yMapErrM);
+    svg.selectAll(".errorYp")
+        .duration(750)
+        .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
+        .attr("y1",yMapErrP).attr("y2",yMapErrP);
+    svg.selectAll(".errorYm")
+        .duration(750)
+        .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
+        .attr("y1",yMapErrM).attr("y2",yMapErrM);
+}
+
 function updateXaxis(xvarNew) {
     // set global variable
     xvar = xvarNew;
-
     d3.csv("csv/gwcat.csv", function(error, data) {
+        console.log(data);
 
         // change string (from CSV) into number format
-        data.forEach(function(d) {
-            for (col in columns){
-                if (columns[col].type=="flt"){d[col] = +d[col]}
-            }
-        });
+        // DON'T NEED TO REFORMAT
+        // data.forEach(function(d) {
+        //     for (col in columns){
+        //         if (columns[col].type=="flt"){d[col] = +d[col]}
+        //     }
+        // });
+
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
         xScale.domain([0, d3.max(data, xValue)+2]);
@@ -651,7 +832,8 @@ function updateXaxis(xvarNew) {
         svg.select(".x-axis.axis-label")
             .duration(750)
             .text(getLabelUnit(xvar));
-        svg.forceX([0]);
+        // Update error bars
+        updateErrors();
     });
 
 }
@@ -663,11 +845,12 @@ function updateYaxis(yvarNew) {
     d3.csv("csv/gwcat.csv", function(error, data) {
 
         // change string (from CSV) into number format
-        data.forEach(function(d) {
-            for (col in columns){
-                if (columns[col].type=="flt"){d[col] = +d[col]}
-            }
-        });
+        // DON'T NEED TO REFORMAT
+        // data.forEach(function(d) {
+        //     for (col in columns){
+        //         if (columns[col].type=="flt"){d[col] = +d[col]}
+        //     }
+        // });
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
         yScale.domain([0, d3.max(data, yValue)+2]);
@@ -685,6 +868,7 @@ function updateYaxis(yvarNew) {
         svg.select(".y-axis.axis-label")
             .duration(750)
             .text(getLabelUnit(yvar));
+        updateErrors();
     });
 
 }
