@@ -620,8 +620,17 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-    xScale.domain([0, d3.max(data, xValue)+2]);
-    yScale.domain([0, d3.max(data, yValue)+2]);
+    if (xvar=="massratio"){
+        xScale.domain([0, d3.max(data, xValue)]);
+    }else{
+        xScale.domain([0, d3.max(data, xValue)+2]);
+    }
+    if (yvar=="massratio"){
+        yScale.domain([0, d3.max(data, yValue)]);
+    }else{
+        yScale.domain([0, d3.max(data, yValue)+2]);
+    }
+
 
     // x-axis
     svg.append("g")
@@ -805,19 +814,17 @@ function updateXaxis(xvarNew) {
     // set global variable
     xvar = xvarNew;
     d3.csv("csv/gwcat.csv", function(error, data) {
-        console.log(data);
 
         // change string (from CSV) into number format
-        // DON'T NEED TO REFORMAT
-        // data.forEach(function(d) {
-        //     for (col in columns){
-        //         if (columns[col].type=="flt"){d[col] = +d[col]}
-        //     }
-        // });
+        data.forEach(formatData);
 
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        xScale.domain([0, d3.max(data, xValue)+2]);
+        if (xvar=="massratio"){
+            xScale.domain([0, d3.max(data, xValue)]);
+        }else{
+            xScale.domain([0, d3.max(data, xValue)+2]);
+        }
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
 
@@ -845,15 +852,14 @@ function updateYaxis(yvarNew) {
     d3.csv("csv/gwcat.csv", function(error, data) {
 
         // change string (from CSV) into number format
-        // DON'T NEED TO REFORMAT
-        // data.forEach(function(d) {
-        //     for (col in columns){
-        //         if (columns[col].type=="flt"){d[col] = +d[col]}
-        //     }
-        // });
+        data.forEach(formatData);
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        yScale.domain([0, d3.max(data, yValue)+2]);
+        if (yvar=="massratio"){
+            yScale.domain([0, d3.max(data, yValue)]);
+        }else{
+            yScale.domain([0, d3.max(data, yValue)+2]);
+        }
 
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
