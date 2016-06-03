@@ -33,7 +33,42 @@ var svg = d3.select("div#bubble-container")
     .attr("height", diameter)
     .attr("class", "bubble");
 
+
+var tooltip = d3.select("div#bubble-container").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
+
+var tttext = function(d){
+    text =  "<span class='ttname'>"+d["name"]+"</span>"+
+    "<span class='mass'>Mass= "+d["massBH"]+" Msun</span>";
+    if (d["method"]=="GWinit"){
+        text = text+ "<span class='mass'>Merging black hole</span>";
+    }else if(d["method"]=='GWfin'){
+        text = text+ "<span class='mass'>Merged black hole</span>";
+    }else if(d["method"]=='Xray'){
+        text = text+ "<span class='mass'>X-ray detection</span>";
+    }
+    // "<span class='mass'>"+d["compName"]+"</span>"+
+    // "<span class='mass'>"+d["initmass2"]+"</span>";
+    return text;
+}
 var data;
+
+var showTooltip = function(d){
+    tooltip.transition()
+       .duration(200)
+       .style("opacity", .9);
+    tooltip.html(tttext(d))
+       .style("left", (d3.event.pageX + 10) + "px")
+       .style("top", (d3.event.pageY-10) + "px")
+       .style("width","auto")
+       .style("height","auto");
+}
+var hideTooltip = function(d) {
+    tooltip.transition()
+         .duration(500)
+         .style("opacity", 0);
+}
 
 d3.csv("csv/bhcat.csv", function(error, data){
 
@@ -56,7 +91,9 @@ d3.csv("csv/bhcat.csv", function(error, data){
         .attr("r", function(d){ return d.r; })
         .attr("cx", function(d){ return d.x; })
         .attr("cy", function(d){ return d.y; })
-        .style("fill", function(d){return fillcolor2(cValue(d))});
+        .style("fill", function(d){return fillcolor2(cValue(d))})
+        .on("mouseover", function(d) {showTooltip(d);})
+        .on("mouseout", function(d) {hideTooltip(d);});
 
     //format the text for each bubble
     bubbles.append("text")
@@ -68,7 +105,9 @@ d3.csv("csv/bhcat.csv", function(error, data){
             "fill":function(d){return textcolor2(cValue(d));},
             "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
             "font-size": "12px"
-        });
+        })
+        .on("mouseover", function(d) {showTooltip(d);})
+        .on("mouseout", function(d) {hideTooltip(d);;});
 
     var legend = svg.selectAll(".legend")
       .data(fillcolor2.domain())
