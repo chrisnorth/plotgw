@@ -28,7 +28,8 @@ var columns = {
     finalspin:{code:"finalspin",errcode:"finalspinerr",
         type:"flt",avail:false},
     distance:{code:"distance",errcode:"distanceerr",
-        type:"flt",avail:false,unit:'MPc'},
+        type:"flt",label:'Distance',
+        avail:true,unit:'MPc'},
     redshift:{code:"redshift",errcode:"redshifterr",
         type:"flt",avail:false},
     date:{code:"date",
@@ -36,7 +37,7 @@ var columns = {
     far:{code:"far",
         type:"flt",avail:false},
     fap:{code:"fap",
-        type:"flt",avail:false},
+        type:"flt",},
     dtHL:{code:"dtHL",
         type:"flt",avail:false},
     sigma:{code:"sigma",
@@ -59,7 +60,14 @@ var columns = {
 columns.distanceLy = {
     'type':'fn',
     'fn':function(d){return(Math.round(d['distance']*3.26))},
-    'unit':'Mly'
+    'unit':'Mly',
+    avail:false,label:'DistanceLy',errcode:"DistanceLyErr"
+}
+columns.distanceLyErr = {
+    'type':'fn',
+    'fn':function(d){return(Math.round(d['distance']*3.26))},
+    'unit':'Mly',
+    avail:false,label:'DistanceLy'
 };
 // columns.distanceStr = {
 //     'type':'fn',
@@ -608,6 +616,7 @@ var formatData = function(d){
                 columns[col+'Str']={'type':'str','unit':columns[col].unit}
             }
         }
+        console.log(col,d[col])
         // console.log(col,d[col]);
     }
 }
