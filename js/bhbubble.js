@@ -9,11 +9,11 @@ var cVals={GWinit:1,GWfin:2,Xray:3};
 var cValue = function(d){return cVals[d.method]}
 var legenddescs = {3:'X-rays',1:'Gravitaional Waves'}
 
+
 // random comparitor
 function comparitor(a,b){
     return a.value * Math.random()- b.value*Math.random();
 }
-
 var dorandom=false;
 if (dorandom){
     var bubble = d3.layout.pack()
@@ -38,6 +38,7 @@ var tooltip = d3.select("div#bubble-container").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
 
+//define tooltip text
 var tttext = function(d){
     text =  "<span class='ttname'>"+d["name"]+"</span>"+
     "<span class='mass'>Mass= "+d["massBH"]+" Msun</span>";
@@ -52,9 +53,9 @@ var tttext = function(d){
     // "<span class='mass'>"+d["initmass2"]+"</span>";
     return text;
 }
-var data;
-
+//set tooltip functions
 var showTooltip = function(d){
+    console.log('2',d.name,tooltip);
     tooltip.transition()
        .duration(200)
        .style("opacity", .9);
@@ -63,18 +64,27 @@ var showTooltip = function(d){
        .style("top", (d3.event.pageY-10) + "px")
        .style("width","auto")
        .style("height","auto");
+    svg.select('#hl'+d.id)
+        .attr("stroke-opacity",1);
 }
 var hideTooltip = function(d) {
     tooltip.transition()
-         .duration(500)
-         .style("opacity", 0);
+        .duration(500)
+        .style("opacity", 0);
+    svg.select('#hl'+d.id)
+        .attr("stroke-opacity",0);
 }
 
-d3.csv("csv/bhcat.csv", function(error, data){
+var data;
+
+d3.json("json/bhcat.json", function(error, data){
 
     //convert numerical values from strings to numbers
     data = data.map(function(d){ d.value = +d["massBH"]; return d; });
-
+    data.forEach(function(d){
+        d.id = ('hl'+d.name).replace('+','').replace('(','').replace(')','').replace('-','')
+        console.log(d.name,d.id);
+    });
     //bubbles needs very specific format, convert data to this.
     var nodes = bubble.nodes({children:data}).filter(function(d) { return !d.children; });
     // var nodes = bubble.nodes({children:data}).filter(function(d) { return d.method=="Xray"; });
@@ -86,11 +96,22 @@ d3.csv("csv/bhcat.csv", function(error, data){
         .data(nodes)
         .enter();
 
+    //create highlight circles
+    bubbles.append("circle")
+        .attr("r", function(d){ return d.r; })
+        .attr("cx", function(d){ return d.x; })
+        .attr("cy", function(d){ return d.y; })
+        .attr("id",function(d){return 'hl'+d.id;})
+        .attr("fill-opacity",0)
+        .attr("stroke-opacity",0)
+        .style({"stroke":"red","stroke-width":10})
+
     //create the bubbles
     bubbles.append("circle")
         .attr("r", function(d){ return d.r; })
         .attr("cx", function(d){ return d.x; })
         .attr("cy", function(d){ return d.y; })
+        .attr("id",function(d){return d.id;})
         .style("fill", function(d){return fillcolor2(cValue(d))})
         .on("mouseover", function(d) {showTooltip(d);})
         .on("mouseout", function(d) {hideTooltip(d);});
@@ -104,7 +125,7 @@ d3.csv("csv/bhcat.csv", function(error, data){
         .style({
             "fill":function(d){return textcolor2(cValue(d));},
             "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-            "font-size": "12px"
+            "font-size": function(d) { return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
         })
         .on("mouseover", function(d) {showTooltip(d);})
         .on("mouseout", function(d) {hideTooltip(d);;});
@@ -136,12 +157,12 @@ d3.csv("csv/bhcat.csv", function(error, data){
       .style("text-anchor", "start")
       .text(function(d){return legenddescs[d];});
 
-    console.log(data);
-    data.forEach(function(d){
+    // console.log(data);
         // console.log(d.name,d.method,cValue(d),legenddescs[d.method],fillcolor2(cValue(d)),textcolor2(cValue(d)));
-    });
+    // });
 })
 
+//make SVG download button
 d3.select("#generate")
     .on("click", writeDownloadLink);
 
