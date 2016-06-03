@@ -40,7 +40,6 @@ var svg = d3.select("div#bubble-container")
     .attr("height", diameter)
     .attr("class", "bubble");
 
-
 var tooltip = d3.select("div#bubble-container").append("div")
     .attr("class", "tooltip")
     .style("opacity", 0);
@@ -77,7 +76,7 @@ var showTooltip = function(d){
        .duration(200)
        .style("opacity", .9);
     tooltip.html(tttext(d))
-       .style("left", (d3.event.pageX + 10) + "px")
+       .style("left", (d3.event.pageX + 10+d.r) + "px")
        .style("top", (d3.event.pageY-10) + "px")
        .style("width","auto")
        .style("height","auto");
