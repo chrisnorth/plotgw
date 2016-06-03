@@ -7,8 +7,8 @@ var diameter = 800 //max size of the bubbles
 var fillcolor2 = d3.scale.linear().domain([1,2,3])
         .range([d3.rgb("#ccccFF"), d3.rgb("#0000FF"), d3.rgb('#FFFFFF')])
 var textcolor2 = d3.scale.linear().domain([1,2,3])
-        .range([d3.rgb("#000000"), d3.rgb("#00ff00"),d3.rgb('#000000')])
-var cVals={GWinit:1,GWfin:2,Xray:3};
+        .range([d3.rgb("#000000"), d3.rgb("#ffffff"),d3.rgb('#000000')])
+var cVals={LVT:1,GW:2,Xray:3};
 // var cValue = function(d){if(d.method=="GW"){return 1;}else{return 2;};};
 var cValue = function(d){return cVals[d.method]}
 var legenddescs = {3:'X-rays',1:'Gravitaional Waves'}
@@ -49,15 +49,25 @@ var tooltip = d3.select("div#bubble-container").append("div")
 var tttext = function(d){
     text =  "<span class='ttname'>"+d["name"]+"</span>"+
     "<span class='mass'>Mass= "+d["massBH"]+" Msun</span>";
-    if (d["method"]=="GWinit"){
-        text = text+ "<span class='mass'>Merging black hole</span>";
-    }else if(d["method"]=='GWfin'){
-        text = text+ "<span class='mass'>Merged black hole</span>";
+    if (d["method"]=="GW"){
+        text = text+ "<span class='mass'>Gravitational Wave detection</span>";
+        // text = text+ "<span class='mass'>(Primary)</span>";
+    }else if(d["method"]=="LVT"){
+            text = text+ "<span class='mass'>Gravitational Wave candidate</span>";
     }else if(d["method"]=='Xray'){
         text = text+ "<span class='mass'>X-ray detection</span>";
+        text = text+ "<span class='mass'>Companion: "+d.compType+"</span>";
+    }
+    if(d["BHtype"]=='final'){
+        text = text+ "<span class='mass'>Final black hole</span>";
+    }else if(d["BHtype"]=='primary'){
+        text = text+ "<span class='mass'>Primary black hole</span>";
+    }else if(d["BHtype"]=='secondary'){
+        text = text+ "<span class='mass'>Secondary black hole</span>";
     }
     // "<span class='mass'>"+d["compName"]+"</span>"+
     // "<span class='mass'>"+d["initmass2"]+"</span>";
+    text = text+ "<span class='mass'>Location: "+d.location+"</span>";
     return text;
 }
 //set tooltip functions
@@ -99,7 +109,7 @@ d3.csv("csv/bhcat.csv", function(error, data){
     data.forEach(function(d){
         d.id = ('hl'+d.name).replace('+','').replace('(','').replace(')','').replace('-','')
         // console.log(d.name,d.id);
-        if ((d.method=="GWinit")||(d.method=="GWfin")){
+        if ((d.method=="GW")||(d.method=="LVT")){
             arrowpos[d.name]={x:d.x,y:d.y,r:d.r,c:fillcolor2(cValue(d))};
         }
         if (d.compType=="Black hole"){
@@ -246,7 +256,7 @@ d3.csv("csv/bhcat.csv", function(error, data){
 
     //format the text for each bubble
     getText = function(d){
-        if (d.method=="GWinit"){return "";}else{return d.name}
+        if ((d.BHtype=="primary")||(d.BHtype=="secondary")){return "";}else{return d.name}
     }
     bubbles.append("text")
         .attr("x", function(d){ return d.x; })
