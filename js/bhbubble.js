@@ -1,8 +1,8 @@
-var diameter = Math.min(document.getElementById("bubble-container").offsetWidth,document.getElementById("bubble-container").offsetHeight);
-// document.getElementById("hdr").setAttribute("width",diameter);
-document.getElementById("bubble-container").setAttribute("width",diameter);
-console.log(document.getElementById("hdr"));
-// var diameter = 800 //max size of the bubbles
+// var diameter = Math.min(document.getElementById("bubble-container").offsetWidth,document.getElementById("bubble-container").offsetHeight);
+// // document.getElementById("hdr").setAttribute("width",diameter);
+// document.getElementById("bubble-container").setAttribute("width",diameter);
+// console.log(document.getElementById("hdr"));
+var diameter = 800 //max size of the bubbles
     // color    = d3.scale.category10(); //color category
 var fillcolor2 = d3.scale.linear().domain([1,2,3])
         .range([d3.rgb("#ccccFF"), d3.rgb("#0000FF"), d3.rgb('#FFFFFF')])
