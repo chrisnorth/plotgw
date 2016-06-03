@@ -11,7 +11,7 @@ var textcolor2 = d3.scale.linear().domain([1,2,3])
 var cVals={LVT:1,GW:2,Xray:3};
 // var cValue = function(d){if(d.method=="GW"){return 1;}else{return 2;};};
 var cValue = function(d){return cVals[d.method]}
-var legenddescs = {3:'X-rays',1:'Gravitaional Waves'}
+var legenddescs = {1:'Gravitational Wave Detection',2:'Gravitational Wave Candidate',3:'X-ray Measurement'}
 
 
 // random comparitor
@@ -106,17 +106,21 @@ d3.csv("csv/bhcat.csv", function(error, data){
     // var nodes = bubble.nodes({children:data}).filter(function(d) { return d.method=="Xray"; });
     var arrows=[];
     var arrowpos = {};
+    var name2id=function(name){
+        return name.replace('+','').replace('(','').replace(')','').replace('-','');
+    };
     data.forEach(function(d){
-        d.id = ('hl'+d.name).replace('+','').replace('(','').replace(')','').replace('-','')
+        d.id = name2id(d.name)
         // console.log(d.name,d.id);
         if ((d.method=="GW")||(d.method=="LVT")){
-            arrowpos[d.name]={x:d.x,y:d.y,r:d.r,c:fillcolor2(cValue(d))};
+            arrowpos[d.id]={x:d.x,y:d.y,r:d.r,c:fillcolor2(cValue(d))};
         }
         if (d.compType=="Black hole"){
-            arrows.push([d.name,d.compName]);
+            arrows.push([d.id,name2id(d.parentName)]);
         }
     });
     // console.log(arrows);
+    // console.log(arrowpos);
     //setup the chart
     var bubbles = svg.append("g")
         .attr("transform", "translate(0,0)")
@@ -279,15 +283,16 @@ d3.csv("csv/bhcat.csv", function(error, data){
       .data(fillcolor2.domain())
     .enter().append("g")
       .attr("class", "legend")
-      .attr("opacity",0)
+      .attr("opacity",1)
       .attr("transform", function(d, i) { return "translate(0," +(i * 24) + ")"; });
 
     // draw legend colored rectangles
-    legend.append("rect")
+    legend.append("circle")
       .attr("x", 12)
       .attr("y",12)
-      .attr("width", 18)
-      .attr("height", 18)
+      .attr("r", 9)
+      .attr("transform","translate(21,21)")
+    //   .attr("height", 18)
       .style("fill", fillcolor2)
     //   .style("stroke",function(d){return linestyles[d.method];})
       .style("stroke","#000");

@@ -1,13 +1,13 @@
-name,massBH,massBHtxt,massComp,compType,compName,period,method,BHtype,location,ref1,ref2,ref3,ref4,num
-GW151226b,7.5,"7.4,2.3,2.3",,Black hole,GW151226,,GW,secondary,Extragalactic,gw151226,gw151226,gw151226,gw151226,31
+name,massBH,massBHtxt,massComp,compType,parentName,period,method,BHtype,location,ref1,ref2,ref3,ref4,num
+GW151226-B,7.5,"7.4,2.3,2.3",,Black hole,GW151226,,GW,secondary,Extragalactic,gw151226,gw151226,gw151226,gw151226,31
 GW151226,20.1,"20.8,6.1,1.7",,None,,,GW,final,Extragalactic,gw151226,gw151226,gw151226,gw151226,30
-GW151226a,14.2,"14.2,8.3,3.7",,Black hole,GW151226,,GW,primary,Extragalactic,gw151226,gw151226,gw151226,gw151226,29
-LVT151012b,13,"13,4,5",,Black hole,LVT151012,,LVT,secondary,Extragalactic,lvt151012,lvt151012,lvt151012,lvt151012,28
+GW151226-A,14.2,"14.2,8.3,3.7",,Black hole,GW151226,,GW,primary,Extragalactic,gw151226,gw151226,gw151226,gw151226,29
+LVT151012-B,13,"13,4,5",,Black hole,LVT151012,,LVT,secondary,Extragalactic,lvt151012,lvt151012,lvt151012,lvt151012,28
 LVT151012,35,"35,14,4",,None,,,LVT,final,Extragalactic,lvt151012,lvt151012,lvt151012,lvt151012,27
-LVT151012a,23,"23,18,6",,Black hole,LVT151012,,LVT,primary,Extragalactic,lvt151012,lvt151012,lvt151012,lvt151012,26
-GW150914b,28.1,"28.1,1.8,1.5",,Black hole,GW150914,,GW,secondary,Extragalactic,gw150914,gw150914,gw150914,gw150914,25
+LVT151012-A,23,"23,18,6",,Black hole,LVT151012,,LVT,primary,Extragalactic,lvt151012,lvt151012,lvt151012,lvt151012,26
+GW150914-B,28.1,"28.1,1.8,1.5",,Black hole,GW150914,,GW,secondary,Extragalactic,gw150914,gw150914,gw150914,gw150914,25
 GW150914,62.3,"62.3,3.7,3.1",,None,,,GW,final,Extragalactic,gw150914,gw150914,gw150914,gw150914,24
-GW150914a,36.2,"36.2,5.2,3.8",,Black hole,GW150914,,GW,primary,Extragalactic,gw150914,gw150914,gw150914,gw150914,23
+GW150914-A,36.2,"36.2,5.2,3.8",,Black hole,GW150914,,GW,primary,Extragalactic,gw150914,gw150914,gw150914,gw150914,23
 M33X-7,15.65,15.65\pm1.45,70,Wolf-Rayet star,,82.97,Xray,,M33,51,51,51,52,22
 NGC300X-1,20,20\pm4,26,Wolf-Rayet star,,32.3,Xray,,NGC 300,50,50,50,50,21
 LMCX-1,10.91,10.91\pm1.55,31.79,O-type star,,93.84,Xray,,Large Magellanic Cloud,47,47,47,47,20
