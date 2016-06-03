@@ -579,7 +579,8 @@ var swErr = 2;
 var opErr = 0.7;
 // tooltip text
 var tttext = function(d){
-    return("<span class='ttname'>"+d["name"]+"</span>");
+    return("<span class='ttname'>"+d["name"]+"</span>"+
+    "<span class='ttpri'>"+d["initmass1"]+"</span>"+"<span class='ttsec'>"+d["initmass2"]+"</span>");
 }
 var data;
 
@@ -621,14 +622,14 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
     if (xvar=="massratio"){
-        xScale.domain([0, d3.max(data, xValue)]);
+        xScale.domain([0, d3.max(data, xErrP)]);
     }else{
-        xScale.domain([0, d3.max(data, xValue)+2]);
+        xScale.domain([0, d3.max(data, xErrP)+2]);
     }
     if (yvar=="massratio"){
-        yScale.domain([0, d3.max(data, yValue)]);
+        yScale.domain([0, d3.max(data, yErrP)]);
     }else{
-        yScale.domain([0, d3.max(data, yValue)+2]);
+        yScale.domain([0, d3.max(data, yErrP)+2]);
     }
 
 
@@ -664,6 +665,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorX")
+        .attr("transform", "translate("+margin.left+",0)")
         .attr("x1",xMapErrP).attr("x2",xMapErrM)
         .attr("y1",yMap).attr("y2",yMap)
         .attr("stroke",colorErr)
@@ -674,6 +676,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorXp")
+        .attr("transform", "translate("+margin.left+",0)")
         .attr("x1",xMapErrP).attr("x2",xMapErrP)
         .attr("y1",xMapErrY0).attr("y2",xMapErrY1)
         .attr("stroke",colorErr)
@@ -684,6 +687,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorXm")
+        .attr("transform", "translate("+margin.left+",0)")
         .attr("x1",xMapErrM).attr("x2",xMapErrM)
         .attr("y1",xMapErrY0).attr("y2",xMapErrY1)
         .attr("stroke",colorErr)
@@ -696,6 +700,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorY")
+        .attr("transform", "translate("+margin.left+",0)")
         .attr("x1",xMap).attr("x2",xMap)
         .attr("y1",yMapErrP).attr("y2",yMapErrM)
         .attr("stroke",colorErr)
@@ -706,6 +711,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorYp")
+        .attr("transform", "translate("+margin.left+",0)")
         .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
         .attr("y1",yMapErrP).attr("y2",yMapErrP)
         .attr("stroke",colorErr)
@@ -716,6 +722,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorYm")
+        .attr("transform", "translate("+margin.left+",0)")
         .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
         .attr("y1",yMapErrM).attr("y2",yMapErrM)
         .attr("stroke",colorErr)
@@ -727,6 +734,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .data(data)
     .enter().append("circle")
       .attr("class", "dot")
+      .attr("transform", "translate("+margin.left+",0)")
       .attr("r", 7)
       .attr("cx", xMap)
       .attr("cy", yMap)
@@ -820,9 +828,9 @@ function updateXaxis(xvarNew) {
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
         if (xvar=="massratio"){
-            xScale.domain([0, d3.max(data, xValue)]);
+            xScale.domain([0, d3.max(data, xErr)]);
         }else{
-            xScale.domain([0, d3.max(data, xValue)+2]);
+            xScale.domain([0, d3.max(data, xErrP)+2]);
         }
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
@@ -855,9 +863,9 @@ function updateYaxis(yvarNew) {
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
         if (yvar=="massratio"){
-            yScale.domain([0, d3.max(data, yValue)]);
+            yScale.domain([0, d3.max(data, yErrP)]);
         }else{
-            yScale.domain([0, d3.max(data, yValue)+2]);
+            yScale.domain([0, d3.max(data, yErrP)+2]);
         }
 
         // Select the section we want to apply our changes to
