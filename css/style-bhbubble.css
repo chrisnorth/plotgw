@@ -9,13 +9,18 @@ body {
     height:100%;
 }
 #hdr{
-    width:800;
+    width:100%;
     text-align:center;
     max-height:10%;
     color:#fff;
+    height:10%;
 }
 #hdr h1{
     margin-bottom:0;
+}
+#bubble-container{
+    height:90%;
+    text-align:center;
 }
 .tooltip {
   position: absolute;
@@ -28,4 +33,5 @@ body {
 }
 .tooltip span{
     display:block;
+    font-size:2em;
 }
