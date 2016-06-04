@@ -51,19 +51,26 @@ var info = d3.select("div#bubble-container").append("div")
 //define tooltip text
 var tttext = function(d){
     text =  "<span class='name'>"+d["name"]+"</span>"+
-    "<span class='info'>Mass: "+d["massBH"]+" Msun</span>";
-    text = text + "<span class='info'>"+d.binType+"</span>";
+    "<span class='info'>Mass: "+d["massBH"]+" M<sub>&#x2609;</sub></span>";
     if(d["method"]=='Xray'){
         // text = text+ "<span class='info'>X-ray detection</span>";
+        text = text + "<span class='info'>"+d.binType+"</span>";
         text = text+ "<span class='info'>Companion: "+d.compType+"</span>";
+    }else{
+        text = text+ "<span class='info'>"+d.binType+
+            " ("+d.BHtype+")</span>";
+        // typedesc={"final":"Final black hole",
+        //     "primary":"Primary black hole",
+        //     "secondary":"Secondary black hole"}
+        // text = text + "<span class='info'>"+typedesc[d.BHtype]+"</span>";
     }
-    if(d["BHtype"]=='final'){
-        text = text+ "<span class='info'>Final black hole</span>";
-    }else if(d["BHtype"]=='primary'){
-        text = text+ "<span class='info'>Primary black hole</span>";
-    }else if(d["BHtype"]=='secondary'){
-        text = text+ "<span class='info'>Secondary black hole</span>";
-    }
+    // if(d["BHtype"]=='final'){
+    //     text = text+ "<span class='info'>Final black hole</span>";
+    // }else if(d["BHtype"]=='primary'){
+    //     text = text+ "<span class='info'>Primary black hole</span>";
+    // }else if(d["BHtype"]=='secondary'){
+    //     text = text+ "<span class='info'>Secondary black hole</span>";
+    // }
     // "<span class='mass'>"+d["compName"]+"</span>"+
     // "<span class='mass'>"+d["initmass2"]+"</span>";
     text = text+ "<span class='info'>Location: "+d.location+"</span>";
