@@ -2,6 +2,7 @@
 // // document.getElementById("hdr").setAttribute("width",diameter);
 // document.getElementById("bubble-container").setAttribute("width",diameter);
 // console.log(document.getElementById("hdr"));
+var pgWidth = document.getElementById("bubble-container").offsetWidth;
 var diameter = 800 //max size of the bubbles
     // color    = d3.scale.category10(); //color category
 var fillcolor2 = d3.scale.linear().domain([1,2,3])
@@ -11,7 +12,7 @@ var textcolor2 = d3.scale.linear().domain([1,2,3])
 var cVals={LVT:1,GW:2,Xray:3};
 // var cValue = function(d){if(d.method=="GW"){return 1;}else{return 2;};};
 var cValue = function(d){return cVals[d.method]}
-var legenddescs = {1:'Gravitational Wave Detection',2:'Gravitational Wave Candidate',3:'X-ray Measurement'}
+var legenddescs = {1:'Gravitational Wave Candidate',2:'Gravitational Wave Detection',3:'X-ray Measurement'}
 
 
 // random comparitor
@@ -41,44 +42,51 @@ var svg = d3.select("div#bubble-container")
     .attr("class", "bubble");
 
 var tooltip = d3.select("div#bubble-container").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0);
+    .attr("class", "tooltip");
+    // .style("opacity", 0);
+
+var info = d3.select("div#bubble-container").append("div")
+    .attr("class","infopanel");
 
 //define tooltip text
 var tttext = function(d){
-    text =  "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='mass'>Mass= "+d["massBH"]+" Msun</span>";
-    if (d["method"]=="GW"){
-        text = text+ "<span class='mass'>Gravitational Wave detection</span>";
-        // text = text+ "<span class='mass'>(Primary)</span>";
-    }else if(d["method"]=="LVT"){
-            text = text+ "<span class='mass'>Gravitational Wave candidate</span>";
-    }else if(d["method"]=='Xray'){
-        text = text+ "<span class='mass'>X-ray detection</span>";
-        text = text+ "<span class='mass'>Companion: "+d.compType+"</span>";
+    text =  "<span class='name'>"+d["name"]+"</span>"+
+    "<span class='info'>Mass: "+d["massBH"]+" Msun</span>";
+    text = text + "<span class='info'>"+d.binType+"</span>";
+    if(d["method"]=='Xray'){
+        // text = text+ "<span class='info'>X-ray detection</span>";
+        text = text+ "<span class='info'>Companion: "+d.compType+"</span>";
     }
     if(d["BHtype"]=='final'){
-        text = text+ "<span class='mass'>Final black hole</span>";
+        text = text+ "<span class='info'>Final black hole</span>";
     }else if(d["BHtype"]=='primary'){
-        text = text+ "<span class='mass'>Primary black hole</span>";
+        text = text+ "<span class='info'>Primary black hole</span>";
     }else if(d["BHtype"]=='secondary'){
-        text = text+ "<span class='mass'>Secondary black hole</span>";
+        text = text+ "<span class='info'>Secondary black hole</span>";
     }
     // "<span class='mass'>"+d["compName"]+"</span>"+
     // "<span class='mass'>"+d["initmass2"]+"</span>";
-    text = text+ "<span class='mass'>Location: "+d.location+"</span>";
+    text = text+ "<span class='info'>Location: "+d.location+"</span>";
     return text;
 }
 //set tooltip functions
 var showTooltip = function(d){
     // console.log('2',d.name,tooltip);
+    getLeft = function(d){
+        if (d.x > diameter/2){return (d3.event.pageX - 0.25*pgWidth - 10) + "px";}
+        else{return (d3.event.pageX + 10) + "px";};
+    }
+    getTop = function(d){
+        if (d.y > diameter/2){return (d3.event.pageY - 0.1*diameter - 10) + "px";}
+        else{return (d3.event.pageY + 10) + "px";};
+    }
     tooltip.transition()
        .duration(200)
        .style("opacity", .9);
     tooltip.html(tttext(d))
-       .style("left", (d3.event.pageX + 10+d.r) + "px")
-       .style("top", (d3.event.pageY-10) + "px")
-       .style("width","auto")
+       .style("left", getLeft(d))
+       .style("top", getTop(d))
+       .style("width","25%")
        .style("height","auto");
     svg.select('#hl'+d.id)
         .transition(500)
@@ -118,15 +126,11 @@ d3.csv("csv/bhcat.csv", function(error, data){
             arrows.push([d.id,name2id(d.parentName)]);
         }
     });
-    // console.log(arrows);
-    // console.log(arrowpos);
     //setup the chart
     var bubbles = svg.append("g")
         .attr("transform", "translate(0,0)")
-        .selectAll(".bubble")
-        .data(nodes)
-        .enter();
-
+    // console.log(arrows);
+    // console.log(arrowpos);
     addline = function(i){
       x1=arrowpos[arrows[i][0]].x;
       x2=arrowpos[arrows[i][1]].x;
@@ -151,7 +155,7 @@ d3.csv("csv/bhcat.csv", function(error, data){
       y1r1 = y1 - r1*Math.cos(ang);
       y1r2 = y1 + r1*Math.cos(ang);;
       points = x1r1+","+y1r1+" "+x1r2+","+y1r2+" "+x2+","+y2;
-      bubbles.append("polygon")
+      svg.append("polygon")
           .attr("points",points)
           .attr("fill",col);
         //   .style({"stroke":"red","stroke-width":2});
@@ -164,27 +168,32 @@ d3.csv("csv/bhcat.csv", function(error, data){
       y1=arrowpos[arrows[i][0]].y;
       y2=arrowpos[arrows[i][1]].y;
       col=arrowpos[arrows[i][0]].c;
-    //   console.log(col);
       ang = Math.atan2((y2-y1),(x2-x1));
-      x1r1 = x1 + r1*Math.sin(ang);
-      x1r2 = x1 - r1*Math.sin(ang);
-      y1r1 = y1 - r1*Math.cos(ang);
-      y1r2 = y1 + r1*Math.cos(ang);
-      x2r1 = (r1*x2+r2*x1)/(r1+r2) + r1*Math.sin(ang)/2;
-      x2r2 = (r1*x2+r2*x1)/(r1+r2) - r1*Math.sin(ang)/2;
-      y2r1 = (r1*y2+r2*y1)/(r1+r2) - r1*Math.cos(ang)/2;
-      y2r2 = (r1*y2+r2*y1)/(r1+r2) + r1*Math.cos(ang)/2;
-      x3r1 = x2 + r2*Math.sin(ang);
-      x3r2 = x2 - r2*Math.sin(ang);
-      y3r1 = y2 - r2*Math.cos(ang);
-      y3r2 = y2 + r2*Math.cos(ang);
-      points = x1r1+","+y1r1+" "+x2r1+","+y2r1+" "+x3r1+","+y3r1+
-        " "+x3r2+","+y3r2+" "+x2r2+","+y2r2+" "+x1r2+","+y1r2;
+      r1s=r1*Math.sin(ang);
+      r1c=r1*Math.cos(ang);
+      r2s=r2*Math.sin(ang);
+      r2c=r2*Math.cos(ang);
+    //   console.log(col);
+      x1r1 = x1 + r1s/2;
+      x1r2 = x1 - r1s/2;
+      y1r1 = y1 - r1c/2;
+      y1r2 = y1 + r1c/2;
+      x2r1 = (r1*x2+r2*x1)/(r1+r2) + r1s;
+      x2r2 = (r1*x2+r2*x1)/(r1+r2) - r1s;
+      y2r1 = (r1*y2+r2*y1)/(r1+r2) - r1s;
+      y2r2 = (r1*y2+r2*y1)/(r1+r2) + r1s;
+      x3r1 = x2 + r2s/2;
+      x3r2 = x2 - r2s/2;
+      y3r1 = y2 - r2c/2;
+      y3r2 = y2 + r2c/2;
+      points = x1r1+","+y1r1+" "+x3r1+","+y3r1+
+        " "+x3r2+","+y3r2+" "+x1r2+","+y1r2;
     //   linedata = [{"x":x1r1,"y":y1r1},]
     //   console.log(points);
-      bubbles.append("polygon")
+      svg.append("polygon")
           .attr("points",points)
-          .attr("fill",col);
+          .attr("fill",col)
+          .attr("fill-opacity",0.5);
         //   .style({"stroke":"red","stroke-width":2});
     }
     addcurve = function(i){
@@ -194,17 +203,16 @@ d3.csv("csv/bhcat.csv", function(error, data){
         x2=arrowpos[arrows[i][1]].x;
         y1=arrowpos[arrows[i][0]].y;
         y2=arrowpos[arrows[i][1]].y;
-        col=arrowpos[arrows[i][0]].c;
         //   console.log(col);
         ang = Math.atan2((y2-y1),(x2-x1));
         r1s=r1*Math.sin(ang);
         r1c=r1*Math.cos(ang);
         r2s=r2*Math.sin(ang);
         r2c=r2*Math.cos(ang);
-        x1r1 = x1 + r1s;
-        x1r2 = x1 - r1s;
-        y1r1 = y1 - r1c;
-        y1r2 = y1 + r1c;
+        x1r1 = x1 + r1s/2;
+        x1r2 = x1 - r1s/2;
+        y1r1 = y1 - r1c/2;
+        y1r2 = y1 + r1c/2;
         x2r1 = (r1*x2+r2*x1)/(r1+r2) + r1s/2;
         x2r2 = (r1*x2+r2*x1)/(r1+r2) - r1s/2;
         y2r1 = (r1*y2+r2*y1)/(r1+r2) - r1c/2;
@@ -217,12 +225,13 @@ d3.csv("csv/bhcat.csv", function(error, data){
         // " L"+x3r2+","+y3r2+" L"+x2r2+","+y2r2+" L"+x1r2+","+y1r2;
         lineData = [{"x":x1r1,"y":y1r1},{"x":x2r1,"y":y2r1},{"x":x3r1,"y":y3r1},
             {"x":x3r2,"y":y3r2},{"x":x2r2,"y":y2r2},{"x":x1r2,"y":y1r2}];
+        col=arrowpos[arrows[i][0]].c;
         lineFunc = d3.svg.line()
             .x(function(d){return d.x;})
             .y(function(d){return d.y;})
-            .interpolate("cardinal")
+            .interpolate("cardinal-closed")
     //   console.log(points);
-      bubbles.append("path")
+      svg.append("path")
           .attr("d",lineFunc(lineData))
           .attr("class","merger")
           .attr("fill",col);
@@ -234,6 +243,14 @@ d3.csv("csv/bhcat.csv", function(error, data){
         // addpolygon(i);
         addcurve(i);
     }
+
+
+    var bubbles = svg.append("g")
+        .attr("transform", "translate(0,0)")
+        .selectAll(".bubble")
+        .data(nodes)
+        .enter();
+
     svg.selectAll("path.merger")
         .attr("opacity",0.5);
     //create highlight circles
