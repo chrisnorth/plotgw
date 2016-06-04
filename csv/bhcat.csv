@@ -9,10 +9,10 @@ GW150914-B,28.1,+1.8-1.5,,Black hole,Binary black hole,GW150914,,GW,secondary,Ex
 GW150914,62.3,+3.7-3.1,,None,Binary black hole,,,GW,final,Extragalactic,gw150914,gw150914,gw150914,gw150914,24
 GW150914-A,36.2,+5.2-3.8,,Black hole,Binary black hole,GW150914,,GW,primary,Extragalactic,gw150914,gw150914,gw150914,gw150914,23
 M33X-7,15.65,+1.45-1.45,70,Wolf-Rayet star,X-ray binary,X-ray binary,82.97,Xray,,M33,51,51,51,52,22
-NGC300X-1,20,+4-4,26,Wolf-Rayet star,X-ray binary,,32.3,Xray,,NGC 300,50,50,50,50,21
+LMCX-3,7,+0.32-0.32,3.72,B-type star,X-ray binary,,134.4,Xray,,Large Magellanic Cloud,48,48,48,48,21
 LMCX-1,10.91,+1.55-1.55,31.79,O-type star,X-ray binary,,93.84,Xray,,Large Magellanic Cloud,47,47,47,47,20
 CygX-1,14.8,+0.1-0.1,19.2,O-type star,X-ray binary,,134.4,Xray,,Milky Way,16,16,16,16,19
-XTEJ1819-254,10.215,r8.73-11.7,5.49,N-type star,X-ray binary,,67.62,Xray,,Milky Way,15,15,38,15,18
+XTEJ1819-254,10.215,r8.73-11.7,5.49,B-type star,X-ray binary,,67.62,Xray,,Milky Way,15,15,38,15,18
 4U1543-47,5.1,r2.7-7.5,2.3,A-type star,X-ray binary,,26.8,Xray,,Milky Way,14,14,14,46,17
 GROJ1655-40,5.31,+0.07-0.07,1.75,F/G-type star,X-ray binary,,62.909,Xray,,Milky Way,0,13,36,45,16
 GS1354-64,7.6,+0.7-0.7,1.03,G-type star,X-ray binary,,61.07,Xray,,Milky Way,0,12,12,12,15
