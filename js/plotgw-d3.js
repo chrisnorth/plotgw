@@ -510,7 +510,7 @@ svgcont = d3.select("div#graphcontainer").append("div")
     .classed("svg-container",true);
 
 
-var margin = {top: 10, right: 60, bottom: 50, left: 60}
+var margin = {top: 0, right: 60, bottom: 50, left: 60}
 var fullWidth = document.getElementById("graphcontainer").offsetWidth;
 var fullHeight = document.getElementById("graphcontainer").offsetHeight;
 var width = fullWidth - margin.left - margin.right;
@@ -645,7 +645,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // x-axis
     svg.append("g")
         .attr("class", "x-axis axis")
-        .attr("transform", "translate("+margin.left+"," + relh[1]*height + ")")
+        .attr("transform", "translate("+margin.left+"," + (margin.top + relh[1]*height) + ")")
         .call(xAxis)
     .append("text")
         .attr("class", "x-axis axis-label")
@@ -657,7 +657,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
     // y-axis
     svg.append("g")
         .attr("class", "y-axis axis")
-        .attr("transform", "translate("+margin.left+",0)")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
         .call(yAxis)
     .append("text")
         .attr("class", "y-axis axis-label")
@@ -674,7 +674,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorX")
-        .attr("transform", "translate("+margin.left+",0)")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
         .attr("x1",xMapErrP).attr("x2",xMapErrM)
         .attr("y1",yMap).attr("y2",yMap)
         .attr("stroke",colorErr)
@@ -685,7 +685,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorXp")
-        .attr("transform", "translate("+margin.left+",0)")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
         .attr("x1",xMapErrP).attr("x2",xMapErrP)
         .attr("y1",xMapErrY0).attr("y2",xMapErrY1)
         .attr("stroke",colorErr)
@@ -696,7 +696,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorXm")
-        .attr("transform", "translate("+margin.left+",0)")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
         .attr("x1",xMapErrM).attr("x2",xMapErrM)
         .attr("y1",xMapErrY0).attr("y2",xMapErrY1)
         .attr("stroke",colorErr)
@@ -709,7 +709,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorY")
-        .attr("transform", "translate("+margin.left+",0)")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
         .attr("x1",xMap).attr("x2",xMap)
         .attr("y1",yMapErrP).attr("y2",yMapErrM)
         .attr("stroke",colorErr)
@@ -720,7 +720,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorYp")
-        .attr("transform", "translate("+margin.left+",0)")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
         .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
         .attr("y1",yMapErrP).attr("y2",yMapErrP)
         .attr("stroke",colorErr)
@@ -731,7 +731,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
         .data(data)
     .enter().append("line")
         .attr("class","error errorYm")
-        .attr("transform", "translate("+margin.left+",0)")
+        .attr("transform", "translate("+margin.left+","+margin.top+")")
         .attr("x1",yMapErrX0).attr("x2",yMapErrX1)
         .attr("y1",yMapErrM).attr("y2",yMapErrM)
         .attr("stroke",colorErr)
@@ -743,7 +743,7 @@ d3.csv("csv/gwcat.csv", function(error, data) {
       .data(data)
     .enter().append("circle")
       .attr("class", "dot")
-      .attr("transform", "translate("+margin.left+",0)")
+      .attr("transform", "translate("+margin.left+","+margin.top+")")
       .attr("r", 7)
       .attr("cx", xMap)
       .attr("cy", yMap)
