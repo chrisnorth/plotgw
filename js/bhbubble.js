@@ -118,10 +118,17 @@ var iptext = function(d){
         if (d.ref1!="-"){text = text +
             " <sup>["+rx+"]</sup></span>";rcm=rx;rx++;}
         else{text = text+"</span>"}
+        //period mass
+        text = text+ "<span class='info'><b>Orbital period</b>: "+d.period+
+        " days</sub>";
+        if (d.ref4!="-"){text = text +
+            " <sup>["+rx+"]</sup></span>";rper=rx;rx++;}
+        else{text = text+"</span>"}
         text = text+ "<span class='info'><b>Location</b>: "+d.location+"</span>";
         if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.ref3+"</span>"}
         if (rct){text = text + "<span class='ref'>["+rct+"] "+d.ref2+"</span>"}
         if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.ref1+"</span>"}
+        if (rcm){text = text + "<span class='ref'>["+rper+"] "+d.ref4+"</span>"}
     }else{
         text = text+ "<span class='info'>"+d.binType+
             " ("+d.BHtype+")</span>";
@@ -148,11 +155,14 @@ var hideInfopanel = function(d) {
     // fade out infopanel
     infopanelouter.transition()
         .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    infopanelouter.style("top","200%");
     // fade out semi-transparent background
     infopanelbg.transition()
       .duration(500)
       .style("opacity",0);
     infopanelbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
 }
 
 var data;
