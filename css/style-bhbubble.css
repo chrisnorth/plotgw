@@ -44,6 +44,9 @@ a{
     padding-top:5%;
     text-align:center;
 }
+.bh-circle,.bh-circle-text{
+    cursor:pointer
+}
 /*Tooltips*/
 .tooltip {
   position: absolute;
@@ -68,13 +71,61 @@ a{
 }
 
 /*Info panel*/
-.infopanel{
-    position: absolute;
+.infopanelbg{
+    position:fixed;
+    width:100%;
+    height:0;
+    left:0;
+    top:0;
+    background-color: #888;
+    opacity:0;
+}
+.infopanelouter{
+    position: fixed;
     width: 200px;
     height: 28px;
-    pointer-events: none;
     background-color:rgba(255,255,255,1);
-    border:solid rgba(0,0,0,0.5) 1px;
+    border:solid rgba(0,0,0,1) 5px;
+    border-radius:20px;
     padding:5px;
     opacity:0;
+}
+.infopanel{
+    width:100%;
+    height:auto;
+    padding-bottom:10px;
+}
+.infopanel span{
+    display:block;
+}
+.infopanel span.name{
+    font-size:2em;
+    font-weight:bold;
+    padding-bottom:20px;
+}
+.infopanel span.info{
+    font-size:1em;
+    text-align:left;
+    padding-bottom:10px;
+}
+.infopanel span.cite{
+    font-size:0.8em;
+    display:inline;
+}
+.infopanel span.ref{
+    font-size:0.8em;
+    text-align:left;
+    padding-bottom:0px;
+}
+.infoclose{
+    position:absolute;
+    width:30px;
+    height:30px;
+    right:-15px;
+    top:-10px;
+    cursor:pointer;
+}
+.infoclose img{
+    width:100%;
+    cursor:pointer;
 }

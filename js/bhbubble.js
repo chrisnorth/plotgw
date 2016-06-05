@@ -36,17 +36,21 @@ if (sort=="random"){
 }
 
 var svg = d3.select("div#bubble-container")
-    .append("svg")
-    .attr("width", diameter)
-    .attr("height", diameter)
-    .attr("class", "bubble");
+    .append("svg").attr("class", "bubble")
+    .attr("width", diameter).attr("height", diameter);
 
 var tooltip = d3.select("div#bubble-container").append("div")
     .attr("class", "tooltip");
     // .style("opacity", 0);
 
-var info = d3.select("div#bubble-container").append("div")
-    .attr("class","infopanel");
+var infopanelbg = d3.select("div#bubble-container").append("div")
+    .attr("class","infopanelbg")
+    .on("click",function(){hideInfopanel();});
+var infopanelouter = d3.select("div#bubble-container").append("div")
+    .attr("class","infopanelouter").attr("id","infopanel-outer");
+var infopanel = d3.select("div#infopanel-outer").append("div")
+        .attr("class","infopanel");
+infopanelouter.append("div").attr("class","infoclose").html("<img src='img/close.png' title='close'>").on("click",function(){hideInfopanel();});
 
 //define tooltip text
 var tttext = function(d){
@@ -59,20 +63,7 @@ var tttext = function(d){
     }else{
         text = text+ "<span class='info'>"+d.binType+
             " ("+d.BHtype+")</span>";
-        // typedesc={"final":"Final black hole",
-        //     "primary":"Primary black hole",
-        //     "secondary":"Secondary black hole"}
-        // text = text + "<span class='info'>"+typedesc[d.BHtype]+"</span>";
     }
-    // if(d["BHtype"]=='final'){
-    //     text = text+ "<span class='info'>Final black hole</span>";
-    // }else if(d["BHtype"]=='primary'){
-    //     text = text+ "<span class='info'>Primary black hole</span>";
-    // }else if(d["BHtype"]=='secondary'){
-    //     text = text+ "<span class='info'>Secondary black hole</span>";
-    // }
-    // "<span class='mass'>"+d["compName"]+"</span>"+
-    // "<span class='mass'>"+d["initmass2"]+"</span>";
     text = text+ "<span class='info'>Location: "+d.location+"</span>";
     return text;
 }
@@ -91,21 +82,77 @@ var showTooltip = function(d){
        .duration(200)
        .style("opacity", .9);
     tooltip.html(tttext(d))
-       .style("left", getLeft(d))
-       .style("top", getTop(d))
-       .style("width","25%")
-       .style("height","auto");
+       .style("left", getLeft(d)).style("top", getTop(d))
+       .style("width","25%").style("height","auto");
     svg.select('#hl'+d.id)
         .transition(500)
         .attr("stroke-opacity",1);
 }
 var hideTooltip = function(d) {
     tooltip.transition()
-        .duration(500)
-        .style("opacity", 0);
+        .duration(500).style("opacity", 0);
     svg.select('#hl'+d.id)
-        .transition(500)
-        .attr("stroke-opacity",0);
+        .transition(500).attr("stroke-opacity",0);
+}
+
+var iptext = function(d){
+    //initialise reference number
+    rx=1;
+    text =  "<span class='name'>"+d["name"]+"</span>"+
+    //BH mass
+    "<span class='info'><b>Mass</b>: "+d["massBH"]+" M<sub>&#x2609;</sub>";
+    if (d.ref3!='-'){text = text +
+        " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
+    else{text = text+"</span>"}
+    text = text + "<span class='info'><b>Type</b>: "+d.binType+"</span>";
+    if(d["method"]=='Xray'){
+        // text = text+ "<span class='info'>X-ray detection</span>";
+        //companion
+        text = text+ "<span class='info'><b>Companion</b>: "+d.compType;
+        if (d.ref2!="-"){text = text +
+            " <sup>["+rx+"]</sup></span>";rct=rx;rx++;}
+        else{text = text+"</span>"}
+        //companion mass
+        text = text+ "<span class='info'><b>Companion mass</b>: "+d.compMass+
+        " M<sub>&#x2609;</sub>";
+        if (d.ref1!="-"){text = text +
+            " <sup>["+rx+"]</sup></span>";rcm=rx;rx++;}
+        else{text = text+"</span>"}
+        text = text+ "<span class='info'><b>Location</b>: "+d.location+"</span>";
+        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.ref3+"</span>"}
+        if (rct){text = text + "<span class='ref'>["+rct+"] "+d.ref2+"</span>"}
+        if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.ref1+"</span>"}
+    }else{
+        text = text+ "<span class='info'>"+d.binType+
+            " ("+d.BHtype+")</span>";
+    }
+    return text;
+}
+var showInfopanel = function(d){
+    // fade in semi-transparent background layer (greys out image)
+    infopanelbg.transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    infopanelbg.style("height","100%");
+    //fade in infopanel
+    infopanelouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    infopanel.html(iptext(d));
+    infopanelouter.style("left", "25%").style("top", "25%")
+       .style("width","50%").style("height","auto");
+
+}
+var hideInfopanel = function(d) {
+    // fade out infopanel
+    infopanelouter.transition()
+        .duration(500).style("opacity", 0);
+    // fade out semi-transparent background
+    infopanelbg.transition()
+      .duration(500)
+      .style("opacity",0);
+    infopanelbg.style("height",0);
 }
 
 var data;
@@ -138,71 +185,6 @@ d3.csv("csv/bhcat.csv", function(error, data){
         .attr("transform", "translate(0,0)")
     // console.log(arrows);
     // console.log(arrowpos);
-    addline = function(i){
-      x1=arrowpos[arrows[i][0]].x;
-      x2=arrowpos[arrows[i][1]].x;
-      y1=arrowpos[arrows[i][0]].y;
-      y2=arrowpos[arrows[i][1]].y;
-      svg.append("line")
-          .attr("x1",x1).attr("x2",x2).attr("y1",y1).attr("y2",y2)
-          .style({"stroke":"red","stroke-width":2});
-    }
-    addtriangle = function(i){
-      r1=arrowpos[arrows[i][0]].r;
-      r2=arrowpos[arrows[i][1]].r;
-      x1=arrowpos[arrows[i][0]].x;
-      x2=arrowpos[arrows[i][1]].x;
-      y1=arrowpos[arrows[i][0]].y;
-      y2=arrowpos[arrows[i][1]].y;
-      col=arrowpos[arrows[i][0]].c;
-    //   console.log(col);
-      ang = Math.atan2((y2-y1),(x2-x1));
-      x1r1 = x1 + r1*Math.sin(ang);
-      x1r2 = x1 - r1*Math.sin(ang);
-      y1r1 = y1 - r1*Math.cos(ang);
-      y1r2 = y1 + r1*Math.cos(ang);;
-      points = x1r1+","+y1r1+" "+x1r2+","+y1r2+" "+x2+","+y2;
-      svg.append("polygon")
-          .attr("points",points)
-          .attr("fill",col);
-        //   .style({"stroke":"red","stroke-width":2});
-    }
-    addpolygon = function(i){
-      r1=arrowpos[arrows[i][0]].r;
-      r2=arrowpos[arrows[i][1]].r;
-      x1=arrowpos[arrows[i][0]].x;
-      x2=arrowpos[arrows[i][1]].x;
-      y1=arrowpos[arrows[i][0]].y;
-      y2=arrowpos[arrows[i][1]].y;
-      col=arrowpos[arrows[i][0]].c;
-      ang = Math.atan2((y2-y1),(x2-x1));
-      r1s=r1*Math.sin(ang);
-      r1c=r1*Math.cos(ang);
-      r2s=r2*Math.sin(ang);
-      r2c=r2*Math.cos(ang);
-    //   console.log(col);
-      x1r1 = x1 + r1s/2;
-      x1r2 = x1 - r1s/2;
-      y1r1 = y1 - r1c/2;
-      y1r2 = y1 + r1c/2;
-      x2r1 = (r1*x2+r2*x1)/(r1+r2) + r1s;
-      x2r2 = (r1*x2+r2*x1)/(r1+r2) - r1s;
-      y2r1 = (r1*y2+r2*y1)/(r1+r2) - r1s;
-      y2r2 = (r1*y2+r2*y1)/(r1+r2) + r1s;
-      x3r1 = x2 + r2s/2;
-      x3r2 = x2 - r2s/2;
-      y3r1 = y2 - r2c/2;
-      y3r2 = y2 + r2c/2;
-      points = x1r1+","+y1r1+" "+x3r1+","+y3r1+
-        " "+x3r2+","+y3r2+" "+x1r2+","+y1r2;
-    //   linedata = [{"x":x1r1,"y":y1r1},]
-    //   console.log(points);
-      svg.append("polygon")
-          .attr("points",points)
-          .attr("fill",col)
-          .attr("fill-opacity",0.5);
-        //   .style({"stroke":"red","stroke-width":2});
-    }
     addcurve = function(i){
         r1=arrowpos[arrows[i][0]].r;
         r2=arrowpos[arrows[i][1]].r;
@@ -266,6 +248,7 @@ d3.csv("csv/bhcat.csv", function(error, data){
         .attr("cx", function(d){ return d.x; })
         .attr("cy", function(d){ return d.y; })
         .attr("id",function(d){return 'hl'+d.id;})
+        .attr("class","bh-circle-highlight")
         .attr("fill-opacity",0)
         .attr("stroke-opacity",0)
         .style({"stroke":"red","stroke-width":10})
@@ -276,10 +259,11 @@ d3.csv("csv/bhcat.csv", function(error, data){
         .attr("cx", function(d){ return d.x; })
         .attr("cy", function(d){ return d.y; })
         .attr("id",function(d){return d.id;})
+        .attr("class","bh-circle")
         .style("fill", function(d){return fillcolor2(cValue(d))})
-        .style({"stroke":"#000000","stoke-width":1})
         .on("mouseover", function(d) {showTooltip(d);})
-        .on("mouseout", function(d) {hideTooltip(d);});
+        .on("mouseout", function(d) {hideTooltip(d);})
+        .on("click",function(d){showInfopanel(d);});
 
     //format the text for each bubble
     getText = function(d){
@@ -290,6 +274,7 @@ d3.csv("csv/bhcat.csv", function(error, data){
         .attr("y", function(d){ return d.y + 5; })
         .attr("text-anchor", "middle")
         .text(function(d){ return getText(d); })
+        .attr("class","bh-circle-text")
         .style({
             "fill":function(d){return textcolor2(cValue(d));},
             "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
