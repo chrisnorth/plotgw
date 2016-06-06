@@ -39,7 +39,7 @@ input.down{
     position:absolute;
     display:inline-block;
     width:25%;
-    height:80%;
+    height:90%;
     border:2px solid black;
     border-radius: 10px;
     background-color: #eee;
@@ -116,7 +116,7 @@ input.down{
 .svg-content-responsive {
     display: inline-block;
     position: absolute;
-    top: 10px;
+    top: 0;
     left: 0;
 }
 
