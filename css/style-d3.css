@@ -32,11 +32,12 @@ input.down{
 }
 #graphcontainer{
     display:inline-block;
+    float:left;
     width:70%;
     height:80%;
 }
 #infoouter{
-    position:absolute;
+    float:left;
     display:inline-block;
     width:25%;
     height:90%;
@@ -47,8 +48,9 @@ input.down{
 #sketchcontainer{
     position:relative;
     display:inline-block;
-    width:100%;
-    height:50%;
+    /*width:100%;
+    height:50%;*/
+    float:left;
     /*border:2px solid black;*/
     /*border-radius: 10px;*/
     /*background-color: #ccc*/
@@ -58,6 +60,7 @@ input.down{
     display:inline-block;
     width:100%;
     height:50%;
+    float:left;
     /*border:2px solid black;*/
     /*border-radius: 10px;*/
     /*background-color: #ccc*/
@@ -107,9 +110,9 @@ input.down{
 .svg-container {
     display: inline-block;
     position: relative;
-    width: 100%;
-    height:100%;
-    padding-bottom: 100%; /* aspect ratio */
+    /*width: 100%;
+    height:100%;*/
+    /*padding-bottom: 100%; /* aspect ratio */*/
     vertical-align: top;
     overflow: hidden;
 }

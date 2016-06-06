@@ -150,32 +150,69 @@ GWCatalogue.prototype.scaleWindow = function(){
     this.winAspect = this.winFullWidth/this.winFullHeight;
     // console.log(this.winFullWidth,this.winFullHeight,this.winAspect);
 
+    info=document.getElementById("infoouter");
+    skcont=document.getElementById("sketchcontainer");
+    labcont=document.getElementById("labcontainer");
+    graph=document.getElementById("graphcontainer");
     if (this.winAspect<1){
         // portrait
-        // console.log('portrait window');
+        console.log('portrait');
+        this.portrait=true;
+        this.sketchFullWidth = 0.9*this.winFullWidth;
+        this.sketchFullHeight = 0.5*this.sketchFullWidth;
+        this.fullGraphWidth = 0.95*this.winFullWidth;
+        this.fullGraphHeight =
+            0.85*(this.winFullHeight-this.sketchFullHeight);
+        info.style["margin-left"]="5%";
+        this.sketchWidth = 0.45*this.sketchFullWidth;
+        this.sketchHeight = this.sketchFullHeight;
+        console.log(this.sketchHeight,this.sketchFullHeight);
+        this.labWidth = 0.5*this.sketchFullWidth;
+        this.labHeight = this.sketchFullHight;
+        this.labcontWidth="45%";
+        this.labcontHeight="20%";
+        // info.style.top = "50%";
+        // info.style.left = "0%";
     }else{
         // landscape window
-        console.log('window',this.winFullWidth,this.winFullHeight);
+        console.log('landscape')
+        this.portrait=false;
         this.sketchFullHeight = 0.85*this.winFullHeight;
-        this.sketchFullWidth = 0.5*this.winFullHeight;
-        this.sketchAspect = this.sketchFullWidth/this.sketchFullHeight;
-        console.log('sketchfull',this.sketchFullWidth,this.sketchFullHeight);
-            // .attr("height",this.sketchFullHeight);
-        console.log('infoouter',
-            document.getElementById("infoouter").offsetHeight,
-            document.getElementById("infoouter").offsetWidth);
-        d3.selectAll("#graphcontainer")
-            .attr("width",0.95*(this.winFullWidth-this.fullSketchWidch));
+        this.sketchFullWidth = 0.5*this.sketchFullHeight;
         this.fullGraphWidth =
             0.95*(this.winFullWidth-this.sketchFullWidth);
-        this.fullGraphHeight = 0.8*this.winFullHeight;
-        info=document.getElementById("infoouter");
-        info.style.width = this.sketchFullWidth;
-        info.style.height = this.sketchFullHeight;
-        graph=document.getElementById("graphcontainer")
-        graph.style.width = this.fullGraphWidth;
-        graph.style.height = this.fullGraphHeight;
+        this.fullGraphHeight = this.winFullHeight;
+        info.style["margin-left"]=0;
+        this.sketchWidth = this.sketchFullWidth;
+        this.sketchHeight = 0.5*this.sketchFullHeight;
+        console.log(this.sketchHeight,this.sketchFullHeight);
+        this.sketchAspect = this.sketchFullWidth/this.sketchFullHeight;
+        this.labWidth = this.sketchFullWidth;
+        this.labHeight = 0.5*this.sketchFullHight;
+        this.labcontWidth="45%";
+        this.labcontHeight="10%";
+        // info.style.top = "";
+        // info.style.left = "";
     }
+    info.style.width = this.sketchFullWidth;
+    info.style.height = this.sketchFullHeight;
+    graph.style.width = this.fullGraphWidth;
+    graph.style.height = this.fullGraphHeight;
+    console.log(this.sketchHeight,this.sketchFullHeight);
+    skcont.style.height = this.sketchHeight;
+    skcont.style.width = this.sketchWidth;
+    console.log(skcont);
+    labcont.style.height = this.labHeight;
+    labcont.style.width = this.labWidth;
+    this.svgHeight = 0.8*this.fullGraphHeight;
+    this.svgWidth = this.fullGraphWidth;
+    console.log('window',this.winFullWidth,this.winFullHeight);
+    console.log('sketchfull',this.sketchFullWidth,this.sketchFullHeight);
+        // .attr("height",this.sketchFullHeight);
+    console.log('infoouter',
+        document.getElementById("infoouter").offsetHeight,
+        document.getElementById("infoouter").offsetWidth);
+
 }
 GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
@@ -185,7 +222,7 @@ GWCatalogue.prototype.setScales = function(){
     this.graphWidth =
         this.fullGraphWidth - this.margin.left - this.margin.right;
     this.graphHeight =
-        this.fullGraphHeight - this.margin.top - this.margin.bottom;
+        0.8*this.fullGraphHeight - this.margin.top - this.margin.bottom;
 
     // set errorbar marker width
     // this.relh = [0.0,1.0];
@@ -282,7 +319,7 @@ GWCatalogue.prototype.setScales = function(){
         prob:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
     //icon size and files
     this.micon = {w:"20%",h:"20%"}; //mass icons
-    this.iicon = {w:"10%",h:"10%"}; //info icons
+    // this.iicon = {w:"10%",h:"10%"}; //info icons
     this.icons = {
         mass:"img/mass-msun.svg",
         date:"img/time.svg",
@@ -319,9 +356,9 @@ GWCatalogue.prototype.drawSketch = function(){
     this.svgSketch = d3.select("div#sketchcontainer").append("svg")
         .attr("preserveAspectRatio", "none")
         .attr("id","svgSketch")
-        .attr("viewBox","0 0 "+this.sketchWidth+" " +this.sketchHeight)
-        // .attr("width", widthSketch + marginSketch.left + marginSketch.right)
-        // .attr("height", (heightSketch + marginSketch.top + marginSketch.bottom))
+        // .attr("viewBox","0 0 "+this.sketchWidth+" " +this.sketchHeight)
+        .attr("width", this.sketchWidth + this.marginSketch.left + this.marginSketch.right)
+        .attr("height", (this.sketchHeight + this.marginSketch.top + this.marginSketch.bottom))
         .append("g")
         .attr("transform", "translate(" + this.marginSketch.left + "," + this.marginSketch.top + ")");
     // make gradients
@@ -352,6 +389,7 @@ GWCatalogue.prototype.drawSketch = function(){
 
     if (this.redraw){
         console.log('redrawing masses');
+        for (lab in this.labels){this.addLab(lab)};
         this.addMasses("pri",true);
         this.addMasses("sec",true);
         this.addMasses("final",true);
@@ -401,7 +439,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
     this.svgSketch.append("circle")
         .attr("class","sketch bh-"+bh)
         .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
-        .attr("cy",this.yScaleSk(gw.yout))
+        .attr("cy",this.yScaleSk(this.yout))
         .attr("r",this.scaleRadius(1,1))
         // .attr("cy",function(){
         //     if (redraw){
@@ -448,9 +486,11 @@ GWCatalogue.prototype.addLab = function(lab){
     labimgdiv = document.createElement('div');
     labimgdiv.className = 'icon labcont';
     labimgdiv.setAttribute("id",lab+'icon');
+    labimgdiv.style.width = this.labcontWidth;
+    labimgdiv.style.height = this.labcontHeight;
     // console.log(labimgdiv.classList);
     // labimgdiv.style.width = "40%";
-    labimgdiv.style.height = this.iicon.h;
+    // labimgdiv.style.height = this.iicon.h;
     // labimgdiv.style.left =
     //     xScaleSk(bhpos[lab].xicon)-xScaleSkAspect(micon.w)/2;
     // labimgdiv.style.top = yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2;
@@ -555,6 +595,25 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.flyInMasses(d,"pri","snap");
         this.flyInMasses(d,"sec","snap");
         this.flyInMasses(d,"final","snap");
+        this.sketchTitle.html("Information: "+this.sketchName);
+        for (lab in this.labels){
+                labTxt=''
+                for (i in this.cols[lab]){
+                    labTxt += " "+d[this.cols[lab][i]];
+                    if (columns[this.cols[lab][i]].unit){
+                        labTxt += " "+columns[this.cols[lab][i]].unit;
+                    }
+                    if (i<this.cols[lab].length-1){
+                        labTxt += "<br>";
+                    }
+                }
+            // if(svgLabs){
+            // OBSOLETE
+            //     svgSketch.select("text."+lab+"txt").html(labTxt);
+            // }else{
+                document.getElementById(lab+"txt").innerHTML = labTxt;
+            // }
+        }
     }else if ((this.sketchName==d["name"])){
         console.log('flying out');
         this.flyOutMasses("pri");
@@ -662,12 +721,14 @@ GWCatalogue.prototype.makeGraph = function(){
 
     svgcont = d3.select("div#graphcontainer").append("div")
         .attr("id","svg-container")
+        .attr("width",this.svgWidth)
+        .attr("height",this.svgHeight)
         .classed("svg-container",true);
     this.svg = d3.select(".svg-container").append("svg")
         // .attr("preserveAspectRatio", "xMidYMid meet")
         // .attr("viewBox","0 0 "+this.graphWidth+" " +1.2*this.graphHeight)
-        .attr("width",this.graphWidth+this.margin.top+this.margin.bottom)
-        .attr("height",this.graphHeight+this.margin.top+this.margin.bottom)
+        .attr("width",this.svgWidth)
+        .attr("height",this.svgHeight)
         // .classed("svg-content-responsive",true);
         // .attr("width", width + margin.left + margin.right)
         // .attr("height", height + margin.top + margin.bottom);
@@ -677,9 +738,11 @@ GWCatalogue.prototype.makeGraph = function(){
             this.margin.top + ")")
 
 // add the tooltip area to the webpage
-    this.tooltip = d3.select("div#graphcontainer").append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
+    if (!this.redraw){
+        this.tooltip = d3.select("div#graphcontainer").append("div")
+            .attr("class", "tooltip")
+            .style("opacity", 0);
+    }
 }
 GWCatalogue.prototype.drawGraph = function(){
     var gw = this;
@@ -1080,7 +1143,7 @@ window.addEventListener("resize",function(){
     // console.log(gw.sketchName);
     d3.select("svg#svgSketch").remove()
     d3.select("div#svg-container").remove()
-    // d3.selectAll("div.labcont").remove()
+    d3.selectAll("div.labcont").remove()
     // d3.selectAll("div.massicon").remove()
     gwcat.redraw=true;
     gwcat.setScales();
@@ -1092,8 +1155,8 @@ window.addEventListener("resize",function(){
             gw.updateSketch(d);
         }
     });
-    gwcat.redraw=false;
     gwcat.drawGraph();
+    gwcat.redraw=false;
         // gwcat.updateSketch();
     // });
 });
