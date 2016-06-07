@@ -221,7 +221,7 @@ BHBubble.prototype.filterData = function(data,filterType){
 }
 
 BHBubble.prototype.loadData = function(){
-    console.log("loadData");
+    // console.log("loadData");
     var bh=this;
     d3.csv("csv/bhcat.csv", function(error, data){
         data.forEach(function(d){
@@ -246,7 +246,7 @@ BHBubble.prototype.loadData = function(){
 }
 
 BHBubble.prototype.formatData = function(){
-    console.log("formatData",this.data[0].r);
+    // console.log("formatData",this.data[0].r);
     var bh=this;
     //convert numerical values from strings to numbers
     //bubbles needs very specific format, convert data to this.
@@ -274,7 +274,7 @@ BHBubble.prototype.drawBubbles = function(){
         .append("svg").attr("class", "bubble")
         .attr("width", this.diameter).attr("height", this.diameter);
 
-    console.log("drawBubbles",this.data[0].r);
+    // console.log("drawBubbles",this.data[0].r);
     var bh=this;
     this.bubbles = this.svg.append("g")
         .attr("transform", "translate(0,0)")
@@ -431,10 +431,9 @@ BHBubble.prototype.addButtons = function(){
         newcontinput.type = 'button';
         newcontinput.name = opt.filterType;
         newcontinput.value = opt.name;
-        if (opt.filterType==this.filterType){newcontinput.classList.add("down")};
+        if (opt.filterType==bh.filterType){newcontinput.classList.add("down")};
         newcontinput.addEventListener('click',function(){
             oldFilterType = bh.filterType;
-            console.log(oldFilterType,opt.filterType,this.name);//(this.id).strip('-')[1]);
             document.getElementById("button-"+oldFilterType).classList.remove("down")
             this.classList.add("down");
             // bh.filterType=bh.options[o].filterType
@@ -467,9 +466,9 @@ BHBubble.prototype.writeDownloadLink = function(){
 };
 
 BHBubble.prototype.replot = function(filterType){
-    console.log('plotting',filterType)
+    // console.log('replotting',filterType)
     this.filterType = filterType;
-    this.makeSvg();
+    // this.makeSvg();
     d3.select("svg").remove()
     this.loadData();
     this.makeDownload();
