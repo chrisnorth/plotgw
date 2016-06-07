@@ -142,6 +142,7 @@ GWCatalogue.prototype.init = function(){
         LVT:'Candidate'}
     this.setStyles();
     this.sketchName="None";
+    this.setScales();
 
 }
 GWCatalogue.prototype.scaleWindow = function(){
@@ -185,7 +186,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         info.style["margin-left"]=0;
         this.sketchWidth = this.sketchFullWidth;
         this.sketchHeight = 0.5*this.sketchFullHeight;
-        console.log(this.sketchHeight,this.sketchFullHeight);
+        // console.log(this.sketchHeight,this.sketchFullHeight);
         this.sketchAspect = this.sketchFullWidth/this.sketchFullHeight;
         this.labWidth = this.sketchFullWidth;
         this.labHeight = 0.5*this.sketchFullHight;
@@ -198,20 +199,20 @@ GWCatalogue.prototype.scaleWindow = function(){
     info.style.height = this.sketchFullHeight;
     graph.style.width = this.fullGraphWidth;
     graph.style.height = this.fullGraphHeight;
-    console.log(this.sketchHeight,this.sketchFullHeight);
+    // console.log(this.sketchHeight,this.sketchFullHeight);
     skcont.style.height = this.sketchHeight;
     skcont.style.width = this.sketchWidth;
-    console.log(skcont);
+    // console.log(skcont);
     labcont.style.height = this.labHeight;
     labcont.style.width = this.labWidth;
     this.svgHeight = 0.8*this.fullGraphHeight;
     this.svgWidth = this.fullGraphWidth;
-    console.log('window',this.winFullWidth,this.winFullHeight);
-    console.log('sketchfull',this.sketchFullWidth,this.sketchFullHeight);
+    // console.log('window',this.winFullWidth,this.winFullHeight);
+    // console.log('sketchfull',this.sketchFullWidth,this.sketchFullHeight);
         // .attr("height",this.sketchFullHeight);
-    console.log('infoouter',
-        document.getElementById("infoouter").offsetHeight,
-        document.getElementById("infoouter").offsetWidth);
+    // console.log('infoouter',
+    //     document.getElementById("infoouter").offsetHeight,
+    //     document.getElementById("infoouter").offsetWidth);
 
 }
 GWCatalogue.prototype.setScales = function(){
@@ -294,7 +295,7 @@ GWCatalogue.prototype.setScales = function(){
         document.getElementById("sketchcontainer").offsetHeight -
         this.marginSketch.top - this.marginSketch.bottom;
     this.aspectSketch = this.sketchHeight/this.sketchWidth
-    console.log('sketchcont',this.sketchHeight,this.sketchWidth);
+    // console.log('sketchcont',this.sketchHeight,this.sketchWidth);
 
     // labContainer = document.createElement("div")
     // labContainer.setAttribute("id","labcontainer");
@@ -350,8 +351,7 @@ GWCatalogue.prototype.setScales = function(){
 }
 GWCatalogue.prototype.drawSketch = function(){
     // Create sketch panel
-    this.setScales();
-    console.log("svg scale",this.sketchWidth,this.sketchHeight);
+    // console.log("svg scale",this.sketchWidth,this.sketchHeight);
     // Add svg to sketch container
     this.svgSketch = d3.select("div#sketchcontainer").append("svg")
         .attr("preserveAspectRatio", "none")
@@ -699,6 +699,7 @@ GWCatalogue.prototype.tttext = function(d){
 }
 
 GWCatalogue.prototype.formatData = function(d){
+    console.log('formatData',d.name);
     for (col in columns){
         if (columns[col].type=="fn"){d[col]=columns[col].fn(d)};
         if (columns[col].type=="flt"){
@@ -718,7 +719,7 @@ GWCatalogue.prototype.formatData = function(d){
 }
 GWCatalogue.prototype.makeGraph = function(){
     // this.setSvgScales();
-
+    console.log('makeGraph');
     svgcont = d3.select("div#graphcontainer").append("div")
         .attr("id","svg-container")
         .attr("width",this.svgWidth)
@@ -744,204 +745,220 @@ GWCatalogue.prototype.makeGraph = function(){
             .style("opacity", 0);
     }
 }
+GWCatalogue.prototype.drawGraphInit = function(){
+    var gw = this;
+    console.log('drawGraphInit')
+    d3.csv("csv/gwcat.csv", function(error, data) {
+        console.log('d3.csv');
+        // console.log(gw);
+        // change string (from CSV) into number format
+        // var data=data;
+
+        // var formatData = this.formatData(d)
+        // console.log(this.formatData,formatData(d));
+        data.forEach(gw.formatData);
+        gw.data = data;
+        // console.log(data);
+
+        gw.drawGraph();
+
+        // console.log('gw.data',gw.data);
+    });
+
+}
+
 GWCatalogue.prototype.drawGraph = function(){
     var gw = this;
     // gw.setSvgScales();
     gw.makeGraph();
-    console.log(this.graphHeight);
-    d3.csv("csv/gwcat.csv", function(error, data) {
-        // console.log(gw);
-        // change string (from CSV) into number format
-        // var data=data;
-        gw.data = data;
-        // var formatData = this.formatData(d)
-        // console.log(this.formatData,formatData(d));
-        data.forEach(gw.formatData);
+    data = this.data;
+    // console.log(this.graphHeight);
+    console.log('drawGraph');
+    // console.log('this.data',this.data);
 
-        // don't want dots overlapping axis, so add in buffer to data domain
-        // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        if (gw.xvar=="massratio"){
-            gw.xScale.domain([0, d3.max(data, gw.xErrP)]);
-        }else{
-            gw.xScale.domain([0, d3.max(data, gw.xErrP)+2]);
-        }
-        if (gw.yvar=="massratio"){
-            gw.yScale.domain([0, d3.max(data, gw.yErrP)]);
-        }else{
-            gw.yScale.domain([0, d3.max(data, gw.yErrP)+2]);
-        }
+    // don't want dots overlapping axis, so add in buffer to data domain
+    // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+    // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+    if (gw.xvar=="massratio"){
+        gw.xScale.domain([0, d3.max(data, gw.xErrP)]);
+    }else{
+        gw.xScale.domain([0, d3.max(data, gw.xErrP)+2]);
+    }
+    if (gw.yvar=="massratio"){
+        gw.yScale.domain([0, d3.max(data, gw.yErrP)]);
+    }else{
+        gw.yScale.domain([0, d3.max(data, gw.yErrP)+2]);
+    }
 
 
-        // x-axis
-        gw.svg.append("g")
-            .attr("class", "x-axis axis")
-            // .attr("transform", "translate("+gw.margin.left+"," +
-            //     (gw.margin.top + gw.relh[1]*gw.graphHeight) + ")")
-            .attr("transform", "translate("+gw.margin.left+"," +
-                (gw.margin.top + gw.graphHeight) + ")")
-            .call(gw.xAxis)
-        .append("text")
-            .attr("class", "x-axis axis-label")
-            // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
-            .attr("x", gw.graphWidth/2)
-            .attr("y", "2em")
-            .style("text-anchor", "middle")
-            .text(getLabelUnit(gw.xvar));
+    // x-axis
+    gw.svg.append("g")
+        .attr("class", "x-axis axis")
+        // .attr("transform", "translate("+gw.margin.left+"," +
+        //     (gw.margin.top + gw.relh[1]*gw.graphHeight) + ")")
+        .attr("transform", "translate("+gw.margin.left+"," +
+            (gw.margin.top + gw.graphHeight) + ")")
+        .call(gw.xAxis)
+    .append("text")
+        .attr("class", "x-axis axis-label")
+        // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
+        .attr("x", gw.graphWidth/2)
+        .attr("y", "2em")
+        .style("text-anchor", "middle")
+        .text(getLabelUnit(gw.xvar));
 
-        // y-axis
-        gw.svg.append("g")
-            .attr("class", "y-axis axis")
-            .attr("transform", "translate("+gw.margin.left+","+
-                gw.margin.top+")")
-            .call(gw.yAxis)
-        .append("text")
-            .attr("class", "y-axis axis-label")
-            //   .attr("transform", "translate(," + height + ")")
-            .attr("transform", "rotate(-90)")
-            .attr("y", 6)
-            // .attr("x",-(gw.relh[0]+gw.relh[1])*gw.graphHeight/2)
-            .attr("x",-gw.graphHeight/2)
-            .attr("dy", "-30px")
-            .style("text-anchor", "middle")
-            .text(getLabelUnit(gw.yvar));
-
-        // add x error bar
-        gw.svg.selectAll(".errorX")
-            .data(data)
-        .enter().append("line")
-            .attr("class","error errorX")
-            .attr("transform", "translate("+gw.margin.left+","+
-                gw.margin.top+")")
-            .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrM)
-            .attr("y1",gw.yMap).attr("y2",gw.yMap)
-            .attr("stroke",gw.colorErr)
-            .attr("stroke-width",gw.swErr)
-            .attr("opacity",gw.opErr);
-        // add top of y error bar
-        gw.svg.selectAll(".errorXp")
-            .data(data)
-        .enter().append("line")
-            .attr("class","error errorXp")
-            .attr("transform", "translate("+gw.margin.left+","+
-                gw.margin.top+")")
-            .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrP)
-            .attr("y1",gw.xMapErrY0).attr("y2",gw.xMapErrY1)
-            .attr("stroke",gw.colorErr)
-            .attr("stroke-width",gw.swErr)
-            .attr("opacity",gw.opErr);
-        // add bottom of y error bar
-        gw.svg.selectAll(".errorXm")
-            .data(data)
-        .enter().append("line")
-            .attr("class","error errorXm")
-            .attr("transform", "translate("+gw.margin.left+","+
-                gw.margin.top+")")
-            .attr("x1",gw.xMapErrM).attr("x2",gw.xMapErrM)
-            .attr("y1",gw.xMapErrY0).attr("y2",gw.xMapErrY1)
-            .attr("stroke",gw.colorErr)
-            .attr("stroke-width",gw.swErr)
-            .attr("opacity",gw.opErr);
-
-
-        // add y error bar
-        gw.svg.selectAll(".errorY")
-            .data(data)
-        .enter().append("line")
-            .attr("class","error errorY")
-            .attr("transform", "translate("+gw.margin.left+","+
-                gw.margin.top+")")
-            .attr("x1",gw.xMap).attr("x2",gw.xMap)
-            .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrM)
-            .attr("stroke",gw.colorErr)
-            .attr("stroke-width",gw.swErr)
-            .attr("opacity",gw.opErr);
-        // add top of y error bar
-        gw.svg.selectAll(".errorYp")
-            .data(data)
-        .enter().append("line")
-            .attr("class","error errorYp")
-            .attr("transform", "translate("+gw.margin.left+","+
-                gw.margin.top+")")
-            .attr("x1",gw.yMapErrX0).attr("x2",gw.yMapErrX1)
-            .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrP)
-            .attr("stroke",gw.colorErr)
-            .attr("stroke-width",gw.swErr)
-            .attr("opacity",gw.opErr);
-        // add bottom of y error bar
-        gw.svg.selectAll(".errorYm")
-            .data(data)
-        .enter().append("line")
-            .attr("class","error errorYm")
-            .attr("transform", "translate("+gw.margin.left+","+
-                gw.margin.top+")")
-            .attr("x1",gw.yMapErrX0).attr("x2",gw.yMapErrX1)
-            .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrM)
-            .attr("stroke",gw.colorErr)
-            .attr("stroke-width",gw.swErr)
-            .attr("opacity",gw.opErr);
-
-        // draw dots
-        gw.svg.selectAll(".dot")
-          .data(data)
-        .enter().append("circle")
-          .attr("class", "dot")
-          .attr("transform", "translate("+gw.margin.left+","+
+    // y-axis
+    gw.svg.append("g")
+        .attr("class", "y-axis axis")
+        .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
-          .attr("r", 7)
-          .attr("cx", gw.xMap)
-          .attr("cy", gw.yMap)
-          .attr("cursor","pointer")
-        //   .style("fill", function(d) { return color(cValue(d));})
-          .style("fill", function(d){return gw.color(gw.cValue(d));})
-          .style("stroke",function(d){return gw.linestyles[d.type];})
-          .on("mouseover", function(d) {
-                gw.tooltip.transition()
-                   .duration(200)
-                   .style("opacity", .9);
-                gw.tooltip.html(gw.tttext(d))
-                   .style("left", (d3.event.pageX + 10) + "px")
-                   .style("top", (d3.event.pageY-10) + "px")
-                   .style("width","auto")
-                   .style("height","auto");
-          })
-          .on("mouseout", function(d) {
-              gw.tooltip.transition()
-                   .duration(500)
-                   .style("opacity", 0);
-            //   document.getElementById("sketchcontainer").style.opacity=0.;
-          })
-          .on("click", function(d) {
-              gw.updateSketch(d)
-            //   add highlight to selected circle
-            });
-        // draw legend
-        gw.legend = gw.svg.selectAll(".legend")
-          .data(gw.color.domain())
-        .enter().append("g")
-          .attr("class", "legend")
-          .attr("transform", function(d, i) { return "translate(0," +
-            (i * 24) + ")"; });
+        .call(gw.yAxis)
+    .append("text")
+        .attr("class", "y-axis axis-label")
+        //   .attr("transform", "translate(," + height + ")")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        // .attr("x",-(gw.relh[0]+gw.relh[1])*gw.graphHeight/2)
+        .attr("x",-gw.graphHeight/2)
+        .attr("dy", "-30px")
+        .style("text-anchor", "middle")
+        .text(getLabelUnit(gw.yvar));
 
-        // draw legend colored rectangles
-        gw.legend.append("rect")
-          .attr("x", gw.margin.left + 12)
-          .attr("y", gw.margin.top + 12)
-          .attr("width", 18)
-          .attr("height", 18)
-          .style("fill", gw.color)
-          .style("stroke",function(d){return gw.linestyles[d.type];})
-          .style("stroke","#000");
+    // add x error bar
+    gw.svg.selectAll(".errorX")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorX")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrM)
+        .attr("y1",gw.yMap).attr("y2",gw.yMap)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+    // add top of y error bar
+    gw.svg.selectAll(".errorXp")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorXp")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrP)
+        .attr("y1",gw.xMapErrY0).attr("y2",gw.xMapErrY1)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+    // add bottom of y error bar
+    gw.svg.selectAll(".errorXm")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorXm")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("x1",gw.xMapErrM).attr("x2",gw.xMapErrM)
+        .attr("y1",gw.xMapErrY0).attr("y2",gw.xMapErrY1)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
 
-        // draw legend text
-        gw.legend.append("text")
-          .attr("x", gw.margin.left + 36)
-          .attr("y", gw.margin.top + 21)
-          .attr("dy", ".35em")
-          .attr("font-size","1.2em")
-          .style("text-anchor", "start")
-          .text(function(d) { return gw.legenddescs[d];})
-    });
+
+    // add y error bar
+    gw.svg.selectAll(".errorY")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorY")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("x1",gw.xMap).attr("x2",gw.xMap)
+        .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrM)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+    // add top of y error bar
+    gw.svg.selectAll(".errorYp")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorYp")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("x1",gw.yMapErrX0).attr("x2",gw.yMapErrX1)
+        .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrP)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+    // add bottom of y error bar
+    gw.svg.selectAll(".errorYm")
+        .data(data)
+    .enter().append("line")
+        .attr("class","error errorYm")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("x1",gw.yMapErrX0).attr("x2",gw.yMapErrX1)
+        .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrM)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+
+    // draw dots
+    gw.svg.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("transform", "translate("+gw.margin.left+","+
+        gw.margin.top+")")
+      .attr("r", 7)
+      .attr("cx", gw.xMap)
+      .attr("cy", gw.yMap)
+      .attr("cursor","pointer")
+    //   .style("fill", function(d) { return color(cValue(d));})
+      .style("fill", function(d){return gw.color(gw.cValue(d));})
+      .style("stroke",function(d){return gw.linestyles[d.type];})
+      .on("mouseover", function(d) {
+            gw.tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+            gw.tooltip.html(gw.tttext(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY-10) + "px")
+               .style("width","auto")
+               .style("height","auto");
+      })
+      .on("mouseout", function(d) {
+          gw.tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+        //   document.getElementById("sketchcontainer").style.opacity=0.;
+      })
+      .on("click", function(d) {
+          gw.updateSketch(d)
+        //   add highlight to selected circle
+        });
+    // draw legend
+    gw.legend = gw.svg.selectAll(".legend")
+      .data(gw.color.domain())
+    .enter().append("g")
+      .attr("class", "legend")
+      .attr("transform", function(d, i) { return "translate(0," +
+        (i * 24) + ")"; });
+
+    // draw legend colored rectangles
+    gw.legend.append("rect")
+      .attr("x", gw.margin.left + 12)
+      .attr("y", gw.margin.top + 12)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", gw.color)
+      .style("stroke",function(d){return gw.linestyles[d.type];})
+      .style("stroke","#000");
+
+    // draw legend text
+    gw.legend.append("text")
+      .attr("x", gw.margin.left + 36)
+      .attr("y", gw.margin.top + 21)
+      .attr("dy", ".35em")
+      .attr("font-size","1.2em")
+      .style("text-anchor", "start")
+      .text(function(d) { return gw.legenddescs[d];})
 }
 GWCatalogue.prototype.updateErrors = function(){
     // svg = d3.select("body").transition();
@@ -1107,8 +1124,9 @@ GWCatalogue.prototype.hideTooltip = function(){
 var gwcat = new GWCatalogue
 gwcat.init();
 // gwcat.setScales();
+gwcat.drawGraphInit();
+// gwcat.setScales();
 gwcat.drawSketch();
-gwcat.drawGraph();
 gwcat.addButtons();
 // add the tooltip area to the sketch
 // var tooltipSk = d3.select("div#sketchcontainer").append("div")
@@ -1147,15 +1165,15 @@ window.addEventListener("resize",function(){
     // d3.selectAll("div.massicon").remove()
     gwcat.redraw=true;
     gwcat.setScales();
+    gwcat.drawGraph();
     gwcat.drawSketch();
     gwcat.data.forEach(function(d){
-        gwcat.formatData;
+        // gwcat.formatData;
         if (d.name==gw.sketchName){
             // console.log('resize:',d.name,gw.sketchName);
             gw.updateSketch(d);
         }
     });
-    gwcat.drawGraph();
     gwcat.redraw=false;
         // gwcat.updateSketch();
     // });
