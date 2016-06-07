@@ -12,7 +12,7 @@ a{
     text-align:center;
     max-height:10%;
     color:#fff;
-    height:10%;
+    /*height:10%;*/
     position:fixed;
     background-color: rgba(0,0,0,0.5)
 }
@@ -37,6 +37,14 @@ a{
     right:0%;
     height:100%;
     cursor:pointer;
+}
+#controls{
+    position:absolute;
+    top:0;
+    right:0;
+}
+#controls button{
+    float:left;
 }
 #bubble-container{
     height:90%;
