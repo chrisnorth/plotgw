@@ -46,6 +46,11 @@ a{
 #controls button{
     float:left;
 }
+input.down{
+    background-color:#0cf;
+    border-left:7px;
+    border-right:7px;
+}
 #bubble-container{
     height:90%;
     display:block;
