@@ -17,6 +17,7 @@ BHBubble.prototype.getUrlVars = function(){
             vars[hash[0]] = hash[1];
         }
     }
+    console.log("input:",vars);
     this.urlVars = vars;
 }
 BHBubble.prototype.loadLang = function(lang){
@@ -62,9 +63,9 @@ BHBubble.prototype.init = function(){
     // var cValue = function(d){if(d.method=="GW"){return 1;}else{return 2;};};
     this.cValue = function(d){return this.cVals[d.method]};
     this.legenddescs = {
-        1:this.t("gwcand"),
-        2:this.t("gwdet"),
-        3:this.t("xraymeas")};
+        1:this.t("Gravitational Wave Candidate"),
+        2:this.t("Gravitational Wave Detection"),
+        3:this.t("X-ray Measurement")};
     //define comparitor sort function(blank for null)
     this.sort = "gwfirst";
     this.valueCol='massBHsq';
@@ -756,5 +757,5 @@ bub = new BHBubble
 bub.getUrlVars();
 // console.log(bub.urlVars);
 bub.langdir='bhbubble-lang/';
-bub.loadLang('en');
+bub.loadLang(bub.urlVars.lang);
 // console.log(bub.langdict);

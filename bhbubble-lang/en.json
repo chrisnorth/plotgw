@@ -1,9 +1,9 @@
 [{
     "code":"en",
     "title":"Known Stellar-mass Black Holes",
-    "gwcand":"Gravitational Wave Canditate",
-    "gwdet":"Gravitational Wave Detection",
-    "xraymeas":"X-ray measurement",
+    "Gravitational Wave Candidate":"Gravitational Wave Candidate",
+    "Gravitational Wave Detection":"Gravitational Wave Detection",
+    "X-ray Measurement":"X-ray Measurement",
     "close":"close",
     "Mass":"Mass",
     "Location":"Location",
