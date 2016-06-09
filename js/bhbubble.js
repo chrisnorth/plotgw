@@ -574,7 +574,7 @@ BHBubble.prototype.addButtons = function(){
     var divcont = document.getElementById('controls');
     spancont = document.createElement('span');
     spancont.className = "control-lab";
-    spancont.innerHTML = "Controls";
+    spancont.innerHTML = this.t("Mergers");
     divcont.appendChild(spancont);
     // divcont.innerHTML('<span>Controls:</span>');
     this.animcont = document.createElement('div');
@@ -610,7 +610,7 @@ BHBubble.prototype.addButtons = function(){
     //scale mass button
     spancontscale = document.createElement('span');
     spancontscale.className = "control-lab";
-    spancontscale.innerHTML = "Scale";
+    spancontscale.innerHTML = this.t("Scale");
     divcont.appendChild(spancontscale);
     //
     this.scalecontmass = document.createElement('div');
