@@ -39,12 +39,39 @@ a{
     cursor:pointer;
 }
 #controls{
-    position:fixed;
-    top:0;
+    position:absolute;
+    top:10%;
     right:0;
+    /*height:10%;*/
+    width:10%;
+    margin-right:2%;
 }
-#controls button{
-    float:left;
+#controls div.control.merge{
+    border:solid 1px white;
+    border-radius:10%;
+    margin-bottom:10px;
+}
+#controls span{
+    color:#fff;
+    font-size:18px;
+    display:block;
+}
+#controls .control, #controls .scale{
+    float:right;
+    width:100%;
+    cursor:pointer;
+}
+#controls .hide{
+    display:none;
+}
+#controls .current{
+    border:2px solid white;
+    /*border-radius:25%;*/
+    background-color: #555;
+    cursor:default;
+}
+#controls .control img, #controls .scale img{
+    width: 100%;
 }
 input.down{
     background-color:#0cf;
@@ -56,6 +83,7 @@ input.down{
     display:block;
     padding-top:5%;
     text-align:center;
+    position:relative;
 }
 .bh-circle,.bh-circle-text{
     cursor:pointer

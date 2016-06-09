@@ -40,14 +40,16 @@ BHBubble.prototype.loadLang = function(lang){
         },
         dataType: 'json',
         success:function(data){
-            console.log('success',data);_bh.langdict=data[0];_bh.makePlot();}
+            console.log('success',data[0]);_bh.langdict=data[0];_bh.makePlot();}
     })
 }
-BHBubble.prototype.t = function(key){
+BHBubble.prototype.t = function(key,def){
+    // console.log(this);
     if (this.langdict.hasOwnProperty(key)){return this.langdict[key];}
-    else{console.log('cannot find '+key);return key;}
+    else{console.log('not found:',key,def);return (def) ? def : key;}
 }
 BHBubble.prototype.init = function(){
+    // _t=this.translate;
     this.pgWidth = document.getElementById("bubble-container").scrollWidth;
     this.pgHeight = document.getElementById("bubble-container").scrollHeight;
     this.diameter = 800 //max size of the bubbles
@@ -66,10 +68,11 @@ BHBubble.prototype.init = function(){
     //define comparitor sort function(blank for null)
     this.sort = "gwfirst";
     this.valueCol='massBHsq';
-    this.filterType="all";
+    this.filterType="";
     this.displayFilter="nofin";
     this.langdir = 'bhbubble-lang/';
-    $('#hdr h1').html(this.t("title"));
+    $('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
+    this.mergeDuration = 1000;
 }
 
 // random comparitor
@@ -133,7 +136,7 @@ BHBubble.prototype.makeSvg = function(){
     this.infopanel = d3.select("div#infopanel-outer").append("div")
             .attr("class","infopanel");
     this.infopanelouter.append("div").attr("class","infoclose")
-        .html("<img src='img/close.png' title='close'>")
+        .html("<img src='img/close.png' title='"+this.t("close")+"'>")
         .on("click",function(){bh.hideInfopanel();});
     this.bubble = d3.layout.pack()
         .sort(this.comparitor(this.sort))
@@ -144,16 +147,16 @@ BHBubble.prototype.makeSvg = function(){
 //define tooltip text
 BHBubble.prototype.tttext = function(d){
     text =  "<span class='name'>"+d["name"]+"</span>"+
-    "<span class='info'>Mass: "+d["massBH"]+" M<sub>&#x2609;</sub></span>";
+    "<span class='info'>"+this.t("Mass")+": "+d["massBHstr"]+" M<sub>&#x2609;</sub></span>";
     if(d["method"]=='Xray'){
         // text = text+ "<span class='info'>X-ray detection</span>";
         text = text + "<span class='info'>"+d.binType+"</span>";
-        text = text+ "<span class='info'>Companion: "+d.compType+"</span>";
+        // text = text+ "<span class='info'>"+this.t("Companion")+": "+this.t(d.compType)+"</span>";
     }else{
-        text = text+ "<span class='info'>"+d.binType+
-            " ("+d.BHtype+")</span>";
+        text = text+ "<span class='info'>"+this.t(d.binType)+
+            " ("+this.t(d.BHtype)+")</span>";
     }
-    text = text+ "<span class='info'>Location: "+d.location+"</span>";
+    // text = text+ "<span class='info'>"+this.t("Location")+": "+this.t(d.location)+"</span>";
     return text;
 }
 //set tooltip functions
@@ -170,7 +173,7 @@ BHBubble.prototype.showTooltip = function(d){
     }
     this.tooltip.transition()
        .duration(200)
-       .style("opacity",bh.getOpacity()(d)*0.5);
+       .style("opacity",bh.getOpacity()(d)*0.9);
     this.tooltip.html(this.tttext(d))
        .style("left", getLeft(d)).style("top", getTop(d))
        .style("width","25%").style("height","auto");
@@ -188,40 +191,48 @@ BHBubble.prototype.hideTooltip = function(d) {
 BHBubble.prototype.iptext = function(d){
     //initialise reference number
     rx=1;
-    text =  "<span class='name'>"+d["name"]+"</span>"+
-    //BH mass
-    "<span class='info'><b>Mass</b>: "+d["massBH"]+" M<sub>&#x2609;</sub>";
-    if (d.ref3!='-'){text = text +
-        " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
-    else{text = text+"</span>"}
-    text = text + "<span class='info'><b>Type</b>: "+d.binType+"</span>";
+    text =  "<span class='name'>"+d["name"]+"</span>";
     if(d["method"]=='Xray'){
+        text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
+        if (d.refbhmass!='-'){text = text +
+            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
+        else{text = text+"</span>"}
+        text = text + "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+"</span>";
         // text = text+ "<span class='info'>X-ray detection</span>";
         //companion
-        text = text+ "<span class='info'><b>Companion</b>: "+d.compType;
-        if (d.ref2!="-"){text = text +
-            " <sup>["+rx+"]</sup></span>";rct=rx;rx++;}
-        else{text = text+"</span>"}
-        //companion mass
-        text = text+ "<span class='info'><b>Companion mass</b>: "+d.compMass+
-        " M<sub>&#x2609;</sub>";
-        if (d.ref1!="-"){text = text +
-            " <sup>["+rx+"]</sup></span>";rcm=rx;rx++;}
-        else{text = text+"</span>"}
+        text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
+            d.compMass+" M<sub>&#x2609;</sub> "+this.t(d.compType);
+        if (d.refcomp!="-"){text = text +
+            " <sup>["+rx+"]</sup>";rct=rx;rx++;}
+        if (d.refcompmass!="-"){text = text +
+            " <sup>["+rx+"]</sup>";rcm=rx;rx++;}
+        text = text+"</span>";
         //period mass
-        text = text+ "<span class='info'><b>Orbital period</b>: "+d.period+
-        " days</sub>";
-        if (d.ref4!="-"){text = text +
+        text = text+ "<span class='info'><b>"+this.t("Orbital period")+"</b>: "+d.period+
+        " "+this.t("days")+"</sub>";
+        if (d.refper!="-"){text = text +
             " <sup>["+rx+"]</sup></span>";rper=rx;rx++;}
         else{text = text+"</span>"}
-        text = text+ "<span class='info'><b>Location</b>: "+d.location+"</span>";
-        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.ref3+"</span>"}
-        if (rct){text = text + "<span class='ref'>["+rct+"] "+d.ref2+"</span>"}
-        if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.ref1+"</span>"}
-        if (rcm){text = text + "<span class='ref'>["+rper+"] "+d.ref4+"</span>"}
+        text = text+ "<span class='info'><b>"+this.t("Location")+"</b>: "+this.t(d.location)+"</span>";
+        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
+        if (rct){text = text + "<span class='ref'>["+rct+"] "+d.refcomp+"</span>"}
+        if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.refcompmass+"</span>"}
+        if (rcm){text = text + "<span class='ref'>["+rper+"] "+d.refper+"</span>"}
     }else{
-        text = text+ "<span class='info'>"+d.binType+
-            " ("+d.BHtype+")</span>";
+        text = text + "<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
+        if (d.refbhmass!='-'){text = text +
+            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
+        else{text = text+"</span>"}
+        text = text+ "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+
+            " ("+this.t(d.BHtype)+")</span>";
+        if (d.compType!="None"){
+            text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
+                d.compMass+" M<sub>&#x2609;</sub> "+this.t(d.compType)+"</span>";
+        }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
+        text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.t(d.distance)+
+            " "+this.t("million light years")+"</span>";
+        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
+
     }
     return text;
 }
@@ -284,33 +295,82 @@ BHBubble.prototype.loadData = function(){
     // console.log("loadData");
     var bh=this;
     d3.csv("csv/bhcat.csv", function(error, data){
-        data.forEach(function(d){
-            d.massBH = +d.massBH;
-            d.massBHsq = Math.pow(d.massBH,2);});
         // data.forEach(function(d){
         //     if (bh.filterFn(bh)){d=null}});
         // console.log(data.length);
         // console.log(data.length);
         data= bh.filterData(data,bh.filterType);
         // console.log(data.length);
-        data = data.map(function(d){d.value=+d[bh.valueCol];return d;})
-        // data = data.map(function(d){
-        //     if(!bh.filterFn(bh.filterType)){d="";return d;}else{d.value = +(d["massBH"]); return d; }});
-        bh.nodes = bh.bubble.nodes({children:data})
-            .filter(bh.filterFn(bh.filterType));
         bh.data = data;
         // console.log(data[0].r)
-        bh.formatData()
+        // bh.scaleData();
+        bh.formatData(bh.valueCol)
         bh.drawBubbles();
     })
 }
-
-BHBubble.prototype.formatData = function(){
+// BHBubble.prototype.scaleData = function(scale){
+//     bh=this;
+//
+// }
+BHBubble.prototype.formatData = function(valueCol){
     // console.log("formatData",this.data[0].r);
     var bh=this;
     //convert numerical values from strings to numbers
     //bubbles needs very specific format, convert data to this.
-
+    this.data.forEach(function(d){
+        d.massBH = +d.massBH;
+        d.massBHsq = Math.pow(d.massBH,2);
+        if (d.massBHerr[0]=='+'){
+            errcode=d.massBHerr.split('-');
+            d.massBHplus = +errcode[0] + d.massBH;
+            d.massBHminus = -errcode[1] + d.massBH;
+            d.massBHstr = parseFloat(d.massBHminus.toFixed(1))+' - '+
+                                parseFloat(d.massBHplus.toFixed(1));
+            // console.log('lim:',d.massBHerr,errcode,d.massBHstr);
+        }else if(d.massBHerr[0]=='r'){
+            errcode=d.massBHerr.split('r')[1];
+            errcode=errcode.split('-');
+            d.massBHplus = +errcode[1];
+            d.massBHminus = +errcode[0];
+            d.massBHstr = parseFloat(d.massBHminus.toFixed(1))+' - '+
+                                parseFloat(d.massBHplus.toFixed(1));
+            // console.log('range:',d.massBHerr,errcode,d.massBHstr);
+        }else if(d.massBHerr[0]=='>'){
+            errcode=d.massBHerr.split('>')[1]
+            d.massBHplus = Infinity;
+            d.massBHminus = +errcode;
+            d.massBHstr = '>'+parseFloat(d.massBHminus.toFixed(1));
+            // console.log('min:',d.massBHerr,errcode,d.massBHstr);
+        }else if(d.massBHerr[0]=='<'){
+            errcode=d.massBHerr.split('<')[1]
+            d.massBHplus = +errcode;
+            d.massBHminus = 0;
+            d.massBHstr = '<'+parseFloat(d.massBHplus.toFixed(1));
+            // console.log('max:',d.massBHerr,errcode,d.massBHstr);
+        }else if(d.massBHerr[0]=='~'){
+            errcode=d.massBHerr.split('~')[1];
+            d.massBHplus = +errcode;
+            d.massBHminus = +errcode;
+            d.massBHstr = 'approx. '+parseFloat(d.massBHplus.toFixed(1));
+        }
+    });
+    this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
+    // data = data.map(function(d){
+    //     if(!bh.filterFn(bh.filterType)){d="";return d;}else{d.value = +(d["massBH"]); return d; }});
+    this.nodes = this.bubble.nodes({children:this.data})
+        .filter(this.filterFn(this.filterType));
+    // data.forEach(
+    //     d.massBH = +d[col];
+    //         if (columns[col]['errcode']){
+    //             errcode=d[columns[col]['errcode']].split('-')
+    //             d[col+'plus'] = +errcode[0] + d[col];
+    //             d[col+'minus'] = -errcode[1] + d[col];
+    //             d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'-'+
+    //                     parseFloat(d[col+'plus'].toPrecision(3))
+    //             columns[col+'Str']={'type':'str','unit':columns[col].unit}
+    //         }
+    //     }
+    // )
     this.arrows=[];
     this.arrowpos = {};
     this.name2id=function(name){
@@ -465,7 +525,8 @@ BHBubble.prototype.drawBubbles = function(){
                 return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
         })
         .on("mouseover", function(d) {bh.showTooltip(d);})
-        .on("mouseout", function(d) {bh.hideTooltip(d);;});
+        .on("mouseout", function(d) {bh.hideTooltip(d);;})
+        .on("click",function(d){bh.showInfopanel(d);});;
     // for (i in arrows){
     //     // addtriangle(i);
     //     addcurve(i);
@@ -510,62 +571,108 @@ BHBubble.prototype.drawBubbles = function(){
 BHBubble.prototype.addButtons = function(){
     var bh=this;
     var divcont = document.getElementById('controls');
-    var animcont = document.createElement('div');
-    animcont.className = 'control merger'
-    animcont.style.display = 'inline-block';
-    divcont.appendChild(animcont);
-    var animinput = document.createElement('input');
-    animinput.setAttribute("id","button-merger");
-    animinput.type = 'button';
-    animinput.name = "merger";
-    animinput.value = "Merger";
-    animinput.addEventListener('click',function(){
-        // bh.filterType=bh.options[o].filterType
+    spancont = document.createElement('span');
+    spancont.className = "control-lab";
+    spancont.innerHTML = "Controls";
+    divcont.appendChild(spancont);
+    // divcont.innerHTML('<span>Controls:</span>');
+    this.animcont = document.createElement('div');
+    this.animcont.className = 'control merge merger';
+    if (this.displayFilter=="noinit"){this.animcont.classList.add("hide");}
+    // animcont.style.display = 'inline-block';
+    divcont.appendChild(this.animcont);
+
+    animimg = document.createElement('img');
+    animimg.setAttribute("id","button-merger");
+    animimg.setAttribute("src","img/merger.svg");
+    animimg.setAttribute("title",this.t("Merge binary black holes"));
+    animimg.addEventListener("click",function(){
         bh.animateMerger();
     });
-    animcont.appendChild(animinput);
+    this.animcont.appendChild(animimg);
     //
-    var animcontun = document.createElement('div');
-    animcontun.className = 'control unmerger'
-    animcontun.style.display = 'inline-block';
-    divcont.appendChild(animcontun);
-    var animinputun = document.createElement('input');
-    animinputun.setAttribute("id","button-merger");
-    animinputun.type = 'button';
-    animinputun.name = "unmerger";
-    animinputun.value = "Unmerger";
-    animinputun.addEventListener('click',function(){
-        // bh.filterType=bh.options[o].filterType
+    //unmerger button
+    this.animcontun = document.createElement('div');
+    this.animcontun.className = 'control merge unmerger';
+    if (this.displayFilter=="nofin"){this.animcontun.classList.add("hide");}
+    // animcontun.style.display = 'inline-block';
+    divcont.appendChild(this.animcontun);
+    animimgun = document.createElement('img');
+    animimgun.setAttribute("id","button-unmerger");
+    animimgun.setAttribute("src","img/unmerger.svg");
+    animimgun.setAttribute("title",this.t("Unmerge binary black holes"));
+    animimgun.addEventListener("click",function(){
         bh.animateUnMerger();
     });
-    animcontun.appendChild(animinputun);
+    this.animcontun.appendChild(animimgun);
+    //
+    //scale mass button
+    spancontscale = document.createElement('span');
+    spancontscale.className = "control-lab";
+    spancontscale.innerHTML = "Scale";
+    divcont.appendChild(spancontscale);
+    //
+    this.scalecontmass = document.createElement('div');
+    this.scalecontmass.className = 'control scale scale-mass';
+    if (this.valueCol=="massBHsq"){this.scalecontmass.classList.add("current");}
+    // animcontun.style.display = 'inline-block';
+    divcont.appendChild(this.scalecontmass);
+    scaleimgmass = document.createElement('img');
+    scaleimgmass.setAttribute("id","button-scale-mass");
+    scaleimgmass.setAttribute("src","img/scalemass.svg");
+    scaleimgmass.setAttribute("title",this.t("Scale by mass"));
+    if (this.valueCol!="massBHsq"){
+        scaleimgmass.addEventListener("click",function(){bh.replot("massBHsq");}
+    );}
+    this.scalecontmass.appendChild(scaleimgmass);
+    //
+    //scale size button
+    this.scalecontsize = document.createElement('div');
+    this.scalecontsize.className = 'control scale scale-size';
+    if (this.valueCol=="massBH"){this.scalecontsize.classList.add("current");}
+    // animcontun.style.display = 'inline-block';
+    divcont.appendChild(this.scalecontsize);
+    scaleimgsize = document.createElement('img');
+    scaleimgsize.setAttribute("id","button-scale-size");
+    scaleimgsize.setAttribute("src","img/scalesize.svg");
+    scaleimgsize.setAttribute("title",this.t("Scale by size"));
+    if (this.valueCol!="massBH"){
+        scaleimgsize.addEventListener("click",function(){bh.replot("massBH");}
+    );}
+    this.scalecontsize.appendChild(scaleimgsize);
 }
+// BHBubble.prototype.addSvgButtons = function(){
+//     this.svg.append("div")
+//         .
+// }
 BHBubble.prototype.animateMerger = function(){
     // console.log(this.arrows);
     bh=this;
-    this.displayFilter = "noinit"
+    this.displayFilter = "noinit";
+    this.animcontun.classList.remove("hide");
+    this.animcont.classList.add("hide");
     for (a in this.arrows){
         //move intialcircles
         d3.selectAll('#bh-circle-'+this.arrows[a][0])
-            .transition().duration(2000)
+            .transition().duration(this.mergeDuration)
             .attr("cx",this.arrowpos[this.arrows[a][1]].x)
             .attr("cy",this.arrowpos[this.arrows[a][1]].y)
             // .attr("stroke","black")
             .attr("r",function(d){return bh.getRadius(d);});
         //hide initial text
         d3.selectAll('#bh-circle-text-'+this.arrows[a][0])
-            .transition().duration(2000).delay(250)
+            .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity();})
             .text(function(d){ return bh.getText(d); });
         //move final circles
         d3.selectAll('#bh-circle-'+this.arrows[a][1])
-            .transition().duration(2000).delay(250)
+            .transition().duration(this.mergeDuration).delay(250)
             .attr("r",function(d){return bh.getRadius(d)})
             // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
             .attr("opacity",function(d){return bh.getOpacity(d);});
         //show final text
         d3.selectAll('#bh-circle-text-'+this.arrows[a][1])
-            .transition().duration(2000).delay(250)
+            .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity()(d);})
             .text(function(d){ return bh.getText(d); });
     }
@@ -573,29 +680,31 @@ BHBubble.prototype.animateMerger = function(){
 BHBubble.prototype.animateUnMerger = function(){
     // console.log(this.arrows);
     bh=this;
-    this.displayFilter = "nofin"
+    this.displayFilter = "nofin";
+    this.animcont.classList.remove("hide");
+    this.animcontun.classList.add("hide");
     for (a in this.arrows){
         //move intialcircles
         d3.selectAll('#bh-circle-'+this.arrows[a][0])
-            .transition().duration(1000)
+            .transition().duration(this.mergeDuration)
             .attr("cx",this.arrowpos[this.arrows[a][0]].x)
             .attr("cy",this.arrowpos[this.arrows[a][0]].y)
             // .attr("stroke","black")
             .attr("r",function(d){return bh.getRadius(d);});
         //hide initial text
         d3.selectAll('#bh-circle-text-'+this.arrows[a][0])
-            .transition().duration(1000).delay(250)
+            .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity();})
             .text(function(d){ return bh.getText(d); });
         //move final circles
         d3.selectAll('#bh-circle-'+this.arrows[a][1])
-            .transition().duration(1000).delay(250)
+            .transition().duration(this.mergeDuration).delay(250)
             .attr("r",function(d){return bh.getRadius(d)})
             // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
             .attr("opacity",function(d){return bh.getOpacity(d);});
         //show final text
         d3.selectAll('#bh-circle-text-'+this.arrows[a][1])
-            .transition().duration(1000).delay(250)
+            .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity()(d);})
             .text(function(d){ return bh.getText(d); });
     }
@@ -623,13 +732,17 @@ BHBubble.prototype.writeDownloadLink = function(){
     var blob = new Blob([html], {type: "image/svg+xml"});
     saveAs(blob, "Black-holes.svg");
 };
-BHBubble.prototype.replot = function(filterType){
-    // console.log('replotting',filterType)
-    this.filterType = filterType;
+BHBubble.prototype.replot = function(valueCol){
+    var oldValueCol = this.valueCol;
+    this.valueCol = valueCol;
+    this.formatData(this.valueCol);
     // this.makeSvg();
-    d3.select("svg").remove()
-    this.loadData();
+    d3.select("svg").remove();
+    d3.selectAll(".control").remove();
+    d3.selectAll(".control-lab").remove();
+    this.drawBubbles();
     this.makeDownload();
+    this.addButtons();
 }
 BHBubble.prototype.makePlot = function(){
     console.log(this.langdict);
