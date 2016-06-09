@@ -38,6 +38,8 @@
     "Scale by size":"Scale by size",
     "Mergers":"Mergers",
     "Merge binary black holes":"Merge binary black holes",
-    "Unmerge binary black holes":"Unmerge binary black holes"
+    "Unmerge binary black holes":"Unmerge binary black holes",
+    "footer":"Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>X-ray binary data based on <a href='http://stellarcollapse.org'>stellarcollapse.org</a>",
+    "Save as SVG":"Save as SVG"
 }
 ]

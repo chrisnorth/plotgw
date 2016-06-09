@@ -144,6 +144,12 @@ BHBubble.prototype.makeSvg = function(){
         .size([this.pgWidth, this.pgHeight])
         // .size([this.diameter, this.diameter])
         .padding(15);
+    //replace footer text for language
+    footer=document.getElementById("footer-txt");
+    footertxt = footer.innerHTML;
+    footer.innerHTML = this.t("footer",footertxt);
+    //replace svg button text for language
+    document.getElementById("generate").innerHTML=this.t("Save as SVG");
 }
 //define tooltip text
 BHBubble.prototype.tttext = function(d){
@@ -710,7 +716,6 @@ BHBubble.prototype.animateUnMerger = function(){
             .text(function(d){ return bh.getText(d); });
     }
 }
-
 BHBubble.prototype.makeDownload = function(){
     //make SVG download button
     d3.select("#generate")
