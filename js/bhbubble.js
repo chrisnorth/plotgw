@@ -2,12 +2,54 @@
 // // document.getElementById("hdr").setAttribute("width",diameter);
 // document.getElementById("bubble-container").setAttribute("width",diameter);
 // console.log(document.getElementById("hdr"));
+
 function BHBubble(){
     return this;
 }
+BHBubble.prototype.getUrlVars = function(){
+    var vars = {},hash;
+    if (window.location.href.search!=-1){
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            // vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+    }
+    this.urlVars = vars;
+}
+BHBubble.prototype.loadLang = function(lang){
+    var _bh = this;
+    if (!lang){lang="en"};
+    var url=this.langdir+lang+'.json';
+    console.log(url);
+    // Bug fix for reading local JSON file in FF3
+    $.ajaxSetup({async:true,'beforeSend': function(xhr){
+        // console.log(this);
+        if (xhr.overrideMimeType) xhr.overrideMimeType("text/plain"); },
+        datatype:'json',
+        success:function(json){console.log(json);}
+    });
+    // Get the JSON language file amd call "makePlot" on completion
+    $.getJSON({url:url,
+        beforeSend: function(xhr){
+            if (xhr.overrideMimeType){
+                xhr.overrideMimeType("application/json");
+            }
+        },
+        dataType: 'json',
+        success:function(data){
+            console.log('success',data);_bh.langdict=data[0];_bh.makePlot();}
+    })
+}
+BHBubble.prototype.t = function(key){
+    if (this.langdict.hasOwnProperty(key)){return this.langdict[key];}
+    else{console.log('cannot find '+key);return key;}
+}
 BHBubble.prototype.init = function(){
-    this.pgWidth = document.getElementById("bubble-container").offsetWidth;
-    this.pgHeight = document.getElementById("bubble-container").offsetHeight;
+    this.pgWidth = document.getElementById("bubble-container").scrollWidth;
+    this.pgHeight = document.getElementById("bubble-container").scrollHeight;
     this.diameter = 800 //max size of the bubbles
         // color    = d3.scale.category10(); //color category
     this.fillcolor2 = d3.scale.linear().domain([1,2,3])
@@ -17,20 +59,36 @@ BHBubble.prototype.init = function(){
     this.cVals={LVT:1,GW:2,Xray:3};
     // var cValue = function(d){if(d.method=="GW"){return 1;}else{return 2;};};
     this.cValue = function(d){return this.cVals[d.method]};
-    this.legenddescs = {1:'Gravitational Wave Candidate',2:'Gravitational Wave Detection',3:'X-ray Measurement'};
+    this.legenddescs = {
+        1:this.t("gwcand"),
+        2:this.t("gwdet"),
+        3:this.t("xraymeas")};
     //define comparitor sort function(blank for null)
-    this.sort = "";
+    this.sort = "gwfirst";
     this.valueCol='massBHsq';
     this.filterType="all";
+    this.displayFilter="nofin";
+    this.langdir = 'bhbubble-lang/';
+    $('#hdr h1').html(this.t("title"));
 }
 
 // random comparitor
-BHBubble.prototype.comparitor = function(){
-    if (this.sort=="random"){
+BHBubble.prototype.comparitor = function(sort){
+    bh=this;
+    // console.log(this,this.sort);
+    if (sort=="random"){
         return function(a,b){
             return a.value * Math.random()- b.value*Math.random();};
-    }else if(this.sort="reverse"){
+    }else if(sort=="reverse"){
         return function(a,b){return b.value - a.value;};
+    }else if(sort=="forward"){
+        return function(a,b){return a.value - b.value;};
+    }else if(sort=="gwfirst"){
+        return function(a,b){
+            if (a.method==b.method){return null;}
+            else if((a.method=='GW')||(a.method=='LVT')){return 1000;}
+            else{return -1000;}
+        }
     }else{
         return null;
     }
@@ -78,8 +136,9 @@ BHBubble.prototype.makeSvg = function(){
         .html("<img src='img/close.png' title='close'>")
         .on("click",function(){bh.hideInfopanel();});
     this.bubble = d3.layout.pack()
-        .sort(this.comparitor)
-        .size([this.diameter, this.diameter])
+        .sort(this.comparitor(this.sort))
+        .size([this.pgWidth, this.pgHeight])
+        // .size([this.diameter, this.diameter])
         .padding(15);
 }
 //define tooltip text
@@ -100,6 +159,7 @@ BHBubble.prototype.tttext = function(d){
 //set tooltip functions
 BHBubble.prototype.showTooltip = function(d){
     // console.log('2',d.name,tooltip);
+    bh=this;
     getLeft = function(d){
         if (d.x > this.diameter/2){return (d3.event.pageX - 0.25*this.pgWidth - 10) + "px";}
         else{return (d3.event.pageX + 10) + "px";};
@@ -110,13 +170,13 @@ BHBubble.prototype.showTooltip = function(d){
     }
     this.tooltip.transition()
        .duration(200)
-       .style("opacity", .9);
+       .style("opacity",bh.getOpacity()(d)*0.5);
     this.tooltip.html(this.tttext(d))
        .style("left", getLeft(d)).style("top", getTop(d))
        .style("width","25%").style("height","auto");
     this.svg.select('#hl'+d.id)
         .transition(500)
-        .attr("stroke-opacity",1);
+        .attr("stroke-opacity",bh.getOpacity());
 }
 BHBubble.prototype.hideTooltip = function(d) {
     this.tooltip.transition()
@@ -269,15 +329,39 @@ BHBubble.prototype.formatData = function(){
     });
     //setup the chart
 }
+BHBubble.prototype.getText = function(d){
+    if (
+        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
+        ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
+    ){
+        return "";}else{return d.name}
+}
+BHBubble.prototype.getRadius = function(d){
+    if (
+        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
+        ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
+    ){
+        return 0;}else{return d.r}
+}
+BHBubble.prototype.getOpacity = function(d){
+    if (this.displayFilter=="nofin"){
+        return function(d){
+            // console.log('nofin',d.BHtype,d.BHtype=="final" ? 0 : 1);
+            return d.BHtype=="final" ? 0 : 1;};
+    }else if(this.displayFilter=="noinit"){
+        return function(d){
+            // console.log('noinit',d.BHtype,d.BHtype=="primary" ? 0 : d.BHtype=="secondary" ? 0 : 1);
+            return d.BHtype=="primary" ? 0 : d.BHtype=="secondary" ? 0 : 1;};
+    }else{return function(d){return 1;};}
+}
 BHBubble.prototype.drawBubbles = function(){
     this.svg = d3.select("div#bubble-container")
         .append("svg").attr("class", "bubble")
-        .attr("width", this.diameter).attr("height", this.diameter);
+        .attr("width", this.pgWidth).attr("height", 0.9*this.pgHeight);
 
     // console.log("drawBubbles",this.data[0].r);
     var bh=this;
-    this.bubbles = this.svg.append("g")
-        .attr("transform", "translate(0,0)")
+
     // console.log(arrows);
     // console.log(arrowpos);
     this.addcurve = function(i){
@@ -322,22 +406,24 @@ BHBubble.prototype.drawBubbles = function(){
         //   .attr("opacity",0.5)
         //   .style({"stroke":"red","stroke-width":2,"opacity":0.5});
     }
-    if ((this.filterType!="nofin")&&(this.filterType!="noinit")){
+    if (
+        ((this.filterType!="nofin")&&(this.filterType!="noinit"))&&
+        ((this.displayFilter!="nofin")&&(this.displayFilter!="noinit"))){
         for (i in this.arrows){
             // addtriangle(i);
             // addpolygon(i);
             this.addcurve(i);
+            this.svg.selectAll("path.merger")
+                .attr("opacity",0.5);
     }}
-
 
     this.bubbles = this.svg.append("g")
         .attr("transform", "translate(0,0)")
+        .attr("width", this.pgWidth).attr("height", 0.9*this.pgHeight)
         .selectAll(".bubble")
         .data(this.nodes)
         .enter();
 
-    this.svg.selectAll("path.merger")
-        .attr("opacity",0.5);
     //create highlight circles
     this.bubbles.append("circle")
         .attr("r", function(d){ return d.r; })
@@ -354,7 +440,8 @@ BHBubble.prototype.drawBubbles = function(){
         .attr("r", function(d){ return d.r; })
         .attr("cx", function(d){ return d.x; })
         .attr("cy", function(d){ return d.y; })
-        .attr("id",function(d){return d.id;})
+        .attr("id",function(d){return 'bh-circle-'+d.id;})
+        .attr("opacity",this.getOpacity())
         .attr("class","bh-circle")
         .style("fill", function(d){return bh.fillcolor2(bh.cValue(d))})
         .on("mouseover", function(d) {bh.showTooltip(d);})
@@ -362,20 +449,20 @@ BHBubble.prototype.drawBubbles = function(){
         .on("click",function(d){bh.showInfopanel(d);});
 
     //format the text for each bubble
-    this.getText = function(d){
-        if (((d.BHtype=="primary")||(d.BHtype=="secondary"))&&(bh.filterType=="noinit")){
-            return "";}else{return d.name}
-    }
+
     this.bubbles.append("text")
         .attr("x", function(d){ return d.x; })
         .attr("y", function(d){ return d.y + 5; })
         .attr("text-anchor", "middle")
-        .text(function(d){ return bh.getText(d); })
+        .text(function(d){return d.name;})
         .attr("class","bh-circle-text")
+        .attr("opacity",this.getOpacity())
+        .attr("id",function(d){return "bh-circle-text-"+d.id;})
         .style({
             "fill":function(d){return bh.textcolor2(bh.cValue(d));},
             "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-            "font-size": function(d) { return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
+            "font-size": function(d) {
+                return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
         })
         .on("mouseover", function(d) {bh.showTooltip(d);})
         .on("mouseout", function(d) {bh.hideTooltip(d);;});
@@ -384,6 +471,13 @@ BHBubble.prototype.drawBubbles = function(){
     //     addcurve(i);
     // }
 
+    // replace text and circles with display values
+    d3.selectAll("text")
+        .text(function(d){ return bh.getText(d); });
+    d3.selectAll(".bh-circle")
+        .attr("r",function(d){return bh.getRadius(d);})
+
+    // add legend
     this.legend = this.svg.selectAll(".legend")
       .data(this.fillcolor2.domain())
     .enter().append("g")
@@ -415,33 +509,98 @@ BHBubble.prototype.drawBubbles = function(){
 }
 BHBubble.prototype.addButtons = function(){
     var bh=this;
-    this.options = {'all':{name:'All',filterType:'all'},
-        'nofin':{name:'Initial only',filterType:'nofin'},
-        'noinit':{name:'Final only',filterType:'noinit'}};
-    for (o in this.options){
-        opt=this.options[o];
-        var divcont = document.getElementById('controls');
-        // console.log(divcont,opt);
-        var newcont = document.createElement('div');
-        newcont.className = 'control '+opt.filterType;
-        newcont.style.display = 'inline-block';
-        divcont.appendChild(newcont);
-        var newcontinput = document.createElement('input');
-        newcontinput.setAttribute("id","button-"+opt.filterType);
-        newcontinput.type = 'button';
-        newcontinput.name = opt.filterType;
-        newcontinput.value = opt.name;
-        if (opt.filterType==bh.filterType){newcontinput.classList.add("down")};
-        newcontinput.addEventListener('click',function(){
-            oldFilterType = bh.filterType;
-            document.getElementById("button-"+oldFilterType).classList.remove("down")
-            this.classList.add("down");
-            // bh.filterType=bh.options[o].filterType
-            bh.replot(this.name);
-        });
-        newcont.appendChild(newcontinput);
+    var divcont = document.getElementById('controls');
+    var animcont = document.createElement('div');
+    animcont.className = 'control merger'
+    animcont.style.display = 'inline-block';
+    divcont.appendChild(animcont);
+    var animinput = document.createElement('input');
+    animinput.setAttribute("id","button-merger");
+    animinput.type = 'button';
+    animinput.name = "merger";
+    animinput.value = "Merger";
+    animinput.addEventListener('click',function(){
+        // bh.filterType=bh.options[o].filterType
+        bh.animateMerger();
+    });
+    animcont.appendChild(animinput);
+    //
+    var animcontun = document.createElement('div');
+    animcontun.className = 'control unmerger'
+    animcontun.style.display = 'inline-block';
+    divcont.appendChild(animcontun);
+    var animinputun = document.createElement('input');
+    animinputun.setAttribute("id","button-merger");
+    animinputun.type = 'button';
+    animinputun.name = "unmerger";
+    animinputun.value = "Unmerger";
+    animinputun.addEventListener('click',function(){
+        // bh.filterType=bh.options[o].filterType
+        bh.animateUnMerger();
+    });
+    animcontun.appendChild(animinputun);
+}
+BHBubble.prototype.animateMerger = function(){
+    // console.log(this.arrows);
+    bh=this;
+    this.displayFilter = "noinit"
+    for (a in this.arrows){
+        //move intialcircles
+        d3.selectAll('#bh-circle-'+this.arrows[a][0])
+            .transition().duration(2000)
+            .attr("cx",this.arrowpos[this.arrows[a][1]].x)
+            .attr("cy",this.arrowpos[this.arrows[a][1]].y)
+            // .attr("stroke","black")
+            .attr("r",function(d){return bh.getRadius(d);});
+        //hide initial text
+        d3.selectAll('#bh-circle-text-'+this.arrows[a][0])
+            .transition().duration(2000).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity();})
+            .text(function(d){ return bh.getText(d); });
+        //move final circles
+        d3.selectAll('#bh-circle-'+this.arrows[a][1])
+            .transition().duration(2000).delay(250)
+            .attr("r",function(d){return bh.getRadius(d)})
+            // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
+            .attr("opacity",function(d){return bh.getOpacity(d);});
+        //show final text
+        d3.selectAll('#bh-circle-text-'+this.arrows[a][1])
+            .transition().duration(2000).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity()(d);})
+            .text(function(d){ return bh.getText(d); });
     }
 }
+BHBubble.prototype.animateUnMerger = function(){
+    // console.log(this.arrows);
+    bh=this;
+    this.displayFilter = "nofin"
+    for (a in this.arrows){
+        //move intialcircles
+        d3.selectAll('#bh-circle-'+this.arrows[a][0])
+            .transition().duration(1000)
+            .attr("cx",this.arrowpos[this.arrows[a][0]].x)
+            .attr("cy",this.arrowpos[this.arrows[a][0]].y)
+            // .attr("stroke","black")
+            .attr("r",function(d){return bh.getRadius(d);});
+        //hide initial text
+        d3.selectAll('#bh-circle-text-'+this.arrows[a][0])
+            .transition().duration(1000).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity();})
+            .text(function(d){ return bh.getText(d); });
+        //move final circles
+        d3.selectAll('#bh-circle-'+this.arrows[a][1])
+            .transition().duration(1000).delay(250)
+            .attr("r",function(d){return bh.getRadius(d)})
+            // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
+            .attr("opacity",function(d){return bh.getOpacity(d);});
+        //show final text
+        d3.selectAll('#bh-circle-text-'+this.arrows[a][1])
+            .transition().duration(1000).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity()(d);})
+            .text(function(d){ return bh.getText(d); });
+    }
+}
+
 BHBubble.prototype.makeDownload = function(){
     //make SVG download button
     d3.select("#generate")
@@ -464,7 +623,6 @@ BHBubble.prototype.writeDownloadLink = function(){
     var blob = new Blob([html], {type: "image/svg+xml"});
     saveAs(blob, "Black-holes.svg");
 };
-
 BHBubble.prototype.replot = function(filterType){
     // console.log('replotting',filterType)
     this.filterType = filterType;
@@ -473,9 +631,17 @@ BHBubble.prototype.replot = function(filterType){
     this.loadData();
     this.makeDownload();
 }
+BHBubble.prototype.makePlot = function(){
+    console.log(this.langdict);
+    this.init();
+    this.makeSvg();
+    this.loadData();
+    this.makeDownload();
+    this.addButtons();
+}
 bub = new BHBubble
-bub.init();
-bub.makeSvg();
-bub.loadData();
-bub.makeDownload();
-bub.addButtons();
+bub.getUrlVars();
+// console.log(bub.urlVars);
+bub.langdir='bhbubble-lang/';
+bub.loadLang('en');
+// console.log(bub.langdict);
