@@ -125,14 +125,14 @@ BHBubble.prototype.filterFn = function(filterType){
 BHBubble.prototype.makeSvg = function(){
     var bh=this;
 
-    this.tooltip = d3.select("div#bubble-container").append("div")
+    this.tooltip = d3.select("div#full").append("div")
         .attr("class", "tooltip");
     // .style("opacity", 0);
 
-    this.infopanelbg = d3.select("div#bubble-container").append("div")
+    this.infopanelbg = d3.select("div#full").append("div")
         .attr("class","infopanelbg")
         .on("click",function(){bh.hideInfopanel();});
-    this.infopanelouter = d3.select("div#bubble-container").append("div")
+    this.infopanelouter = d3.select("div#full").append("div")
         .attr("class","infopanelouter").attr("id","infopanel-outer");
     this.infopanel = d3.select("div#infopanel-outer").append("div")
             .attr("class","infopanel");
@@ -613,40 +613,41 @@ BHBubble.prototype.addButtons = function(){
     });
     this.animcontun.appendChild(animimgun);
     //
-    //scale mass button
     spancontscale = document.createElement('span');
     spancontscale.className = "control-lab";
     spancontscale.innerHTML = this.t("Scale");
     divcont.appendChild(spancontscale);
     //
-    this.scalecontmass = document.createElement('div');
-    this.scalecontmass.className = 'control scale scale-mass';
-    if (this.valueCol=="massBHsq"){this.scalecontmass.classList.add("current");}
-    // animcontun.style.display = 'inline-block';
-    divcont.appendChild(this.scalecontmass);
-    scaleimgmass = document.createElement('img');
-    scaleimgmass.setAttribute("id","button-scale-mass");
-    scaleimgmass.setAttribute("src","img/scalemass.svg");
-    scaleimgmass.setAttribute("title",this.t("Scale by mass"));
-    if (this.valueCol!="massBHsq"){
-        scaleimgmass.addEventListener("click",function(){bh.replot("massBHsq");}
-    );}
-    this.scalecontmass.appendChild(scaleimgmass);
-    //
     //scale size button
     this.scalecontsize = document.createElement('div');
     this.scalecontsize.className = 'control scale scale-size';
-    if (this.valueCol=="massBH"){this.scalecontsize.classList.add("current");}
+    if (this.valueCol=="massBHsq"){this.scalecontsize.classList.add("current");}
     // animcontun.style.display = 'inline-block';
     divcont.appendChild(this.scalecontsize);
     scaleimgsize = document.createElement('img');
     scaleimgsize.setAttribute("id","button-scale-size");
     scaleimgsize.setAttribute("src","img/scalesize.svg");
     scaleimgsize.setAttribute("title",this.t("Scale by size"));
-    if (this.valueCol!="massBH"){
-        scaleimgsize.addEventListener("click",function(){bh.replot("massBH");}
+    if (this.valueCol!="massBHsq"){
+        scaleimgsize.addEventListener("click",function(){bh.replot("massBHsq");}
     );}
     this.scalecontsize.appendChild(scaleimgsize);
+    //
+    //scale mass button
+    this.scalecontmass = document.createElement('div');
+    this.scalecontmass.className = 'control scale scale-mass';
+    if (this.valueCol=="massBH"){this.scalecontmass.classList.add("current");}
+    // animcontun.style.display = 'inline-block';
+    divcont.appendChild(this.scalecontmass);
+    scaleimgmass = document.createElement('img');
+    scaleimgmass.setAttribute("id","button-scale-mass");
+    scaleimgmass.setAttribute("src","img/scalemass.svg");
+    scaleimgmass.setAttribute("title",this.t("Scale by mass"));
+    if (this.valueCol!="massBH"){
+        scaleimgmass.addEventListener("click",function(){bh.replot("massBH");}
+    );}
+    this.scalecontmass.appendChild(scaleimgmass);
+    //
 }
 // BHBubble.prototype.addSvgButtons = function(){
 //     this.svg.append("div")

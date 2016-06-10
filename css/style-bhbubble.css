@@ -19,6 +19,18 @@ a{
 #hdr h1{
     margin-bottom:0;
 }
+#full{
+    height:90%;
+    display:block;
+    padding-top:5%;
+    text-align:center;
+    position:relative;
+}
+#bubble-container{
+    width:100%;
+    height:100%;
+    position:absolute;
+}
 #footer{
     position:fixed;
     width:100%;
@@ -77,13 +89,6 @@ input.down{
     background-color:#0cf;
     border-left:7px;
     border-right:7px;
-}
-#bubble-container{
-    height:90%;
-    display:block;
-    padding-top:5%;
-    text-align:center;
-    position:relative;
 }
 .bh-circle,.bh-circle-text{
     cursor:pointer
