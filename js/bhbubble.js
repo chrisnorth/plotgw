@@ -17,20 +17,20 @@ BHBubble.prototype.getUrlVars = function(){
             vars[hash[0]] = hash[1];
         }
     }
-    console.log("input:",vars);
+    // console.log("input:",vars);
     this.urlVars = vars;
 }
 BHBubble.prototype.loadLang = function(lang){
     var _bh = this;
     if (!lang){lang="en"};
     var url=this.langdir+lang+'.json';
-    console.log(url);
+    // console.log(url);
     // Bug fix for reading local JSON file in FF3
     $.ajaxSetup({async:true,'beforeSend': function(xhr){
         // console.log(this);
         if (xhr.overrideMimeType) xhr.overrideMimeType("text/plain"); },
         datatype:'json',
-        success:function(json){console.log(json);}
+        success:function(json){}
     });
     // Get the JSON language file amd call "makePlot" on completion
     $.getJSON({url:url,
@@ -41,7 +41,8 @@ BHBubble.prototype.loadLang = function(lang){
         },
         dataType: 'json',
         success:function(data){
-            console.log('success',data[0]);_bh.langdict=data[0];_bh.makePlot();}
+            //console.log('success',data[0]);
+            _bh.langdict=data[0];_bh.makePlot();}
     })
 }
 BHBubble.prototype.t = function(key,def){
@@ -99,8 +100,8 @@ BHBubble.prototype.comparitor = function(sort){
     }else if(sort=="gwfirst"){
         return function(a,b){
             if (a.method==b.method){return null;}
-            else if((a.method=='GW')||(a.method=='LVT')){return 1000;}
-            else{return -1000;}
+            else if((a.method=='GW')||(a.method=='LVT')){return 1;}
+            else{return -1;}
         }
     }else{
         return null;
@@ -406,6 +407,7 @@ BHBubble.prototype.formatData = function(valueCol){
     });
 }
 BHBubble.prototype.getText = function(d){
+    bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
         ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
@@ -413,6 +415,8 @@ BHBubble.prototype.getText = function(d){
         return "";}else{return d.name}
 }
 BHBubble.prototype.getRadius = function(d){
+    console.log('radius',bh.displayFilter);
+    bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
         ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
@@ -420,18 +424,22 @@ BHBubble.prototype.getRadius = function(d){
         return 0;}else{return d.r}
 }
 BHBubble.prototype.getX = function(d){
+    bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
     ){console.log(d.id,'x-alternate');return this.arrowpos[this.arrows[d.id][1]].x;}
     else{return this.arrowpos[d.id].x}
 }
 BHBubble.prototype.getY = function(d){
+    bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
     ){console.log(d.id,'y-alternate');return this.arrowpos[this.arrows[d.id][1]].y;}
         else{return this.arrowpos[d.id].y}
 }
 BHBubble.prototype.getOpacity = function(d){
+    bh=this;
+    console.log('opacity',this.displayFilter);
     if (this.displayFilter=="nofin"){
         return function(d){
             // console.log('nofin',d.BHtype,d.BHtype=="final" ? 0 : 1);
@@ -545,7 +553,7 @@ BHBubble.prototype.drawBubbles = function(){
         .attr("text-anchor", "middle")
         .text(function(d){return d.name;})
         .attr("class","bh-circle-text")
-        .attr("opacity",this.getOpacity())
+        .attr("opacity",function(d){return bh.getOpacity(d)})
         .attr("id",function(d){return "bh-circle-text-"+d.id;})
         .style({
             "fill":function(d){return bh.textcolor2(bh.cValue(d));},
@@ -610,17 +618,22 @@ BHBubble.prototype.addButtons = function(){
     var bh=this;
     var divcont = document.getElementById('controls');
     divcont.style.marginRight = this.pgMargin.right;
-    spancont = document.createElement('span');
+    //
+    spancont = document.createElement('div');
     spancont.className = "control-lab";
     spancont.innerHTML = this.t("Mergers");
     divcont.appendChild(spancont);
+    //set font size
+    width=spancont.offsetWidth;
+    fontsize=Math.min(width, (width - 8) / 20 * 8) + "px";
+    spancont.style.fontSize=fontsize;
+    //
     // divcont.innerHTML('<span>Controls:</span>');
     this.animcont = document.createElement('div');
     this.animcont.className = 'control merge merger';
     if (this.displayFilter=="noinit"){this.animcont.classList.add("hide");}
     // animcont.style.display = 'inline-block';
     divcont.appendChild(this.animcont);
-
     animimg = document.createElement('img');
     animimg.setAttribute("id","button-merger");
     animimg.setAttribute("src","img/merger.svg");
@@ -645,10 +658,33 @@ BHBubble.prototype.addButtons = function(){
     });
     this.animcontun.appendChild(animimgun);
     //
-    spancontscale = document.createElement('span');
+    //show all button
+    this.animcontall = document.createElement('div');
+    this.animcontall.className = 'control merge all';
+    // if (this.displayFilter=="nofin"){this.animcontun.classList.add("hide");}
+    // animcontun.style.display = 'inline-block';
+    divcont.appendChild(this.animcontall);
+    animimgall = document.createElement('img');
+    animimgall.setAttribute("id","button-showall");
+    animimgall.setAttribute("src","img/showall.svg");
+    animimgall.setAttribute("title",this.t("Show all black holes"));
+    animimgall.addEventListener("click",function(){
+        console.log('show all');bh.showAll();
+    });
+    this.animcontall.appendChild(animimgall);
+    //
+    //Scale label
+    spancontscale = document.createElement('div');
     spancontscale.className = "control-lab";
+    // scaletext = document.createTextNode(this.t("Scale"));
+    // spancontscale.appendChild(scaletext);
     spancontscale.innerHTML = this.t("Scale");
     divcont.appendChild(spancontscale);
+    //set font size
+    width=spancontscale.offsetWidth;
+    fontsize=Math.min(width, (width - 8) / 20 * 8) + "px";
+    spancontscale.style.fontSize=fontsize;
+
     //
     //scale size button
     this.scalecontsize = document.createElement('div');
@@ -695,8 +731,10 @@ BHBubble.prototype.animateMerger = function(){
         //move intialcircles
         d3.selectAll('#bh-circle-'+this.arrows[id][0])
             .transition().duration(this.mergeDuration)
-            .attr("cx",this.arrowpos[this.arrows[id][1]].x)
-            .attr("cy",this.arrowpos[this.arrows[id][1]].y)
+            .attr("cx",function(d){return bh.getX(d);})
+            // this.arrowpos[this.arrows[id][1]].x)
+            .attr("cy",function(d){return bh.getY(d);})
+            // this.arrowpos[this.arrows[id][1]].y)
             // .attr("stroke","black")
             .attr("r",function(d){return bh.getRadius(d);});
         //hide initial text
@@ -723,27 +761,59 @@ BHBubble.prototype.animateUnMerger = function(){
     this.displayFilter = "nofin";
     this.animcont.classList.remove("hide");
     this.animcontun.classList.add("hide");
-    for (a in this.arrows){
+    for (id in this.arrows){
         //move intialcircles
-        d3.selectAll('#bh-circle-'+this.arrows[a][0])
+        d3.selectAll('#bh-circle-'+this.arrows[id][0])
             .transition().duration(this.mergeDuration)
-            .attr("cx",this.arrowpos[this.arrows[a][0]].x)
-            .attr("cy",this.arrowpos[this.arrows[a][0]].y)
+            .attr("cx",function(d){return bh.getX(d);})
+            .attr("cy",function(d){return bh.getY(d);})
             // .attr("stroke","black")
             .attr("r",function(d){return bh.getRadius(d);});
         //hide initial text
-        d3.selectAll('#bh-circle-text-'+this.arrows[a][0])
+        d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity();})
             .text(function(d){ return bh.getText(d); });
         //move final circles
-        d3.selectAll('#bh-circle-'+this.arrows[a][1])
+        d3.selectAll('#bh-circle-'+this.arrows[id][1])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("r",function(d){return bh.getRadius(d)})
             // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
             .attr("opacity",function(d){return bh.getOpacity(d);});
         //show final text
-        d3.selectAll('#bh-circle-text-'+this.arrows[a][1])
+        d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
+            .transition().duration(this.mergeDuration).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity()(d);})
+            .text(function(d){ return bh.getText(d); });
+    }
+}
+BHBubble.prototype.showAll = function(){
+    // console.log(this.arrows);
+    bh=this;
+    this.displayFilter = "all";
+    this.animcontun.classList.remove("hide");
+    this.animcont.classList.remove("hide");
+    for (id in this.arrows){
+        //move intialcircles
+        d3.selectAll('#bh-circle-'+this.arrows[id][0])
+            .transition().duration(this.mergeDuration)
+            .attr("cx",function(d){return bh.getX(d);})
+            .attr("cy",function(d){return bh.getY(d);})
+            // .attr("stroke","black")
+            .attr("r",function(d){return bh.getRadius(d);});
+        //hide initial text
+        d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
+            .transition().duration(this.mergeDuration).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity();})
+            .text(function(d){ return bh.getText(d); });
+        //move final circles
+        d3.selectAll('#bh-circle-'+this.arrows[id][1])
+            .transition().duration(this.mergeDuration).delay(250)
+            .attr("r",function(d){return bh.getRadius(d)})
+            // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
+            .attr("opacity",function(d){return bh.getOpacity(d);});
+        //show final text
+        d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity()(d);})
             .text(function(d){ return bh.getText(d); });
@@ -773,8 +843,9 @@ BHBubble.prototype.writeDownloadLink = function(){
 };
 BHBubble.prototype.replot = function(valueCol){
     var oldValueCol = this.valueCol;
-    this.valueCol = valueCol;
+    this.valueCol = (valueCol) ? valueCol : oldValueCol;
     this.formatData(this.valueCol);
+    this.scalePage()
     // this.makeSvg();
     d3.select("svg").remove();
     d3.selectAll(".control").remove();
@@ -784,7 +855,6 @@ BHBubble.prototype.replot = function(valueCol){
     this.addButtons();
 }
 BHBubble.prototype.makePlot = function(){
-    console.log(this.langdict);
     this.init();
     this.scalePage();
     this.makeSvg();
@@ -798,3 +868,6 @@ bub.getUrlVars();
 bub.langdir='bhbubble-lang/';
 bub.loadLang(bub.urlVars.lang);
 // console.log(bub.langdict);
+// window.addEventListener("resize",function(){
+//     bub.replot();
+// });

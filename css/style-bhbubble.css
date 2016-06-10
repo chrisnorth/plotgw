@@ -63,21 +63,23 @@ a{
     border-radius:10%;
     margin-bottom:10px;
 }
-#controls span{
+#controls div.control-lab{
     color:#fff;
     font-size:18px;
     display:block;
 }
 #controls .control, #controls .scale{
-    float:right;
-    width:100%;
+    float:left;
+    width:80%;
     cursor:pointer;
+    margin-left:10%;
+    margin-right:10%;
 }
 #controls .hide{
     display:none;
 }
 #controls .current{
-    border:2px solid white;
+    border:1px solid white;
     /*border-radius:25%;*/
     background-color: #555;
     cursor:default;

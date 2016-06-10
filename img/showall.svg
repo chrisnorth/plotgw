@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   width="16"
+   height="16"
+   viewBox="0 0 16 16"
+   id="svg4219"
+   version="1.1">
+  <defs
+     id="defs4221">
+    <linearGradient
+       id="linearGradient3775">
+      <stop
+         style="stop-color:#939393;stop-opacity:1;"
+         offset="0"
+         id="stop3777" />
+      <stop
+         style="stop-color:#f0f0f0;stop-opacity:1;"
+         offset="1"
+         id="stop3779" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linearGradient3775"
+       id="linearGradient3781"
+       x1="64.520836"
+       y1="31.139874"
+       x2="64.520844"
+       y2="213.05951"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0.73584906,0,0,1.0260417,69.831162,551.34231)" />
+  </defs>
+  <metadata
+     id="metadata4224">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     style="fill:#ffffff;fill-opacity:1"
+     transform="translate(-0.9375,-1036.2147)"
+     id="g4196">
+    <circle
+       style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="path4190"
+       cx="3.5433857"
+       cy="-1048.2023"
+       r="1.5791001"
+       transform="scale(1,-1)" />
+    <circle
+       transform="scale(1,-1)"
+       r="1.5791001"
+       cy="-1040.2271"
+       cx="3.5433857"
+       id="circle4192"
+       style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  </g>
+  <circle
+     style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="circle4194"
+     cx="12.557096"
+     cy="-7.9999828"
+     r="2.4250467"
+     transform="scale(1,-1)" />
+  <text
+     id="text4148"
+     y="10.351074"
+     x="4.1372814"
+     style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;"
+     xml:space="preserve"><tspan
+       style="font-size:7.5px;fill:#ffffff;fill-opacity:1;"
+       y="10.351074"
+       x="4.1372814"
+       id="tspan4150">+</tspan></text>
+</svg>
