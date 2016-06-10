@@ -65,7 +65,7 @@ BHBubble.prototype.init = function(){
     this.legenddescs = {
         1:this.t("Gravitational Wave Candidate"),
         2:this.t("Gravitational Wave Detection"),
-        3:this.t("X-ray Measurement")};
+        3:this.t("X-ray Binary")};
     //define comparitor sort function(blank for null)
     this.sort = "gwfirst";
     this.valueCol='massBHsq';
@@ -75,8 +75,6 @@ BHBubble.prototype.init = function(){
     $('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
     this.mergeDuration = 1000;
 }
-
-// random comparitor
 BHBubble.prototype.comparitor = function(sort){
     bh=this;
     // console.log(this,this.sort);
