@@ -48,7 +48,7 @@ BHBubble.prototype.loadLang = function(lang){
 BHBubble.prototype.t = function(key,def){
     // console.log(this);
     if (this.langdict.hasOwnProperty(key)){return this.langdict[key];}
-    else{console.log('not found:',key,def);return (def) ? def : key;}
+    else{console.log('not found:',key,def);return (def) ? def : '?'+key;}
 }
 BHBubble.prototype.init = function(){
     // _t=this.translate;
@@ -167,7 +167,7 @@ BHBubble.prototype.tttext = function(d){
     "<span class='info'>"+this.t("Mass")+": "+d["massBHstr"]+" M<sub>&#x2609;</sub></span>";
     if(d["method"]=='Xray'){
         // text = text+ "<span class='info'>X-ray detection</span>";
-        text = text + "<span class='info'>"+d.binType+"</span>";
+        text = text + "<span class='info'>"+this.t(d.binType)+"</span>";
         // text = text+ "<span class='info'>"+this.t("Companion")+": "+this.t(d.compType)+"</span>";
     }else{
         text = text+ "<span class='info'>"+this.t(d.binType)+
