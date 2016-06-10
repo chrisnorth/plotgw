@@ -72,8 +72,19 @@ BHBubble.prototype.init = function(){
     this.filterType="";
     this.displayFilter="nofin";
     this.langdir = 'bhbubble-lang/';
-    $('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
+    d3.select('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
     this.mergeDuration = 1000;
+}
+BHBubble.prototype.scalePage = function(){
+    this.svgSize=Math.min(this.pgWidth,this.pgHeight);
+    this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
+    d3.select("#full")
+        .attr("width",this.svgSize+"px")
+        .attr("margin-left",this.pgMargin.left+"px");
+    d3.select("#bubble-container")
+        .attr("width",this.svgSize+"px")
+        .attr("margin-left",this.pgMargin.left+"px");
+    // console.log()
 }
 BHBubble.prototype.comparitor = function(sort){
     bh=this;
@@ -139,7 +150,7 @@ BHBubble.prototype.makeSvg = function(){
         .on("click",function(){bh.hideInfopanel();});
     this.bubble = d3.layout.pack()
         .sort(this.comparitor(this.sort))
-        .size([this.pgWidth, this.pgHeight])
+        .size([this.svgSize, this.svgSize])
         // .size([this.diameter, this.diameter])
         .padding(15);
     //replace footer text for language
@@ -376,23 +387,23 @@ BHBubble.prototype.formatData = function(valueCol){
     //         }
     //     }
     // )
-    this.arrows=[];
+    this.arrows={};
     this.arrowpos = {};
     this.name2id=function(name){
         return name.replace('+','').replace('(','').replace(')','').replace('-','');
     };
     this.data.forEach(function(d){
         // console.log(d);
-        d.id = bh.name2id(d.name)
+        d.id = bh.name2id(d.name);
         // console.log(d.name,d.id);
-        if ((d.method=="GW")||(d.method=="LVT")){
-            bh.arrowpos[d.id]={x:d.x,y:d.y,r:d.r,c:bh.fillcolor2(bh.cValue(d))};
-        }
+        bh.arrowpos[d.id]={x:d.x,y:d.y,r:d.r,c:bh.fillcolor2(bh.cValue(d)),type:d.BHtype};
+        // if ((d.method=="GW")||(d.method=="LVT")){
+        //     bh.arrowpos[d.id]={x:d.x,y:d.y,r:d.r,c:bh.fillcolor2(bh.cValue(d)),type:d.BHtype};
+        // }
         if (d.compType=="Black hole"){
-            bh.arrows.push([d.id,bh.name2id(d.parentName)]);
+            bh.arrows[d.id]=[d.id,bh.name2id(d.parentName)];
         }
     });
-    //setup the chart
 }
 BHBubble.prototype.getText = function(d){
     if (
@@ -408,6 +419,18 @@ BHBubble.prototype.getRadius = function(d){
     ){
         return 0;}else{return d.r}
 }
+BHBubble.prototype.getX = function(d){
+    if (
+        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
+    ){console.log(d.id,'x-alternate');return this.arrowpos[this.arrows[d.id][1]].x;}
+    else{return this.arrowpos[d.id].x}
+}
+BHBubble.prototype.getY = function(d){
+    if (
+        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
+    ){console.log(d.id,'y-alternate');return this.arrowpos[this.arrows[d.id][1]].y;}
+        else{return this.arrowpos[d.id].y}
+}
 BHBubble.prototype.getOpacity = function(d){
     if (this.displayFilter=="nofin"){
         return function(d){
@@ -422,20 +445,20 @@ BHBubble.prototype.getOpacity = function(d){
 BHBubble.prototype.drawBubbles = function(){
     this.svg = d3.select("div#bubble-container")
         .append("svg").attr("class", "bubble")
-        .attr("width", this.pgWidth).attr("height", 0.9*this.pgHeight);
+        .attr("width", this.svgSize).attr("height", this.svgSize);
 
     // console.log("drawBubbles",this.data[0].r);
     var bh=this;
 
     // console.log(arrows);
     // console.log(arrowpos);
-    this.addcurve = function(i){
-        r1=bh.arrowpos[bh.arrows[i][0]].r;
-        r2=bh.arrowpos[bh.arrows[i][1]].r;
-        x1=bh.arrowpos[bh.arrows[i][0]].x;
-        x2=bh.arrowpos[bh.arrows[i][1]].x;
-        y1=bh.arrowpos[bh.arrows[i][0]].y;
-        y2=bh.arrowpos[bh.arrows[i][1]].y;
+    this.addcurve = function(id){
+        r1=bh.arrowpos[bh.arrows[id][0]].r;
+        r2=bh.arrowpos[bh.arrows[id][1]].r;
+        x1=bh.arrowpos[bh.arrows[id][0]].x;
+        x2=bh.arrowpos[bh.arrows[id][1]].x;
+        y1=bh.arrowpos[bh.arrows[id][0]].y;
+        y2=bh.arrowpos[bh.arrows[id][1]].y;
         //   console.log(col);
         ang = Math.atan2((y2-y1),(x2-x1));
         r1s=r1*Math.sin(ang);
@@ -458,7 +481,7 @@ BHBubble.prototype.drawBubbles = function(){
         // " L"+x3r2+","+y3r2+" L"+x2r2+","+y2r2+" L"+x1r2+","+y1r2;
         bh.lineData = [{"x":x1r1,"y":y1r1},{"x":x2r1,"y":y2r1},{"x":x3r1,"y":y3r1},
             {"x":x3r2,"y":y3r2},{"x":x2r2,"y":y2r2},{"x":x1r2,"y":y1r2}];
-        col=bh.arrowpos[bh.arrows[i][0]].c;
+        col=bh.arrowpos[bh.arrows[id][0]].c;
         bh.lineFunc = d3.svg.line()
             .x(function(d){return d.x;})
             .y(function(d){return d.y;})
@@ -474,17 +497,18 @@ BHBubble.prototype.drawBubbles = function(){
     if (
         ((this.filterType!="nofin")&&(this.filterType!="noinit"))&&
         ((this.displayFilter!="nofin")&&(this.displayFilter!="noinit"))){
-        for (i in this.arrows){
+        for (id in this.arrows){
             // addtriangle(i);
             // addpolygon(i);
-            this.addcurve(i);
+            this.addcurve(id);
             this.svg.selectAll("path.merger")
                 .attr("opacity",0.5);
-    }}
+        }
+    }
 
     this.bubbles = this.svg.append("g")
         .attr("transform", "translate(0,0)")
-        .attr("width", this.pgWidth).attr("height", 0.9*this.pgHeight)
+        .attr("width", this.svgSize).attr("height", this.svgSize)
         .selectAll(".bubble")
         .data(this.nodes)
         .enter();
@@ -502,11 +526,11 @@ BHBubble.prototype.drawBubbles = function(){
 
     //create the bubbles
     this.bubbles.append("circle")
-        .attr("r", function(d){ return d.r; })
-        .attr("cx", function(d){ return d.x; })
-        .attr("cy", function(d){ return d.y; })
+        .attr("r", function(d){ return bh.getRadius(d); })
+        .attr("cx", function(d){ return bh.getX(d); })
+        .attr("cy", function(d){ return bh.getY(d); })
         .attr("id",function(d){return 'bh-circle-'+d.id;})
-        .attr("opacity",this.getOpacity())
+        .attr("opacity",function(d){return bh.getOpacity(d);})
         .attr("class","bh-circle")
         .style("fill", function(d){return bh.fillcolor2(bh.cValue(d))})
         .on("mouseover", function(d) {bh.showTooltip(d);})
@@ -542,7 +566,16 @@ BHBubble.prototype.drawBubbles = function(){
         .text(function(d){ return bh.getText(d); });
     d3.selectAll(".bh-circle")
         .attr("r",function(d){return bh.getRadius(d);})
-
+    // for (i in this.arrows){
+    //     // addtriangle(i);
+    //     // addpolygon(i);
+    //     if (
+    //         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
+    //         ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
+    //     ){
+    //         d3.select(this.arrows[i][0]).attr("cx",this.arrowpos[this.arrows[i][0]].x);
+    //     }
+    // }
     // add legend
     this.legend = this.svg.selectAll(".legend")
       .data(this.fillcolor2.domain())
@@ -576,6 +609,7 @@ BHBubble.prototype.drawBubbles = function(){
 BHBubble.prototype.addButtons = function(){
     var bh=this;
     var divcont = document.getElementById('controls');
+    divcont.style.marginRight = this.pgMargin.right;
     spancont = document.createElement('span');
     spancont.className = "control-lab";
     spancont.innerHTML = this.t("Mergers");
@@ -657,27 +691,27 @@ BHBubble.prototype.animateMerger = function(){
     this.displayFilter = "noinit";
     this.animcontun.classList.remove("hide");
     this.animcont.classList.add("hide");
-    for (a in this.arrows){
+    for (id in this.arrows){
         //move intialcircles
-        d3.selectAll('#bh-circle-'+this.arrows[a][0])
+        d3.selectAll('#bh-circle-'+this.arrows[id][0])
             .transition().duration(this.mergeDuration)
-            .attr("cx",this.arrowpos[this.arrows[a][1]].x)
-            .attr("cy",this.arrowpos[this.arrows[a][1]].y)
+            .attr("cx",this.arrowpos[this.arrows[id][1]].x)
+            .attr("cy",this.arrowpos[this.arrows[id][1]].y)
             // .attr("stroke","black")
             .attr("r",function(d){return bh.getRadius(d);});
         //hide initial text
-        d3.selectAll('#bh-circle-text-'+this.arrows[a][0])
+        d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity();})
             .text(function(d){ return bh.getText(d); });
         //move final circles
-        d3.selectAll('#bh-circle-'+this.arrows[a][1])
+        d3.selectAll('#bh-circle-'+this.arrows[id][1])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("r",function(d){return bh.getRadius(d)})
             // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
             .attr("opacity",function(d){return bh.getOpacity(d);});
         //show final text
-        d3.selectAll('#bh-circle-text-'+this.arrows[a][1])
+        d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("opacity",function(d){return bh.getOpacity()(d);})
             .text(function(d){ return bh.getText(d); });
@@ -752,6 +786,7 @@ BHBubble.prototype.replot = function(valueCol){
 BHBubble.prototype.makePlot = function(){
     console.log(this.langdict);
     this.init();
+    this.scalePage();
     this.makeSvg();
     this.loadData();
     this.makeDownload();
