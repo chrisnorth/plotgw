@@ -55,13 +55,12 @@ BHBubble.prototype.t = function(key,def){
 BHBubble.prototype.tN = function(key){
     // translate numbers
     if (this.langdict.hasOwnProperty("numbers")){
-        console.log('translating numbers: '+key)
         ndict=this.langdict.numbers;
         newNum='';
         for (n=0;n<key.length;n++){
             if (ndict.hasOwnProperty(key[n])){
-                console.log(key[n],ndict[key[n]]);newNum = newNum + ndict[key[n]];}
-            else{console.log(key[n]+' not found');newNum = newNum + key[n];}
+                newNum = newNum + ndict[key[n]];}
+            else{newNum = newNum + key[n];}
         }
         return newNum;
     }
@@ -91,13 +90,45 @@ BHBubble.prototype.init = function(){
     d3.select('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
     this.mergeDuration = 1000;
 }
+BHBubble.prototype.makeSvg = function(){
+    var bh=this;
+
+    this.tooltip = d3.select("div#full").append("div")
+        .attr("class", "tooltip");
+    // .style("opacity", 0);
+
+    this.infopanelbg = d3.select("div#full").append("div")
+        .attr("class","infopanelbg")
+        .on("click",function(){bh.hideInfopanel();});
+    this.infopanelouter = d3.select("div#full").append("div")
+        .attr("class","infopanelouter").attr("id","infopanel-outer");
+    this.infopanel = d3.select("div#infopanel-outer").append("div")
+            .attr("class","infopanel");
+    this.infopanelouter.append("div").attr("class","infoclose")
+        .html("<img src='img/close.png' title='"+this.t("close")+"'>")
+        .on("click",function(){bh.hideInfopanel();});
+    //replace footer text for language
+    footer=document.getElementById("footer-txt");
+    footertxt = footer.innerHTML;
+    footer.innerHTML = this.t("footer",footertxt);
+    //replace svg button text for language
+    document.getElementById("generate").innerHTML=this.t("Save as SVG");
+}
 BHBubble.prototype.scalePage = function(){
-    this.pgWidth = document.getElementById("bubble-container").offsetWidth;
-    this.pgHeight = document.getElementById("bubble-container").offsetHeight;
-    this.svgSize=Math.min(this.pgWidth,this.pgHeight);
-    this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
+    // this.pgWidth = document.getElementById("bubble-container").offsetWidth;
+    // this.pgHeight = document.getElementById("bubble-container").offsetHeight;
+    this.pgWidth=window.outerWidth;
+    this.pgHeight=window.outerHeight;
     this.pgAspect = this.pgWidth/this.pgHeight;
-    if (this.pgAspect>1.2){this.controlLoc='right'}else{this.controlLoc='bottom'}
+    if (this.pgAspect>0.9){this.controlLoc='right'}else{this.controlLoc='bottom'}
+    this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+    this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+    if (this.controlLoc=='right'){
+        this.svgSize=Math.min(this.bubWidth,0.8*this.pgHeight);
+    }else{
+        this.svgSize=this.bubWidth;
+    }
+    this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
     console.log(this.pgAspect,this.controlLoc);
     d3.select("#full")
         .attr("width",this.svgSize+"px")
@@ -105,6 +136,28 @@ BHBubble.prototype.scalePage = function(){
     d3.select("#bubble-container")
         .attr("width",this.svgSize+"px")
         .attr("margin-left",this.pgMargin.left+"px");
+    footer = document.getElementById("footer");
+    full = document.getElementById("full");
+    bubcont = document.getElementById("bubble-container");
+    if (this.controlLoc=='right'){
+        footer.classList.add("right");
+        footer.classList.remove("bottom");
+        bubcont.classList.add("right");
+        bubcont.classList.remove("bottom");
+        bubcont.style.height = this.svgSize+"px";
+        full.classList.add("right");
+        full.classList.remove("bottom");
+        full.style.height = this.svgSize+"px";
+    }else{
+        footer.classList.add("bottom");
+        footer.classList.remove("right");
+        bubcont.classList.add("bottom");
+        bubcont.classList.remove("right");
+        bubcont.style.height = this.pgWidth+"px";
+        full.classList.add("bottom");
+        full.classList.remove("right");
+        // bubcont.style.height = this.pgWidth+"px";
+    }
     // console.log()
 }
 BHBubble.prototype.comparitor = function(sort){
@@ -152,30 +205,6 @@ BHBubble.prototype.filterFn = function(filterType){
             return !d.children;};
     }
 }
-BHBubble.prototype.makeSvg = function(){
-    var bh=this;
-
-    this.tooltip = d3.select("div#full").append("div")
-        .attr("class", "tooltip");
-    // .style("opacity", 0);
-
-    this.infopanelbg = d3.select("div#full").append("div")
-        .attr("class","infopanelbg")
-        .on("click",function(){bh.hideInfopanel();});
-    this.infopanelouter = d3.select("div#full").append("div")
-        .attr("class","infopanelouter").attr("id","infopanel-outer");
-    this.infopanel = d3.select("div#infopanel-outer").append("div")
-            .attr("class","infopanel");
-    this.infopanelouter.append("div").attr("class","infoclose")
-        .html("<img src='img/close.png' title='"+this.t("close")+"'>")
-        .on("click",function(){bh.hideInfopanel();});
-    //replace footer text for language
-    footer=document.getElementById("footer-txt");
-    footertxt = footer.innerHTML;
-    footer.innerHTML = this.t("footer",footertxt);
-    //replace svg button text for language
-    document.getElementById("generate").innerHTML=this.t("Save as SVG");
-}
 //define tooltip text
 BHBubble.prototype.tttext = function(d){
     text =  "<span class='name'>"+d["name"]+"</span>"+
@@ -196,7 +225,7 @@ BHBubble.prototype.showTooltip = function(d){
     // console.log('2',d.name,tooltip);
     bh=this;
     getLeft = function(d){
-        if (d.x > this.diameter/2){return (d3.event.pageX - 0.25*this.pgWidth - 10) + "px";}
+        if (d.x > this.diameter/2){return (d3.event.pageX - 0.25*this.bubWidth - 10) + "px";}
         else{return (d3.event.pageX + 10) + "px";};
     }
     getTop = function(d){
@@ -635,21 +664,30 @@ BHBubble.prototype.drawBubbles = function(){
 BHBubble.prototype.addButtons = function(){
     var bh=this;
     var divcont = document.getElementById('controls');
-    if (this.controlLoc = 'right'){
-        divcont.style.width = 0.1*this.pgWidth;
-        if (this.pgMargin.right > 0.1*this.pgWidth){
-            divcont.style.marginRight = this.pgMargin.right - 0.1*this.pgWidth;
+    if (this.controlLoc == 'right'){
+        divcont.classList.add("right");
+        divcont.classList.remove("bottom");
+        divcont.style.width = 0.1*this.pgWidth+"px";
+        divcont.style.marginLeft = 0;
+        if (this.pgMargin.right > 0.1*this.bubWidth){
+            divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
         }else{
             divcont.style.marginRight = 0;
         }
     }else{
-        console.log(divcont.style.top);
-        divcont.setAttribute(top) = 0.9*pgHeight;
-        divcont.style.marginRight = this.pgMargin.right - 0.05*this.pgWidth;
+        divcont.classList.add("bottom");
+        divcont.classList.remove("right");
+        divcont.style.marginLeft = 0.2*this.pgWidth+"px";
+        divcont.style.width = 0.6*this.pgWidth+"px";
+        // console.log('bottom',divcont.style.top);
+        // divcont.style.top = 0.9*this.pgHeight+"px";
+        // divcont.style.width = this.pgWidth+"px";
+        // divcont.style.width = this.pgWidth+"px";
+        // // divcont.style.marginRight = this.pgMargin.right - 0.05*this.pgWidth;
     }
     //
     spancont = document.createElement('div');
-    spancont.className = "control-lab";
+    spancont.className = "control-lab "+((this.controlLoc == 'right')?'right':'bottom');
     spancont.innerHTML = this.t("Mergers");
     divcont.appendChild(spancont);
     //set font size
@@ -659,7 +697,9 @@ BHBubble.prototype.addButtons = function(){
     //
     // divcont.innerHTML('<span>Controls:</span>');
     this.animcont = document.createElement('div');
-    this.animcont.className = 'control merge merger';
+    this.animcont.className = 'control merge merger '+((this.controlLoc == 'right')?'right':'bottom');
+    if (this.controlLoc == 'right'){this.animcont.width = "80%";}
+    else{this.animcont.height = "100%";}
     if (this.displayFilter=="noinit"){this.animcont.classList.add("hide");}
     // animcont.style.display = 'inline-block';
     divcont.appendChild(this.animcont);
@@ -674,7 +714,7 @@ BHBubble.prototype.addButtons = function(){
     //
     //unmerger button
     this.animcontun = document.createElement('div');
-    this.animcontun.className = 'control merge unmerger';
+    this.animcontun.className = 'control merge unmerger '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.displayFilter=="nofin"){this.animcontun.classList.add("hide");}
     // animcontun.style.display = 'inline-block';
     divcont.appendChild(this.animcontun);
@@ -689,7 +729,7 @@ BHBubble.prototype.addButtons = function(){
     //
     //show all button
     this.animcontall = document.createElement('div');
-    this.animcontall.className = 'control merge all';
+    this.animcontall.className = 'control merge all '+((this.controlLoc == 'right')?'right':'bottom');
     // if (this.displayFilter=="nofin"){this.animcontun.classList.add("hide");}
     // animcontun.style.display = 'inline-block';
     divcont.appendChild(this.animcontall);
@@ -704,7 +744,7 @@ BHBubble.prototype.addButtons = function(){
     //
     //Scale label
     spancontscale = document.createElement('div');
-    spancontscale.className = "control-lab";
+    spancontscale.className = "control-lab "+((this.controlLoc == 'right')?'right':'bottom');
     // scaletext = document.createTextNode(this.t("Scale"));
     // spancontscale.appendChild(scaletext);
     spancontscale.innerHTML = this.t("Scale");
@@ -717,7 +757,7 @@ BHBubble.prototype.addButtons = function(){
     //
     //scale size button
     this.scalecontsize = document.createElement('div');
-    this.scalecontsize.className = 'control scale scale-size';
+    this.scalecontsize.className = 'control scale scale-size '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.valueCol=="massBHsq"){this.scalecontsize.classList.add("current");}
     // animcontun.style.display = 'inline-block';
     divcont.appendChild(this.scalecontsize);
@@ -732,7 +772,7 @@ BHBubble.prototype.addButtons = function(){
     //
     //scale mass button
     this.scalecontmass = document.createElement('div');
-    this.scalecontmass.className = 'control scale scale-mass';
+    this.scalecontmass.className = 'control scale scale-mass '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.valueCol=="massBH"){this.scalecontmass.classList.add("current");}
     // animcontun.style.display = 'inline-block';
     divcont.appendChild(this.scalecontmass);
@@ -873,8 +913,8 @@ BHBubble.prototype.writeDownloadLink = function(){
 BHBubble.prototype.replot = function(valueCol){
     var oldValueCol = this.valueCol;
     this.valueCol = (valueCol) ? valueCol : oldValueCol;
-    this.formatData(this.valueCol);
     this.scalePage()
+    this.formatData(this.valueCol);
     // this.makeSvg();
     d3.select("svg").remove();
     d3.selectAll(".control").remove();

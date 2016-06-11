@@ -7,31 +7,49 @@ body {
 a{
     color:#ff55ff;
 }
-#hdr{
+#hdr.bottom{
     width:100%;
     text-align:center;
     max-height:10%;
     color:#fff;
-    /*height:10%;*/
     position:fixed;
     background-color: rgba(0,0,0,0.5)
+}
+#hdr.right{
+    width:100%;
+    text-align:center;
+    max-height:10%;
+    color:#fff;
+    background-color: rgba(0,0,0,0.5);
+    display:block
 }
 #hdr h1{
     margin-bottom:0;
 }
-#full{
+#full.right{
     height:90%;
     display:block;
     padding-top:5%;
     text-align:center;
     position:relative;
 }
-#bubble-container{
+#full.bottom{
+    height:90%;
+    display:block;
+    text-align:center;
+    position:relative;
+}
+#bubble-container.right{
     width:100%;
     height:90%;
     position:absolute;
 }
-#footer{
+#bubble-container.bottom{
+    width:100%;
+    display:block;
+    float:left;
+}
+#footer.right{
     position:fixed;
     width:100%;
     max-height:20%;
@@ -40,21 +58,40 @@ a{
     background-color: rgba(0,0,0,0.5);
     color:#fff;
 }
-#footer span{
+#footer.right span{
     display:block;
 }
-#footer button{
+#footer.right button{
     position:absolute;
     top:0%;
     right:0%;
     height:100%;
     cursor:pointer;
 }
-#controls{
+#footer.bottom{
+    float:left;
+    width:100%;
+    max-height:20%;
+    bottom:0;
+    text-align:center;
+    background-color: rgba(0,0,0,0.5);
+    color:#fff;
+}
+#footer.bottom span{
+    width:90%;
+    display:block;
+}
+#footer.bottom button{
+    float:right;
+    width:10%;
+    cursor:pointer;
+}
+/*Control panel on right side*/
+#controls.right{
     position:absolute;
     top:10%;
     right:0;
-    /*height:10%;*/
+    height:10%;
     width:5%;
     margin-right:2%;
 }
@@ -63,17 +100,46 @@ a{
     border-radius:10%;
     margin-bottom:10px;
 }
-#controls div.control-lab{
+#controls.right div.control-lab{
     color:#fff;
     font-size:18px;
     display:block;
 }
-#controls .control, #controls .scale{
+#controls .control.right, #controls .scale.right{
     float:left;
     width:80%;
     cursor:pointer;
     margin-left:10%;
     margin-right:10%;
+}
+#controls .control.right img, #controls .scale.right img{
+    width: 100%;
+}
+/*Control panel below*/
+#controls.bottom{
+    top:90%;
+    height:10%;
+    width:100%;
+    margin-right:2%;
+    float:left;
+    display:block;
+}
+#controls.bottom div.control-lab{
+    color:#fff;
+    font-size:18px;
+    display:inline-block;
+    float:left;
+    text-align:right;
+    margin-right:1%;
+    width:10%;
+}
+#controls .control.bottom, #controls .scale.bottom{
+    float:left;
+    width:15%;
+    cursor:pointer;
+}
+#controls .control.bottom img, #controls .scale.bottom img{
+    width: 100%;
 }
 #controls .hide{
     display:none;
@@ -83,9 +149,6 @@ a{
     /*border-radius:25%;*/
     background-color: #555;
     cursor:default;
-}
-#controls .control img, #controls .scale img{
-    width: 100%;
 }
 input.down{
     background-color:#0cf;
