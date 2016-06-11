@@ -48,13 +48,11 @@ BHBubble.prototype.loadLang = function(lang){
 BHBubble.prototype.t = function(key,def){
     // console.log(this);
     if (this.langdict.hasOwnProperty(key)){return this.langdict[key];}
-    else{console.log('not found:',key,def);return (def) ? def : '?'+key;}
+    else{return (def) ? def : '?'+key;}
 }
 BHBubble.prototype.init = function(){
     // _t=this.translate;
-    this.pgWidth = document.getElementById("bubble-container").scrollWidth;
-    this.pgHeight = document.getElementById("bubble-container").scrollHeight;
-    this.diameter = 800 //max size of the bubbles
+    // this.diameter = 800 //max size of the bubbles
         // color    = d3.scale.category10(); //color category
     this.fillcolor2 = d3.scale.linear().domain([1,2,3])
             .range([d3.rgb("#48c7e9"), d3.rgb("#67c18d"), d3.rgb('#f68d69')])
@@ -77,8 +75,13 @@ BHBubble.prototype.init = function(){
     this.mergeDuration = 1000;
 }
 BHBubble.prototype.scalePage = function(){
+    this.pgWidth = document.getElementById("bubble-container").offsetWidth;
+    this.pgHeight = document.getElementById("bubble-container").offsetHeight;
     this.svgSize=Math.min(this.pgWidth,this.pgHeight);
     this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
+    this.pgAspect = this.pgWidth/this.pgHeight;
+    if (this.pgAspect>1.2){this.controlLoc='right'}else{this.controlLoc='bottom'}
+    console.log(this.pgAspect,this.controlLoc);
     d3.select("#full")
         .attr("width",this.svgSize+"px")
         .attr("margin-left",this.pgMargin.left+"px");
@@ -99,9 +102,9 @@ BHBubble.prototype.comparitor = function(sort){
         return function(a,b){return a.value - b.value;};
     }else if(sort=="gwfirst"){
         return function(a,b){
-            if (a.method==b.method){return null;}
-            else if((a.method=='GW')||(a.method=='LVT')){return 1;}
-            else{return -1;}
+            if (((a.method=='Xray')&&(b.method=='Xray'))||((a.method!='Xray')&&(b.method!='Xray'))){return b.num-a.num;}
+            else if((a.method=='GW')||(a.method=='LVT')){return 1000;}
+            else{return -1000;}
         }
     }else{
         return null;
@@ -149,11 +152,6 @@ BHBubble.prototype.makeSvg = function(){
     this.infopanelouter.append("div").attr("class","infoclose")
         .html("<img src='img/close.png' title='"+this.t("close")+"'>")
         .on("click",function(){bh.hideInfopanel();});
-    this.bubble = d3.layout.pack()
-        .sort(this.comparitor(this.sort))
-        .size([this.svgSize, this.svgSize])
-        // .size([this.diameter, this.diameter])
-        .padding(15);
     //replace footer text for language
     footer=document.getElementById("footer-txt");
     footertxt = footer.innerHTML;
@@ -374,6 +372,11 @@ BHBubble.prototype.formatData = function(valueCol){
     this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
     // data = data.map(function(d){
     //     if(!bh.filterFn(bh.filterType)){d="";return d;}else{d.value = +(d["massBH"]); return d; }});
+    this.bubble = d3.layout.pack()
+        .sort(this.comparitor(this.sort))
+        .size([this.svgSize, this.svgSize])
+        // .size([this.diameter, this.diameter])
+        .padding(15);
     this.nodes = this.bubble.nodes({children:this.data})
         .filter(this.filterFn(this.filterType));
     // data.forEach(
@@ -415,7 +418,6 @@ BHBubble.prototype.getText = function(d){
         return "";}else{return d.name}
 }
 BHBubble.prototype.getRadius = function(d){
-    console.log('radius',bh.displayFilter);
     bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
@@ -427,19 +429,18 @@ BHBubble.prototype.getX = function(d){
     bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
-    ){console.log(d.id,'x-alternate');return this.arrowpos[this.arrows[d.id][1]].x;}
+    ){return this.arrowpos[this.arrows[d.id][1]].x;}
     else{return this.arrowpos[d.id].x}
 }
 BHBubble.prototype.getY = function(d){
     bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
-    ){console.log(d.id,'y-alternate');return this.arrowpos[this.arrows[d.id][1]].y;}
+    ){return this.arrowpos[this.arrows[d.id][1]].y;}
         else{return this.arrowpos[d.id].y}
 }
 BHBubble.prototype.getOpacity = function(d){
     bh=this;
-    console.log('opacity',this.displayFilter);
     if (this.displayFilter=="nofin"){
         return function(d){
             // console.log('nofin',d.BHtype,d.BHtype=="final" ? 0 : 1);
@@ -502,18 +503,17 @@ BHBubble.prototype.drawBubbles = function(){
         //   .attr("opacity",0.5)
         //   .style({"stroke":"red","stroke-width":2,"opacity":0.5});
     }
-    if (
-        ((this.filterType!="nofin")&&(this.filterType!="noinit"))&&
-        ((this.displayFilter!="nofin")&&(this.displayFilter!="noinit"))){
-        for (id in this.arrows){
-            // addtriangle(i);
-            // addpolygon(i);
-            this.addcurve(id);
-            this.svg.selectAll("path.merger")
-                .attr("opacity",0.5);
-        }
-    }
-
+    // if (
+    //     ((this.filterType!="nofin")&&(this.filterType!="noinit"))&&
+    //     ((this.displayFilter!="nofin")&&(this.displayFilter!="noinit"))){
+    //     for (id in this.arrows){
+    //         // addtriangle(i);
+    //         // addpolygon(i);
+    //         this.addcurve(id);
+    //         this.svg.selectAll("path.merger")
+    //             .attr("opacity",0.5);
+    //     }
+    // }
     this.bubbles = this.svg.append("g")
         .attr("transform", "translate(0,0)")
         .attr("width", this.svgSize).attr("height", this.svgSize)
@@ -617,7 +617,18 @@ BHBubble.prototype.drawBubbles = function(){
 BHBubble.prototype.addButtons = function(){
     var bh=this;
     var divcont = document.getElementById('controls');
-    divcont.style.marginRight = this.pgMargin.right;
+    if (this.controlLoc = 'right'){
+        divcont.style.width = 0.1*this.pgWidth;
+        if (this.pgMargin.right > 0.1*this.pgWidth){
+            divcont.style.marginRight = this.pgMargin.right - 0.1*this.pgWidth;
+        }else{
+            divcont.style.marginRight = 0;
+        }
+    }else{
+        console.log(divcont.style.top);
+        divcont.setAttribute(top) = 0.9*pgHeight;
+        divcont.style.marginRight = this.pgMargin.right - 0.05*this.pgWidth;
+    }
     //
     spancont = document.createElement('div');
     spancont.className = "control-lab";
@@ -625,7 +636,7 @@ BHBubble.prototype.addButtons = function(){
     divcont.appendChild(spancont);
     //set font size
     width=spancont.offsetWidth;
-    fontsize=Math.min(width, (width - 8) / 20 * 8) + "px";
+    fontsize=Math.min(width, (width - 8) / 25 * 8) + "px";
     spancont.style.fontSize=fontsize;
     //
     // divcont.innerHTML('<span>Controls:</span>');
@@ -682,7 +693,7 @@ BHBubble.prototype.addButtons = function(){
     divcont.appendChild(spancontscale);
     //set font size
     width=spancontscale.offsetWidth;
-    fontsize=Math.min(width, (width - 8) / 20 * 8) + "px";
+    fontsize=Math.min(width, (width - 8) / 25 * 8) + "px";
     spancontscale.style.fontSize=fontsize;
 
     //
@@ -868,6 +879,6 @@ bub.getUrlVars();
 bub.langdir='bhbubble-lang/';
 bub.loadLang(bub.urlVars.lang);
 // console.log(bub.langdict);
-// window.addEventListener("resize",function(){
-//     bub.replot();
-// });
+window.addEventListener("resize",function(){
+    bub.replot();
+});
