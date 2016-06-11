@@ -22,6 +22,7 @@ BHBubble.prototype.getUrlVars = function(){
 }
 BHBubble.prototype.loadLang = function(lang){
     var _bh = this;
+    var lang;
     if (!lang){lang="en"};
     var url=this.langdir+lang+'.json';
     // console.log(url);
@@ -40,15 +41,31 @@ BHBubble.prototype.loadLang = function(lang){
             }
         },
         dataType: 'json',
+        failure:function(){'Error loading language '+lang},
         success:function(data){
             //console.log('success',data[0]);
             _bh.langdict=data[0];_bh.makePlot();}
     })
 }
 BHBubble.prototype.t = function(key,def){
-    // console.log(this);
+    //translate text
     if (this.langdict.hasOwnProperty(key)){return this.langdict[key];}
     else{return (def) ? def : '?'+key;}
+}
+BHBubble.prototype.tN = function(key){
+    // translate numbers
+    if (this.langdict.hasOwnProperty("numbers")){
+        console.log('translating numbers: '+key)
+        ndict=this.langdict.numbers;
+        newNum='';
+        for (n=0;n<key.length;n++){
+            if (ndict.hasOwnProperty(key[n])){
+                console.log(key[n],ndict[key[n]]);newNum = newNum + ndict[key[n]];}
+            else{console.log(key[n]+' not found');newNum = newNum + key[n];}
+        }
+        return newNum;
+    }
+    return key;
 }
 BHBubble.prototype.init = function(){
     // _t=this.translate;
@@ -162,7 +179,7 @@ BHBubble.prototype.makeSvg = function(){
 //define tooltip text
 BHBubble.prototype.tttext = function(d){
     text =  "<span class='name'>"+d["name"]+"</span>"+
-    "<span class='info'>"+this.t("Mass")+": "+d["massBHstr"]+" M<sub>&#x2609;</sub></span>";
+    "<span class='info'>"+this.t("Mass")+": "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub></span>";
     if(d["method"]=='Xray'){
         // text = text+ "<span class='info'>X-ray detection</span>";
         text = text + "<span class='info'>"+this.t(d.binType)+"</span>";
@@ -208,44 +225,45 @@ BHBubble.prototype.iptext = function(d){
     rx=1;
     text =  "<span class='name'>"+d["name"]+"</span>";
     if(d["method"]=='Xray'){
-        text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
+        text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub>";
         if (d.refbhmass!='-'){text = text +
             " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
-        else{text = text+"</span>"}
+        else{rhbm=false;text = text+"</span>"}
         text = text + "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+"</span>";
         // text = text+ "<span class='info'>X-ray detection</span>";
         //companion
         text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-            d.compMass+" M<sub>&#x2609;</sub> "+this.t(d.compType);
+            this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType);
         if (d.refcomp!="-"){text = text +
-            " <sup>["+rx+"]</sup>";rct=rx;rx++;}
+            " <sup>["+rx+"]</sup>";rct=rx;rx++;}else{rct=false;}
         if (d.refcompmass!="-"){text = text +
-            " <sup>["+rx+"]</sup>";rcm=rx;rx++;}
+            " <sup>["+rx+"]</sup>";rcm=rx;rx++;}else{rcm=false;}
         text = text+"</span>";
         //period mass
-        text = text+ "<span class='info'><b>"+this.t("Orbital period")+"</b>: "+d.period+
+        text = text+ "<span class='info'><b>"+this.t("Orbital period")+"</b>: "+this.tN(d.period)+
         " "+this.t("days")+"</sub>";
         if (d.refper!="-"){text = text +
             " <sup>["+rx+"]</sup></span>";rper=rx;rx++;}
-        else{text = text+"</span>"}
+        else{rper=false;text = text+"</span>"}
         text = text+ "<span class='info'><b>"+this.t("Location")+"</b>: "+this.t(d.location)+"</span>";
         if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
         if (rct){text = text + "<span class='ref'>["+rct+"] "+d.refcomp+"</span>"}
         if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.refcompmass+"</span>"}
-        if (rcm){text = text + "<span class='ref'>["+rper+"] "+d.refper+"</span>"}
+        if (rper){text = text + "<span class='ref'>["+rper+"] "+d.refper+"</span>"}
     }else{
-        text = text + "<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
+        text = text + "<span class='info'><b>"+this.t("Mass")+"</b>: "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub>";
         if (d.refbhmass!='-'){text = text +
             " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
-        else{text = text+"</span>"}
+        else{rbhm=false;text = text+"</span>"}
         text = text+ "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+
             " ("+this.t(d.BHtype)+")</span>";
         if (d.compType!="None"){
             text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-                d.compMass+" M<sub>&#x2609;</sub> "+this.t(d.compType)+"</span>";
+                this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType)+"</span>";
         }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
-        text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.t(d.distance)+
+        text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.tN(d.distance)+
             " "+this.t("million light years")+"</span>";
+        console.log(rbhm);
         if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
 
     }

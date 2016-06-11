@@ -40,6 +40,19 @@
     "Merge binary black holes":"Merge binary black holes",
     "Unmerge binary black holes":"Unmerge binary black holes",
     "footer":"Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Translated by  <a href='mailto:patra@mit.edu'>Satya Mohapatra</a>, &#2872;&#2852;&#2893;&#2911; &#2862;&#2873;&#2878;&#2858;&#2878;&#2852;&#2893;&#2864;, &#2360;&#2340;&#2381;&#2351; &#2350;&#2361;&#2366;&#2346;&#2366;&#2340;&#2381;&#2352;,  &#1587;&#1578;&#1740;&#1575; &#1605;&#1608;&#1729;&#1662;&#1578;&#1585;&#1575;</>. Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>X-ray binary data based on <a href='http://stellarcollapse.org'>stellarcollapse.org</a>",
-    "Save as SVG":"Save as SVG"
+    "Save as SVG":"Save as SVG",
+    "numbers":{
+        "0":"&#2918;",
+        "1":"&#2919;",
+        "2":"&#2920;",
+        "3":"&#2921;",
+        "4":"&#2922;",
+        "5":"&#2923;",
+        "6":"&#2924;",
+        "7":"&#2925;",
+        "8":"&#2926;",
+        "9":"&#2927;",
+        "-":"&#2928;"
+        }
 }
 ]

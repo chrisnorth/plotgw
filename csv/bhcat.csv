@@ -1,13 +1,13 @@
 name,,massBH,massBHerr,compMass,compType,binType,parentName,period,method,BHtype,location,distance,refcompmass,refcomp,refbhmass,refper,num
-GW151226-B,,7.5,+2.3-2.3,14.2,Black hole,Binary black hole,GW151226,,GW,secondary,Extragalactic,780-1860,-,-,-,-,31
-GW151226,,20.1,+6.1-1.7,None,None,Binary black hole,,,GW,final,Extragalactic,780-1860,-,-,-,-,30
-GW151226-A,,14.2,+8.3-3.7,7.5,Black hole,Binary black hole,GW151226,,GW,primary,Extragalactic,780-1860,-,-,-,-,29
-LVT151012-B,,13,+4-5,23,Black hole,Binary black hole,LVT151012,,LVT,secondary,Extragalactic,1730-4960,-,-,-,-,28
-LVT151012,,35,+14-4,None,None,Binary black hole,,,LVT,final,Extragalactic,1730-4960,-,-,-,-,27
-LVT151012-A,,23,+18-6,13,Black hole,Binary black hole,LVT151012,,LVT,primary,Extragalactic,Extragalactic,-,-,-,-,26
+GW151226-B,,7.5,+2.3-2.3,14.2,Black hole,Binary black hole,GW151226,,GW,secondary,Extragalactic,780-1860,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,31
+GW151226,,20.1,+6.1-1.7,None,None,Binary black hole,,,GW,final,Extragalactic,780-1860,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,30
+GW151226-A,,14.2,+8.3-3.7,7.5,Black hole,Binary black hole,GW151226,,GW,primary,Extragalactic,780-1860,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,29
+LVT151012-B,,13,+4-5,23,Black hole,Binary black hole,LVT151012,,LVT,secondary,Extragalactic,1730-4960,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,28
+LVT151012,,35,+14-4,None,None,Binary black hole,,,LVT,final,Extragalactic,1730-4960,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,27
+LVT151012-A,,23,+18-6,13,Black hole,Binary black hole,LVT151012,,LVT,primary,Extragalactic,1730-4960,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,26
 GW150914-B,,28.1,+1.8-1.5,36.2,Black hole,Binary black hole,GW150914,,GW,secondary,Extragalactic,820-2020,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016,  Phys. Rev. Lett. 116 06110",-,25
 GW150914,,62.3,+3.7-3.1,None,None,Binary black hole,,,GW,final,Extragalactic,820-2020,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016,  Phys. Rev. Lett. 116 06110",-,24
-GW150914-A,,36.2,+5.2-3.8,28.1,Black hole,Binary black hole,GW150914,,GW,primary,Extragalactic,820-2020,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016,  Phys. Rev. Lett. 116 06110",-,23
+GW150914-A,,36.2,+5.2-3.8,28.1,28.1,Binary black hole,GW150914,,GW,primary,Extragalactic,820-2020,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016,  Phys. Rev. Lett. 116 06110",-,23
 M33X-7,,15.65,+1.45-1.45,70,Wolf-Rayet star,X-ray binary,X-ray binary,82.97,Xray,,M33,,"Orosz, J. A., McClintock, J. E., Narayan, R., et al. 2007, Nature, 449, 872","Orosz, J. A., McClintock, J. E., Narayan, R., et al. 2007, Nature, 449, 872","Orosz, J. A., McClintock, J. E., Narayan, R., et al. 2007, Nature, 449, 872","Pietsch, W., Haberl, F., Sasaki, M., et al. 2006, ApJ, 646, 420",22
 LMCX-3,,7,+0.32-0.32,3.72,B-type star,X-ray binary,,134.4,Xray,,Large Magellanic Cloud,,"Orosz, J. A., Steiner, J. F., McClintock, J. E., et al. 2014, ArXiv e-prints,arXiv:1402.0085","Orosz, J. A., Steiner, J. F., McClintock, J. E., et al. 2014, ArXiv e-prints,arXiv:1402.0085","Orosz, J. A., Steiner, J. F., McClintock, J. E., et al. 2014, ArXiv e-prints,arXiv:1402.0085","Orosz, J. A., Steiner, J. F., McClintock, J. E., et al. 2014, ArXiv e-prints,arXiv:1402.0085",21
 LMCX-1,,10.91,+1.55-1.55,31.79,O-type star,X-ray binary,,93.84,Xray,,Large Magellanic Cloud,,"Orosz, J. A., Steeghs, D., McClintock, J. E., et al. 2009, ApJ, 697, 573","Orosz, J. A., Steeghs, D., McClintock, J. E., et al. 2009, ApJ, 697, 573","Orosz, J. A., Steeghs, D., McClintock, J. E., et al. 2009, ApJ, 697, 573","Orosz, J. A., Steeghs, D., McClintock, J. E., et al. 2009, ApJ, 697, 573",20
