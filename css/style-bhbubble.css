@@ -1,6 +1,6 @@
 body {
   font: 11px sans-serif;
-  height:100%;
+  /*height:100%;*/
   margin:0;
   background-color:#000;
 }
@@ -18,7 +18,7 @@ a{
 #hdr.right{
     width:100%;
     text-align:center;
-    max-height:10%;
+    height:5%;
     color:#fff;
     background-color: rgba(0,0,0,0.5);
     display:block
@@ -27,9 +27,8 @@ a{
     margin-bottom:0;
 }
 #full.right{
-    height:90%;
+    height:80%;
     display:block;
-    padding-top:5%;
     text-align:center;
     position:relative;
 }
@@ -41,7 +40,7 @@ a{
 }
 #bubble-container.right{
     width:100%;
-    height:90%;
+    height:100%;
     position:absolute;
 }
 #bubble-container.bottom{
@@ -51,15 +50,15 @@ a{
     float:left;
 }
 #footer.right{
-    position:fixed;
+    position:absolute;;
     width:100%;
-    max-height:20%;
+    max-height:15%;
     bottom:0;
     text-align:center;
     background-color: rgba(0,0,0,0.5);
     color:#fff;
 }
-#footer.right span{
+/*#footer.right span{
     display:block;
 }
 #footer.right button{
@@ -68,7 +67,7 @@ a{
     right:0%;
     height:100%;
     cursor:pointer;
-}
+}*/
 #footer.bottom{
     position:absolute;
     width:100%;
@@ -92,7 +91,7 @@ a{
     position:absolute;
     top:10%;
     right:0;
-    height:10%;
+    height:100%;
     width:5%;
     margin-right:2%;
 }
@@ -105,6 +104,9 @@ a{
     color:#fff;
     font-size:18px;
     display:block;
+    margin-top:5%;
+    float:left;
+    margin-left:10%;
 }
 #controls .control.right, #controls .scale.right{
     float:left;
@@ -132,7 +134,7 @@ a{
     float:left;
     text-align:right;
     margin-right:1%;
-    width:10%;
+    margin-left:2%;
 }
 #controls .control.bottom, #controls .scale.bottom{
     float:left;
@@ -176,12 +178,18 @@ input.down{
     /*font-size:2em;*/
 }
 .tooltip span.name{
-    font-size:2em
+    font-size:2em;
+    font-weight: bold;
 }
 .tooltip span.info{
     font-size:1em;
 }
-
+@media (max-width: 500px){
+    .tooltip span.name{
+        font-size: 1em;
+        font-weight: bold;
+    }
+}
 /*Info panel*/
 .infopanelbg{
     position:fixed;

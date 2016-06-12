@@ -131,10 +131,10 @@ BHBubble.prototype.scalePage = function(){
         footer.classList.remove("bottom");
         bubcont.classList.add("right");
         bubcont.classList.remove("bottom");
-        bubcont.style.height = this.svgSize+"px";
+        // bubcont.style.height = this.svgSize+"px";
         full.classList.add("right");
         full.classList.remove("bottom");
-        full.style.height = this.svgSize+"px";
+        // full.style.height = this.svgSize+"px";
     }else{
         footer.classList.add("bottom");
         footer.classList.remove("right");
@@ -149,7 +149,7 @@ BHBubble.prototype.scalePage = function(){
     this.bubWidth = document.getElementById("bubble-container").offsetWidth;
     this.bubHeight = document.getElementById("bubble-container").offsetHeight;
     if (this.controlLoc=='right'){
-        this.svgSize=Math.min(this.bubWidth,0.8*this.pgHeight);
+        this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }else{
         console.log(this.bubWidth,this.bubHeight)
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
@@ -667,10 +667,19 @@ BHBubble.prototype.drawBubbles = function(){
       .text(function(d){return bh.legenddescs[d];});
 
 }
-BHBubble.prototype.addButtons = function(){
+BHBubble.prototype.controlLabFontSize = function(width){
+    if (this.controlLoc=='right'){
+        Math.min(width, (width - 8) / 30 * 8) + "px";
+    }else{
+        Math.min(width, (width - 8) / 30 * 8) + "px";
+    }
+}
+BHBubble.prototype.addButtons = function(width){
     var bh=this;
-    var divcont = document.getElementById('controls');
+    full = document.getElementById('full');
     if (this.controlLoc == 'right'){
+        divcont = document.createElement('div');
+        divcont.setAttribute("id","controls");
         divcont.classList.add("right");
         divcont.classList.remove("bottom");
         divcont.style.width = 0.1*this.pgWidth+"px";
@@ -680,10 +689,14 @@ BHBubble.prototype.addButtons = function(){
         }else{
             divcont.style.marginRight = 0;
         }
+        full.appendChild(divcont);
     }else{
+        divcont = document.createElement('div');
+        divcont.setAttribute("id","controls")
+        full.insertBefore(divcont,full.children[0]);
         divcont.classList.add("bottom");
         divcont.classList.remove("right");
-        divcont.style.marginLeft = 0.2*this.pgWidth+"px";
+        divcont.style.marginLeft = this.pgMargin.left+"px";
         divcont.style.width = 0.6*this.pgWidth+"px";
         // console.log('bottom',divcont.style.top);
         // divcont.style.top = 0.9*this.pgHeight+"px";
@@ -697,8 +710,9 @@ BHBubble.prototype.addButtons = function(){
     spancont.innerHTML = this.t("Mergers");
     divcont.appendChild(spancont);
     //set font size
-    width=spancont.offsetWidth;
-    fontsize=Math.min(width, (width - 8) / 25 * 8) + "px";
+    // width=spancont.offsetWidth;
+    fontsize=this.controlLabFontSize(spancont.offsetWidth);
+    // Math.min(width, (width - 8) / 30 * 8) + "px";
     spancont.style.fontSize=fontsize;
     //
     // divcont.innerHTML('<span>Controls:</span>');
@@ -756,8 +770,9 @@ BHBubble.prototype.addButtons = function(){
     spancontscale.innerHTML = this.t("Scale");
     divcont.appendChild(spancontscale);
     //set font size
-    width=spancontscale.offsetWidth;
-    fontsize=Math.min(width, (width - 8) / 25 * 8) + "px";
+    // width=spancontscale.offsetWidth;
+    fontsize=this.controlLabFontSize(spancontscale.offsetWidth);
+    // Math.min(width, (width - 8) / 30 * 8) + "px";
     spancontscale.style.fontSize=fontsize;
 
     //
@@ -923,6 +938,7 @@ BHBubble.prototype.replot = function(valueCol){
     this.formatData(this.valueCol);
     // this.makeSvg();
     d3.select("svg").remove();
+    d3.selectAll("#controls").remove();
     d3.selectAll(".control").remove();
     d3.selectAll(".control-lab").remove();
     this.drawBubbles();
