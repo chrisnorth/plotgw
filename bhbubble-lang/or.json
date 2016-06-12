@@ -1,8 +1,12 @@
 [{
     "code":"or",
+    "name":"Oriya",
+    "inputFile":"bhcat-or.csv",
+    "nameCol":"nameTr",
     "title":"&#2844;&#2851;&#2878; &#2852;&#2878;&#2864;&#2837;&#2880;&#2911; &#2860;&#2872;&#2893;&#2852;&#2881; &#2860;&#2878;&#2866;&#2878; &#2837;&#2883;&#2871;&#2893;&#2851; &#2839;&#2873;&#2893;&#2869;&#2864;",
-    "Gravitational Wave Candidate":"Gravitational Wave Candidate",
-    "Gravitational Wave Detection":"Gravitational Wave Detection",
+    "Gravitational Wave Candidate":"&#2862;&#2873;&#2878;&#2837;&#2864;&#2893;&#2871;&#2851; &#2852;&#2864;&#2818;&#2839; &#2858;&#2893;&#2864;&#2878;&#2864;&#2893;&#2853;&#2880;",
+    "Gravitational Wave Detection":"&#2862;&#2873;&#2878;&#2837;&#2864;&#2893;&#2871;&#2851; &#2852;&#2864;&#2818;&#2839; &#2854;&#2893;&#2869;&#2878;&#2864;&#2878; &#2822;&#2860;&#2879;&#2871;&#2893;&#2837;&#2883;&#2852;",
+    "X-ray Binary":"&#2864;&#2818;&#2844;&#2856; &#2864;&#2870;&#2893;&#2862;&#2880; &#2863;&#2876;&#2862;&#2844;",
     "X-ray Measurement":"&#2864;&#2818;&#2844;&#2856; &#2864;&#2870;&#2893;&#2862;&#2880; Measurement",
     "close":"&#2860;&#2856;&#2893;&#2854; &#2837;&#2864;&#2856;&#2893;&#2852;&#2881;",
     "Mass":"&#2860;&#2872;&#2893;&#2852;&#2881;&#2852;&#2893;&#2869;",
@@ -37,22 +41,10 @@
     "Scale by mass":"&#2860;&#2872;&#2893;&#2852;&#2881;&#2852;&#2878; &#2854;&#2893;&#2869;&#2878;&#2864;&#2878; &#2822;&#2858;&#2887;&#2837;&#2893;&#2871;&#2879;&#2837; &#2862;&#2878;&#2858;&#2837;",
     "Scale by size":"&#2822;&#2837;&#2878;&#2864; &#2854;&#2893;&#2869;&#2878;&#2864;&#2878; &#2822;&#2858;&#2887;&#2837;&#2893;&#2871;&#2879;&#2837; &#2862;&#2878;&#2858;&#2837; ",
     "Mergers":"&#2855;&#2837;&#2893;&#2837;&#2878;",
-    "Merge binary black holes":"Merge binary black holes",
-    "Unmerge binary black holes":"Unmerge binary black holes",
-    "footer":"Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Translated by  <a href='mailto:patra@mit.edu'>Satya Mohapatra</a>, &#2872;&#2852;&#2893;&#2911; &#2862;&#2873;&#2878;&#2858;&#2878;&#2852;&#2893;&#2864;, &#2360;&#2340;&#2381;&#2351; &#2350;&#2361;&#2366;&#2346;&#2366;&#2340;&#2381;&#2352;,  &#1587;&#1578;&#1740;&#1575; &#1605;&#1608;&#1729;&#1662;&#1578;&#1585;&#1575;</>. Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>X-ray binary data based on <a href='http://stellarcollapse.org'>stellarcollapse.org</a>",
-    "Save as SVG":"Save as SVG",
-    "numbers":{
-        "0":"&#2918;",
-        "1":"&#2919;",
-        "2":"&#2920;",
-        "3":"&#2921;",
-        "4":"&#2922;",
-        "5":"&#2923;",
-        "6":"&#2924;",
-        "7":"&#2925;",
-        "8":"&#2926;",
-        "9":"&#2927;",
-        "-":"&#2928;"
-        }
+    "Merge binary black holes":"&#2837;&#2883;&#2871;&#2893;&#2851; &#2839;&#2873;&#2893;&#2869;&#2864; &#2855;&#2837;&#2893;&#2837;&#2878; &#2837;&#2864;&#2856;&#2893;&#2852;&#2881;",
+    "Unmerge binary black holes":"&#2864;&#2818;&#2844;&#2856; &#2864;&#2870;&#2893;&#2862;&#2880; &#2863;&#2876;&#2862;&#2844;&#2837;&#2883;&#2871;&#2893;&#2851; &#2839;&#2873;&#2893;&#2869;&#2864; &#2821;-&#2855;&#2837;&#2893;&#2837;&#2878; &#2837;&#2864;&#2856;&#2893;&#2852;&#2881;",
+    "Show all black holes":"&#2872;&#2860;&#2881; &#2837;&#2883;&#2871;&#2893;&#2851; &#2839;&#2873;&#2893;&#2869;&#2864;&#2818;&#2837;&#2881; &#2854;&#2887;&#2838;&#2878;&#2856;&#2893;&#2852;&#2881;",
+    "footer":"Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Translated by  <a href='mailto:patra@mit.edu'>Satya Mohapatra</a>, &#2872;&#2852;&#2893;&#2911; &#2862;&#2873;&#2878;&#2858;&#2878;&#2852;&#2893;&#2864;, &#2360;&#2340;&#2381;&#2351; &#2350;&#2361;&#2366;&#2346;&#2366;&#2340;&#2381;&#2352;,  &#1587;&#1578;&#1740;&#1575; &#1605;&#1608;&#1729;&#1662;&#1578;&#1585;&#1575;</>. Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>X-ray binary data based on <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
+    "Save as SVG":"Save as SVG"
 }
 ]

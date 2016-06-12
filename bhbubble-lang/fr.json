@@ -1,5 +1,6 @@
 [{
     "code":"fr",
+    "name":"Francais",
     "title":"Trous Noirs Stellaires Connus",
     "Gravitational Wave Candidate":"Possible Onde Gravitationnelle",
     "Gravitational Wave Detection":"Onde Gravitationnelle Détectée",
@@ -40,7 +41,8 @@
     "Mergers":"Fusion",
     "Merge binary black holes":"Fusionner les systèmes binaires de trous noirs",
     "Unmerge binary black holes":"Revenir aux deux trous noirs initiaux",
-    "footer":"Hébergé par <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Maintenu par Chris North pour la <a href='http://www.ligo.org'>Collaboration Scientifique LIGO</a>. Code source disponible sur <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Données des systèmes binaires X issues de <a href='http://stellarcollapse.org'>stellarcollapse.org</a>",
+    "Show all black holes":"Montrer tous les trous noirs",
+    "footer":"Hébergé par <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Traduction : Nicolas Arnaud (CNRS, <a href='http://www.virgo-gw.eu' title='collaboration Virgo'>collaboration Virgo</a>)</br>Maintenu par Chris North pour la <a href='http://www.ligo.org'>Collaboration Scientifique LIGO</a>. Code source disponible sur <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Données des systèmes binaires X issues de <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
     "Save as SVG":"Sauver au format SVG"
 }
 ]

@@ -7,9 +7,11 @@ function BHBubble(){
     return this;
 }
 BHBubble.prototype.getUrlVars = function(){
+    // Get URL and query variables
     var vars = {},hash;
-    if (window.location.href.search!=-1){
+    if (window.location.href.indexOf('?')!=-1){
         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        url = window.location.href.slice(0,window.location.href.indexOf('?'));
         for(var i = 0; i < hashes.length; i++)
         {
             hash = hashes[i].split('=');
@@ -19,10 +21,23 @@ BHBubble.prototype.getUrlVars = function(){
     }
     // console.log("input:",vars);
     this.urlVars = vars;
+    this.url = url;
+}
+BHBubble.prototype.makeUrl = function(newKeys){
+    // construct new URL with replacement queries if necessary
+    newUrlVars = this.urlVars;
+    for (key in newKeys){newUrlVars[key]=newKeys[key];}
+    newUrl = this.url+'?';
+    for (key in newUrlVars){
+        newUrl=newUrl + key+'='+newUrlVars[key]+'&';
+    }
+    newUrl = newUrl.slice(0,newUrl.length-1);
+    return newUrl;
 }
 BHBubble.prototype.loadLang = function(lang){
+    //;load language files - then call rest of load procedure
     var _bh = this;
-    var lang;
+    _bh.lang = lang;
     if (!lang){lang="en"};
     var url=this.langdir+lang+'.json';
     // console.log(url);
@@ -41,7 +56,10 @@ BHBubble.prototype.loadLang = function(lang){
             }
         },
         dataType: 'json',
-        failure:function(){'Error loading language '+lang},
+        error:function(data){
+            alert('Error loading language '+_bh.lang+'. Reverting to English as default');
+            window.location.replace(_bh.makeUrl({'lang':'en'}));
+        },
         success:function(data){
             //console.log('success',data[0]);
             _bh.langdict=data[0];_bh.makePlot();}
@@ -50,9 +68,9 @@ BHBubble.prototype.loadLang = function(lang){
 BHBubble.prototype.t = function(key,def){
     //translate text
     if (this.langdict.hasOwnProperty(key)){return this.langdict[key];}
-    else{return (def) ? def : '?'+key;}
+    else{console.log("not found:",key);return (def) ? def : '?'+key;}
 }
-BHBubble.prototype.tN = function(key){
+BHBubble.prototype.tNold = function(key){
     // translate numbers
     if (this.langdict.hasOwnProperty("numbers")){
         ndict=this.langdict.numbers;
@@ -66,10 +84,29 @@ BHBubble.prototype.tN = function(key){
     }
     return key;
 }
+BHBubble.prototype.tN = function(key){
+    var systems = {
+            devanagari: 2406, tamil: 3046, kannada:  3302,
+            telugu: 3174, marathi: 2406, malayalam: 3430,
+            oriya: 2918, gurmukhi: 2662, nagari: 2534, gujarati: 2790
+        };
+    if (!systems.hasOwnProperty(this.langdict.name.toLowerCase())){return key;}
+    zero = 48; // char code for Arabic zero
+    nine = 57; // char code for Arabic nine
+    offset = (systems[this.langdict.name.toLowerCase()] || zero) - zero;
+    output = key.toString().split("");
+    l = output.length;
+
+    for (i = 0; i < l; i++) {
+        cc = output[i].charCodeAt(0);
+        if (cc >= zero && cc <= nine) {
+            output[i] = String.fromCharCode(cc + offset);
+        }
+    }
+    return output.join("");
+}
 BHBubble.prototype.init = function(){
-    // _t=this.translate;
-    // this.diameter = 800 //max size of the bubbles
-        // color    = d3.scale.category10(); //color category
+    // initialise parameters (only called on load)
     this.fillcolor2 = d3.scale.linear().domain([1,2,3])
             .range([d3.rgb("#48c7e9"), d3.rgb("#67c18d"), d3.rgb('#f68d69')])
     this.textcolor2 = d3.scale.linear().domain([1,2,3])
@@ -89,10 +126,13 @@ BHBubble.prototype.init = function(){
     this.langdir = 'bhbubble-lang/';
     d3.select('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
     this.mergeDuration = 1000;
+    //set name column
+    if (this.langdict.hasOwnProperty("nameCol")){this.nameCol=this.langdict.nameCol;}
+    else{this.nameCol='name';}
 }
 BHBubble.prototype.makeSvg = function(){
+    // make initial elements
     var bh=this;
-
     this.tooltip = d3.select("div#full").append("div")
         .attr("class", "tooltip");
     // .style("opacity", 0);
@@ -116,8 +156,7 @@ BHBubble.prototype.makeSvg = function(){
     document.getElementById("generate").innerHTML=this.t("Save as SVG");
 }
 BHBubble.prototype.scalePage = function(){
-    // this.pgWidth = document.getElementById("bubble-container").offsetWidth;
-    // this.pgHeight = document.getElementById("bubble-container").offsetHeight;
+    // Set scale of elements given page size
     this.pgWidth=window.outerWidth;
     this.pgHeight=window.outerHeight;
     this.pgAspect = this.pgWidth/this.pgHeight;
@@ -151,11 +190,11 @@ BHBubble.prototype.scalePage = function(){
     if (this.controlLoc=='right'){
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }else{
-        console.log(this.bubWidth,this.bubHeight)
+        // console.log(this.bubWidth,this.bubHeight)
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }
     this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
-    console.log(this.pgAspect,this.controlLoc);
+    // console.log(this.pgAspect,this.controlLoc);
     d3.select("#full")
         .attr("width",this.svgSize+"px")
         .attr("margin-left",this.pgMargin.left+"px");
@@ -165,22 +204,28 @@ BHBubble.prototype.scalePage = function(){
     // console.log()
 }
 BHBubble.prototype.comparitor = function(sort){
+    // Define comparitor (for sorting positions of black holes)
     bh=this;
     // console.log(this,this.sort);
     if (sort=="random"){
+        // random sorting
         return function(a,b){
             return a.value * Math.random()- b.value*Math.random();};
-    }else if(sort=="reverse"){
-        return function(a,b){return b.value - a.value;};
     }else if(sort=="forward"){
+        // keep input order (in table)
         return function(a,b){return a.value - b.value;};
+    }else if(sort=="reverse"){
+        // reverse the input order (in table)
+        return function(a,b){return b.value - a.value;};
     }else if(sort=="gwfirst"){
+        // GW & LVT on outside of Xray binaries, otherise keep order of input
         return function(a,b){
             if (((a.method=='Xray')&&(b.method=='Xray'))||((a.method!='Xray')&&(b.method!='Xray'))){return b.num-a.num;}
             else if((a.method=='GW')||(a.method=='LVT')){return 1000;}
             else{return -1000;}
         }
     }else{
+        // keep input order (but reverses order on replot!?)
         return null;
     }
 }
@@ -193,7 +238,7 @@ BHBubble.prototype.comparitor = function(sort){
 //     }
 // }
 BHBubble.prototype.filterFn = function(filterType){
-    // console.log(filterType);
+    // define filter function
     if (filterType=="nofin"){
         return function(d){
             // console.log(d.name,(d.BHtype!="final"),(!d.children),((d.BHtype!="final")&&(!d.children)));
@@ -210,130 +255,8 @@ BHBubble.prototype.filterFn = function(filterType){
     }
 }
 //define tooltip text
-BHBubble.prototype.tttext = function(d){
-    text =  "<span class='name'>"+d["name"]+"</span>"+
-    "<span class='info'>"+this.t("Mass")+": "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub></span>";
-    if(d["method"]=='Xray'){
-        // text = text+ "<span class='info'>X-ray detection</span>";
-        text = text + "<span class='info'>"+this.t(d.binType)+"</span>";
-        // text = text+ "<span class='info'>"+this.t("Companion")+": "+this.t(d.compType)+"</span>";
-    }else{
-        text = text+ "<span class='info'>"+this.t(d.binType)+
-            " ("+this.t(d.BHtype)+")</span>";
-    }
-    // text = text+ "<span class='info'>"+this.t("Location")+": "+this.t(d.location)+"</span>";
-    return text;
-}
-//set tooltip functions
-BHBubble.prototype.showTooltip = function(d){
-    // console.log('2',d.name,tooltip);
-    bh=this;
-    getLeft = function(d){
-        console.log('x',d.x,bh.svgSize);
-        if (d.x > bh.svgSize/2){console.log('left>0.5');return (d3.event.pageX - 0.25*bh.svgSize - 10) + "px";}
-        else{return (d3.event.pageX + 10) + "px";};
-    }
-    getTop = function(d){
-        console.log('y',d.y,bh.svgSize);
-        if (d.y > bh.svgSize/2){console.log('top>0.5');return (d3.event.pageY - 0.1*bh.svgSize - 10) + "px";}
-        else{return (d3.event.pageY + 10) + "px";};
-    }
-    this.tooltip.transition()
-       .duration(200)
-       .style("opacity",bh.getOpacity()(d)*0.9);
-    this.tooltip.html(this.tttext(d))
-       .style("left", getLeft(d)).style("top", getTop(d))
-       .style("width","25%").style("height","auto");
-    this.svg.select('#hl'+d.id)
-        .transition(500)
-        .attr("stroke-opacity",bh.getOpacity());
-}
-BHBubble.prototype.hideTooltip = function(d) {
-    this.tooltip.transition()
-        .duration(500).style("opacity", 0);
-    this.svg.select('#hl'+d.id)
-        .transition(500).attr("stroke-opacity",0);
-}
-
-BHBubble.prototype.iptext = function(d){
-    //initialise reference number
-    rx=1;
-    text =  "<span class='name'>"+d["name"]+"</span>";
-    if(d["method"]=='Xray'){
-        text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub>";
-        if (d.refbhmass!='-'){text = text +
-            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
-        else{rhbm=false;text = text+"</span>"}
-        text = text + "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+"</span>";
-        // text = text+ "<span class='info'>X-ray detection</span>";
-        //companion
-        text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-            this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType);
-        if (d.refcomp!="-"){text = text +
-            " <sup>["+rx+"]</sup>";rct=rx;rx++;}else{rct=false;}
-        if (d.refcompmass!="-"){text = text +
-            " <sup>["+rx+"]</sup>";rcm=rx;rx++;}else{rcm=false;}
-        text = text+"</span>";
-        //period mass
-        text = text+ "<span class='info'><b>"+this.t("Orbital period")+"</b>: "+this.tN(d.period)+
-        " "+this.t("days")+"</sub>";
-        if (d.refper!="-"){text = text +
-            " <sup>["+rx+"]</sup></span>";rper=rx;rx++;}
-        else{rper=false;text = text+"</span>"}
-        text = text+ "<span class='info'><b>"+this.t("Location")+"</b>: "+this.t(d.location)+"</span>";
-        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
-        if (rct){text = text + "<span class='ref'>["+rct+"] "+d.refcomp+"</span>"}
-        if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.refcompmass+"</span>"}
-        if (rper){text = text + "<span class='ref'>["+rper+"] "+d.refper+"</span>"}
-    }else{
-        text = text + "<span class='info'><b>"+this.t("Mass")+"</b>: "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub>";
-        if (d.refbhmass!='-'){text = text +
-            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
-        else{rbhm=false;text = text+"</span>"}
-        text = text+ "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+
-            " ("+this.t(d.BHtype)+")</span>";
-        if (d.compType!="None"){
-            text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-                this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType)+"</span>";
-        }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
-        text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.tN(d.distance)+
-            " "+this.t("million light years")+"</span>";
-        console.log(rbhm);
-        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
-
-    }
-    return text;
-}
-BHBubble.prototype.showInfopanel = function(d){
-    // fade in semi-transparent background layer (greys out image)
-    this.infopanelbg.transition()
-      .duration(500)
-      .style({"opacity":0.5});
-    this.infopanelbg.style("height","100%");
-    //fade in infopanel
-    this.infopanelouter.transition()
-       .duration(500)
-       .style("opacity",1);
-    // set contents and position of infopanel
-    this.infopanel.html(this.iptext(d));
-    this.infopanelouter.style("left", "25%").style("top", "25%")
-       .style("width","50%").style("height","auto");
-
-}
-BHBubble.prototype.hideInfopanel = function(d) {
-    // fade out infopanel
-    this.infopanelouter.transition()
-        .duration(500).style("opacity", 0);
-    // move infopanel out of page
-    this.infopanelouter.style("top","200%");
-    // fade out semi-transparent background
-    this.infopanelbg.transition()
-      .duration(500)
-      .style("opacity",0);
-    this.infopanelbg.style("height",0);
-    // d3.selectAll(".info").attr("opacity",0);
-}
 BHBubble.prototype.filterData = function(data,filterType){
+    //filter data (OBSOLETE)
     var idxRem=[];
     if (filterType=="nofin"){
         data.forEach(function(d){
@@ -360,28 +283,22 @@ BHBubble.prototype.filterData = function(data,filterType){
 }
 
 BHBubble.prototype.loadData = function(){
-    // console.log("loadData");
+    //load data - then call next functions
+    if (this.langdict.hasOwnProperty('inputFile')){
+        this.inputFile="csv/"+this.langdict.inputFile;
+    }else{this.inputFile="csv/bhcat.csv";}
+    // console.log('file',this.inputFile);
     var bh=this;
-    d3.csv("csv/bhcat.csv", function(error, data){
-        // data.forEach(function(d){
-        //     if (bh.filterFn(bh)){d=null}});
-        // console.log(data.length);
-        // console.log(data.length);
+    d3.csv(this.inputFile, function(error, data){
         data= bh.filterData(data,bh.filterType);
-        // console.log(data.length);
         bh.data = data;
-        // console.log(data[0].r)
-        // bh.scaleData();
+        //call next functions
         bh.formatData(bh.valueCol)
         bh.drawBubbles();
     })
 }
-// BHBubble.prototype.scaleData = function(scale){
-//     bh=this;
-//
-// }
 BHBubble.prototype.formatData = function(valueCol){
-    // console.log("formatData",this.data[0].r);
+    // Calculate errors and make links between black hole mergers
     var bh=this;
     //convert numerical values from strings to numbers
     //bubbles needs very specific format, convert data to this.
@@ -392,35 +309,35 @@ BHBubble.prototype.formatData = function(valueCol){
             errcode=d.massBHerr.split('-');
             d.massBHplus = +errcode[0] + d.massBH;
             d.massBHminus = -errcode[1] + d.massBH;
-            d.massBHstr = parseFloat(d.massBHminus.toFixed(1))+' - '+
-                                parseFloat(d.massBHplus.toFixed(1));
+            d.massBHstr = bh.tN(parseFloat(d.massBHminus.toFixed(1)))+' - '+
+                                bh.tN(parseFloat(d.massBHplus.toFixed(1)));
             // console.log('lim:',d.massBHerr,errcode,d.massBHstr);
         }else if(d.massBHerr[0]=='r'){
             errcode=d.massBHerr.split('r')[1];
             errcode=errcode.split('-');
             d.massBHplus = +errcode[1];
             d.massBHminus = +errcode[0];
-            d.massBHstr = parseFloat(d.massBHminus.toFixed(1))+' - '+
-                                parseFloat(d.massBHplus.toFixed(1));
+            d.massBHstr = bh.tN(parseFloat(d.massBHminus.toFixed(1)))+' - '+
+                                bh.tN(parseFloat(d.massBHplus.toFixed(1)));
             // console.log('range:',d.massBHerr,errcode,d.massBHstr);
         }else if(d.massBHerr[0]=='>'){
             errcode=d.massBHerr.split('>')[1]
             d.massBHplus = Infinity;
             d.massBHminus = +errcode;
-            d.massBHstr = '>'+parseFloat(d.massBHminus.toFixed(1));
+            d.massBHstr = '>'+bh.tN(parseFloat(d.massBHminus.toFixed(1)));
             // console.log('min:',d.massBHerr,errcode,d.massBHstr);
         }else if(d.massBHerr[0]=='<'){
             errcode=d.massBHerr.split('<')[1]
             d.massBHplus = +errcode;
             d.massBHminus = 0;
-            d.massBHstr = '<'+parseFloat(d.massBHplus.toFixed(1));
+            d.massBHstr = '<'+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
             // console.log('max:',d.massBHerr,errcode,d.massBHstr);
         }else if(d.massBHerr[0]=='~'){
             errcode=d.massBHerr.split('~')[1];
             d.massBHplus = +errcode;
             d.massBHminus = +errcode;
-            d.massBHstr = 'approx. '+parseFloat(d.massBHplus.toFixed(1));
-        }
+            d.massBHstr = 'approx. '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
+        }else{console.log('Data format err:',d.massBHerr,d);}
     });
     this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
     // data = data.map(function(d){
@@ -463,6 +380,7 @@ BHBubble.prototype.formatData = function(valueCol){
     });
 }
 BHBubble.prototype.getText = function(d){
+    // get text contents of a BH element given a displayFilter
     bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
@@ -471,6 +389,7 @@ BHBubble.prototype.getText = function(d){
         return "";}else{return d.name}
 }
 BHBubble.prototype.getRadius = function(d){
+    // get radius of a BH element given a displayFilter
     bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
@@ -479,6 +398,7 @@ BHBubble.prototype.getRadius = function(d){
         return 0;}else{return d.r}
 }
 BHBubble.prototype.getX = function(d){
+    // get Y position of a BH element given a displayFilter
     bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
@@ -486,6 +406,7 @@ BHBubble.prototype.getX = function(d){
     else{return this.arrowpos[d.id].x}
 }
 BHBubble.prototype.getY = function(d){
+    // get Y position of a BH element given a displayFilter
     bh=this;
     if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
@@ -493,6 +414,7 @@ BHBubble.prototype.getY = function(d){
         else{return this.arrowpos[d.id].y}
 }
 BHBubble.prototype.getOpacity = function(d){
+    // get opacity of a BH element given a displayFilter
     bh=this;
     if (this.displayFilter=="nofin"){
         return function(d){
@@ -505,6 +427,7 @@ BHBubble.prototype.getOpacity = function(d){
     }else{return function(d){return 1;};}
 }
 BHBubble.prototype.drawBubbles = function(){
+    // Add bubbles and legend
     this.svg = d3.select("div#bubble-container")
         .append("svg").attr("class", "bubble")
         .attr("width", this.svgSize).attr("height", this.svgSize);
@@ -657,31 +580,33 @@ BHBubble.prototype.drawBubbles = function(){
       .style("stroke","#000");
 
     // draw legend text
-    this.legend.append("text")
+    this.legend.append("foreignObject")
       .attr("x", 36)
-      .attr("y", 21)
-      .attr("dy", ".35em")
-      .attr("font-size","1.2em")
+      .attr("y", 15)
+      .attr("width",200)
+      .attr("height",18)
+    //   .attr("dy", ".35em")
+      .append("xhtml:body")
+      .style({"font-size":"1.2em","color":"#fff","text-align":"left"})
       .style("fill","#fff")
-      .style("text-anchor", "start")
-      .text(function(d){return bh.legenddescs[d];});
+    //   .style("text-anchor", "start")
+      .html(function(d){return "<p>"+bh.legenddescs[d]+"<p>";});
 
 }
 BHBubble.prototype.controlLabFontSize = function(width){
+    // set Label fontsize for control panel
     if (this.controlLoc=='right'){
         return Math.min(width, (width - 8) / 30 * 8) + "px";
     }else{
-        console.log(this.pgWidth,width);
         if (this.pgWidth > 500){
-            console.log('big',width, (width - 8) / 30 * 8);
             return Math.min(width, (width - 8) / 30 * 8) + "px";
         }else{
-            console.log('small',width, (width - 8) / 40 * 8);
             return Math.min(width, (width - 8) / 30 * 8) + "px";
         }
     }
 }
 BHBubble.prototype.addButtons = function(width){
+    // Add control buttons
     var bh=this;
     full = document.getElementById('full');
     if (this.controlLoc == 'right'){
@@ -765,7 +690,7 @@ BHBubble.prototype.addButtons = function(width){
     animimgall.setAttribute("src","img/showall.svg");
     animimgall.setAttribute("title",this.t("Show all black holes"));
     animimgall.addEventListener("click",function(){
-        console.log('show all');bh.showAll();
+        bh.showAll();
     });
     this.animcontall.appendChild(animimgall);
     //
@@ -819,7 +744,7 @@ BHBubble.prototype.addButtons = function(width){
 //         .
 // }
 BHBubble.prototype.animateMerger = function(){
-    // console.log(this.arrows);
+    // Hide initial black holes in mergers
     bh=this;
     this.displayFilter = "noinit";
     this.animcontun.classList.remove("hide");
@@ -853,7 +778,7 @@ BHBubble.prototype.animateMerger = function(){
     }
 }
 BHBubble.prototype.animateUnMerger = function(){
-    // console.log(this.arrows);
+    // Hide final black holes in mergers
     bh=this;
     this.displayFilter = "nofin";
     this.animcont.classList.remove("hide");
@@ -885,7 +810,7 @@ BHBubble.prototype.animateUnMerger = function(){
     }
 }
 BHBubble.prototype.showAll = function(){
-    // console.log(this.arrows);
+    // Show all black holes
     bh=this;
     this.displayFilter = "all";
     this.animcontun.classList.remove("hide");
@@ -915,6 +840,133 @@ BHBubble.prototype.showAll = function(){
             .attr("opacity",function(d){return bh.getOpacity()(d);})
             .text(function(d){ return bh.getText(d); });
     }
+}
+BHBubble.prototype.conttttext = function(d){
+    //text of control panel tool-tip
+    text =  this.t("Tooltip");
+    return text;
+}
+BHBubble.prototype.tttext = function(d){
+    //create tooltip text
+    text =  "<span class='name'>"+d[this.nameCol]+"</span>";
+    //mass already has numbers converted
+    text = text + "<span class='info'>"+this.t("Mass")+": "+d["massBHstr"]+" M<sub>&#x2609;</sub></span>";
+    if(d["method"]=='Xray'){
+        // text = text+ "<span class='info'>X-ray detection</span>";
+        text = text + "<span class='info'>"+this.t(d.binType)+"</span>";
+        // text = text+ "<span class='info'>"+this.t("Companion")+": "+this.t(d.compType)+"</span>";
+    }else{
+        text = text+ "<span class='info'>"+this.t(d.binType)+
+            " ("+this.t(d.BHtype)+")</span>";
+    }
+    // text = text+ "<span class='info'>"+this.t("Location")+": "+this.t(d.location)+"</span>";
+    return text;
+}
+//set tooltip functions
+BHBubble.prototype.showTooltip = function(d){
+    // console.log('2',d.name,tooltip);
+    bh=this;
+    getLeft = function(d){
+        if (d.x > bh.svgSize/2){return (d3.event.pageX - 0.25*bh.svgSize - 10) + "px";}
+        else{return (d3.event.pageX + 10) + "px";};
+    }
+    getTop = function(d){
+        if (d.y > bh.svgSize/2){return (d3.event.pageY - 0.1*bh.svgSize - 10) + "px";}
+        else{return (d3.event.pageY + 10) + "px";};
+    }
+    this.tooltip.transition()
+       .duration(200)
+       .style("opacity",bh.getOpacity()(d)*0.9);
+    this.tooltip.html(this.tttext(d))
+       .style("left", getLeft(d)).style("top", getTop(d))
+       .style("width","25%").style("height","auto");
+    this.svg.select('#hl'+d.id)
+        .transition(500)
+        .attr("stroke-opacity",bh.getOpacity());
+}
+BHBubble.prototype.hideTooltip = function(d) {
+    this.tooltip.transition()
+        .duration(500).style("opacity", 0);
+    this.svg.select('#hl'+d.id)
+        .transition(500).attr("stroke-opacity",0);
+}
+
+BHBubble.prototype.iptext = function(d){
+    //initialise reference number
+    rx=1;
+    text =  "<span class='name'>"+d["name"]+"</span>";
+    if(d["method"]=='Xray'){
+        text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
+        if (d.refbhmass!='-'){text = text +
+            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
+        else{rhbm=false;text = text+"</span>"}
+        text = text + "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+"</span>";
+        // text = text+ "<span class='info'>X-ray detection</span>";
+        //companion
+        text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
+            this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType);
+        if (d.refcomp!="-"){text = text +
+            " <sup>["+rx+"]</sup>";rct=rx;rx++;}else{rct=false;}
+        if (d.refcompmass!="-"){text = text +
+            " <sup>["+rx+"]</sup>";rcm=rx;rx++;}else{rcm=false;}
+        text = text+"</span>";
+        //period mass
+        text = text+ "<span class='info'><b>"+this.t("Orbital period")+"</b>: "+this.tN(d.period)+
+        " "+this.t("days")+"</sub>";
+        if (d.refper!="-"){text = text +
+            " <sup>["+rx+"]</sup></span>";rper=rx;rx++;}
+        else{rper=false;text = text+"</span>"}
+        text = text+ "<span class='info'><b>"+this.t("Location")+"</b>: "+this.t(d.location)+"</span>";
+        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
+        if (rct){text = text + "<span class='ref'>["+rct+"] "+d.refcomp+"</span>"}
+        if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.refcompmass+"</span>"}
+        if (rper){text = text + "<span class='ref'>["+rper+"] "+d.refper+"</span>"}
+    }else{
+        text = text + "<span class='info'><b>"+this.t("Mass")+"</b>: "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub>";
+        if (d.refbhmass!='-'){text = text +
+            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
+        else{rbhm=false;text = text+"</span>"}
+        text = text+ "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+
+            " ("+this.t(d.BHtype)+")</span>";
+        if (d.compType!="None"){
+            text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
+                this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType)+"</span>";
+        }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
+        text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.tN(d.distance)+
+            " "+this.t("million light years")+"</span>";
+        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
+
+    }
+    return text;
+}
+BHBubble.prototype.showInfopanel = function(d){
+    // fade in semi-transparent background layer (greys out image)
+    this.infopanelbg.transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    this.infopanelbg.style("height","100%");
+    //fade in infopanel
+    this.infopanelouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    this.infopanel.html(this.iptext(d));
+    this.infopanelouter.style("left", "25%").style("top", "25%")
+       .style("width","50%").style("height","auto");
+
+}
+BHBubble.prototype.hideInfopanel = function(d) {
+    // fade out infopanel
+    this.infopanelouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.infopanelouter.style("top","200%");
+    // fade out semi-transparent background
+    this.infopanelbg.transition()
+      .duration(500)
+      .style("opacity",0);
+    this.infopanelbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
 }
 BHBubble.prototype.makeDownload = function(){
     //make SVG download button
@@ -960,12 +1012,16 @@ BHBubble.prototype.makePlot = function(){
     this.makeDownload();
     this.addButtons();
 }
+
+// create BHBubble object
 bub = new BHBubble
+// parse URL queries
 bub.getUrlVars();
-// console.log(bub.urlVars);
+// load language
 bub.langdir='bhbubble-lang/';
 bub.loadLang(bub.urlVars.lang);
-// console.log(bub.langdict);
+// NB: loadLang calls makePlot function
+
 window.addEventListener("resize",function(){
     bub.replot();
 });
