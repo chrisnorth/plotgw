@@ -669,9 +669,16 @@ BHBubble.prototype.drawBubbles = function(){
 }
 BHBubble.prototype.controlLabFontSize = function(width){
     if (this.controlLoc=='right'){
-        Math.min(width, (width - 8) / 30 * 8) + "px";
+        return Math.min(width, (width - 8) / 30 * 8) + "px";
     }else{
-        Math.min(width, (width - 8) / 30 * 8) + "px";
+        console.log(this.pgWidth,width);
+        if (this.pgWidth > 500){
+            console.log('big',width, (width - 8) / 30 * 8);
+            return Math.min(width, (width - 8) / 30 * 8) + "px";
+        }else{
+            console.log('small',width, (width - 8) / 40 * 8);
+            return Math.min(width, (width - 8) / 30 * 8) + "px";
+        }
     }
 }
 BHBubble.prototype.addButtons = function(width){
@@ -697,7 +704,7 @@ BHBubble.prototype.addButtons = function(width){
         divcont.classList.add("bottom");
         divcont.classList.remove("right");
         divcont.style.marginLeft = this.pgMargin.left+"px";
-        divcont.style.width = 0.6*this.pgWidth+"px";
+        divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
         // console.log('bottom',divcont.style.top);
         // divcont.style.top = 0.9*this.pgHeight+"px";
         // divcont.style.width = this.pgWidth+"px";

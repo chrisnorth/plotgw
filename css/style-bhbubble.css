@@ -25,6 +25,7 @@ a{
 }
 #hdr h1{
     margin-bottom:0;
+    font-size:22px;
 }
 #full.right{
     height:80%;
@@ -98,7 +99,7 @@ a{
 #controls div.control.merge{
     border:solid 1px white;
     border-radius:10%;
-    margin-bottom:1%;
+    /*margin-bottom:1%;*/
 }
 #controls.right div.control-lab{
     color:#fff;
@@ -107,6 +108,7 @@ a{
     margin-top:5%;
     float:left;
     margin-left:10%;
+    width:80%;
 }
 #controls .control.right, #controls .scale.right{
     float:left;
@@ -114,6 +116,7 @@ a{
     cursor:pointer;
     margin-left:10%;
     margin-right:10%;
+    margin-bottom:5%;
 }
 #controls .control.right img, #controls .scale.right img{
     width: 100%;
@@ -135,11 +138,13 @@ a{
     text-align:right;
     margin-right:1%;
     margin-left:2%;
+    width:12%;
 }
 #controls .control.bottom, #controls .scale.bottom{
     float:left;
-    width:15%;
+    width:12%;
     cursor:pointer;
+    margin-right:1%;
 }
 #controls .control.bottom img, #controls .scale.bottom img{
     width: 100%;
@@ -183,12 +188,6 @@ input.down{
 }
 .tooltip span.info{
     font-size:1em;
-}
-@media (max-width: 500px){
-    .tooltip span.name{
-        font-size: 1em;
-        font-weight: bold;
-    }
 }
 /*Info panel*/
 .infopanelbg{
@@ -248,4 +247,13 @@ input.down{
 .infoclose img{
     width:100%;
     cursor:pointer;
+}
+@media (max-width: 500px){
+    .tooltip span.name{
+        font-size: 1em;
+        font-weight: bold;
+    }
+    #hdr h1{
+        font-size: 12px;
+    }
 }
