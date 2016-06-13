@@ -163,7 +163,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.sketchFullHeight = 0.5*this.sketchFullWidth;
         this.fullGraphWidth = 0.95*this.winFullWidth;
         this.fullGraphHeight =
-            0.85*(this.winFullHeight-this.sketchFullHeight);
+            0.8*(this.winFullHeight-this.sketchFullHeight);
         info.style["margin-left"]="5%";
         this.sketchWidth = 0.45*this.sketchFullWidth;
         this.sketchHeight = this.sketchFullHeight;
@@ -182,7 +182,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.sketchFullWidth = 0.5*this.sketchFullHeight;
         this.fullGraphWidth =
             0.95*(this.winFullWidth-this.sketchFullWidth);
-        this.fullGraphHeight = this.winFullHeight;
+        this.fullGraphHeight = 0.9*this.winFullHeight;
         info.style["margin-left"]=0;
         this.sketchWidth = this.sketchFullWidth;
         this.sketchHeight = 0.5*this.sketchFullHeight;
@@ -205,7 +205,7 @@ GWCatalogue.prototype.scaleWindow = function(){
     // console.log(skcont);
     labcont.style.height = this.labHeight;
     labcont.style.width = this.labWidth;
-    this.svgHeight = 0.8*this.fullGraphHeight;
+    this.svgHeight = this.fullGraphHeight;
     this.svgWidth = this.fullGraphWidth;
     // console.log('window',this.winFullWidth,this.winFullHeight);
     // console.log('sketchfull',this.sketchFullWidth,this.sketchFullHeight);
@@ -219,11 +219,11 @@ GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
     var gw=this;
 
-    this.margin = {top: 20, right: 10, bottom: 50, left: 60}
+    this.margin = {top: 40, right: 10, bottom: 20, left: 60}
     this.graphWidth =
         this.fullGraphWidth - this.margin.left - this.margin.right;
     this.graphHeight =
-        0.8*this.fullGraphHeight - this.margin.top - this.margin.bottom;
+        0.9*this.fullGraphHeight - this.margin.top - this.margin.bottom;
 
     // set errorbar marker width
     // this.relh = [0.0,1.0];
