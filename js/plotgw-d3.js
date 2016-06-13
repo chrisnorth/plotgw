@@ -115,10 +115,10 @@ num2Errstr = function(col){
             parseFloat((d[col+'plus']*3.26).toPrecision(3))
 };
 
-getLabel = function(col){
+var getLabel = function(col){
     return(columns[col].label);
 }
-getLabelUnit = function(col){
+var getLabelUnit = function(col){
     if (columns[col].unit){
         return(columns[col].label+' ('+columns[col].unit+')');
     }else{
@@ -760,7 +760,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.data = data;
         // console.log(data);
 
-        gw.drawGraph();
+        gw.makePlot();
 
         // console.log('gw.data',gw.data);
     });
@@ -959,30 +959,56 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
       .text(function(d) { return gw.legenddescs[d];})
+
+    //add options icon
+    this.optionsbg = d3.select('#options-bg');
+    this.optionsouter = d3.select('#options-outer')
+    //add options icon
+    d3.select("#svg-container").append("div")
+      .attr("id","options-icon")
+      .style({"right":0,"top":0,"width":40,"height":40})
+    .append("img")
+      .attr("src","img/mass.svg")
+      .on("click",function(){gw.showOptions();});
+    this.optionsbg.on("click",function(){gw.hideOptions();});
+    this.optionsouter
+      .style("top",0.5*this.svgHeight);
+    this.optionsouter
+      .append("div")
+      .attr("id","options-close")
+      .html("<img src='img/close.png' title='close'>")
+      .on("click",function(){gw.hideOptions();});
+
 }
 GWCatalogue.prototype.updateErrors = function(){
     // svg = d3.select("body").transition();
     this.svg.selectAll(".errorX")
+        .transition()
         .duration(750)
         .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
         .attr("y1",this.yMap).attr("y2",this.yMap);
     this.svg.selectAll(".errorXp")
+        .transition()
         .duration(750)
         .attr("x1",this.xMapErrP).attr("x2",this.xMapErrP)
         .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1);
     this.svg.selectAll(".errorXm")
+        .transition()
         .duration(750)
         .attr("x1",this.xMapErrM).attr("x2",this.xMapErrM)
         .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1);
     this.svg.selectAll(".errorY")
+        .transition()
         .duration(750)
         .attr("x1",this.xMap).attr("x2",this.xMap)
         .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM);
     this.svg.selectAll(".errorYp")
+        .transition()
         .duration(750)
         .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
         .attr("y1",this.yMapErrP).attr("y2",this.yMapErrP);
     this.svg.selectAll(".errorYm")
+        .transition()
         .duration(750)
         .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
         .attr("y1",this.yMapErrM).attr("y2",this.yMapErrM);
@@ -991,73 +1017,157 @@ GWCatalogue.prototype.updateErrors = function(){
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // set global variable
     this.xvar = xvarNew;
+    var gw=this;
     d3.csv("csv/gwcat.csv", function(error, data) {
 
         // change string (from CSV) into number format
-        data.forEach(this.formatData);
+        data.forEach(gw.formatData);
 
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        if (this.xvar=="massratio"){
-            this.xScale.domain([0, d3.max(data, this.xErr)]);
+        if (gw.xvar=="massratio"){
+            gw.xScale.domain([0, d3.max(data, gw.xErr)]);
         }else{
-            this.xScale.domain([0, d3.max(data, this.xErrP)+2]);
+            gw.xScale.domain([0, d3.max(data, gw.xErrP)+2]);
         }
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
 
         // Make the changes
-        this.svg.selectAll(".dot")   // change the line
-          .duration(750)
-          .attr("cx", this.xMap)
-        this.svg.select(".x-axis.axis") // change the x axis
-          .duration(750)
-          .call(this.xAxis);
-        //   .forceX([0]);
-        this.svg.select(".x-axis.axis-label")
+        gw.svg.selectAll(".dot")   // change the line
+            .transition()
             .duration(750)
-            .text(getLabelUnit(this.xvar));
+            .attr("cx", gw.xMap)
+        gw.svg.select(".x-axis.axis") // change the x axis
+            .transition()
+            .duration(750)
+            .call(gw.xAxis);
+            //   .forceX([0]);
+        gw.svg.select(".x-axis.axis-label")
+            .transition()
+            .duration(750)
+            .text(getLabelUnit(gw.xvar));
         // Update error bars
-        this.updateErrors();
+        gw.updateErrors();
     });
 
 }
 
 GWCatalogue.prototype.updateYaxis = function(yvarNew) {
     // set global variable
+    var gw=this;
     this.yvar = yvarNew;
 
     d3.csv("csv/gwcat.csv", function(error, data) {
 
         // change string (from CSV) into number format
-        data.forEach(this.formatData);
+        data.forEach(gw.formatData);
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        if (this.yvar=="massratio"){
-            this.yScale.domain([0, d3.max(data, this.yErrP)]);
+        if (gw.yvar=="massratio"){
+            gw.yScale.domain([0, d3.max(data, gw.yErrP)]);
         }else{
-            this.yScale.domain([0, d3.max(data, this.yErrP)+2]);
+            gw.yScale.domain([0, d3.max(data, gw.yErrP)+2]);
         }
 
         // Select the section we want to apply our changes to
         // var svg = d3.select("body").transition();
 
         // Make the changes
-        this.svg.selectAll(".dot")   // change the line
-          .duration(750)
-          .attr("cy", this.yMap)
-        this.svg.select(".y-axis.axis") // change the y axis
-          .duration(750)
-          .call(yAxis);
-        this.svg.select(".y-axis.axis-label")
+        gw.svg.selectAll(".dot")   // change the line
+            .transition()
             .duration(750)
-            .text(getLabelUnit(this.yvar));
-        this.updateErrors();
+            .attr("cy", gw.yMap)
+        gw.svg.select(".y-axis.axis") // change the y axis
+            .transition()
+            .duration(750)
+            .call(gw.yAxis);
+        gw.svg.selectAll(".y-axis.axis-label")
+            .transition()
+            .duration(750)
+            .text(getLabelUnit(gw.yvar));
+        gw.updateErrors();
     });
 }
+GWCatalogue.prototype.addOptions = function(){
+    console.log("add options");
+    var gw=this;
+    // add buttons
+    for (col in columns){
+        if (columns[col].avail){
+            var divx = document.getElementById('x-buttons');
+            var newoptdivx = document.createElement('div');
+            newoptdivx.classNm = 'option '+col;
+            newoptdivx.style.display = 'inline-block';
+            divx.appendChild(newoptdivx);
+            var newoptinputx = document.createElement('input');
+            newoptinputx.type = 'button';
+            newoptinputx.name = col;
+            newoptinputx.value = getLabel(col);
+            newoptinputx.setAttribute("id","buttonx-"+col);
+            if (col==this.xvar){newoptinputx.classList.add("down")};
+            newoptinputx.addEventListener('click',function(){
+                oldXvar = gw.xvar;
+                document.getElementById("buttonx-"+oldXvar).classList.remove("down")
+                this.classList.add("down");
+                gw.updateXaxis(this.name);
+            });
+            newoptdivx.appendChild(newoptinputx);
 
+            var divy= document.getElementById('y-buttons');
+            var newoptdivy = document.createElement('div');
+            newoptdivy.class = 'option '+col;
+            newoptdivy.style.display = 'inline-block';
+            divy.appendChild(newoptdivy);
+            var newoptinputy = document.createElement('input');
+            newoptinputy.type = 'button';
+            newoptinputy.name = col;
+            newoptinputy.value = getLabel(col);
+            newoptinputy.setAttribute("id","buttony-"+col);
+            if (col==this.yvar){newoptinputy.classList.add("down")};
+            newoptinputy.addEventListener('click',function(){
+                oldYvar = gw.yvar;
+                document.getElementById("buttony-"+oldYvar).classList.remove("down")
+                this.classList.add("down");
+                gw.updateYaxis(this.name);
+            });
+            newoptdivy.appendChild(newoptinputy);
+        }
+    }
+}
+GWCatalogue.prototype.showOptions = function(){
+    // fade in semi-transparent background layer (greys out image)
+    this.optionsbg.transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    this.optionsbg.style("height","100%");
+    //fade in infopanel
+    this.optionsouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    // this.infopanel.html(this.iptext(d));
+    this.optionsouter.style("left", "25%").style("top", "25%")
+       .style("width","50%").style("height","auto");
+
+}
+GWCatalogue.prototype.hideOptions = function(d) {
+    // fade out infopanel
+    this.optionsouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.optionsouter.style("top","200%");
+    // fade out semi-transparent background
+    this.optionsbg.transition()
+      .duration(500)
+      .style("opacity",0);
+    this.optionsbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
+}
 GWCatalogue.prototype.addButtons = function(){
+    console.log("add buttons");
     // Add buttons to top of page
+    var gw=this;
     for (col in columns){
         if (columns[col].avail){
             var divx = document.getElementById('xoptions');
@@ -1072,10 +1182,10 @@ GWCatalogue.prototype.addButtons = function(){
             newoptinputx.setAttribute("id","buttonx-"+col);
             if (col==this.xvar){newoptinputx.classList.add("down")};
             newoptinputx.addEventListener('click',function(){
-                oldXvar = this.xvar;
+                oldXvar = gw.xvar;
                 document.getElementById("buttonx-"+oldXvar).classList.remove("down")
                 this.classList.add("down");
-                updateXaxis(this.name);
+                gw.updateXaxis(this.name);
             });
             newoptdivx.appendChild(newoptinputx);
 
@@ -1091,10 +1201,10 @@ GWCatalogue.prototype.addButtons = function(){
             newoptinputy.setAttribute("id","buttony-"+col);
             if (col==this.yvar){newoptinputy.classList.add("down")};
             newoptinputy.addEventListener('click',function(){
-                oldYvar = this.yvar;
+                oldYvar = gw.yvar;
                 document.getElementById("buttony-"+oldYvar).classList.remove("down")
                 this.classList.add("down");
-                updateYaxis(this.name);
+                gw.updateYaxis(this.name);
             });
             newoptdivy.appendChild(newoptinputy);
         }
@@ -1116,58 +1226,25 @@ GWCatalogue.prototype.hideTooltip = function(){
     ttSk.style.transitionDuration = "500";
     ttSk.style.opacity = 0.;
 }
-
-
-// define fly-in & fly-out
-
-//labels to add and keep updated
-var gwcat = new GWCatalogue
-gwcat.init();
-// gwcat.setScales();
-gwcat.drawGraphInit();
-// gwcat.setScales();
-gwcat.drawSketch();
-gwcat.addButtons();
-// add the tooltip area to the sketch
-// var tooltipSk = d3.select("div#sketchcontainer").append("div")
-//     .attr("class", "tooltipsk")
-//     .style("opacity", 0);
-
-//
-// Make graph
-//
-//set global variable for later use
-// var margin = {top: 20, right: 60, bottom: 50, left: 60}
-
-// add SVG
-// setup x
-
-
-// var data;
-
-// svgcont = d3.select("div#graphcontainer").insert("div",":first-child")
-
-//
-// load data and plot graph
-//
-
-// var makeerrors = function(d){
-//     d.errplus=d.col d.errcode.split('-')[0]
-// }
-
-
-window.addEventListener("resize",function(){
-    var gw=gwcat;
+GWCatalogue.prototype.makePlot = function(){
+    this.drawGraph()
+    this.drawSketch()
+    // this.addButtons()
+    this.addOptions()
+}
+GWCatalogue.prototype.replot = function(){
+    var gw=this;
     // console.log(gw.sketchName);
     d3.select("svg#svgSketch").remove()
     d3.select("div#svg-container").remove()
     d3.selectAll("div.labcont").remove()
     // d3.selectAll("div.massicon").remove()
-    gwcat.redraw=true;
-    gwcat.setScales();
-    gwcat.drawGraph();
-    gwcat.drawSketch();
-    gwcat.data.forEach(function(d){
+    this.redraw=true;
+    this.setScales();
+    this.drawGraph();
+    this.drawSketch();
+    // this.addOptions();
+    this.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.sketchName){
             // console.log('resize:',d.name,gw.sketchName);
@@ -1175,6 +1252,15 @@ window.addEventListener("resize",function(){
         }
     });
     gwcat.redraw=false;
-        // gwcat.updateSketch();
-    // });
+}
+// define fly-in & fly-out
+
+//labels to add and keep updated
+var gwcat = new GWCatalogue
+gwcat.init();
+gwcat.drawGraphInit();
+
+window.addEventListener("resize",function(){
+    gwcat.replot();
+
 });
