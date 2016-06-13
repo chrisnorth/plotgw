@@ -708,6 +708,7 @@ BHBubble.prototype.addButtons = function(width){
         divcont.classList.remove("right");
         divcont.style.marginLeft = this.pgMargin.left+"px";
         divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
+        full.insertBefore(divcont,full.children[0]);
     }
     //
     spancont = document.createElement('div');
