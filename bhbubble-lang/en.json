@@ -1,6 +1,7 @@
 [{
     "code":"en",
     "name":"English",
+    "alphabet":"Roman",
     "title":"Known Stellar-mass Black Holes",
     "Gravitational Wave Candidate":"Gravitational Wave Candidate",
     "Gravitational Wave Detection":"Gravitational Wave Detection",

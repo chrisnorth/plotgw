@@ -1,6 +1,7 @@
 [{
     "code":"fr",
     "name":"Francais",
+    "alphabet":"Roman",
     "title":"Trous Noirs Stellaires Connus",
     "Gravitational Wave Candidate":"Possible Onde Gravitationnelle",
     "Gravitational Wave Detection":"Onde Gravitationnelle Détectée",

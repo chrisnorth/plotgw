@@ -9,6 +9,7 @@ function BHBubble(){
 BHBubble.prototype.getUrlVars = function(){
     // Get URL and query variables
     var vars = {},hash;
+    var url = window.location.href;
     if (window.location.href.indexOf('?')!=-1){
         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
         url = window.location.href.slice(0,window.location.href.indexOf('?'));
@@ -58,6 +59,7 @@ BHBubble.prototype.loadLang = function(lang){
         dataType: 'json',
         error:function(data){
             alert('Error loading language '+_bh.lang+'. Reverting to English as default');
+            //navigate to same page, but lang="en"
             window.location.replace(_bh.makeUrl({'lang':'en'}));
         },
         success:function(data){
@@ -127,14 +129,13 @@ BHBubble.prototype.init = function(){
     d3.select('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
     this.mergeDuration = 1000;
     //set name column
+    this.nameCol="name";
     if (this.langdict.hasOwnProperty("nameCol")){this.nameCol=this.langdict.nameCol;}
-    else{this.nameCol='name';}
+    this.alphabet = (this.langdict.hasOwnProperty("alphabet")) ? this.langdict.alphabet : "Roman";
 }
 BHBubble.prototype.makeSvg = function(){
     // make initial elements
     var bh=this;
-    this.tooltip = d3.select("div#full").append("div")
-        .attr("class", "tooltip");
     // .style("opacity", 0);
 
     this.infopanelbg = d3.select("div#full").append("div")
@@ -153,7 +154,38 @@ BHBubble.prototype.makeSvg = function(){
     footertxt = footer.innerHTML;
     footer.innerHTML = this.t("footer",footertxt);
     //replace svg button text for language
+    if (this.alphabet!="Roman"){
+        document.getElementById("generate").style.display = "none";
+    }
     document.getElementById("generate").innerHTML=this.t("Save as SVG");
+    full = document.getElementById('full');
+    if (this.controlLoc == 'right'){
+        divcont = document.createElement('div');
+        divcont.setAttribute("id","controls");
+        divcont.classList.add("right");
+        divcont.classList.remove("bottom");
+        divcont.style.width = 0.1*this.pgWidth+"px";
+        divcont.style.marginLeft = 0;
+        if (this.pgMargin.right > 0.1*this.bubWidth){
+            divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
+        }else{
+            divcont.style.marginRight = 0;
+        }
+        full.appendChild(divcont);
+    }else{
+        divcont = document.createElement('div');
+        divcont.setAttribute("id","controls")
+        full.insertBefore(divcont,full.children[0]);
+        divcont.classList.add("bottom");
+        divcont.classList.remove("right");
+        divcont.style.marginLeft = this.pgMargin.left+"px";
+        divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
+    }
+    this.tooltip = d3.select("div#full").append("div")
+        .attr("class", "tooltip");
+    this.conttooltip = d3.select("div#full").append("div")
+        .attr("class", "conttooltip");
+
 }
 BHBubble.prototype.scalePage = function(){
     // Set scale of elements given page size
@@ -305,8 +337,9 @@ BHBubble.prototype.formatData = function(valueCol){
     this.data.forEach(function(d){
         d.massBH = +d.massBH;
         d.massBHsq = Math.pow(d.massBH,2);
-        if (d.massBHerr[0]=='+'){
-            errcode=d.massBHerr.split('-');
+        if (d.massBHerr[0]=='e'){
+            errcode=d.massBHerr.split('e')[1];
+            errcode=errcode.split('-');
             d.massBHplus = +errcode[0] + d.massBH;
             d.massBHminus = -errcode[1] + d.massBH;
             d.massBHstr = bh.tN(parseFloat(d.massBHminus.toFixed(1)))+' - '+
@@ -580,18 +613,30 @@ BHBubble.prototype.drawBubbles = function(){
       .style("stroke","#000");
 
     // draw legend text
-    this.legend.append("foreignObject")
-      .attr("x", 36)
-      .attr("y", 15)
-      .attr("width",200)
-      .attr("height",18)
-    //   .attr("dy", ".35em")
-      .append("xhtml:body")
-      .style({"font-size":"1.2em","color":"#fff","text-align":"left"})
-      .style("fill","#fff")
-    //   .style("text-anchor", "start")
-      .html(function(d){return "<p>"+bh.legenddescs[d]+"<p>";});
-
+    if (this.alphabet=="Roman"){
+        //add as SVG text object
+        this.legend.append("text")
+            .attr("x", 36)
+            .attr("y", 21)
+            .attr("dy", ".35em")
+            .style("font-size","1.2em")
+            .style("fill","#fff")
+            .style("text-anchor", "start")
+            .html(function(d){return bh.legenddescs[d];});
+    }else{
+        // add as HTML object
+        this.legend.append("foreignObject")
+            .attr("x", 36)
+            .attr("y", 15)
+            .attr("width",200)
+            .attr("height",18)
+            //   .attr("dy", ".35em")
+            .append("xhtml:body")
+            .style({"font-size":"1.2em","color":"#fff","text-align":"left"})
+            .style("fill","#fff")
+            //   .style("text-anchor", "start")
+            .html(function(d){return "<p>"+bh.legenddescs[d]+"<p>";});
+    }
 }
 BHBubble.prototype.controlLabFontSize = function(width){
     // set Label fontsize for control panel
@@ -608,34 +653,6 @@ BHBubble.prototype.controlLabFontSize = function(width){
 BHBubble.prototype.addButtons = function(width){
     // Add control buttons
     var bh=this;
-    full = document.getElementById('full');
-    if (this.controlLoc == 'right'){
-        divcont = document.createElement('div');
-        divcont.setAttribute("id","controls");
-        divcont.classList.add("right");
-        divcont.classList.remove("bottom");
-        divcont.style.width = 0.1*this.pgWidth+"px";
-        divcont.style.marginLeft = 0;
-        if (this.pgMargin.right > 0.1*this.bubWidth){
-            divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
-        }else{
-            divcont.style.marginRight = 0;
-        }
-        full.appendChild(divcont);
-    }else{
-        divcont = document.createElement('div');
-        divcont.setAttribute("id","controls")
-        full.insertBefore(divcont,full.children[0]);
-        divcont.classList.add("bottom");
-        divcont.classList.remove("right");
-        divcont.style.marginLeft = this.pgMargin.left+"px";
-        divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
-        // console.log('bottom',divcont.style.top);
-        // divcont.style.top = 0.9*this.pgHeight+"px";
-        // divcont.style.width = this.pgWidth+"px";
-        // divcont.style.width = this.pgWidth+"px";
-        // // divcont.style.marginRight = this.pgMargin.right - 0.05*this.pgWidth;
-    }
     //
     spancont = document.createElement('div');
     spancont.className = "control-lab "+((this.controlLoc == 'right')?'right':'bottom');
@@ -658,7 +675,13 @@ BHBubble.prototype.addButtons = function(width){
     animimg = document.createElement('img');
     animimg.setAttribute("id","button-merger");
     animimg.setAttribute("src","img/merger.svg");
-    animimg.setAttribute("title",this.t("Merge binary black holes"));
+    // animimg.setAttribute("title",this.t("Merge binary black holes"));
+    animimg.addEventListener("mouseover",function(e){
+        bh.showControlTooltip(e,"Merge binary black holes");
+    });
+    animimg.addEventListener("mouseout",function(){
+        bh.hideControlTooltip();
+    });
     animimg.addEventListener("click",function(){
         bh.animateMerger();
     });
@@ -673,7 +696,13 @@ BHBubble.prototype.addButtons = function(width){
     animimgun = document.createElement('img');
     animimgun.setAttribute("id","button-unmerger");
     animimgun.setAttribute("src","img/unmerger.svg");
-    animimgun.setAttribute("title",this.t("Unmerge binary black holes"));
+    // animimgun.setAttribute("title",this.t("Unmerge binary black holes"));
+    animimgun.addEventListener("mouseover",function(e){
+        bh.showControlTooltip(e,"Unmerge binary black holes");
+    });
+    animimgun.addEventListener("mouseout",function(){
+        bh.hideControlTooltip();
+    });
     animimgun.addEventListener("click",function(){
         bh.animateUnMerger();
     });
@@ -688,7 +717,13 @@ BHBubble.prototype.addButtons = function(width){
     animimgall = document.createElement('img');
     animimgall.setAttribute("id","button-showall");
     animimgall.setAttribute("src","img/showall.svg");
-    animimgall.setAttribute("title",this.t("Show all black holes"));
+    // animimgall.setAttribute("title",this.t("Show all black holes"));
+    animimgall.addEventListener("mouseover",function(e){
+        bh.showControlTooltip(e,"Show all black holes");
+    });
+    animimgall.addEventListener("mouseout",function(){
+        bh.hideControlTooltip();
+    });
     animimgall.addEventListener("click",function(){
         bh.showAll();
     });
@@ -717,7 +752,13 @@ BHBubble.prototype.addButtons = function(width){
     scaleimgsize = document.createElement('img');
     scaleimgsize.setAttribute("id","button-scale-size");
     scaleimgsize.setAttribute("src","img/scalesize.svg");
-    scaleimgsize.setAttribute("title",this.t("Scale by size"));
+    // scaleimgsize.setAttribute("title",this.t("Scale by size"));
+    scaleimgsize.addEventListener("mouseover",function(e){
+        bh.showControlTooltip(e,"Scale by size");
+    });
+    scaleimgsize.addEventListener("mouseout",function(){
+        bh.hideControlTooltip();
+    });
     if (this.valueCol!="massBHsq"){
         scaleimgsize.addEventListener("click",function(){bh.replot("massBHsq");}
     );}
@@ -732,7 +773,13 @@ BHBubble.prototype.addButtons = function(width){
     scaleimgmass = document.createElement('img');
     scaleimgmass.setAttribute("id","button-scale-mass");
     scaleimgmass.setAttribute("src","img/scalemass.svg");
-    scaleimgmass.setAttribute("title",this.t("Scale by mass"));
+    // scaleimgmass.setAttribute("title",this.t("Scale by mass"));
+    scaleimgmass.addEventListener("mouseover",function(e){
+        bh.showControlTooltip(e,"Scale by mass");
+    });
+    scaleimgmass.addEventListener("mouseout",function(){
+        bh.hideControlTooltip();
+    });
     if (this.valueCol!="massBH"){
         scaleimgmass.addEventListener("click",function(){bh.replot("massBH");}
     );}
@@ -841,10 +888,36 @@ BHBubble.prototype.showAll = function(){
             .text(function(d){ return bh.getText(d); });
     }
 }
-BHBubble.prototype.conttttext = function(d){
+BHBubble.prototype.conttttext = function(text){
     //text of control panel tool-tip
-    text =  this.t("Tooltip");
+    console.log(text,this.t(text));
+    text =  this.t(text);
     return text;
+}
+BHBubble.prototype.showControlTooltip = function(e,text){
+    // console.log('2',d.name,tooltip);
+    bh=this;
+    var e;
+    console.log(e);
+    getLeft = function(e){
+        console.log(e.clientX - 10)
+        return (e.clientX - bh.conttooltip[0][0].clientWidth) + "px";
+    }
+    getTop = function(e){
+        console.log(e.clientY - 10);
+        return (e.clientY - 10) + "px";
+    }
+    this.conttooltip.transition()
+       .duration(200)
+       .style("opacity",0.9);
+    this.conttooltip.html(this.conttttext(text));
+    console.log("width",this.conttooltip[0][0].clientWidth);
+    this.conttooltip.style({"left":getLeft(e),"top":getTop(e)});
+    //    .style("width","25%").style("height","auto");
+}
+BHBubble.prototype.hideControlTooltip = function(d) {
+    this.conttooltip.transition()
+        .duration(500).style("opacity", 0);
 }
 BHBubble.prototype.tttext = function(d){
     //create tooltip text
@@ -890,15 +963,14 @@ BHBubble.prototype.hideTooltip = function(d) {
     this.svg.select('#hl'+d.id)
         .transition(500).attr("stroke-opacity",0);
 }
-
 BHBubble.prototype.iptext = function(d){
     //initialise reference number
     rx=1;
-    text =  "<span class='name'>"+d["name"]+"</span>";
+    text =  "<span class='name'>"+d[this.nameCol]+"</span>";
     if(d["method"]=='Xray'){
         text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
         if (d.refbhmass!='-'){text = text +
-            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
+            " <sup>["+this.tN(rx)+"]</sup></span>";rbhm=rx;rx++;}
         else{rhbm=false;text = text+"</span>"}
         text = text + "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+"</span>";
         // text = text+ "<span class='info'>X-ray detection</span>";
@@ -906,25 +978,25 @@ BHBubble.prototype.iptext = function(d){
         text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
             this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType);
         if (d.refcomp!="-"){text = text +
-            " <sup>["+rx+"]</sup>";rct=rx;rx++;}else{rct=false;}
+            " <sup>["+this.tN(rx)+"]</sup>";rct=rx;rx++;}else{rct=false;}
         if (d.refcompmass!="-"){text = text +
-            " <sup>["+rx+"]</sup>";rcm=rx;rx++;}else{rcm=false;}
+            " <sup>["+this.tN(rx)+"]</sup>";rcm=rx;rx++;}else{rcm=false;}
         text = text+"</span>";
         //period mass
         text = text+ "<span class='info'><b>"+this.t("Orbital period")+"</b>: "+this.tN(d.period)+
         " "+this.t("days")+"</sub>";
         if (d.refper!="-"){text = text +
-            " <sup>["+rx+"]</sup></span>";rper=rx;rx++;}
+            " <sup>["+this.tN(rx)+"]</sup></span>";rper=rx;rx++;}
         else{rper=false;text = text+"</span>"}
         text = text+ "<span class='info'><b>"+this.t("Location")+"</b>: "+this.t(d.location)+"</span>";
-        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
-        if (rct){text = text + "<span class='ref'>["+rct+"] "+d.refcomp+"</span>"}
-        if (rcm){text = text + "<span class='ref'>["+rcm+"] "+d.refcompmass+"</span>"}
-        if (rper){text = text + "<span class='ref'>["+rper+"] "+d.refper+"</span>"}
+        if (rbhm){text = text + "<span class='ref'>["+this.tN(rbhm)+"] "+d.refbhmass+"</span>"}
+        if (rct){text = text + "<span class='ref'>["+this.tN(rct)+"] "+d.refcomp+"</span>"}
+        if (rcm){text = text + "<span class='ref'>["+this.tN(rcm)+"] "+d.refcompmass+"</span>"}
+        if (rper){text = text + "<span class='ref'>["+this.tN(rper)+"] "+d.refper+"</span>"}
     }else{
         text = text + "<span class='info'><b>"+this.t("Mass")+"</b>: "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub>";
         if (d.refbhmass!='-'){text = text +
-            " <sup>["+rx+"]</sup></span>";rbhm=rx;rx++;}
+            " <sup>["+this.tN(rx)+"]</sup></span>";rbhm=rx;rx++;}
         else{rbhm=false;text = text+"</span>"}
         text = text+ "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+
             " ("+this.t(d.BHtype)+")</span>";
@@ -934,7 +1006,7 @@ BHBubble.prototype.iptext = function(d){
         }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
         text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.tN(d.distance)+
             " "+this.t("million light years")+"</span>";
-        if (rbhm){text = text + "<span class='ref'>["+rbhm+"] "+d.refbhmass+"</span>"}
+        if (rbhm){text = text + "<span class='ref'>["+this.tN(rbhm)+"] "+d.refbhmass+"</span>"}
 
     }
     return text;
@@ -975,6 +1047,7 @@ BHBubble.prototype.makeDownload = function(){
 }
 
 BHBubble.prototype.writeDownloadLink = function(){
+    //write download link
     try {
         var isFileSaverSupported = !!new Blob();
     } catch (e) {
