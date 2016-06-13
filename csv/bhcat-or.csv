@@ -1,5 +1,5 @@
 name,nameTr,massBH,massBHerr,compMass,compType,binType,parentName,period,method,BHtype,location,distance,refcompmass,refcomp,refbhmass,refper,num
-GW151226-BAAA,&#2862;&#2852;&#2919;&#2923;&#2919;&#2920;&#2920;&#2924;-&#2838;,7.5,e2.3-2.3,14.2,Black hole,Binary black hole,GW151226,,GW,secondary,Extragalactic,780-1860,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,31
+GW151226-B,&#2862;&#2852;&#2919;&#2923;&#2919;&#2920;&#2920;&#2924;-&#2838;,7.5,e2.3-2.3,14.2,Black hole,Binary black hole,GW151226,,GW,secondary,Extragalactic,780-1860,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,31
 GW151226,&#2862;&#2852;&#2919;&#2923;&#2919;&#2920;&#2920;&#2924;,20.1,e6.1-1.7,None,None,Binary black hole,,,GW,final,Extragalactic,780-1860,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,30
 GW15126-A,&#2862;&#2852;&#2919;&#2923;&#2919;&#2920;&#2920;&#2924;-&#2837;,14.2,e8.3-3.7,7.5,Black hole,Binary black hole,GW151226,,GW,primary,Extragalactic,780-1860,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,29
 LVT151012-B,&#2866;&#2878;&#2823;&#2839;&#2891;-&#2861;&#2879;&#2864;&#2839;&#2891;&#2919;&#2923;&#2919;&#2918;&#2919;&#2920;-&#2838;,13,e4-5,23,Black hole,Binary black hole,LVT151012,,LVT,secondary,Extragalactic,1730-4960,-,-,"LIGO Scientific Collaboration & Virgo Collaboration, 2016",-,28
