@@ -158,34 +158,29 @@ BHBubble.prototype.makeSvg = function(){
         document.getElementById("generate").style.display = "none";
     }
     document.getElementById("generate").innerHTML=this.t("Save as SVG");
-    full = document.getElementById('full');
-    if (this.controlLoc == 'right'){
-        divcont = document.createElement('div');
-        divcont.setAttribute("id","controls");
-        divcont.classList.add("right");
-        divcont.classList.remove("bottom");
-        divcont.style.width = 0.1*this.pgWidth+"px";
-        divcont.style.marginLeft = 0;
-        if (this.pgMargin.right > 0.1*this.bubWidth){
-            divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
-        }else{
-            divcont.style.marginRight = 0;
-        }
-        full.appendChild(divcont);
-    }else{
-        divcont = document.createElement('div');
-        divcont.setAttribute("id","controls")
-        full.insertBefore(divcont,full.children[0]);
-        divcont.classList.add("bottom");
-        divcont.classList.remove("right");
-        divcont.style.marginLeft = this.pgMargin.left+"px";
-        divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
-    }
-    this.tooltip = d3.select("div#full").append("div")
-        .attr("class", "tooltip");
-    this.conttooltip = d3.select("div#full").append("div")
-        .attr("class", "conttooltip");
 
+    // if (this.controlLoc == 'right'){
+    //     divcont = document.createElement('div');
+    //     divcont.setAttribute("id","controls");
+    //     divcont.classList.add("right");
+    //     divcont.classList.remove("bottom");
+    //     divcont.style.width = 0.1*this.pgWidth+"px";
+    //     divcont.style.marginLeft = 0;
+    //     if (this.pgMargin.right > 0.1*this.bubWidth){
+    //         divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
+    //     }else{
+    //         divcont.style.marginRight = 0;
+    //     }
+    //     full.appendChild(divcont);
+    // }else{
+    //     divcont = document.createElement('div');
+    //     divcont.setAttribute("id","controls")
+    //     full.insertBefore(divcont,full.children[0]);
+    //     divcont.classList.add("bottom");
+    //     divcont.classList.remove("right");
+    //     divcont.style.marginLeft = this.pgMargin.left+"px";
+    //     divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
+    // }
 }
 BHBubble.prototype.scalePage = function(){
     // Set scale of elements given page size
@@ -233,8 +228,22 @@ BHBubble.prototype.scalePage = function(){
     d3.select("#bubble-container")
         .attr("width",this.svgSize+"px")
         .attr("margin-left",this.pgMargin.left+"px");
+    //add control panelfull = document.getElementById('full');
+    // divcont = document.createElement('div');
+    // divcont.setAttribute("id","controls");
+    // divcont.classList.add("right");
+    // if (this.controlLoc=="right"){full.appendChild(divcont)}
+    // else{full.insertBefore(divcont,full.children[0]);}
+
     // console.log()
 }
+BHBubble.prototype.addTooltips = function(){
+    this.tooltip = d3.select("div#full").append("div")
+        .attr("class", "tooltip");
+    this.conttooltip = d3.select("div#full").append("div")
+        .attr("class", "conttooltip");
+}
+
 BHBubble.prototype.comparitor = function(sort){
     // Define comparitor (for sorting positions of black holes)
     bh=this;
@@ -419,7 +428,7 @@ BHBubble.prototype.getText = function(d){
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
         ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
     ){
-        return "";}else{return d.name}
+        return "";}else{return d[bh.nameCol]}
 }
 BHBubble.prototype.getRadius = function(d){
     // get radius of a BH element given a displayFilter
@@ -556,31 +565,55 @@ BHBubble.prototype.drawBubbles = function(){
 
     //format the text for each bubble
 
-    this.bubbles.append("text")
-        .attr("x", function(d){ return d.x; })
-        .attr("y", function(d){ return d.y + 5; })
-        .attr("text-anchor", "middle")
-        .text(function(d){return d.name;})
-        .attr("class","bh-circle-text")
-        .attr("opacity",function(d){return bh.getOpacity(d)})
-        .attr("id",function(d){return "bh-circle-text-"+d.id;})
-        .style({
-            "fill":function(d){return bh.textcolor2(bh.cValue(d));},
-            "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-            "font-size": function(d) {
-                return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
-        })
-        .on("mouseover", function(d) {bh.showTooltip(d);})
-        .on("mouseout", function(d) {bh.hideTooltip(d);;})
-        .on("click",function(d){bh.showInfopanel(d);});;
+    if (this.alphabet=="Roman"){
+        //add as SVG text item
+        this.bubbles.append("text")
+            .attr("x", function(d){ return d.x; })
+            .attr("y", function(d){ return d.y + 5; })
+            .attr("text-anchor", "middle")
+            .text(function(d){return d.name;})
+            .attr("class","bh-circle-text")
+            .attr("opacity",function(d){return bh.getOpacity(d)})
+            .attr("id",function(d){return "bh-circle-text-"+d.id;})
+            .style({
+                "fill":function(d){return bh.textcolor2(bh.cValue(d));},
+                "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+                "font-size": function(d) {
+                    return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
+            })
+            .on("mouseover", function(d) {bh.showTooltip(d);})
+            .on("mouseout", function(d) {bh.hideTooltip(d);})
+            .on("click",function(d){bh.showInfopanel(d);});
+        d3.selectAll("text")
+            .text(function(d){ return bh.getText(d); });
+    }else{
+        //add as foreignObject
+        this.bubbles.append("foreignObject")
+            .attr("x", function(d){ return d.x -d.r; })
+            .attr("y", function(d){ return d.y - 5; })
+            .attr("width",function(d){return 2*d.r})
+            .attr("height","28px")
+            .attr("class","bh-circle-text")
+            .attr("id",function(d){return "bh-circle-text-"+d.id;});
+        d3.selectAll(".bh-circle-text")
+            .append("xhtml:body")
+                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
+                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+                    "font-size": function(d) { return 0.2*d.r},
+                    "background-color":"rgba(0,0,0,0)"
+                        // return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
+                })
+                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
+                .on("mouseover", function(d) {bh.showTooltip(d);})
+                .on("mouseout", function(d) {bh.hideTooltip(d);})
+                .on("click",function(d){bh.showInfopanel(d);});
+    }
     // for (i in arrows){
     //     // addtriangle(i);
     //     addcurve(i);
     // }
 
     // replace text and circles with display values
-    d3.selectAll("text")
-        .text(function(d){ return bh.getText(d); });
     d3.selectAll(".bh-circle")
         .attr("r",function(d){return bh.getRadius(d);})
     // for (i in this.arrows){
@@ -632,7 +665,8 @@ BHBubble.prototype.drawBubbles = function(){
             .attr("height",18)
             //   .attr("dy", ".35em")
             .append("xhtml:body")
-            .style({"font-size":"1.2em","color":"#fff","text-align":"left"})
+            .style({"font-size":"1.2em","color":"#fff","text-align":"left",
+                "background-color":"rgba(0,0,0,0)"})
             .style("fill","#fff")
             //   .style("text-anchor", "start")
             .html(function(d){return "<p>"+bh.legenddescs[d]+"<p>";});
@@ -653,6 +687,28 @@ BHBubble.prototype.controlLabFontSize = function(width){
 BHBubble.prototype.addButtons = function(width){
     // Add control buttons
     var bh=this;
+    full = document.getElementById('full');
+    if (this.controlLoc == 'right'){
+        divcont = document.createElement('div');
+        divcont.setAttribute("id","controls");
+        divcont.classList.add("right");
+        divcont.classList.remove("bottom");
+        divcont.style.width = 0.1*this.pgWidth+"px";
+        divcont.style.marginLeft = 0;
+        if (this.pgMargin.right > 0.1*this.bubWidth){
+            divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
+        }else{
+            divcont.style.marginRight = 0;
+        }
+        full.appendChild(divcont);
+    }else{
+        divcont = document.createElement('div');
+        divcont.setAttribute("id","controls");
+        divcont.classList.add("bottom");
+        divcont.classList.remove("right");
+        divcont.style.marginLeft = this.pgMargin.left+"px";
+        divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
+    }
     //
     spancont = document.createElement('div');
     spancont.className = "control-lab "+((this.controlLoc == 'right')?'right':'bottom');
@@ -796,6 +852,26 @@ BHBubble.prototype.animateMerger = function(){
     this.displayFilter = "noinit";
     this.animcontun.classList.remove("hide");
     this.animcont.classList.add("hide");
+    this.doAnimation();
+}
+BHBubble.prototype.animateUnMerger = function(){
+    // Hide final black holes in mergers
+    bh=this;
+    this.displayFilter = "nofin";
+    this.animcont.classList.remove("hide");
+    this.animcontun.classList.add("hide");
+    this.doAnimation();
+}
+BHBubble.prototype.showAll = function(){
+    // Show all black holes
+    bh=this;
+    this.displayFilter = "all";
+    this.animcontun.classList.remove("hide");
+    this.animcont.classList.remove("hide");
+    this.doAnimation();
+}
+BHBubble.prototype.doAnimation = function(){
+    var bh=this;
     for (id in this.arrows){
         //move intialcircles
         d3.selectAll('#bh-circle-'+this.arrows[id][0])
@@ -806,86 +882,51 @@ BHBubble.prototype.animateMerger = function(){
             // this.arrowpos[this.arrows[id][1]].y)
             // .attr("stroke","black")
             .attr("r",function(d){return bh.getRadius(d);});
-        //hide initial text
-        d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("opacity",function(d){return bh.getOpacity();})
-            .text(function(d){ return bh.getText(d); });
-        //move final circles
+            //move final circles
         d3.selectAll('#bh-circle-'+this.arrows[id][1])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("r",function(d){return bh.getRadius(d)})
             // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
             .attr("opacity",function(d){return bh.getOpacity(d);});
-        //show final text
-        d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("opacity",function(d){return bh.getOpacity()(d);})
-            .text(function(d){ return bh.getText(d); });
-    }
-}
-BHBubble.prototype.animateUnMerger = function(){
-    // Hide final black holes in mergers
-    bh=this;
-    this.displayFilter = "nofin";
-    this.animcont.classList.remove("hide");
-    this.animcontun.classList.add("hide");
-    for (id in this.arrows){
-        //move intialcircles
-        d3.selectAll('#bh-circle-'+this.arrows[id][0])
-            .transition().duration(this.mergeDuration)
-            .attr("cx",function(d){return bh.getX(d);})
-            .attr("cy",function(d){return bh.getY(d);})
-            // .attr("stroke","black")
-            .attr("r",function(d){return bh.getRadius(d);});
-        //hide initial text
-        d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("opacity",function(d){return bh.getOpacity();})
-            .text(function(d){ return bh.getText(d); });
-        //move final circles
-        d3.selectAll('#bh-circle-'+this.arrows[id][1])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("r",function(d){return bh.getRadius(d)})
-            // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
-            .attr("opacity",function(d){return bh.getOpacity(d);});
-        //show final text
-        d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("opacity",function(d){return bh.getOpacity()(d);})
-            .text(function(d){ return bh.getText(d); });
-    }
-}
-BHBubble.prototype.showAll = function(){
-    // Show all black holes
-    bh=this;
-    this.displayFilter = "all";
-    this.animcontun.classList.remove("hide");
-    this.animcont.classList.remove("hide");
-    for (id in this.arrows){
-        //move intialcircles
-        d3.selectAll('#bh-circle-'+this.arrows[id][0])
-            .transition().duration(this.mergeDuration)
-            .attr("cx",function(d){return bh.getX(d);})
-            .attr("cy",function(d){return bh.getY(d);})
-            // .attr("stroke","black")
-            .attr("r",function(d){return bh.getRadius(d);});
-        //hide initial text
-        d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("opacity",function(d){return bh.getOpacity();})
-            .text(function(d){ return bh.getText(d); });
-        //move final circles
-        d3.selectAll('#bh-circle-'+this.arrows[id][1])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("r",function(d){return bh.getRadius(d)})
-            // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
-            .attr("opacity",function(d){return bh.getOpacity(d);});
-        //show final text
-        d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
-            .transition().duration(this.mergeDuration).delay(250)
-            .attr("opacity",function(d){return bh.getOpacity()(d);})
-            .text(function(d){ return bh.getText(d); });
+        if (this.alphabet=="Roman"){
+            //hide initial text
+            d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
+                .transition().duration(this.mergeDuration).delay(250)
+                .attr("opacity",function(d){return bh.getOpacity();})
+                .text(function(d){ return bh.getText(d); });
+            //show final text
+            d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
+                .transition().duration(this.mergeDuration).delay(250)
+                .attr("opacity",function(d){return bh.getOpacity()(d);})
+                .text(function(d){ return bh.getText(d); });
+        }else{
+            console.log('sel',d3.selectAll('#bh-circle-text-'+this.arrows[id][0]));
+            //hide initial text
+            d3.selectAll('#bh-circle-text-'+this.arrows[id][0]).selectAll("body").remove()
+            d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
+                .append("xhtml:body")
+                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
+                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+                    "font-size": function(d) { return 0.2*d.r},
+                    "background-color":"rgba(0,0,0,0)"
+                })
+                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
+                .on("mouseover", function(d) {bh.showTooltip(d);})
+                .on("mouseout", function(d) {bh.hideTooltip(d);})
+                .on("click",function(d){bh.showInfopanel(d);});
+            //show final text
+            d3.selectAll('#bh-circle-text-'+this.arrows[id][1]).selectAll("body").remove()
+            d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
+                .append("xhtml:body")
+                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
+                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+                    "font-size": function(d) { return 0.2*d.r},
+                    "background-color":"rgba(0,0,0,0)"})
+                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
+                .on("mouseover", function(d) {bh.showTooltip(d);})
+                .on("mouseout", function(d) {bh.hideTooltip(d);})
+                .on("click",function(d){bh.showInfopanel(d);});
+        }
     }
 }
 BHBubble.prototype.conttttext = function(text){
@@ -1073,9 +1114,12 @@ BHBubble.prototype.replot = function(valueCol){
     d3.selectAll("#controls").remove();
     d3.selectAll(".control").remove();
     d3.selectAll(".control-lab").remove();
+    d3.selectAll(".conttooltip").remove();
+    d3.selectAll(".tooltip").remove()
     this.drawBubbles();
     this.makeDownload();
     this.addButtons();
+    this.addTooltips();
 }
 BHBubble.prototype.makePlot = function(){
     this.init();
@@ -1084,6 +1128,7 @@ BHBubble.prototype.makePlot = function(){
     this.loadData();
     this.makeDownload();
     this.addButtons();
+    this.addTooltips();
 }
 
 // create BHBubble object
