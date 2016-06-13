@@ -70,7 +70,10 @@ BHBubble.prototype.loadLang = function(lang){
 BHBubble.prototype.t = function(key,def){
     //translate text
     if (this.langdict.hasOwnProperty(key)){return this.langdict[key];}
-    else{console.log("not found:",key);return (def) ? def : '?'+key;}
+    else{
+        if (this.urlVars.debug){console.log("not found: "+key)};
+        return (def) ? def : key;
+    }
 }
 BHBubble.prototype.tNold = function(key){
     // translate numbers
@@ -379,7 +382,7 @@ BHBubble.prototype.formatData = function(valueCol){
             d.massBHplus = +errcode;
             d.massBHminus = +errcode;
             d.massBHstr = 'approx. '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
-        }else{console.log('Data format err:',d.massBHerr,d);}
+        }else{if (this.urlVars.debug){console.log('Data format err:',d.massBHerr,d);}}
     });
     this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
     // data = data.map(function(d){
@@ -901,7 +904,6 @@ BHBubble.prototype.doAnimation = function(){
                 .attr("opacity",function(d){return bh.getOpacity()(d);})
                 .text(function(d){ return bh.getText(d); });
         }else{
-            console.log('sel',d3.selectAll('#bh-circle-text-'+this.arrows[id][0]));
             //hide initial text
             d3.selectAll('#bh-circle-text-'+this.arrows[id][0]).selectAll("body").remove()
             d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
@@ -932,7 +934,6 @@ BHBubble.prototype.doAnimation = function(){
 }
 BHBubble.prototype.conttttext = function(text){
     //text of control panel tool-tip
-    console.log(text,this.t(text));
     text =  this.t(text);
     return text;
 }
@@ -940,20 +941,16 @@ BHBubble.prototype.showControlTooltip = function(e,text){
     // console.log('2',d.name,tooltip);
     bh=this;
     var e;
-    console.log(e);
     getLeft = function(e){
-        console.log(e.clientX - 10)
         return (e.clientX - bh.conttooltip[0][0].clientWidth) + "px";
     }
     getTop = function(e){
-        console.log(e.clientY - 10);
         return (e.clientY - 10) + "px";
     }
     this.conttooltip.transition()
        .duration(200)
        .style("opacity",0.9);
     this.conttooltip.html(this.conttttext(text));
-    console.log("width",this.conttooltip[0][0].clientWidth);
     this.conttooltip.style({"left":getLeft(e),"top":getTop(e)});
     //    .style("width","25%").style("height","auto");
 }
