@@ -432,7 +432,9 @@ BHBubble.prototype.formatData = function(valueCol){
 BHBubble.prototype.getText = function(d){
     // get text contents of a BH element given a displayFilter
     bh=this;
-    if (
+    if (d.r<15){
+        return "";
+    }else if (
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
         ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
     ){
@@ -739,7 +741,7 @@ BHBubble.prototype.addButtons = function(width){
     this.animcont.className = 'control merge merger '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.controlLoc == 'right'){this.animcont.width = "80%";}
     else{this.animcont.height = "100%";}
-    if (this.displayFilter=="noinit"){this.animcont.classList.add("hide");}
+    if (this.displayFilter=="noinit"){this.animcont.classList.add("current");}
     // animcont.style.display = 'inline-block';
     this.divcont.appendChild(this.animcont);
     animimg = document.createElement('img');
@@ -760,7 +762,7 @@ BHBubble.prototype.addButtons = function(width){
     //unmerger button
     this.animcontun = document.createElement('div');
     this.animcontun.className = 'control merge unmerger '+((this.controlLoc == 'right')?'right':'bottom');
-    if (this.displayFilter=="nofin"){this.animcontun.classList.add("hide");}
+    if (this.displayFilter=="nofin"){this.animcontun.classList.add("current");}
     // animcontun.style.display = 'inline-block';
     this.divcont.appendChild(this.animcontun);
     animimgun = document.createElement('img');
@@ -781,6 +783,7 @@ BHBubble.prototype.addButtons = function(width){
     //show all button
     this.animcontall = document.createElement('div');
     this.animcontall.className = 'control merge all '+((this.controlLoc == 'right')?'right':'bottom');
+    if (this.displayFilter=="all"){this.animcontall.classList.add("current");}
     this.divcont.appendChild(this.animcontall);
     animimgall = document.createElement('img');
     animimgall.setAttribute("id","button-showall");
@@ -865,27 +868,27 @@ BHBubble.prototype.animateMerger = function(){
     // Hide initial black holes in mergers
     bh=this;
     this.displayFilter = "noinit";
-    this.animcontun.classList.remove("hide");
-    this.animcont.classList.add("hide");
-    this.animcontall.classList.remove("hide");
+    this.animcontun.classList.remove("current");
+    this.animcont.classList.add("current");
+    this.animcontall.classList.remove("current");
     this.doAnimation();
 }
 BHBubble.prototype.animateUnMerger = function(){
     // Hide final black holes in mergers
     bh=this;
     this.displayFilter = "nofin";
-    this.animcont.classList.remove("hide");
-    this.animcontun.classList.add("hide");
-    this.animcontall.classList.remove("hide");
+    this.animcont.classList.remove("current");
+    this.animcontun.classList.add("current");
+    this.animcontall.classList.remove("current");
     this.doAnimation();
 }
 BHBubble.prototype.showAll = function(){
     // Show all black holes
     bh=this;
     this.displayFilter = "all";
-    this.animcontun.classList.remove("hide");
-    this.animcont.classList.remove("hide");
-    this.animcontall.classList.add("hide");
+    this.animcontun.classList.remove("current");
+    this.animcont.classList.remove("current");
+    this.animcontall.classList.add("current");
     this.doAnimation();
 }
 BHBubble.prototype.doAnimation = function(){

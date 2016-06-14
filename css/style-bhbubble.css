@@ -164,7 +164,7 @@ a{
 #controls .control.bottom img, #controls .scale.bottom img{
     width: 100%;
 }
-#controls .current{
+#controls .control.current ,#controls .scale.current{
     border:1px solid white;
     /*border-radius:25%;*/
     background-color: #555;
