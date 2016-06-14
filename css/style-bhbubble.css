@@ -3,6 +3,7 @@ body {
   /*height:100%;*/
   margin:0;
   background-color:#000;
+  text-align:center;
 }
 a{
     color:#ff55ff;
@@ -32,21 +33,26 @@ a{
     display:block;
     text-align:center;
     position:relative;
+    /*width:800px;*/
+    margin:0 auto;
 }
 #full.bottom{
     height:80%;
     display:block;
     text-align:center;
     position:relative;
+    margin:0 auto;
 }
 #bubble-container.right{
-    width:100%;
     height:100%;
-    position:absolute;
+    width:auto;
+    float:left;
+    text-align:right;
+    margin:0 auto;
 }
 #bubble-container.bottom{
     height:90%;
-    width:100%;
+    /*width:100%;*/
     display:block;
     float:left;
 }
@@ -89,12 +95,12 @@ a{
 }
 /*Control panel on right side*/
 #controls.right{
-    position:absolute;
+    float:left;
     top:10%;
     right:0;
     height:100%;
-    width:5%;
-    margin-right:2%;
+    width:12%;
+    /*margin-right:2%;*/
 }
 #controls div.control.merge{
     border:solid 1px white;
@@ -111,6 +117,8 @@ a{
     width:80%;
 }
 #controls .control.right, #controls .scale.right{
+    transition:height;
+    transition-duration: 500ms;
     float:left;
     width:80%;
     cursor:pointer;
@@ -120,6 +128,12 @@ a{
 }
 #controls .control.right img, #controls .scale.right img{
     width: 100%;
+}
+#controls .hide{
+    display:none;
+}
+#controls .hide img{
+    display:none;
 }
 /*Control panel below*/
 #controls.bottom{
@@ -149,9 +163,6 @@ a{
 #controls .control.bottom img, #controls .scale.bottom img{
     width: 100%;
 }
-#controls .hide{
-    display:none;
-}
 #controls .current{
     border:1px solid white;
     /*border-radius:25%;*/
@@ -169,8 +180,8 @@ input.down{
 /*Tooltips*/
 .tooltip {
   position: absolute;
-  width: 25%;
-  height: 28px;
+  width: auto;
+  height: auto;
   pointer-events: none;
   background-color:rgba(255,255,255,1);
   border:solid rgba(0,0,0,0.5) 1px;

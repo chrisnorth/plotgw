@@ -141,13 +141,13 @@ BHBubble.prototype.makeSvg = function(){
     var bh=this;
     // .style("opacity", 0);
 
-    this.infopanelbg = d3.select("div#full").append("div")
+    this.infopanelbg = d3.select("body").append("div")
         .attr("class","infopanelbg")
         .on("click",function(){bh.hideInfopanel();});
-    this.infopanelouter = d3.select("div#full").append("div")
+    this.infopanelouter = d3.select("body").append("div")
         .attr("class","infopanelouter").attr("id","infopanel-outer")
         .style("top",0.5*this.bubHeight);
-    this.infopanel = d3.select("div#infopanel-outer").append("div")
+    this.infopanel = this.infopanelouter.append("div")
             .attr("class","infopanel");
     this.infopanelouter.append("div").attr("class","infoclose")
         .html("<img src='img/close.png' title='"+this.t("close")+"'>")
@@ -163,26 +163,26 @@ BHBubble.prototype.makeSvg = function(){
     document.getElementById("generate").innerHTML=this.t("Save as SVG");
 
     // if (this.controlLoc == 'right'){
-    //     divcont = document.createElement('div');
-    //     divcont.setAttribute("id","controls");
-    //     divcont.classList.add("right");
-    //     divcont.classList.remove("bottom");
-    //     divcont.style.width = 0.1*this.pgWidth+"px";
-    //     divcont.style.marginLeft = 0;
+    //     this.divcont = document.createElement('div');
+    //     this.divcont.setAttribute("id","controls");
+    //     this.divcont.classList.add("right");
+    //     this.divcont.classList.remove("bottom");
+    //     this.divcont.style.width = 0.1*this.pgWidth+"px";
+    //     this.divcont.style.marginLeft = 0;
     //     if (this.pgMargin.right > 0.1*this.bubWidth){
-    //         divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
+    //         this.divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
     //     }else{
-    //         divcont.style.marginRight = 0;
+    //         this.divcont.style.marginRight = 0;
     //     }
-    //     full.appendChild(divcont);
+    //     full.appendChild(this.divcont);
     // }else{
-    //     divcont = document.createElement('div');
-    //     divcont.setAttribute("id","controls")
-    //     full.insertBefore(divcont,full.children[0]);
-    //     divcont.classList.add("bottom");
-    //     divcont.classList.remove("right");
-    //     divcont.style.marginLeft = this.pgMargin.left+"px";
-    //     divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
+    //     this.divcont = document.createElement('div');
+    //     this.divcont.setAttribute("id","controls")
+    //     full.insertBefore(this.divcont,full.children[0]);
+    //     this.divcont.classList.add("bottom");
+    //     this.divcont.classList.remove("right");
+    //     this.divcont.style.marginLeft = this.pgMargin.left+"px";
+    //     this.divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
     // }
 }
 BHBubble.prototype.scalePage = function(){
@@ -193,31 +193,34 @@ BHBubble.prototype.scalePage = function(){
     if (this.pgAspect>0.9){this.controlLoc='right'}else{this.controlLoc='bottom'}
     //apply classes accordingly
     footer = document.getElementById("footer");
-    full = document.getElementById("full");
-    bubcont = document.getElementById("bubble-container");
+    this.full = document.getElementById("full");
+    this.bubcont = document.getElementById("bubble-container");
     if (this.controlLoc=='right'){
         footer.classList.add("right");
         footer.classList.remove("bottom");
-        bubcont.classList.add("right");
-        bubcont.classList.remove("bottom");
+        this.bubcont.classList.add("right");
+        this.bubcont.classList.remove("bottom");
         // bubcont.style.height = this.svgSize+"px";
-        full.classList.add("right");
-        full.classList.remove("bottom");
+        this.full.classList.add("right");
+        this.full.classList.remove("bottom");
         // full.style.height = this.svgSize+"px";
     }else{
         footer.classList.add("bottom");
         footer.classList.remove("right");
-        bubcont.classList.add("bottom");
-        bubcont.classList.remove("right");
+        this.bubcont.classList.add("bottom");
+        this.bubcont.classList.remove("right");
         // bubcont.style.height = this.pgWidth+"px";
-        full.classList.add("bottom");
-        full.classList.remove("right");
+        this.full.classList.add("bottom");
+        this.full.classList.remove("right");
         // bubcont.style.height = this.pgWidth+"px";
     }
     // store bubcont size
-    this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+    // this.addButtons();
+    this.bubWidth = document.getElementById("bubble-container").offsetHeight;
+    // this.contWidth = document.getElementById("controls").offsetWidth;
     this.bubHeight = document.getElementById("bubble-container").offsetHeight;
     if (this.controlLoc=='right'){
+        // document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }else{
         // console.log(this.bubWidth,this.bubHeight)
@@ -225,25 +228,25 @@ BHBubble.prototype.scalePage = function(){
     }
     this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
     // console.log(this.pgAspect,this.controlLoc);
-    d3.select("#full")
-        .attr("width",this.svgSize+"px")
-        .attr("margin-left",this.pgMargin.left+"px");
-    d3.select("#bubble-container")
-        .attr("width",this.svgSize+"px")
-        .attr("margin-left",this.pgMargin.left+"px");
+    // d3.select("#full")
+    //     .style("width","100")
+    //     .style("margin-left",this.pgMargin.left+"px");
+    // d3.select("#bubble-container")
+    //     .style("width","auto")
+        // .style("margin-left",this.pgMargin.left+"px");
     //add control panelfull = document.getElementById('full');
-    // divcont = document.createElement('div');
-    // divcont.setAttribute("id","controls");
-    // divcont.classList.add("right");
-    // if (this.controlLoc=="right"){full.appendChild(divcont)}
-    // else{full.insertBefore(divcont,full.children[0]);}
+    // this.divcont = document.createElement('div');
+    // this.divcont.setAttribute("id","controls");
+    // this.divcont.classList.add("right");
+    // if (this.controlLoc=="right"){full.appendChild(this.divcont)}
+    // else{full.insertBefore(this.divcont,full.children[0]);}
 
     // console.log()
 }
 BHBubble.prototype.addTooltips = function(){
-    this.tooltip = d3.select("div#full").append("div")
+    this.tooltip = d3.select("body").append("div")
         .attr("class", "tooltip");
-    this.conttooltip = d3.select("div#full").append("div")
+    this.conttooltip = d3.select("body").append("div")
         .attr("class", "conttooltip");
 }
 
@@ -462,14 +465,10 @@ BHBubble.prototype.getOpacity = function(d){
     // get opacity of a BH element given a displayFilter
     bh=this;
     if (this.displayFilter=="nofin"){
-        return function(d){
-            // console.log('nofin',d.BHtype,d.BHtype=="final" ? 0 : 1);
-            return d.BHtype=="final" ? 0 : 1;};
+        return (d.BHtype=="final") ? 0 : 1;
     }else if(this.displayFilter=="noinit"){
-        return function(d){
-            // console.log('noinit',d.BHtype,d.BHtype=="primary" ? 0 : d.BHtype=="secondary" ? 0 : 1);
-            return d.BHtype=="primary" ? 0 : d.BHtype=="secondary" ? 0 : 1;};
-    }else{return function(d){return 1;};}
+        return (d.BHtype=="primary") ? 0 : (d.BHtype=="secondary") ? 0 : 1;
+    }else{return 1;}
 }
 BHBubble.prototype.drawBubbles = function(){
     // Add bubbles and legend
@@ -579,10 +578,17 @@ BHBubble.prototype.drawBubbles = function(){
             .attr("opacity",function(d){return bh.getOpacity(d)})
             .attr("id",function(d){return "bh-circle-text-"+d.id;})
             .style({
-                "fill":function(d){return bh.textcolor2(bh.cValue(d));},
+                "fill":function(d){
+                    if (d.r > (2 * d.r - 8) / this.getComputedTextLength() * 8){
+                        return bh.textcolor2(bh.cValue(d));
+                    }else{
+                        return "white";
+                    }},
                 "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                "font-size": function(d) {
-                    return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
+                "font-size":function(d) {
+                    // if (d.name.search('GW')>-1){
+                    // console.log(d.name,Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px" );}
+                    return Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
             })
             .on("mouseover", function(d) {bh.showTooltip(d);})
             .on("mouseout", function(d) {bh.hideTooltip(d);})
@@ -681,7 +687,7 @@ BHBubble.prototype.controlLabFontSize = function(width){
         return Math.min(width, (width - 8) / 30 * 8) + "px";
     }else{
         if (this.pgWidth > 500){
-            return Math.min(width, (width - 8) / 30 * 8) + "px";
+            return Math.min(width, (width - 8) / 35 * 8) + "px";
         }else{
             return Math.min(width, (width - 8) / 30 * 8) + "px";
         }
@@ -692,46 +698,46 @@ BHBubble.prototype.addButtons = function(width){
     var bh=this;
     full = document.getElementById('full');
     if (this.controlLoc == 'right'){
-        divcont = document.createElement('div');
-        divcont.setAttribute("id","controls");
-        divcont.classList.add("right");
-        divcont.classList.remove("bottom");
-        divcont.style.width = 0.1*this.pgWidth+"px";
-        divcont.style.marginLeft = 0;
-        if (this.pgMargin.right > 0.1*this.bubWidth){
-            divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
-        }else{
-            divcont.style.marginRight = 0;
-        }
-        full.appendChild(divcont);
+        this.divcont = document.createElement('div');
+        this.divcont.setAttribute("id","controls");
+        this.divcont.classList.add("right");
+        this.divcont.classList.remove("bottom");
+        // this.divcont.style.width = 0.1*this.pgWidth+"px";
+        // this.divcont.style.marginLeft = 0;
+        // if (this.pgMargin.right > 0.1*this.bubWidth){
+        //     this.divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
+        // }else{
+        //     this.divcont.style.marginRight = 0;
+        // }
+        full.appendChild(this.divcont);
     }else{
-        divcont = document.createElement('div');
-        divcont.setAttribute("id","controls");
-        divcont.classList.add("bottom");
-        divcont.classList.remove("right");
-        divcont.style.marginLeft = this.pgMargin.left+"px";
-        divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
-        full.insertBefore(divcont,full.children[0]);
+        this.divcont = document.createElement('div');
+        this.divcont.setAttribute("id","controls");
+        this.divcont.classList.add("bottom");
+        this.divcont.classList.remove("right");
+        // this.divcont.style.marginLeft = this.pgMargin.left+"px";
+        // this.divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
+        full.insertBefore(this.divcont,full.children[0]);
     }
     //
     spancont = document.createElement('div');
     spancont.className = "control-lab "+((this.controlLoc == 'right')?'right':'bottom');
     spancont.innerHTML = this.t("Mergers");
-    divcont.appendChild(spancont);
+    this.divcont.appendChild(spancont);
     //set font size
     // width=spancont.offsetWidth;
     fontsize=this.controlLabFontSize(spancont.offsetWidth);
     // Math.min(width, (width - 8) / 30 * 8) + "px";
     spancont.style.fontSize=fontsize;
     //
-    // divcont.innerHTML('<span>Controls:</span>');
+    // this.divcont.innerHTML('<span>Controls:</span>');
     this.animcont = document.createElement('div');
     this.animcont.className = 'control merge merger '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.controlLoc == 'right'){this.animcont.width = "80%";}
     else{this.animcont.height = "100%";}
     if (this.displayFilter=="noinit"){this.animcont.classList.add("hide");}
     // animcont.style.display = 'inline-block';
-    divcont.appendChild(this.animcont);
+    this.divcont.appendChild(this.animcont);
     animimg = document.createElement('img');
     animimg.setAttribute("id","button-merger");
     animimg.setAttribute("src","img/merger.svg");
@@ -752,7 +758,7 @@ BHBubble.prototype.addButtons = function(width){
     this.animcontun.className = 'control merge unmerger '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.displayFilter=="nofin"){this.animcontun.classList.add("hide");}
     // animcontun.style.display = 'inline-block';
-    divcont.appendChild(this.animcontun);
+    this.divcont.appendChild(this.animcontun);
     animimgun = document.createElement('img');
     animimgun.setAttribute("id","button-unmerger");
     animimgun.setAttribute("src","img/unmerger.svg");
@@ -771,22 +777,14 @@ BHBubble.prototype.addButtons = function(width){
     //show all button
     this.animcontall = document.createElement('div');
     this.animcontall.className = 'control merge all '+((this.controlLoc == 'right')?'right':'bottom');
-    // if (this.displayFilter=="nofin"){this.animcontun.classList.add("hide");}
-    // animcontun.style.display = 'inline-block';
-    divcont.appendChild(this.animcontall);
+    this.divcont.appendChild(this.animcontall);
     animimgall = document.createElement('img');
     animimgall.setAttribute("id","button-showall");
     animimgall.setAttribute("src","img/showall.svg");
     // animimgall.setAttribute("title",this.t("Show all black holes"));
-    animimgall.addEventListener("mouseover",function(e){
-        bh.showControlTooltip(e,"Show all black holes");
-    });
-    animimgall.addEventListener("mouseout",function(){
-        bh.hideControlTooltip();
-    });
-    animimgall.addEventListener("click",function(){
-        bh.showAll();
-    });
+    animimgall.addEventListener("mouseover",function(e){bh.showControlTooltip(e,"Show all black holes");});
+    animimgall.addEventListener("mouseout",function(){bh.hideControlTooltip();});
+    animimgall.addEventListener("click",function(){bh.showAll();});
     this.animcontall.appendChild(animimgall);
     //
     //Scale label
@@ -795,11 +793,9 @@ BHBubble.prototype.addButtons = function(width){
     // scaletext = document.createTextNode(this.t("Scale"));
     // spancontscale.appendChild(scaletext);
     spancontscale.innerHTML = this.t("Scale");
-    divcont.appendChild(spancontscale);
+    this.divcont.appendChild(spancontscale);
     //set font size
-    // width=spancontscale.offsetWidth;
     fontsize=this.controlLabFontSize(spancontscale.offsetWidth);
-    // Math.min(width, (width - 8) / 30 * 8) + "px";
     spancontscale.style.fontSize=fontsize;
 
     //
@@ -808,7 +804,7 @@ BHBubble.prototype.addButtons = function(width){
     this.scalecontsize.className = 'control scale scale-size '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.valueCol=="massBHsq"){this.scalecontsize.classList.add("current");}
     // animcontun.style.display = 'inline-block';
-    divcont.appendChild(this.scalecontsize);
+    this.divcont.appendChild(this.scalecontsize);
     scaleimgsize = document.createElement('img');
     scaleimgsize.setAttribute("id","button-scale-size");
     scaleimgsize.setAttribute("src","img/scalesize.svg");
@@ -829,7 +825,7 @@ BHBubble.prototype.addButtons = function(width){
     this.scalecontmass.className = 'control scale scale-mass '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.valueCol=="massBH"){this.scalecontmass.classList.add("current");}
     // animcontun.style.display = 'inline-block';
-    divcont.appendChild(this.scalecontmass);
+    this.divcont.appendChild(this.scalecontmass);
     scaleimgmass = document.createElement('img');
     scaleimgmass.setAttribute("id","button-scale-mass");
     scaleimgmass.setAttribute("src","img/scalemass.svg");
@@ -845,6 +841,14 @@ BHBubble.prototype.addButtons = function(width){
     );}
     this.scalecontmass.appendChild(scaleimgmass);
     //
+    this.bubWidth = document.getElementById("bubble-container").offsetHeight;
+    this.contWidth = document.getElementById("controls").offsetWidth;
+    this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+    if (this.controlLoc=='right'){
+        document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth+30)+"px");
+    }else{
+        document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+10)+"px");
+    }
 }
 // BHBubble.prototype.addSvgButtons = function(){
 //     this.svg.append("div")
@@ -856,6 +860,7 @@ BHBubble.prototype.animateMerger = function(){
     this.displayFilter = "noinit";
     this.animcontun.classList.remove("hide");
     this.animcont.classList.add("hide");
+    this.animcontall.classList.remove("hide");
     this.doAnimation();
 }
 BHBubble.prototype.animateUnMerger = function(){
@@ -864,6 +869,7 @@ BHBubble.prototype.animateUnMerger = function(){
     this.displayFilter = "nofin";
     this.animcont.classList.remove("hide");
     this.animcontun.classList.add("hide");
+    this.animcontall.classList.remove("hide");
     this.doAnimation();
 }
 BHBubble.prototype.showAll = function(){
@@ -872,6 +878,7 @@ BHBubble.prototype.showAll = function(){
     this.displayFilter = "all";
     this.animcontun.classList.remove("hide");
     this.animcont.classList.remove("hide");
+    this.animcontall.classList.add("hide");
     this.doAnimation();
 }
 BHBubble.prototype.doAnimation = function(){
@@ -942,10 +949,10 @@ BHBubble.prototype.showControlTooltip = function(e,text){
     bh=this;
     var e;
     getLeft = function(e){
-        return (e.clientX - bh.conttooltip[0][0].clientWidth) + "px";
+        return (e.clientX) + "px";
     }
     getTop = function(e){
-        return (e.clientY - 10) + "px";
+        return (e.clientY) + "px";
     }
     this.conttooltip.transition()
        .duration(200)
@@ -979,19 +986,21 @@ BHBubble.prototype.showTooltip = function(d){
     // console.log('2',d.name,tooltip);
     bh=this;
     getLeft = function(d){
-        if (d.x > bh.svgSize/2){return (d3.event.pageX - 0.25*bh.svgSize - 10) + "px";}
-        else{return (d3.event.pageX + 10) + "px";};
+        // if (d.x > bh.svgSize/2){return (d3.event.pageX - 0.25*bh.svgSize - 10) + "px";}
+        // else{return (d3.event.pageX + 10) + "px";};
+        return (d3.event.pageX) + "px";
     }
     getTop = function(d){
-        if (d.y > bh.svgSize/2){return (d3.event.pageY - 0.1*bh.svgSize - 10) + "px";}
-        else{return (d3.event.pageY + 10) + "px";};
+        // if (d.y > bh.svgSize/2){return (d3.event.pageY - 0.1*bh.svgSize - 10) + "px";}
+        // else{return (d3.event.pageY + 10) + "px";};
+        return (d3.event.pageY) + "px";
     }
     this.tooltip.transition()
        .duration(200)
        .style("opacity",bh.getOpacity()(d)*0.9);
     this.tooltip.html(this.tttext(d))
-       .style("left", getLeft(d)).style("top", getTop(d))
-       .style("width","25%").style("height","auto");
+       .style("left", getLeft(d)).style("top", getTop(d));
+    //    .style("width","auto").style("height","auto");
     this.svg.select('#hl'+d.id)
         .transition(500)
         .attr("stroke-opacity",bh.getOpacity());
