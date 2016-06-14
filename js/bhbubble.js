@@ -190,7 +190,7 @@ BHBubble.prototype.scalePage = function(){
     this.pgWidth=window.outerWidth;
     this.pgHeight=window.outerHeight;
     this.pgAspect = this.pgWidth/this.pgHeight;
-    if (this.pgAspect>0.9){this.controlLoc='right'}else{this.controlLoc='bottom'}
+    if (this.pgAspect>1){this.controlLoc='right'}else{this.controlLoc='bottom'}
     //apply classes accordingly
     footer = document.getElementById("footer");
     this.full = document.getElementById("full");
@@ -216,17 +216,19 @@ BHBubble.prototype.scalePage = function(){
     }
     // store bubcont size
     // this.addButtons();
-    this.bubWidth = document.getElementById("bubble-container").offsetHeight;
     // this.contWidth = document.getElementById("controls").offsetWidth;
-    this.bubHeight = document.getElementById("bubble-container").offsetHeight;
     if (this.controlLoc=='right'){
         // document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
+        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubWidth = this.bubHeight;
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }else{
+        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
         // console.log(this.bubWidth,this.bubHeight)
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }
-    this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
+    // this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
     // console.log(this.pgAspect,this.controlLoc);
     // d3.select("#full")
     //     .style("width","100")
@@ -464,10 +466,12 @@ BHBubble.prototype.getY = function(d){
 BHBubble.prototype.getOpacity = function(d){
     // get opacity of a BH element given a displayFilter
     bh=this;
-    if (this.displayFilter=="nofin"){
-        return (d.BHtype=="final") ? 0 : 1;
-    }else if(this.displayFilter=="noinit"){
-        return (d.BHtype=="primary") ? 0 : (d.BHtype=="secondary") ? 0 : 1;
+    var BHtype=d.BHtype;
+    // console.log(d);
+    if ((this.displayFilter=="nofin")&&(BHtype=="final")){
+        return 0;
+    }else if((this.displayFilter=="noinit")&&((BHtype=="primary")||BHtype=="secondary")){
+        return 0;
     }else{return 1;}
 }
 BHBubble.prototype.drawBubbles = function(){
@@ -841,13 +845,16 @@ BHBubble.prototype.addButtons = function(width){
     );}
     this.scalecontmass.appendChild(scaleimgmass);
     //
-    this.bubWidth = document.getElementById("bubble-container").offsetHeight;
-    this.contWidth = document.getElementById("controls").offsetWidth;
-    this.bubHeight = document.getElementById("bubble-container").offsetHeight;
     if (this.controlLoc=='right'){
+        this.contWidth = document.getElementById("controls").offsetWidth;
+        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubWidth = this.bubHeight;
         document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth+30)+"px");
     }else{
-        document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+10)+"px");
+        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+        this.contWidth = document.getElementById("controls").offsetWidth;
+        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        document.getElementById("full").setAttribute("style","width:100%");
     }
 }
 // BHBubble.prototype.addSvgButtons = function(){
@@ -903,12 +910,12 @@ BHBubble.prototype.doAnimation = function(){
             //hide initial text
             d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
                 .transition().duration(this.mergeDuration).delay(250)
-                .attr("opacity",function(d){return bh.getOpacity();})
+                .attr("opacity",function(d){return bh.getOpacity(d);})
                 .text(function(d){ return bh.getText(d); });
             //show final text
             d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
                 .transition().duration(this.mergeDuration).delay(250)
-                .attr("opacity",function(d){return bh.getOpacity()(d);})
+                .attr("opacity",function(d){return bh.getOpacity(d);})
                 .text(function(d){ return bh.getText(d); });
         }else{
             //hide initial text
@@ -997,13 +1004,13 @@ BHBubble.prototype.showTooltip = function(d){
     }
     this.tooltip.transition()
        .duration(200)
-       .style("opacity",bh.getOpacity()(d)*0.9);
+       .style("opacity",0.9);
     this.tooltip.html(this.tttext(d))
        .style("left", getLeft(d)).style("top", getTop(d));
     //    .style("width","auto").style("height","auto");
     this.svg.select('#hl'+d.id)
         .transition(500)
-        .attr("stroke-opacity",bh.getOpacity());
+        .attr("stroke-opacity",function(d){return bh.getOpacity(d)});
 }
 BHBubble.prototype.hideTooltip = function(d) {
     this.tooltip.transition()
