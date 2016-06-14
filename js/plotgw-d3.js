@@ -968,7 +968,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("id","options-icon")
       .style({"right":0,"top":0,"width":40,"height":40})
     .append("img")
-      .attr("src","img/mass.svg")
+      .attr("src","img/settings.svg")
       .on("click",function(){gw.showOptions();});
     this.optionsbg.on("click",function(){gw.hideOptions();});
     this.optionsouter
