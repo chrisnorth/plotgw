@@ -577,7 +577,7 @@ BHBubble.prototype.drawBubbles = function(){
             .attr("x", function(d){ return d.x; })
             .attr("y", function(d){ return d.y + 5; })
             .attr("text-anchor", "middle")
-            .text(function(d){return d.name;})
+            .text(function(d){return d[bh.nameCol];})
             .attr("class","bh-circle-text")
             .attr("opacity",function(d){return bh.getOpacity(d)})
             .attr("id",function(d){return "bh-circle-text-"+d.id;})
@@ -668,7 +668,7 @@ BHBubble.prototype.drawBubbles = function(){
             .style("font-size","1.2em")
             .style("fill","#fff")
             .style("text-anchor", "start")
-            .html(function(d){return bh.legenddescs[d];});
+            .text(function(d){return bh.legenddescs[d];});
     }else{
         // add as HTML object
         this.legend.append("foreignObject")
