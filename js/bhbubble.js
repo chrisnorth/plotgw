@@ -386,7 +386,7 @@ BHBubble.prototype.formatData = function(valueCol){
             errcode=d.massBHerr.split('~')[1];
             d.massBHplus = +errcode;
             d.massBHminus = +errcode;
-            d.massBHstr = 'approx. '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
+            d.massBHstr = bh.t('approx.')+' '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
         }else{if (this.urlVars.debug){console.log('Data format err:',d.massBHerr,d);}}
     });
     this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
