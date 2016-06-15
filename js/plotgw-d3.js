@@ -42,6 +42,8 @@ var columns = {
         type:"flt",avail:false},
     sigma:{code:"sigma",
         type:"flt",avail:false},
+    SNR:{code:"SNR",errcode:"SNRerr",
+        type:"flt",avail:true,label:"SNR"},
     skyarea:{code:"skyarea",
         type:"flt",avail:false},
 }
@@ -97,19 +99,30 @@ columns.typedesc = {
     'fn':function(d){return(gwcat.typedescs[d['type']])},
     'unit':''
 }
-columns.percent = {
+columns.fappercent = {
     'type':'fn',
-    'fn':function(d){
-        num=100.*(1.-d.fap);
-        return(num.toFixed(6))},
+    'fn':function(d){return (100.*d.fap).toFixed(6);},
     'unit':'%'
 }
 columns.faptxt = {
     'type':'fn',
-    'fn':function(d){
-        return(d.fap.toFixed(8))},
+    'fn':function(d){return d.fap.toFixed(8);},
     'unit':'%'
 }
+columns.fartxt = {
+    'type':'fn',
+    'fn':function(d){
+            // return Math.round(1./d.far);
+            if (1/d.far<100){return "1 per "+(1./d.far).toFixed(1)+" yrs";}
+            else if (1/d.far<1000){return "1 per "+(1./d.far).toFixed(0)+" yrs";}
+            else if (1/d.far<1e6){
+                return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+" kyr";}
+            else{
+                return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+" Myr";}
+        },
+    'unit':''
+}
+
 num2Errstr = function(col){
     return parseFloat((d[col+'plus']*3.26).toPrecision(3))+'-'+
             parseFloat((d[col+'plus']*3.26).toPrecision(3))
@@ -317,7 +330,7 @@ GWCatalogue.prototype.setScales = function(){
         date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
         dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
         typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
-        prob:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
+        far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
     //icon size and files
     this.micon = {w:"20%",h:"20%"}; //mass icons
     // this.iicon = {w:"10%",h:"10%"}; //info icons
@@ -326,16 +339,16 @@ GWCatalogue.prototype.setScales = function(){
         date:"img/time.svg",
         dist:"img/ruler.svg",
         typedesc:"img/blank.svg",
-        prob:"img/dice.svg"};
+        far:"img/dice.svg"};
     // data columns to read from for labels
     this.cols={
         pri:["initmass1"],sec:["initmass2"],final:["finalmass"],
         date:["datestr","timestr"],
         dist:["distanceStr","distanceLyStr"],
         typedesc:["typedesc"],
-        prob:["percent"]};
+        far:["fappercent","fartxt"]};
     // dolumns to show
-    this.labels={"date":0,"dist":0,"typedesc":0,'prob':0};
+    this.labels={"date":0,"dist":0,"typedesc":0,'far':0};
     // y-location of BH when they fly out
     this.yout = -0.3;
     // tooltip labels
@@ -345,7 +358,7 @@ GWCatalogue.prototype.setScales = function(){
         final:"Final Black Hole Mass",
         date:"Date of detection",
         typedesc:"Category of detection",
-        prob:"Likelihood",
+        far:"False alarm probability and rate",
         dist:"Distance"};
     this.labBlank="--";
 }
@@ -695,7 +708,7 @@ GWCatalogue.prototype.setStyles = function(){
 GWCatalogue.prototype.tttext = function(d){
     // tooltip text
     return "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='ttpri'>"+d["initmass1"]+"</span>"+"<span class='ttsec'>"+d["initmass2"]+"</span>";
+    "<span class='ttpri'>"+d[this.xvar]+"</span>"+"<span class='ttsec'>"+d[this.yvar]+"</span>";
 }
 
 GWCatalogue.prototype.formatData = function(d){
@@ -705,7 +718,8 @@ GWCatalogue.prototype.formatData = function(d){
         if (columns[col].type=="flt"){
             d[col] = +d[col];
             if (columns[col]['errcode']){
-                errcode=d[columns[col]['errcode']].split('-')
+                errcode=d[columns[col]['errcode']].split('e')[1]
+                errcode=errcode.split('-')
                 d[col+'plus'] = +errcode[0] + d[col];
                 d[col+'minus'] = -errcode[1] + d[col];
                 d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'-'+
