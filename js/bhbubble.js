@@ -129,7 +129,7 @@ BHBubble.prototype.init = function(){
     this.filterType="";
     this.displayFilter="nofin";
     this.langdir = 'bhbubble-lang/';
-    d3.select('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
+    d3.select('#hdr h1').html(this.t("Known Stellar-mass Black Holes"));
     this.mergeDuration = 1000;
     //set name column
     this.nameCol="name";

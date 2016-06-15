@@ -1,0 +1,33 @@
+[
+{
+    "code":"fr",
+    "name":"Francais",
+    "alphabet":"Roman",
+    "Known Stellar-mass Black Holes":"Ismert sztelláris fekete lyukak",
+    "Gravitational Wave Candidate":"Gravitációshullám-jelölt",
+    "Gravitational Wave Detection":"Gravitációshullám-észlelés",
+    "X-ray Binary":"Röntgenkettős",
+    "Mergers":"Összeolvadások",
+    "Scale":"Méret",
+    "Mass":"Tömeg",
+    "Type":"Típus",
+    "Binary black hole (primary)":"Feketelyuk-kettős (elsődleges)",
+    "Binary black hole (secondary)":"Feketelyuk-kettős (másodlagos)",
+    "Binary black hole (final)":"Feketelyuk-kettős (végső)",
+    "Companion":"Kísérő",
+    "None":"Nincs",
+    "Distance":"Távolság",
+    "million light years":"millió fényév",
+    "star":"csillag",
+    "Location":"Hely",
+    "Orbital period":"Keringési idő",
+    "days":"nap",
+    "Milky Way":"Tejútrendszer",
+    "Merge binary black holes":"Kettősök összeolvasztása",
+    "Unmerge binary black holes":"Kettősök szétválasztása",
+    "Show all black holes":"Összes fekete lyuk megjelenítése",
+    "Scale by size":"Méret átmérő alapján",
+    "Scale by mass":"Méret tömeg alapján",
+    "footer":"Forrás: <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Magyar szöveg: Szölgyén Ákos, Dálya Gergely, Raffai Péter</br>Fejlesztő: Chris North a <a href='http://www.ligo.org'>LIGO Scientific Collaboration[</a> megbízásából.</br>Forráskód megtekintése a <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>-on.</br>A röntgenkettősök adatainak forrása: <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>"
+}
+]
