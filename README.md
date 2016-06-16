@@ -10,6 +10,10 @@ A plot of the detections of compact binary systems (binary black holes/neutron s
 
 All known black holes, plotted as a bubble plot. By default, the circle areas represent the sizes of the black holes (specifically the Schwarzschild radii), though it can be changed to scale by mass. By default, only the initial black holes in merging binary systems are shown, but the controls allow the user to show the final mergers.
 
+The two scalings (by size and mass) scale the area of the displayed circles.
+* Scale by size: scale area of circle by cross sectional area of black hole (i.e. circle radius scaled by black hole radius).
+* Scale by mass: scale area of circle by mass of black hole.
+
 ### Translations
 BHBubble is also available in:
 * [French](http://gravity.astro.cf.ac.uk/plotgw/BHBubble.html?lang=fr)
