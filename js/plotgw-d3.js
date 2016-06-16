@@ -18,7 +18,7 @@ var columns = {
         avail:true,unit:'solar masses'},
     massratio:{code:"massratio",errcode:"massratioerr",
         type:"flt",label:"Mass Ratio",
-        avail:true,unit:''},
+        avail:true,unit:'',border:0.01},
     initspineff:{code:"initspineff",errcode:"initspinefferr",
         type:"flt",avail:false},
     initspin1:{code:"initspin1",errcode:"initspin1err",
@@ -28,10 +28,10 @@ var columns = {
     finalspin:{code:"finalspin",errcode:"finalspinerr",
         type:"flt",avail:false},
     distance:{code:"distance",errcode:"distanceerr",
-        type:"flt",label:'Distance',
+        type:"flt",label:'Distance',border:20,
         avail:true,unit:'MPc'},
     redshift:{code:"redshift",errcode:"redshifterr",
-        type:"flt",avail:false},
+        type:"flt",label:"Redshift",avail:true,border:0.01},
     date:{code:"date",
         type:"date",avail:false},
     far:{code:"far",
@@ -46,6 +46,15 @@ var columns = {
         type:"flt",avail:true,label:"SNR"},
     skyarea:{code:"skyarea",
         type:"flt",avail:false},
+    energy:{code:"energy",avail:true,label:"Energy released",
+        errcode:"energyerr",border:0.1,
+        type:"flt",unit:"solar mass equiv."},
+    peaklum:{code:"peaklum",avail:true,label:"Peak luminosity",
+        errcode:"peaklumerr",type:"flt",
+        unit:"solar mass equiv. per second"},
+    peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
+        errcode:"",type:"flt",border:0.1,
+        unit:"x 1e-21"}
 }
 // var svgLabs=false;
 // for (col in columns){
@@ -793,16 +802,10 @@ GWCatalogue.prototype.drawGraph = function(){
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-    if (gw.xvar=="massratio"){
-        gw.xScale.domain([0, d3.max(data, gw.xErrP)]);
-    }else{
-        gw.xScale.domain([0, d3.max(data, gw.xErrP)+2]);
-    }
-    if (gw.yvar=="massratio"){
-        gw.yScale.domain([0, d3.max(data, gw.yErrP)]);
-    }else{
-        gw.yScale.domain([0, d3.max(data, gw.yErrP)+2]);
-    }
+    xBorder = (columns[gw.xvar].border) ? columns[gw.xvar].border : 2
+    yBorder = (columns[gw.yvar].border) ? columns[gw.yvar].border : 2
+    gw.xScale.domain([0, d3.max(data, gw.xErrP)+xBorder]);
+    gw.yScale.domain([0, d3.max(data, gw.yErrP)+yBorder]);
 
 
     // x-axis
@@ -1039,13 +1042,13 @@ GWCatalogue.prototype.updateErrors = function(){
             .transition()
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.xMap).attr("y2",this.xMap)
+            .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
         this.svg.selectAll(".errorXm")
             .transition()
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.xMap).attr("y2",this.xMap)
+            .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
     }else{
         this.svg.selectAll(".errorX")
@@ -1067,7 +1070,7 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
             .attr("opacity",1);
     }
-    if (columns[this.xvar]["errcode"]==""){
+    if (columns[this.yvar]["errcode"]==""){
         this.svg.selectAll(".errorY")
             .transition()
             .duration(750)
@@ -1077,13 +1080,13 @@ GWCatalogue.prototype.updateErrors = function(){
         this.svg.selectAll(".errorYp")
             .transition()
             .duration(750)
-            .attr("x1",this.yMap).attr("x2",this.yMap)
+            .attr("x1",this.xMap).attr("x2",this.xMap)
             .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
         this.svg.selectAll(".errorYm")
             .transition()
             .duration(750)
-            .attr("x1",this.yMap).attr("x2",this.yMap)
+            .attr("x1",this.xMap).attr("x2",this.xMap)
             .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
     }else{
@@ -1120,18 +1123,11 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
 
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        if (gw.xvar=="massratio"){
-            if (columns[gw.xvar].errcode==""){
-                gw.xScale.domain([0, d3.max(data, gw.xValue)]);
-            }else{
-                gw.xScale.domain([0, d3.max(data, gw.xErrP)]);
-            }
+        xBorder= (columns[gw.xvar].border) ? columns[gw.xvar].border : 2
+        if (columns[gw.xvar].errcode==""){
+            gw.xScale.domain([0, d3.max(data, gw.xValue)+xBorder]);
         }else{
-            if (columns[gw.xvar].errcode==""){
-                gw.xScale.domain([0, d3.max(data, gw.xValue)+2]);
-            }else{
-                gw.xScale.domain([0, d3.max(data, gw.xErrP)+2]);
-            }
+            gw.xScale.domain([0, d3.max(data, gw.xErrP)+xBorder]);
         }
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
@@ -1180,18 +1176,11 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         // data.forEach(gw.formatData);
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        if (gw.yvar=="massratio"){
-            if (columns[gw.yvar].errcode==""){
-                gw.yScale.domain([0, d3.max(data, gw.yValue)]);
-            }else{
-                gw.yScale.domain([0, d3.max(data, gw.yErrP)]);
-            }
+        yBorder= (columns[gw.yvar].border) ? columns[gw.yvar].border : 2
+        if (columns[gw.yvar].errcode==""){
+            gw.yScale.domain([0, d3.max(data, gw.yValue)+yBorder]);
         }else{
-            if (columns[gw.yvar].errcode==""){
-                gw.yScale.domain([0, d3.max(data, gw.yValue)+2]);
-            }else{
-                gw.yScale.domain([0, d3.max(data, gw.yErrP)+2]);
-            }
+            gw.yScale.domain([0, d3.max(data, gw.yErrP)+yBorder]);
         }
 
         // Select the section we want to apply our changes to
