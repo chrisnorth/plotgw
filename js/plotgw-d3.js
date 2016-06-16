@@ -56,7 +56,8 @@ var columns = {
         unit:"solar mass equiv. per second"},
     peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
         errcode:"",type:"flt",border:0.1,
-        unit:"x 1e-21"}
+        unit:"x 1e-21"},
+    data:{code:"data",avail:false,type:'str',label:"Data"}
 }
 // var svgLabs=false;
 // for (col in columns){
@@ -90,7 +91,7 @@ columns.distanceLyErr = {
 // };
 columns.distanceLyStr = {
     'type':'fn',
-    'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'-'+
+    'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+' - '+
             parseFloat((d['distanceplus']*3.26).toPrecision(3))},
     'unit':'Mly'
 }
@@ -104,7 +105,26 @@ columns.timestr = {
     'fn':function(d){return(d['date'].split('T')[1]+" GMT")},
     'unit':''
 };
-
+columns.peaklumtxt = {
+    'type':'fn',
+    'fn':function(d){return(d['peaklumminus'].toPrecision(2)+' - '+d['peaklumplus'].toPrecision(2)+" x10<sup>56</sup> erg/s")},
+    'unit':''
+};
+columns.peaklumMsuntxt = {
+    'type':'fn',
+    'fn':function(d){return(parseFloat((d['peaklumminus']*55.956).toPrecision(2))+' - '+parseFloat((d['peaklumplus']*55.956).toPrecision(2))+" M<sub>&#x2609;</sub>/s")},
+    'unit':''
+};
+columns.energytxt = {
+    'type':'fn',
+    'fn':function(d){return(d['energyminus'].toPrecision(2)+' - '+d['energyplus'].toPrecision(2)+" M<sub>&#x2609;</sub>")},
+    'unit':''
+};
+columns.energyErgtxt = {
+    'type':'fn',
+    'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+' - '+parseFloat((d['energyplus']*1.787).toPrecision(2))+" x10<sup>54</sup> erg/s")},
+    'unit':''
+};
 columns.typedesc = {
     'type':'fn',
     'fn':function(d){return(gwcat.typedescs[d['type']])},
@@ -121,19 +141,22 @@ columns.faptxt = {
     'unit':'%'
 }
 columns.fartxt = {
-    'type':'fn',
-    'fn':function(d){
-            // return Math.round(1./d.far);
-            if (1/d.far<100){return "1 per "+(1./d.far).toFixed(1)+" yrs";}
-            else if (1/d.far<1000){return "1 per "+(1./d.far).toFixed(0)+" yrs";}
-            else if (1/d.far<1e6){
-                return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+" kyr";}
-            else{
-                return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+" Myr";}
-        },
+    type:'fn',
+    fn:function(d){
+        // return Math.round(1./d.far);
+        if (1/d.far<100){return "1 per "+(1./d.far).toFixed(1)+" yrs";}
+        else if (1/d.far<1000){return "1 per "+(1./d.far).toFixed(0)+" yrs";}
+        else if (1/d.far<1e6){
+            return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+" kyr";}
+        else{
+            return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+" Myr";}
+    },
     'unit':''
 }
-
+columns.datalink = {
+    'type':'fn',
+    fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
+}
 num2Errstr = function(col){
     return parseFloat((d[col+'plus']*3.26).toPrecision(3))+'-'+
             parseFloat((d[col+'plus']*3.26).toPrecision(3))
@@ -194,7 +217,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         console.log(this.sketchHeight,this.sketchFullHeight);
         this.labWidth = 0.5*this.sketchFullWidth;
         this.labHeight = this.sketchFullHight;
-        this.labcontWidth="45%";
+        //this.labcontWidth="45%";
         this.labcontHeight="20%";
         // info.style.top = "50%";
         // info.style.left = "0%";
@@ -214,7 +237,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.sketchAspect = this.sketchFullWidth/this.sketchFullHeight;
         this.labWidth = this.sketchFullWidth;
         this.labHeight = 0.5*this.sketchFullHight;
-        this.labcontWidth="45%";
+        //this.labcontWidth="45%";
         this.labcontHeight="10%";
         // info.style.top = "";
         // info.style.left = "";
@@ -343,26 +366,49 @@ GWCatalogue.prototype.setScales = function(){
         typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
         far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
     //icon size and files
-    this.micon = {w:"20%",h:"20%"}; //mass icons
+    this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg",
+        pri:{lab:["initmass1"],ttlab:"Primary Black Hole Mass"},
+        sec:{lab:["initmass2"],ttlab:"Seconary Black Hole Mass"},
+        final:{lab:["finalmass"],ttlab:"Final Black Hole Mass"},
+    }; //mass icons
     // this.iicon = {w:"10%",h:"10%"}; //info icons
-    this.icons = {
-        mass:"img/mass-msun.svg",
-        date:"img/time.svg",
-        dist:"img/ruler.svg",
-        typedesc:"img/blank.svg",
-        far:"img/dice.svg"};
-    // data columns to read from for labels
-    this.cols={
-        pri:["initmass1"],sec:["initmass2"],final:["finalmass"],
-        date:["datestr","timestr"],
-        dist:["distanceStr","distanceLyStr"],
-        typedesc:["typedesc"],
-        far:["fappercent","fartxt"]};
-    // dolumns to show
-    this.labels={"date":0,"dist":0,"typedesc":0,'far':0};
-    // y-location of BH when they fly out
+    // columns to show
     this.yout = -0.3;
-    // tooltip labels
+    this.labels={
+        "date":{icon:"img/time.svg",lab:["datestr","timestr"],
+            ttlab:"Date of detection"},
+        "dist":{icon:"img/ruler.svg",lab:["distanceStr","distanceLyStr"],
+            ttlab:"Distance",varname:"distance"},
+        "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
+            ttlab:"Category of detection"},
+        'far':{icon:"img/dice.svg",lab:["fappercent","fartxt"],
+            ttlab:"False alarm probability and rate",varname:"SNR"},
+        'peaklum':{icon:"img/blank.svg",lab:["peaklumMsuntxt"],
+            ttlab:"Peak Luminosity",varname:"peaklum"},
+        "energy":{icon:"img/blank.svg",lab:["energytxt"],
+            ttlab:"Radiated energy",varname:"energy"},
+        "initspineff":{icon:"img/blank.svg",lab:["initspineffStr"],
+            ttlab:"Initial Effective Spin Magnitude",varname:"initspineff"},
+        "finalspin":{icon:"img/blank.svg",lab:["finalspinStr"],
+            ttlab:"Final Spin Magnitude",varname:"finalspin"},
+        "data":{icon:"img/blank.svg",lab:["datalink"],ttlab:"Link to data"}
+    }
+    // this.icons = {
+    //     mass:"img/mass-msun.svg",
+    //     date:"img/time.svg",
+    //     dist:"img/ruler.svg",
+    //     typedesc:"img/blank.svg",
+    //     far:"img/dice.svg"};
+    // data columns to read from for labels
+    // this.cols={
+    //     pri:["initmass1"],sec:["initmass2"],final:["finalmass"],
+    //     date:["datestr","timestr"],
+    //     dist:["distanceStr","distanceLyStr"],
+    //     typedesc:["typedesc"],
+    //     far:["fappercent","fartxt"]};
+    // // y-location of BH when they fly out
+    // this.yout = -0.3;
+    // // tooltip labels
     this.ttlabels = {
         pri:"Primary Black Hole Mass",
         sec:"Secondary Black Hole Mass",
@@ -370,7 +416,12 @@ GWCatalogue.prototype.setScales = function(){
         date:"Date of detection",
         typedesc:"Category of detection",
         far:"False alarm probability and rate",
-        dist:"Distance"};
+        dist:"Distance",
+        peaklum:"Peak Luminosity",
+        energy:"Energy radiated",
+        initspineff:"Initial Effective Spin Magnitude",
+        finalspin:"Final Spin Magnitude",
+        data:"LIGO Open Science Center"};
     this.labBlank="--";
 }
 GWCatalogue.prototype.drawSketch = function(){
@@ -413,12 +464,12 @@ GWCatalogue.prototype.drawSketch = function(){
 
     if (this.redraw){
         console.log('redrawing masses');
-        for (lab in this.labels){this.addLab(lab)};
+        for (lab in this.labels){console.log('lab',lab);this.addLab(lab)};
         this.addMasses("pri",true);
         this.addMasses("sec",true);
         this.addMasses("final",true);
     }else{
-        for (lab in this.labels){this.addLab(lab)};
+        for (lab in this.labels){console.log('lab',lab);this.addLab(lab)};
         this.addMasses("pri",false);
         this.addMasses("sec",false);
         this.addMasses("final",false);
@@ -487,8 +538,9 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         massicondiv.style.top = this.bhpos[bh].yicon;
         massicondiv.style.position = "absolute";
         massicondiv.innerHTML =
-            "<img src='"+this.icons.mass+"'>"
+            "<img src='"+this.micon.file+"'>"
         massicondiv.onmouseover = function(e){
+            console.log(this.id)
             gw.showTooltip(e,this.id.split("icon")[1])}
         massicondiv.onmouseout = function(){gw.hideTooltip()};
         // add mass text
@@ -520,8 +572,8 @@ GWCatalogue.prototype.addLab = function(lab){
     // labimgdiv.style.top = yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2;
     // labimgdiv.style.position = "absolute";
     labimgdiv.style.display = "inline-block";
-    if (this.icons[lab]){
-        labimgdiv.innerHTML ="<img src='"+gw.icons[lab]+"'>"
+    if (this.labels[lab].icon){
+        labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon+"'>"
     }
     labimgdiv.onmouseover = function(e){
         gw.showTooltip(e,this.id.split("icon")[0])}
@@ -564,42 +616,42 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp)
             .attr("r",this.scaleRadius(
-                d[this.cols[bh][0]],d["finalmass"]))
+                d[this.micon[bh].lab[0]],d["finalmass"]))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.cols[bh]],d["finalmass"]));
+                this.scaleRadius(d[this.micon[bh].lab[0]],d["finalmass"]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp)
             .attr("rx",this.scaleRadius(
-                d[this.cols[bh][0]],d["finalmass"]))
+                d[this.micon[bh].lab[0]],d["finalmass"]))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.cols[bh][0]],d["finalmass"]));
+                0.2*d[this.micon[bh].lab[0]],d["finalmass"]));
     }else if(resize=="fly"){
         // resize & fly in
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.cols[bh][0]],d["finalmass"]));
+                d[this.micon[bh].lab[0]],d["finalmass"]));
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.cols[bh][0]],d["finalmass"]));
+                this.scaleRadius(d[this.micon[bh].lab[0]],d["finalmass"]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("rx",this.scaleRadius(
-                d[this.cols[bh][0]],d["finalmass"]))
+                d[this.micon[bh].lab[0]],d["finalmass"]))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.cols[bh][0]],d["finalmass"]));
+                0.2*d[this.micon[bh].lab[0]],d["finalmass"]));
     }else if(resize=="snap"){
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.cols[bh][0]],d["finalmass"]))
+                d[this.micon[bh].lab[0]],d["finalmass"]))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.cols[bh]],d["finalmass"]));
+                this.scaleRadius(d[this.micon[bh].lab[0]],d["finalmass"]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .attr("rx",this.scaleRadius(
-                d[this.cols[bh][0]],d["finalmass"]))
+                d[this.micon[bh].lab[0]],d["finalmass"]))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.cols[bh][0]],d["finalmass"]));
+                0.2*d[this.micon[bh].lab[0]],d["finalmass"]));
     };
     // set labels
     // if (svgLabs){
@@ -607,7 +659,7 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
     //     svgSketch.select("text.mtxt-"+bh).html(d[cols[bh][0]]);
     // }else{
         document.getElementById("mtxt-"+bh).innerHTML =
-            d[this.cols[bh][0]+'Str'];
+            d[this.micon[bh].lab[0]+'Str'];
     // }
 };
 GWCatalogue.prototype.updateSketch = function(d){
@@ -621,13 +673,14 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.flyInMasses(d,"final","snap");
         this.sketchTitle.html("Information: "+this.sketchName);
         for (lab in this.labels){
+            console.log(this.labels[lab])
                 labTxt=''
-                for (i in this.cols[lab]){
-                    labTxt += " "+d[this.cols[lab][i]];
-                    if (columns[this.cols[lab][i]].unit){
-                        labTxt += " "+columns[this.cols[lab][i]].unit;
+                for (i in this.labels[lab].lab){
+                    labTxt += " "+d[this.labels[lab].lab[i]];
+                    if (columns[this.labels[lab].lab[i]].unit){
+                        labTxt += " "+columns[this.labels[lab].lab[i]].unit;
                     }
-                    if (i<this.cols[lab].length-1){
+                    if (i<this.labels[lab].lab.length-1){
                         labTxt += "<br>";
                     }
                 }
@@ -669,22 +722,18 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchName = d["name"];
         this.sketchTitle.html("Information: "+this.sketchName);
         for (lab in this.labels){
-                labTxt=''
-                for (i in this.cols[lab]){
-                    labTxt += " "+d[this.cols[lab][i]];
-                    if (columns[this.cols[lab][i]].unit){
-                        labTxt += " "+columns[this.cols[lab][i]].unit;
-                    }
-                    if (i<this.cols[lab].length-1){
-                        labTxt += "<br>";
-                    }
+            labTxt=''
+            for (i in this.labels[lab].lab){
+                console.log('lab',this.labels[lab].lab[i],d[this.labels[lab].lab[i]])
+                labTxt += " "+d[this.labels[lab].lab[i]];
+                if (columns[this.labels[lab].lab[i]].unit){
+                    labTxt += " "+columns[this.labels[lab].lab[i]].unit;
                 }
-            // if(svgLabs){
-            // OBSOLETE
-            //     svgSketch.select("text."+lab+"txt").html(labTxt);
-            // }else{
-                document.getElementById(lab+"txt").innerHTML = labTxt;
-            // }
+                if (i<this.labels[lab].lab.length-1){
+                    labTxt += "<br>";
+                }
+            }
+            document.getElementById(lab+"txt").innerHTML = labTxt;
         }
     }
 }
@@ -725,7 +774,7 @@ GWCatalogue.prototype.tttext = function(d){
 GWCatalogue.prototype.formatData = function(d){
     console.log('formatData',d.name);
     for (col in columns){
-        if (columns[col].type=="fn"){d[col]=columns[col].fn(d)};
+        if (columns[col].type=="fn"){d[col]=columns[col].fn(d);console.log('new column',col,d[col])};
         if (columns[col].type=="flt"){
             d[col] = +d[col];
             if (columns[col]['errcode']){
@@ -733,7 +782,7 @@ GWCatalogue.prototype.formatData = function(d){
                 errcode=errcode.split('-')
                 d[col+'plus'] = +errcode[0] + d[col];
                 d[col+'minus'] = -errcode[1] + d[col];
-                d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'-'+
+                d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+' - '+
                         parseFloat(d[col+'plus'].toPrecision(3))
                 columns[col+'Str']={'type':'str','unit':columns[col].unit}
             }
@@ -807,6 +856,7 @@ GWCatalogue.prototype.drawGraph = function(){
     xBorder = (columns[gw.xvar].border) ? columns[gw.xvar].border : 2;
     xMin = (d3.min(data, gw.xErrM)<0) ? d3.min(data, gw.xErrM) - xBorder : 0;
     xMax = d3.max(data, gw.xErrP)+xBorder;
+    gw.xScale.domain([xMin, xMax]);
     yBorder = (columns[gw.yvar].border) ? columns[gw.yvar].border : 2;
     yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
     yMax = d3.max(data, gw.yErrP)+yBorder;
@@ -1027,7 +1077,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .on("click",function(){gw.showOptions();});
     this.optionsbg.on("click",function(){gw.hideOptions();});
     this.optionsouter
-      .style("top",0.5*this.svgHeight);
+      .style("top","200%");
     this.optionsouter
       .append("div")
       .attr("id","options-close")
