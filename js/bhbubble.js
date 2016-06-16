@@ -64,7 +64,10 @@ BHBubble.prototype.loadLang = function(lang){
         },
         success:function(data){
             //console.log('success',data[0]);
-            _bh.langdict=data[0];_bh.makePlot();}
+            _bh.langdict=data[0];
+            if (_bh.langdict.alphabet=="Roman"){
+                document.title=_bh.t("title",document.title);}
+            _bh.makePlot();}
     })
 }
 BHBubble.prototype.t = function(key,def){
@@ -129,7 +132,7 @@ BHBubble.prototype.init = function(){
     this.filterType="";
     this.displayFilter="nofin";
     this.langdir = 'bhbubble-lang/';
-    d3.select('#hdr h1').html(this.t("Known Stellar-mass Black Holes"));
+    d3.select('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
     this.mergeDuration = 1000;
     //set name column
     this.nameCol="name";
