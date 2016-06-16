@@ -42,7 +42,7 @@ var columns = {
         type:"flt",avail:false},
     sigma:{code:"sigma",
         type:"flt",avail:false},
-    SNR:{code:"SNR",errcode:"SNRerr",
+    SNR:{code:"SNR",errcode:"",
         type:"flt",avail:true,label:"SNR"},
     skyarea:{code:"skyarea",
         type:"flt",avail:false},
@@ -232,7 +232,7 @@ GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
     var gw=this;
 
-    this.margin = {top: 40, right: 10, bottom: 20, left: 60}
+    this.margin = {top: 40, right: 20, bottom: 20, left: 60}
     this.graphWidth =
         this.fullGraphWidth - this.margin.left - this.margin.right;
     this.graphHeight =
@@ -420,11 +420,11 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("font-size","1.5em")
         .html("Information Panel");
 
-    this.tooltipSk = document.createElement('div');
-    this.tooltipSk.className = "tooltip";
-    this.tooltipSk.setAttribute("id","tooltipSk");
-    this.tooltipSk.style.opacity = 0;
-    document.getElementById('infoouter').appendChild(this.tooltipSk);
+    // this.tooltipSk = document.createElement('div');
+    // this.tooltipSk.className = "tooltip";
+    // this.tooltipSk.setAttribute("id","tooltipSk");
+    // this.tooltipSk.style.opacity = 0;
+    // document.getElementById('infoouter').appendChild(this.tooltipSk);
 }
 GWCatalogue.prototype.addMasses = function(bh,redraw){
     // add ellipse for shadow
@@ -839,7 +839,8 @@ GWCatalogue.prototype.drawGraph = function(){
         .text(getLabelUnit(gw.yvar));
 
     // add x error bar
-    gw.svg.selectAll(".errorX")
+    errorGroup = gw.svg.append("g").attr("class","g-errors")
+    errorGroup.selectAll(".errorX")
         .data(data)
     .enter().append("line")
         .attr("class","error errorX")
@@ -851,7 +852,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add top of y error bar
-    gw.svg.selectAll(".errorXp")
+    errorGroup.selectAll(".errorXp")
         .data(data)
     .enter().append("line")
         .attr("class","error errorXp")
@@ -863,7 +864,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add bottom of y error bar
-    gw.svg.selectAll(".errorXm")
+    errorGroup.selectAll(".errorXm")
         .data(data)
     .enter().append("line")
         .attr("class","error errorXm")
@@ -875,9 +876,8 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
 
-
     // add y error bar
-    gw.svg.selectAll(".errorY")
+    errorGroup.selectAll(".errorY")
         .data(data)
     .enter().append("line")
         .attr("class","error errorY")
@@ -889,7 +889,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add top of y error bar
-    gw.svg.selectAll(".errorYp")
+    errorGroup.selectAll(".errorYp")
         .data(data)
     .enter().append("line")
         .attr("class","error errorYp")
@@ -901,7 +901,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add bottom of y error bar
-    gw.svg.selectAll(".errorYm")
+    errorGroup.selectAll(".errorYm")
         .data(data)
     .enter().append("line")
         .attr("class","error errorYm")
@@ -913,6 +913,21 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
 
+    gw.svg.append("g")
+        .attr("class","g-highlight")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .style("fill","white")
+        .style("fill-opacity",0)
+        .style("stroke","red")
+        .style("stroke-width",3)
+    .append("circle")
+        .attr("id","highlight")
+        .attr("class","dot-hl")
+        .attr("opacity",0)
+        .attr("cx",gw.xScale(0))
+        .attr("cy",gw.yScale(0))
+        .attr("r",15)
     // draw dots
     gw.svg.selectAll(".dot")
       .data(data)
@@ -944,7 +959,8 @@ GWCatalogue.prototype.drawGraph = function(){
         //   document.getElementById("sketchcontainer").style.opacity=0.;
       })
       .on("click", function(d) {
-          gw.updateSketch(d)
+          gw.moveHighlight(d);
+          gw.updateSketch(d);
         //   add highlight to selected circle
         });
     // draw legend
@@ -980,7 +996,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add options icon
     d3.select("#svg-container").append("div")
       .attr("id","options-icon")
-      .style({"right":0,"top":0,"width":40,"height":40})
+      .style({"right":gw.margin.right,"top":0,"width":40,"height":40})
     .append("img")
       .attr("src","img/settings.svg")
       .on("click",function(){gw.showOptions();});
@@ -994,55 +1010,128 @@ GWCatalogue.prototype.drawGraph = function(){
       .on("click",function(){gw.hideOptions();});
 
 }
+GWCatalogue.prototype.moveHighlight = function(d){
+    var gw=this;
+    if ((this.sketchName==d["name"])){
+        // fade out
+        gw.svg.select("#highlight")
+            .transition().duration(500)
+            .style("opacity",0);
+    }else{
+        // fade in and move
+        gw.svg.select("#highlight")
+            .transition().duration(500)
+            .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
+            .style("opacity",1);
+    }
+
+}
 GWCatalogue.prototype.updateErrors = function(){
     // svg = d3.select("body").transition();
-    this.svg.selectAll(".errorX")
-        .transition()
-        .duration(750)
-        .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
-        .attr("y1",this.yMap).attr("y2",this.yMap);
-    this.svg.selectAll(".errorXp")
-        .transition()
-        .duration(750)
-        .attr("x1",this.xMapErrP).attr("x2",this.xMapErrP)
-        .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1);
-    this.svg.selectAll(".errorXm")
-        .transition()
-        .duration(750)
-        .attr("x1",this.xMapErrM).attr("x2",this.xMapErrM)
-        .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1);
-    this.svg.selectAll(".errorY")
-        .transition()
-        .duration(750)
-        .attr("x1",this.xMap).attr("x2",this.xMap)
-        .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM);
-    this.svg.selectAll(".errorYp")
-        .transition()
-        .duration(750)
-        .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
-        .attr("y1",this.yMapErrP).attr("y2",this.yMapErrP);
-    this.svg.selectAll(".errorYm")
-        .transition()
-        .duration(750)
-        .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
-        .attr("y1",this.yMapErrM).attr("y2",this.yMapErrM);
+    if (columns[this.xvar]["errcode"]==""){
+        this.svg.selectAll(".errorX")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMap).attr("x2",this.xMap)
+            .attr("y1",this.yMap).attr("y2",this.yMap)
+            .attr("opacity",0);
+        this.svg.selectAll(".errorXp")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMap).attr("x2",this.xMap)
+            .attr("y1",this.xMap).attr("y2",this.xMap)
+            .attr("opacity",0);
+        this.svg.selectAll(".errorXm")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMap).attr("x2",this.xMap)
+            .attr("y1",this.xMap).attr("y2",this.xMap)
+            .attr("opacity",0);
+    }else{
+        this.svg.selectAll(".errorX")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
+            .attr("y1",this.yMap).attr("y2",this.yMap)
+            .attr("opacity",1);
+        this.svg.selectAll(".errorXp")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMapErrP).attr("x2",this.xMapErrP)
+            .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
+            .attr("opacity",1);
+        this.svg.selectAll(".errorXm")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMapErrM).attr("x2",this.xMapErrM)
+            .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
+            .attr("opacity",1);
+    }
+    if (columns[this.xvar]["errcode"]==""){
+        this.svg.selectAll(".errorY")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMap).attr("x2",this.xMap)
+            .attr("y1",this.yMap).attr("y2",this.yMap)
+            .attr("opacity",0);
+        this.svg.selectAll(".errorYp")
+            .transition()
+            .duration(750)
+            .attr("x1",this.yMap).attr("x2",this.yMap)
+            .attr("y1",this.yMap).attr("y2",this.yMap)
+            .attr("opacity",0);
+        this.svg.selectAll(".errorYm")
+            .transition()
+            .duration(750)
+            .attr("x1",this.yMap).attr("x2",this.yMap)
+            .attr("y1",this.yMap).attr("y2",this.yMap)
+            .attr("opacity",0);
+    }else{
+        this.svg.selectAll(".errorY")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMap).attr("x2",this.xMap)
+            .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
+            .attr("opacity",1);
+        this.svg.selectAll(".errorYp")
+            .transition()
+            .duration(750)
+            .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
+            .attr("y1",this.yMapErrP).attr("y2",this.yMapErrP)
+            .attr("opacity",1);
+        this.svg.selectAll(".errorYm")
+            .transition()
+            .duration(750)
+            .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
+            .attr("y1",this.yMapErrM).attr("y2",this.yMapErrM)
+            .attr("opacity",1);
+    }
 }
 
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // set global variable
     this.xvar = xvarNew;
     var gw=this;
-    d3.csv("csv/gwcat.csv", function(error, data) {
+    var data=gw.data;
+    // d3.csv("csv/gwcat.csv", function(error, data) {
 
         // change string (from CSV) into number format
-        data.forEach(gw.formatData);
+        // data.forEach(gw.formatData);
 
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
         if (gw.xvar=="massratio"){
-            gw.xScale.domain([0, d3.max(data, gw.xErr)]);
+            if (columns[gw.xvar].errcode==""){
+                gw.xScale.domain([0, d3.max(data, gw.xValue)]);
+            }else{
+                gw.xScale.domain([0, d3.max(data, gw.xErrP)]);
+            }
         }else{
-            gw.xScale.domain([0, d3.max(data, gw.xErrP)+2]);
+            if (columns[gw.xvar].errcode==""){
+                gw.xScale.domain([0, d3.max(data, gw.xValue)+2]);
+            }else{
+                gw.xScale.domain([0, d3.max(data, gw.xErrP)+2]);
+            }
         }
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
@@ -1052,6 +1141,10 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .transition()
             .duration(750)
             .attr("cx", gw.xMap)
+        // gw.svg.select(".dot-hl")
+        //     .transition()
+        //     .duration(750)
+        //     .attr("cx", gw.xMap)
         gw.svg.select(".x-axis.axis") // change the x axis
             .transition()
             .duration(750)
@@ -1062,26 +1155,43 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .duration(750)
             .text(getLabelUnit(gw.xvar));
         // Update error bars
+        data.forEach(function(d){
+            if (d.name==gw.sketchName){
+                gw.svg.select("#highlight")
+                    .transition()
+                    .duration(750)
+                    .attr("cx", gw.xMap(d));
+            }
+        });
         gw.updateErrors();
-    });
+    // });
 
 }
 
 GWCatalogue.prototype.updateYaxis = function(yvarNew) {
     // set global variable
     var gw=this;
+    var data=gw.data;
     this.yvar = yvarNew;
 
-    d3.csv("csv/gwcat.csv", function(error, data) {
+    // d3.csv("csv/gwcat.csv", function(error, data) {
 
         // change string (from CSV) into number format
-        data.forEach(gw.formatData);
+        // data.forEach(gw.formatData);
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
         if (gw.yvar=="massratio"){
-            gw.yScale.domain([0, d3.max(data, gw.yErrP)]);
+            if (columns[gw.yvar].errcode==""){
+                gw.yScale.domain([0, d3.max(data, gw.yValue)]);
+            }else{
+                gw.yScale.domain([0, d3.max(data, gw.yErrP)]);
+            }
         }else{
-            gw.yScale.domain([0, d3.max(data, gw.yErrP)+2]);
+            if (columns[gw.yvar].errcode==""){
+                gw.yScale.domain([0, d3.max(data, gw.yValue)+2]);
+            }else{
+                gw.yScale.domain([0, d3.max(data, gw.yErrP)+2]);
+            }
         }
 
         // Select the section we want to apply our changes to
@@ -1100,8 +1210,16 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .transition()
             .duration(750)
             .text(getLabelUnit(gw.yvar));
+        data.forEach(function(d){
+            if (d.name==gw.sketchName){
+                gw.svg.select("#highlight")
+                    .transition()
+                    .duration(750)
+                    .attr("cy", gw.yMap(d));
+            }
+        });
         gw.updateErrors();
-    });
+    // });
 }
 GWCatalogue.prototype.addOptions = function(){
     console.log("add options");
@@ -1227,17 +1345,17 @@ GWCatalogue.prototype.addButtons = function(){
 //
 GWCatalogue.prototype.showTooltip = function(e,tttxt){
     ttSk = document.getElementById("tooltipSk")
-    ttSk.style.transitionDuration = "200";
+    ttSk.style.transitionDuration = "200ms";
     ttSk.style.opacity = 0.9;
-    ttSk.style.left = e.pageX + 10 - document.getElementById("infoouter").offsetLeft +"px";
-    ttSk.style.top = e.pageY - 10 - document.getElementById("infoouter").offsetTop + "px";
-    ttSk.style.graphWidth = "auto";
-    ttSk.style.graphHeight = "auto";
+    ttSk.style.left = e.pageX + 10 ;
+    ttSk.style.top = e.pageY - 10 ;
+    ttSk.style.width = "auto";
+    ttSk.style.height = "auto";
     ttSk.innerHTML = this.ttlabels[tttxt];
 }
 GWCatalogue.prototype.hideTooltip = function(){
     ttSk = document.getElementById("tooltipSk");
-    ttSk.style.transitionDuration = "500";
+    ttSk.style.transitionDuration = "500ms";
     ttSk.style.opacity = 0.;
 }
 GWCatalogue.prototype.makePlot = function(){
