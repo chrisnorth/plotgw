@@ -29,7 +29,7 @@
      id="namedview4254"
      showgrid="false"
      inkscape:zoom="9.6875"
-     inkscape:cx="16"
+     inkscape:cx="-8.3096774"
      inkscape:cy="8"
      inkscape:window-x="0"
      inkscape:window-y="0"
@@ -71,28 +71,28 @@
     </rdf:RDF>
   </metadata>
   <g
-     transform="translate(0,-1036.3622)"
-     id="layer1"
-     style="stroke:none;fill:#ffffff;fill-opacity:1">
+     id="g4155">
     <path
        id="path4298"
-       d="m 24.964286,1038.3622 c -1.380712,0 -2.5,1.1194 -2.5,2.5 0,0.8215 0.388193,1.5443 1,2 -0.195367,0.1455 -0.354477,0.3046 -0.5,0.5 l -2,0 -2,7 12,0 -2,-7 -2,0 c -0.145523,-0.1954 -0.304633,-0.3545 -0.5,-0.5 0.611807,-0.4557 1,-1.1785 1,-2 0,-1.3806 -1.119287,-2.5 -2.5,-2.5 z m 0,1 c 0.833333,0 1.5,0.6667 1.5,1.5 0,0.8333 -0.666667,1.5 -1.5,1.5 -0.833333,0 -1.5,-0.6667 -1.5,-1.5 0,-0.8333 0.666667,-1.5 1.5,-1.5 z"
-       style="fill:#ffffff;fill-opacity:1;stroke:none" />
+       d="m 24.964286,2 c -1.380712,0 -2.5,1.1194 -2.5,2.5 0,0.8215 0.388193,1.5443 1,2 -0.195367,0.1455 -0.354477,0.3046 -0.5,0.5 l -2,0 -2,7 12,0 -2,-7 -2,0 c -0.145523,-0.1954 -0.304633,-0.3545 -0.5,-0.5 0.611807,-0.4557 1,-1.1785 1,-2 0,-1.3806 -1.119287,-2.5 -2.5,-2.5 z m 0,1 c 0.833333,0 1.5,0.6667 1.5,1.5 0,0.8333 -0.666667,1.5 -1.5,1.5 -0.833333,0 -1.5,-0.6667 -1.5,-1.5 0,-0.8333 0.666667,-1.5 1.5,-1.5 z"
+       style="fill:#ffffff;fill-opacity:1;stroke:none"
+       inkscape:connector-curvature="0" />
     <circle
        r="5"
-       cy="1044.3622"
+       cy="7.9999828"
        cx="6.4464288"
        id="path4140"
-       style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+       style="opacity:0.98999999;fill:#c1c1c1;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
        id="text4142"
-       y="1046.6586"
+       y="10.29637"
        x="12.28233"
        style="font-style:normal;font-weight:normal;font-size:7.33675051px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       xml:space="preserve"><tspan
-         y="1046.6586"
+       xml:space="preserve"
+       sodipodi:linespacing="125%"><tspan
+         y="10.29637"
          x="12.28233"
          id="tspan4144"
-         style="stroke:none;fill:#ffffff;fill-opacity:1">=</tspan></text>
+         style="fill:#ffffff;fill-opacity:1;stroke:none">=</tspan></text>
   </g>
 </svg>
