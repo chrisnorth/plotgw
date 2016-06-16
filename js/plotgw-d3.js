@@ -20,13 +20,15 @@ var columns = {
         type:"flt",label:"Mass Ratio",
         avail:true,unit:'',border:0.01},
     initspineff:{code:"initspineff",errcode:"initspinefferr",
-        type:"flt",avail:false},
+        type:"flt",avail:true,border:0.01,
+        label:"Effective inspiral spin magnitude",unit:""},
     initspin1:{code:"initspin1",errcode:"initspin1err",
         type:"flt",avail:false},
     initspin2:{code:"initspin2",errcode:"initspin2err",
         type:"flt",avail:false},
     finalspin:{code:"finalspin",errcode:"finalspinerr",
-        type:"flt",avail:false},
+        type:"flt",avail:true,border:0.01,
+        label:"Final spin magnitude",unit:""},
     distance:{code:"distance",errcode:"distanceerr",
         type:"flt",label:'Distance',border:20,
         avail:true,unit:'MPc'},
@@ -802,40 +804,60 @@ GWCatalogue.prototype.drawGraph = function(){
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-    xBorder = (columns[gw.xvar].border) ? columns[gw.xvar].border : 2
-    yBorder = (columns[gw.yvar].border) ? columns[gw.yvar].border : 2
-    gw.xScale.domain([0, d3.max(data, gw.xErrP)+xBorder]);
-    gw.yScale.domain([0, d3.max(data, gw.yErrP)+yBorder]);
+    xBorder = (columns[gw.xvar].border) ? columns[gw.xvar].border : 2;
+    xMin = (d3.min(data, gw.xErrM)<0) ? d3.min(data, gw.xErrM) - xBorder : 0;
+    xMax = d3.max(data, gw.xErrP)+xBorder;
+    yBorder = (columns[gw.yvar].border) ? columns[gw.yvar].border : 2;
+    yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
+    yMax = d3.max(data, gw.yErrP)+yBorder;
+    xAxLineOp = (yMin < 0) ? 1 : 0;
+    yAxLineOp = (xMin < 0) ? 1 : 0;
+    gw.yScale.domain([yMin, yMax]);
 
 
     // x-axis
     gw.svg.append("g")
         .attr("class", "x-axis axis")
-        // .attr("transform", "translate("+gw.margin.left+"," +
-        //     (gw.margin.top + gw.relh[1]*gw.graphHeight) + ")")
         .attr("transform", "translate("+gw.margin.left+"," +
-            (gw.margin.top + gw.graphHeight) + ")")
-        .call(gw.xAxis)
-    .append("text")
+            (gw.margin.top + gw.graphHeight) + ")");
+    gw.svg.select(".x-axis.axis")
+        .append("line")
+        .attr("class","x-axis axis-line")
+        .attr("x1",0).attr("x2",gw.graphWidth)
+        .attr("y1",0).attr("y2",0)
+        .style("stroke","rgb(200,200,200)").attr("stroke-width",5)
+        .attr("opacity",xAxLineOp);
+    gw.svg.select(".x-axis.axis").call(gw.xAxis)
+    gw.svg.select(".x-axis.axis").append("text")
         .attr("class", "x-axis axis-label")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .attr("x", gw.graphWidth/2)
         .attr("y", "2em")
         .style("text-anchor", "middle")
         .text(getLabelUnit(gw.xvar));
+    gw.svg.select(".x-axis.axis").append("line")
+        .attr("class","x-axis axis-line")
+        .attr("x1",0).attr("x2",gw.graphWidth)
+        .attr("y1",0).attr("y2",0)
+        .style("stroke","rgb(200,200,200)").attr("stroke-width",5)
+        .attr("opacity",xAxLineOp);
 
     // y-axis
     gw.svg.append("g")
         .attr("class", "y-axis axis")
         .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")")
-        .call(gw.yAxis)
-    .append("text")
+            gw.margin.top+")");
+    gw.svg.select(".y-axis.axis").append("line")
+        .attr("class","y-axis axis-line")
+        .attr("x1",0).attr("x2",0)
+        .attr("y1",0).attr("y2",gw.graphHeight)
+        .style("stroke","rgb(200,200,200)").attr("stroke-width",5)
+        .attr("opacity",yAxLineOp);
+    gw.svg.select(".y-axis.axis").call(gw.yAxis)
+    gw.svg.select(".y-axis.axis").append("text")
         .attr("class", "y-axis axis-label")
-        //   .attr("transform", "translate(," + height + ")")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
-        // .attr("x",-(gw.relh[0]+gw.relh[1])*gw.graphHeight/2)
         .attr("x",-gw.graphHeight/2)
         .attr("dy", "-30px")
         .style("text-anchor", "middle")
@@ -1125,10 +1147,16 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
         xBorder= (columns[gw.xvar].border) ? columns[gw.xvar].border : 2
         if (columns[gw.xvar].errcode==""){
-            gw.xScale.domain([0, d3.max(data, gw.xValue)+xBorder]);
+            xMin = (d3.min(data, gw.xValue)<0) ? d3.min(data, gw.xValue) - xBorder : 0;
+            xMax = d3.max(data, gw.xValue)+xBorder;
+            gw.xScale.domain([xMin, xMax]);
         }else{
-            gw.xScale.domain([0, d3.max(data, gw.xErrP)+xBorder]);
+            xMin = (d3.min(data, gw.xErrM)<0) ? d3.min(data, gw.xErrM) - xBorder : 0;
+            xMax = d3.max(data, gw.xErrP)+xBorder;
+            gw.xScale.domain([xMin, xMax]);
         }
+        yAxLineOp = (xMin < 0) ? 1 : 0;
+
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
 
@@ -1150,6 +1178,11 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .transition()
             .duration(750)
             .text(getLabelUnit(gw.xvar));
+        gw.svg.select(".y-axis.axis-line")
+            .transition()
+            .duration(750)
+            .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
+            .attr("opacity",yAxLineOp);
         // Update error bars
         data.forEach(function(d){
             if (d.name==gw.sketchName){
@@ -1178,11 +1211,14 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
         yBorder= (columns[gw.yvar].border) ? columns[gw.yvar].border : 2
         if (columns[gw.yvar].errcode==""){
-            gw.yScale.domain([0, d3.max(data, gw.yValue)+yBorder]);
+            yMin = (d3.min(data, gw.yValue)<0) ? d3.min(data, gw.yValue) - yBorder : 0;
+            gw.yScale.domain([yMin, d3.max(data, gw.yValue)+yBorder]);
         }else{
-            gw.yScale.domain([0, d3.max(data, gw.yErrP)+yBorder]);
+            yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
+            gw.yScale.domain([yMin, d3.max(data, gw.yErrP)+yBorder]);
         }
-
+        xAxLineOp = (yMin < 0) ? 1 : 0;
+        console.log("xAxLineOp",xAxLineOp)
         // Select the section we want to apply our changes to
         // var svg = d3.select("body").transition();
 
@@ -1199,6 +1235,11 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .transition()
             .duration(750)
             .text(getLabelUnit(gw.yvar));
+        gw.svg.select(".x-axis.axis-line")
+            .transition()
+            .duration(750)
+            .attr("y1",-gw.yScale(0)/2).attr("y2",-gw.yScale(0)/2)
+            .attr("opacity",xAxLineOp);
         data.forEach(function(d){
             if (d.name==gw.sketchName){
                 gw.svg.select("#highlight")
