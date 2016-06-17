@@ -690,17 +690,83 @@ BHBubble.prototype.drawBubbles = function(){
             .html(function(d){return "<p>"+bh.legenddescs[d]+"<p>";});
     }
 }
-BHBubble.prototype.controlLabFontSize = function(width){
+BHBubble.prototype.addHelp = function(){
+    // set up help divs
+    var bh=this;
+    this.anim={
+        merger:{icon:"img/merger.svg",
+            tt:this.t("Merge binary black holes")},
+        unmerger:{icon:"img/unmerger.svg",
+            tt:this.t("Unmerge binary black holes")},
+        showall:{icon:"img/showall.svg",
+            tt:this.t("Show all black holes")}
+    }
+    this.scales={
+        scalesize:{icon:"img/scalesize.svg",
+            tt:this.t("Scale by size")},
+        scalemass:{icon:"img/scalemass.svg",
+            tt:this.t("Scale by mass")},
+    }
+    this.helpbg = d3.select('#help-bg');
+    this.helpouter = d3.select('#help-outer');
+    this.helpinner = d3.select('#help-inner');
+    // add click actions
+    helpicon = document.getElementById('help-icon')
+    helpicon.addEventListener("click",function(){bh.showHelp();})
+    helpicon.addEventListener("mouseover",function(e){
+            bh.showControlTooltip(e,"Help");})
+    helpicon.addEventListener("mouseout",function(e){
+            bh.hideControlTooltip();});
+    this.helpbg.on("click",function(){bh.hideHelp();});
+    this.helpouter
+        .style("top","200%");
+    this.helpouter
+        .append("div")
+        .attr("class","helpclose")
+        .html("<img src='img/close.png' title='close'>")
+        .on("click",function(){bh.hideHelp();});
+    // build help text
+    this.helpinner.append("div")
+        .attr("class","help-title")
+        .html(this.t("Mergers"));
+    for (cont in this.anim){
+        helpcont=this.helpinner.append("div")
+            .attr("class","help-cont")
+            .attr("id","help-"+cont);
+        helpcont.append("img")
+            .attr("class","anim")
+            .attr("src",this.anim[cont].icon);
+        helpcont.append("div")
+            .attr("class","help-text")
+            .html(this.anim[cont].tt);
+    }
+    this.helpinner.append("div")
+        .attr("class","help-title")
+        .html(this.t("Scale"));
+    for (cont in this.scales){
+        helpcont=this.helpinner.append("div")
+            .attr("class","help-cont")
+            .attr("id","help-"+cont);
+        helpcont.append("img")
+            .attr("class","scale")
+            .attr("src",this.scales[cont].icon);
+        helpcont.append("div")
+            .attr("class","help-text")
+            .html(this.scales[cont].tt);
+    }
+}
+BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
     // set Label fontsize for control panel
     if (this.controlLoc=='right'){
-        return Math.min(width, (width - 8) / 30 * 8) + "px";
+        return Math.min(width, (width - 8) / 30 * 8);
     }else{
         if (this.pgWidth > 500){
-            return Math.min(width, (width - 8) / 35 * 8) + "px";
+            return Math.min(width, (width - 8) / 35 * 8);
         }else{
-            return Math.min(width, (width - 8) / 30 * 8) + "px";
+            return Math.min(width, (width - 8) / 35 * 8);
         }
     }
+    // correct for length of text
 }
 BHBubble.prototype.addButtons = function(width){
     // Add control buttons
@@ -711,21 +777,12 @@ BHBubble.prototype.addButtons = function(width){
         this.divcont.setAttribute("id","controls");
         this.divcont.classList.add("right");
         this.divcont.classList.remove("bottom");
-        // this.divcont.style.width = 0.1*this.pgWidth+"px";
-        // this.divcont.style.marginLeft = 0;
-        // if (this.pgMargin.right > 0.1*this.bubWidth){
-        //     this.divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
-        // }else{
-        //     this.divcont.style.marginRight = 0;
-        // }
         full.appendChild(this.divcont);
     }else{
         this.divcont = document.createElement('div');
         this.divcont.setAttribute("id","controls");
         this.divcont.classList.add("bottom");
         this.divcont.classList.remove("right");
-        // this.divcont.style.marginLeft = this.pgMargin.left+"px";
-        // this.divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
         full.insertBefore(this.divcont,full.children[0]);
     }
     //
@@ -736,8 +793,11 @@ BHBubble.prototype.addButtons = function(width){
     //set font size
     // width=spancont.offsetWidth;
     fontsize=this.controlLabFontSize(spancont.offsetWidth);
-    // Math.min(width, (width - 8) / 30 * 8) + "px";
-    spancont.style.fontSize=fontsize;
+    // correct for text length
+    fontscale = Math.sqrt("Mergers".length/this.t("Mergers").length);
+    if (this.langdict.alphabet!="Roman"){fontscale *= Math.sqrt(7);}
+    if (fontscale<1){fontsize *= fontscale;}
+    spancont.style.fontSize=fontsize+"px";
     //
     // this.divcont.innerHTML('<span>Controls:</span>');
     this.animcont = document.createElement('div');
@@ -806,7 +866,11 @@ BHBubble.prototype.addButtons = function(width){
     this.divcont.appendChild(spancontscale);
     //set font size
     fontsize=this.controlLabFontSize(spancontscale.offsetWidth);
-    spancontscale.style.fontSize=fontsize;
+    //scale by text length
+    fontscale = Math.sqrt("Scale".length/this.t("Scale").length);
+    if (this.langdict.alphabet!="Roman"){fontscale *= Math.sqrt(7);}
+    if (fontscale<1){fontsize *= fontscale;}
+    spancontscale.style.fontSize=fontsize+"px";
 
     //
     //scale size button
@@ -962,7 +1026,9 @@ BHBubble.prototype.showControlTooltip = function(e,text){
     bh=this;
     var e;
     getLeft = function(e){
-        return (e.clientX) + "px";
+        if (e.clientX > window.innerWidth/2){
+            return (e.clientX - bh.conttooltip.property("offsetWidth"))+"px";
+        }else{return (e.clientX) + "px";}
     }
     getTop = function(e){
         return (e.clientY) + "px";
@@ -1101,6 +1167,35 @@ BHBubble.prototype.hideInfopanel = function(d) {
     this.infopanelbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
 }
+BHBubble.prototype.showHelp = function(){
+    // fade in semi-transparent background layer (greys out image)
+    this.helpbg.transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    this.helpbg.style("height","100%");
+    //fade in infopanel
+    this.helpouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    // this.infopanel.html(this.iptext(d));
+    this.helpouter.style("left", "25%").style("top", "25%")
+       .style("width","50%").style("height","50%");
+
+}
+BHBubble.prototype.hideHelp = function(d) {
+    // fade out infopanel
+    this.helpouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.helpouter.style("top","200%");
+    // fade out semi-transparent background
+    this.helpbg.transition()
+      .duration(500)
+      .style("opacity",0);
+    this.helpbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
+}
 BHBubble.prototype.makeDownload = function(){
     //make SVG download button
     d3.select("#generate")
@@ -1143,6 +1238,7 @@ BHBubble.prototype.replot = function(valueCol){
 }
 BHBubble.prototype.makePlot = function(){
     this.init();
+    this.addHelp();
     this.scalePage();
     this.makeSvg();
     this.loadData();
