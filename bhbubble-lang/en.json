@@ -46,6 +46,7 @@
     "Merge binary black holes":"Merge binary black holes",
     "Unmerge binary black holes":"Unmerge binary black holes",
     "Show all black holes":"Show all black holes",
+    "Help":"Help",
     "footer":"Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>X-ray binary data based on <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
     "Save as SVG":"Save as SVG"
 }
