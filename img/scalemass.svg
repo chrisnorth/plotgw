@@ -29,7 +29,7 @@
      id="namedview4254"
      showgrid="false"
      inkscape:zoom="9.6875"
-     inkscape:cx="-8.3096774"
+     inkscape:cx="6.2023848"
      inkscape:cy="8"
      inkscape:window-x="0"
      inkscape:window-y="0"
@@ -71,28 +71,37 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="g4155">
-    <path
-       id="path4298"
-       d="m 24.964286,2 c -1.380712,0 -2.5,1.1194 -2.5,2.5 0,0.8215 0.388193,1.5443 1,2 -0.195367,0.1455 -0.354477,0.3046 -0.5,0.5 l -2,0 -2,7 12,0 -2,-7 -2,0 c -0.145523,-0.1954 -0.304633,-0.3545 -0.5,-0.5 0.611807,-0.4557 1,-1.1785 1,-2 0,-1.3806 -1.119287,-2.5 -2.5,-2.5 z m 0,1 c 0.833333,0 1.5,0.6667 1.5,1.5 0,0.8333 -0.666667,1.5 -1.5,1.5 -0.833333,0 -1.5,-0.6667 -1.5,-1.5 0,-0.8333 0.666667,-1.5 1.5,-1.5 z"
-       style="fill:#ffffff;fill-opacity:1;stroke:none"
-       inkscape:connector-curvature="0" />
+     id="g4191">
     <circle
        r="5"
        cy="7.9999828"
-       cx="6.4464288"
+       cx="6.9459682"
        id="path4140"
        style="opacity:0.98999999;fill:#c1c1c1;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     <text
        id="text4142"
        y="10.29637"
-       x="12.28233"
+       x="12.781869"
        style="font-style:normal;font-weight:normal;font-size:7.33675051px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"
        sodipodi:linespacing="125%"><tspan
          y="10.29637"
-         x="12.28233"
+         x="12.781869"
          id="tspan4144"
          style="fill:#ffffff;fill-opacity:1;stroke:none">=</tspan></text>
+    <g
+       id="g4187">
+      <path
+         inkscape:connector-curvature="0"
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
+         d="m 24.804032,4.6838538 c -0.763103,0 -1.38172,0.6186791 -1.38172,1.3817204 0,0.4540334 0.214549,0.8535164 0.552688,1.1053764 -0.107977,0.080416 -0.195915,0.1683488 -0.276344,0.2763441 l -1.105377,0 -1.105376,3.8688173 6.632258,0 -1.105376,-3.8688173 -1.105377,0 c -0.08043,-0.1079953 -0.168367,-0.195928 -0.276344,-0.2763441 0.338139,-0.25186 0.552688,-0.651343 0.552688,-1.1053764 0,-0.7630413 -0.618616,-1.3817204 -1.38172,-1.3817204 z m 0,0.5526882 c 0.460573,0 0.829032,0.3684772 0.829032,0.8290322 0,0.4605551 -0.368459,0.8290323 -0.829032,0.8290323 -0.460573,0 -0.829032,-0.3684772 -0.829032,-0.8290323 0,-0.460555 0.368459,-0.8290322 0.829032,-0.8290322 z"
+         id="path4298" />
+      <circle
+         r="5"
+         cy="7.9999828"
+         cx="24.804031"
+         id="circle4165"
+         style="opacity:0.98999999;fill:#ffffff;fill-opacity:0;stroke:#ffffff;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
   </g>
 </svg>

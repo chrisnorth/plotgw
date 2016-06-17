@@ -71,26 +71,21 @@
     </rdf:RDF>
   </metadata>
   <g
-     id="g4208">
-    <circle
-       r="5"
-       cy="7.9999828"
-       cx="6.4464288"
-       id="path4140"
-       style="opacity:0.98999999;fill:#c1c1c1;fill-opacity:1;stroke:none;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+     id="g4306">
     <text
        id="text4142"
-       y="10.29637"
-       x="12.28233"
+       y="10.23729"
+       x="13.57083"
        style="font-style:normal;font-weight:normal;font-size:7.33675051px;line-height:125%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        xml:space="preserve"
        sodipodi:linespacing="125%"><tspan
-         y="10.29637"
-         x="12.28233"
+         y="10.23729"
+         x="13.57083"
          id="tspan4144"
          style="fill:#ffffff;fill-opacity:1">=</tspan></text>
     <g
-       id="g4201">
+       transform="translate(1.2885004,-0.0590794)"
+       id="g4257">
       <g
          style="fill:#ffffff;fill-opacity:1"
          id="g4171"
@@ -119,7 +114,39 @@
          cy="6.4821606"
          cx="23.97657"
          id="circle4176"
-         style="opacity:0.98999999;fill:#ffffff;fill-opacity:0;stroke:#ffffff;stroke-width:0.32568029;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+         style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.32568029;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g4299">
+      <g
+         transform="matrix(0,-0.53827587,0.53827587,0,-547.69996,25.630421)"
+         id="g4230"
+         style="fill:#ffffff;fill-opacity:1">
+        <rect
+           style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="rect4232"
+           width="2"
+           height="7"
+           x="24"
+           y="1026.3622" />
+        <path
+           inkscape:connector-curvature="0"
+           style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.67404193;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="path4234"
+           d="m 27.61391,1027.1968 -2.610553,0 -2.610553,0 1.305276,-2.2608 1.305277,-2.2608 1.305276,2.2608 z" />
+        <path
+           inkscape:connector-curvature="0"
+           d="m -22.392796,-1032.8431 -2.610553,0 -2.610553,0 1.305276,-2.2608 1.305277,-2.2608 1.305276,2.2608 z"
+           id="path4236"
+           style="opacity:0.98999999;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.67404193;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           transform="scale(-1,-1)" />
+      </g>
+      <circle
+         style="opacity:0.98999999;fill:#c1c1c1;fill-opacity:1;stroke:none;stroke-width:0.32568029;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="circle4238"
+         cx="6.7349296"
+         cy="6.4230814"
+         r="3.8371599" />
     </g>
   </g>
 </svg>
