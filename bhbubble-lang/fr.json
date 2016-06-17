@@ -7,7 +7,7 @@
     "Gravitational Wave Detection":"Onde Gravitationnelle Détectée",
     "X-ray Measurement":"Mesures de systèmes binaires X",
     "X-ray Binary":"Binaire X",
-    "close":"close",
+    "Close":"close",
     "Mass":"Masse",
     "Location":"Position",
     "Milky Way":"Voie Lactée",
@@ -46,6 +46,7 @@
     "Merge binary black holes":"Fusionner les systèmes binaires de trous noirs",
     "Unmerge binary black holes":"Revenir aux deux trous noirs initiaux",
     "Show all black holes":"Montrer tous les trous noirs",
+    "Help":"Aider",
     "footer":"Hébergé par <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Traduction : Nicolas Arnaud (CNRS, <a href='http://www.virgo-gw.eu' title='collaboration Virgo'>collaboration Virgo</a>)</br>Maintenu par Chris North pour la <a href='http://www.ligo.org'>Collaboration Scientifique LIGO</a>. Code source disponible sur <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Données des systèmes binaires X issues de <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
     "Save as SVG":"Sauver au format SVG"
 }

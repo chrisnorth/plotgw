@@ -8,7 +8,7 @@
     "Gravitational Wave Candidate":"ମହାକର୍ଷଣ ତରଂଗ ପ୍ରାର୍ଥୀ",
     "Gravitational Wave Detection":"ମହାକର୍ଷଣ ତରଂଗ ଦ୍ଵାରା ଆବିଷ୍କୃତ",
     "X-ray Measurement":"ରଂଜନ ରଶ୍ମୀ ଦ୍ଵାରା ଆବିଷ୍କୃତ",
-    "close":"ବନ୍ଦ କରନ୍ତୁ",
+    "Close":"ବନ୍ଦ କରନ୍ତୁ",
     "Mass":"ବସ୍ତୁତ୍ଵ",
     "Location":"ସ୍ତିଥି",
     "Milky Way":"ଆକାଶ ଗଂଗା",
@@ -46,7 +46,8 @@
     "Merge binary black holes":"କୃଷ୍ଣ ଗହ୍ଵର ଧକ୍କା କରନ୍ତୁ",
     "Unmerge binary black holes":"କୃଷ୍ଣ ଗହ୍ଵର ଅ-ଧକ୍କା କରନ୍ତୁ",
     "Show all black holes":"ସବୁ କୃଷ୍ଣ ଗହ୍ଵରଂକୁ ଦେଖାନ୍ତୁ",
-    "footer":"ଏହି ତଥ୍ୟଚିତ୍ରଟି<a href='http://www.astro.cf.ac.uk'>କାର୍ଡିଫ୍ ବିଶ୍ଵବିଦ୍ୟାଳୟ ପଦାର୍ଥ ବିଜ୍ଞାନ ଓ ନକ୍ଷତ୍ର ବିଜ୍ଞାନ ବିଭାଗ</a> ଦ୍ଵାରା ପୋଷିତ</br>ଅନୁବାଦ: <a href="mailto:patra@mit.edu">ସତ୍ୟ ମହାପାତ୍ର</a> | ଏହି ତଥ୍ୟଚିତ୍ରଟି  କ୍ରୀସ୍ ନର୍ଥଂକ ଦ୍ଵାରା, <a href='http://www.ligo.org'> ଲାଇଗୋ ବୈଜ୍ଞାନିକ ସଂଗଠନ ତରଫରୁ ପ୍ରସ୍ତୁତ </a>| <a href='http://www.github.com/chrisnorth/plotgw'>ଗିଟ୍ - ହବ୍ ରେ </a>ଏହି ତଥ୍ୟଚିତ୍ରର ଉତ୍ସ ଦେଖନ୍ତୁ | </br>ରଂଜନ ରଶ୍ମୀ ଯ଼ମଜ ତଥ୍ୟ: <a href='http://stellarcollapse.org'>ତାରକୀୟ ପତନ</a>",
+    "Help":"ସହାୟତା",
+    "footer":"ଏହି ତଥ୍ୟଚିତ୍ରଟି<a href='http://www.astro.cf.ac.uk'>କାର୍ଡିଫ୍ ବିଶ୍ଵବିଦ୍ୟାଳୟ ପଦାର୍ଥ ବିଜ୍ଞାନ ଓ ନକ୍ଷତ୍ର ବିଜ୍ଞାନ ବିଭାଗ</a> ଦ୍ଵାରା ପୋଷିତ</br>ଅନୁବାଦ: <a href='mailto:patra@mit.edu'>ସତ୍ୟ ମହାପାତ୍ର</a> | ଏହି ତଥ୍ୟଚିତ୍ରଟି  କ୍ରୀସ୍ ନର୍ଥଂକ ଦ୍ଵାରା, <a href='http://www.ligo.org'> ଲାଇଗୋ ବୈଜ୍ଞାନିକ ସଂଗଠନ ତରଫରୁ ପ୍ରସ୍ତୁତ </a>| <a href='http://www.github.com/chrisnorth/plotgw'>ଗିଟ୍ - ହବ୍ ରେ </a>ଏହି ତଥ୍ୟଚିତ୍ରର ଉତ୍ସ ଦେଖନ୍ତୁ | </br>ରଂଜନ ରଶ୍ମୀ ଯ଼ମଜ ତଥ୍ୟ: <a href='http://stellarcollapse.org'>ତାରକୀୟ ପତନ</a>",
     "Save as SVG":"ଏସ.ଭି.ଜି. ଭାବେ ସଂରକ୍ଷଣ କରନ୍ତୁ"
 }
 ]

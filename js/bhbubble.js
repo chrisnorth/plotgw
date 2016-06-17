@@ -153,7 +153,7 @@ BHBubble.prototype.makeSvg = function(){
     this.infopanel = this.infopanelouter.append("div")
             .attr("class","infopanel");
     this.infopanelouter.append("div").attr("class","infoclose")
-        .html("<img src='img/close.png' title='"+this.t("close")+"'>")
+        .html("<img src='img/close.png' title='"+this.t("Close")+"'>")
         .on("click",function(){bh.hideInfopanel();});
     //replace footer text for language
     footer=document.getElementById("footer-txt");
@@ -723,7 +723,7 @@ BHBubble.prototype.addHelp = function(){
     this.helpouter
         .append("div")
         .attr("class","helpclose")
-        .html("<img src='img/close.png' title='close'>")
+        .html("<img src='img/close.png' title='"+this.t("Close")+"'>")
         .on("click",function(){bh.hideHelp();});
     // build help text
     this.helpinner.append("div")
