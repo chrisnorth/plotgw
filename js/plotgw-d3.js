@@ -389,7 +389,7 @@ GWCatalogue.prototype.setScales = function(){
     // columns to show
     this.yout = -0.3;
     this.labels={
-        "date":{icon:"img/time.svg",lab:["datestr"],
+        "date":{icon:"img/date.svg",lab:["datestr"],
             ttlab:"Date of detection"},
         "time":{icon:"img/time.svg",lab:["timestr"],
             ttlab:"Time of detection"},
@@ -411,7 +411,7 @@ GWCatalogue.prototype.setScales = function(){
             ttlab:"Initial Effective Spin Magnitude",varname:"initspineff"},
         "finalspin":{icon:"img/finalspin.svg",lab:["finalspinStr"],
             ttlab:"Final Spin Magnitude",varname:"finalspin"},
-        "data":{icon:"img/blank.svg",lab:["datalink"],ttlab:"Link to data"}
+        "data":{icon:"img/data.svg",lab:["datalink"],ttlab:"Link to data"}
     }
     // this.icons = {
     //     mass:"img/mass-msun.svg",
@@ -496,7 +496,7 @@ GWCatalogue.prototype.drawSketch = function(){
         this.addMasses("sec",false);
         this.addMasses("final",false);
 
-        // add unitswitch img
+        // add unitswitch button
         swimgdiv = document.createElement('div');
         swimgdiv.className = 'icon labcont';
         swimgdiv.setAttribute("id",'unitswicon');
@@ -504,7 +504,7 @@ GWCatalogue.prototype.drawSketch = function(){
         swimgdiv.style.height = this.labcontHeight;
         swimgdiv.style.display = "inline-block";
         if (this.labels[lab].icon){
-            swimgdiv.innerHTML ="<img src='img/blank.svg'>"
+            swimgdiv.innerHTML ="<img src='img/switch.svg'>"
         }
         swimgdiv.onmouseover = function(e){
             gw.showTooltip(e,"switch")}
@@ -515,7 +515,6 @@ GWCatalogue.prototype.drawSketch = function(){
         swtxtdiv.setAttribute("id",'unitswtxt');
         swtxtdiv.style.height = "100%";
         swtxtdiv.innerHTML = 'Switch units';
-        // console.log(labtxtdiv);
         swimgdiv.appendChild(swtxtdiv);
         document.getElementById('labcontainer').appendChild(swimgdiv);
         this.unitSwitch=false;
