@@ -59,23 +59,11 @@ var columns = {
         unit:"x 1e-21"},
     data:{code:"data",avail:false,type:'str',label:"Data"}
 }
-// var svgLabs=false;
-// for (col in columns){
-//     console.log(col);
-//     if (columns[col]['errcode']){
-//         columns[col+'Str'] = {
-//             'type':'fn',
-//             'fn':function(d){return parseFloat(d[col+'minus'].toPrecision(3))+'-'+
-//                     parseFloat(d[col+'plus'].toPrecision(3))},
-//             'unit':columns[col].unit
-//         }
-//     }
-// }
 columns.distanceLy = {
     'type':'fn',
     'fn':function(d){return(Math.round(d['distance']*3.26))},
     'unit':'Mly',
-    avail:false,label:'DistanceLy',errcode:"DistanceLyErr"
+    avail:false,label:'DistanceLy',errcode:"distanceLyErr"
 }
 columns.distanceLyErr = {
     'type':'fn',
@@ -89,40 +77,57 @@ columns.distanceLyErr = {
 //             parseFloat(d['distanceplus'].toPrecision(3))},
 //     'unit':'Mly'
 // };
+columns.distancePcStr = {
+    'type':'fn',
+    'fn':function(d){return parseFloat((d['distanceminus']).toPrecision(3))+
+    '&ndash;'+parseFloat((d['distanceplus']).toPrecision(3))+'<br/>MPc'},
+    'unit':''
+}
 columns.distanceLyStr = {
     'type':'fn',
-    'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+' - '+
-            parseFloat((d['distanceplus']*3.26).toPrecision(3))},
-    'unit':'Mly'
+    'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'&ndash;'+
+            parseFloat((d['distanceplus']*3.26).toPrecision(3))+'<br/>million ly'},
+    'unit':''
 }
 columns.datestr = {
     'type':'fn',
-    'fn':function(d){return(d['date'].split('T')[0])},
+    'fn':function(d){
+        months=['Jan','Feb','Mar','Apr','May','Jun',
+            'Jul','Aug','Sep','Oct','Nov','Dec'];
+        day=d['date'].split('T')[0].split('-')[0];
+        month=months[parseInt(d['date'].split('T')[0].split('-')[1])-1];
+        year=d['date'].split('T')[0].split('-')[2];
+        return day+' '+month+'<br/>'+year;
+    },
     'unit':''
 };
 columns.timestr = {
     'type':'fn',
-    'fn':function(d){return(d['date'].split('T')[1]+" GMT")},
+    'fn':function(d){return(d['date'].split('T')[1]+"<br/>UT")},
     'unit':''
 };
-columns.peaklumtxt = {
+columns.peaklumtxtErg = {
     'type':'fn',
-    'fn':function(d){return(d['peaklumminus'].toPrecision(2)+' - '+d['peaklumplus'].toPrecision(2)+" x10<sup>56</sup> erg/s")},
+    'fn':function(d){return(d['peaklumminus'].toPrecision(2)+'&ndash;'+d['peaklumplus'].toPrecision(2)+"<br/>x10<sup>56</sup> erg/s")},
     'unit':''
 };
-columns.peaklumMsuntxt = {
+columns.peaklumtxtMsun = {
     'type':'fn',
-    'fn':function(d){return(parseFloat((d['peaklumminus']*55.956).toPrecision(2))+' - '+parseFloat((d['peaklumplus']*55.956).toPrecision(2))+" M<sub>&#x2609;</sub>/s")},
+    'fn':function(d){return(parseFloat((d['peaklumminus']*55.956).toPrecision(2))+
+    '&ndash;'+parseFloat((d['peaklumplus']*55.956).toPrecision(2))+
+    "<br/>M<sub>&#x2609;</sub>c<sup>2</sup>/s")},
     'unit':''
 };
-columns.energytxt = {
+columns.energytxtMsun = {
     'type':'fn',
-    'fn':function(d){return(d['energyminus'].toPrecision(2)+' - '+d['energyplus'].toPrecision(2)+" M<sub>&#x2609;</sub>")},
+    'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
     'unit':''
 };
-columns.energyErgtxt = {
+columns.energytxtErg = {
     'type':'fn',
-    'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+' - '+parseFloat((d['energyplus']*1.787).toPrecision(2))+" x10<sup>54</sup> erg/s")},
+    'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+
+    '&ndash;'+parseFloat((d['energyplus']*1.787).toPrecision(2))+
+    "<br/>x10<sup>54</sup> erg")},
     'unit':''
 };
 columns.typedesc = {
@@ -133,25 +138,34 @@ columns.typedesc = {
 columns.fappercent = {
     'type':'fn',
     'fn':function(d){return (100.*d.fap).toFixed(6);},
-    'unit':'%'
+    'unit':'%',
+    'unitSwitch':'fartxt'
 }
 columns.faptxt = {
     'type':'fn',
-    'fn':function(d){return d.fap.toFixed(8);},
-    'unit':'%'
+    'fn':function(d){return (d.fap).toPrecision(3);},
+    'unit':'',
+    'unitSwitch':'fartxt'
 }
 columns.fartxt = {
     type:'fn',
     fn:function(d){
         // return Math.round(1./d.far);
-        if (1/d.far<100){return "1 per "+(1./d.far).toFixed(1)+" yrs";}
-        else if (1/d.far<1000){return "1 per "+(1./d.far).toFixed(0)+" yrs";}
+        if (1/d.far<100){
+            return "1 per "+(1./d.far).toFixed(1)+
+            "<br/>yrs";}
+        else if (1/d.far<1000){
+            return "1 per "+(1./d.far).toFixed(0)+
+            "<br/>yrs";}
         else if (1/d.far<1e6){
-            return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+" kyr";}
+            return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
+            "<br/>kyr";}
         else{
-            return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+" Myr";}
+            return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
+            "<br/>Myr";}
     },
-    'unit':''
+    'unit':'',
+    'unitSwitch':'fartxt'
 }
 columns.datalink = {
     'type':'fn',
@@ -266,7 +280,7 @@ GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
     var gw=this;
 
-    this.margin = {top: 40, right: 20, bottom: 20, left: 60}
+    this.margin = {top: 40, right: 20, bottom: 30, left: 70}
     this.graphWidth =
         this.fullGraphWidth - this.margin.left - this.margin.right;
     this.graphHeight =
@@ -375,21 +389,27 @@ GWCatalogue.prototype.setScales = function(){
     // columns to show
     this.yout = -0.3;
     this.labels={
-        "date":{icon:"img/time.svg",lab:["datestr","timestr"],
+        "date":{icon:"img/time.svg",lab:["datestr"],
             ttlab:"Date of detection"},
-        "dist":{icon:"img/ruler.svg",lab:["distanceStr","distanceLyStr"],
+        "time":{icon:"img/time.svg",lab:["timestr"],
+            ttlab:"Time of detection"},
+        "dist":{icon:"img/ruler.svg",lab:["distancePcStr"],
+            labSw:["distanceLyStr"],
             ttlab:"Distance",varname:"distance"},
-        "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
-            ttlab:"Category of detection"},
-        'far':{icon:"img/dice.svg",lab:["fappercent","fartxt"],
+        // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
+            // ttlab:"Category of detection"},
+        'far':{icon:"img/dice.svg",lab:["faptxt"],
+            labSw:["fartxt"],
             ttlab:"False alarm probability and rate",varname:"SNR"},
-        'peaklum':{icon:"img/blank.svg",lab:["peaklumMsuntxt"],
+        'peaklum':{icon:"img/peaklum.svg",lab:["peaklumtxtMsun"],
+            labSw:["peaklumtxtErg"],
             ttlab:"Peak Luminosity",varname:"peaklum"},
-        "energy":{icon:"img/blank.svg",lab:["energytxt"],
+        "energy":{icon:"img/energyrad.svg",lab:["energytxtMsun"],
+            labSw:["energytxtErg"],
             ttlab:"Radiated energy",varname:"energy"},
-        "initspineff":{icon:"img/blank.svg",lab:["initspineffStr"],
+        "initspineff":{icon:"img/initspin.svg",lab:["initspineffStr"],
             ttlab:"Initial Effective Spin Magnitude",varname:"initspineff"},
-        "finalspin":{icon:"img/blank.svg",lab:["finalspinStr"],
+        "finalspin":{icon:"img/finalspin.svg",lab:["finalspinStr"],
             ttlab:"Final Spin Magnitude",varname:"finalspin"},
         "data":{icon:"img/blank.svg",lab:["datalink"],ttlab:"Link to data"}
     }
@@ -421,7 +441,9 @@ GWCatalogue.prototype.setScales = function(){
         energy:"Energy radiated",
         initspineff:"Initial Effective Spin Magnitude",
         finalspin:"Final Spin Magnitude",
-        data:"LIGO Open Science Center"};
+        data:"LIGO Open Science Center",
+        switch:"Switch Units"
+    };
     this.labBlank="--";
 }
 GWCatalogue.prototype.drawSketch = function(){
@@ -473,6 +495,30 @@ GWCatalogue.prototype.drawSketch = function(){
         this.addMasses("pri",false);
         this.addMasses("sec",false);
         this.addMasses("final",false);
+
+        // add unitswitch img
+        swimgdiv = document.createElement('div');
+        swimgdiv.className = 'icon labcont';
+        swimgdiv.setAttribute("id",'unitswicon');
+        swimgdiv.style.width = this.labcontWidth;
+        swimgdiv.style.height = this.labcontHeight;
+        swimgdiv.style.display = "inline-block";
+        if (this.labels[lab].icon){
+            swimgdiv.innerHTML ="<img src='img/blank.svg'>"
+        }
+        swimgdiv.onmouseover = function(e){
+            gw.showTooltip(e,"switch")}
+        swimgdiv.onmouseout = function(){gw.hideTooltip()};
+        swimgdiv.onclick = function(){gw.switchUnits()};
+        swtxtdiv = document.createElement('div');
+        swtxtdiv.className = 'sketchlab info';
+        swtxtdiv.setAttribute("id",'unitswtxt');
+        swtxtdiv.style.height = "100%";
+        swtxtdiv.innerHTML = 'Switch units';
+        // console.log(labtxtdiv);
+        swimgdiv.appendChild(swtxtdiv);
+        document.getElementById('labcontainer').appendChild(swimgdiv);
+        this.unitSwitch=false;
     }
     // add title
     this.sketchTitle = this.svgSketch.append("text")
@@ -499,16 +545,6 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         .attr("cy",this.yScaleSk(this.bhpos[bh].scy))
         .attr("rx",this.scaleRadius(0,1))
         .attr("ry",this.scaleRadius(0,1))
-        // .attr("rx",function(){
-        //     if (redraw){
-        //         return gw.scaleRadius(
-        //             d[gw.cols[bh][0]],d["finalmass"]);
-        //     }else{return gw.scaleRadius(0,1);}})
-        // .attr("ry",function(){
-        //     if (redraw){
-        //         return gw.scaleRadius(
-        //             0.2*d[gw.cols[bh][0]],d["finalmass"]);
-        //     }else{return gw.scaleRadius(0,1);}})
         .attr("fill","url(#gradShadow)");
     // add circle for black hole
     this.svgSketch.append("circle")
@@ -516,15 +552,6 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
         .attr("cy",this.yScaleSk(this.yout))
         .attr("r",this.scaleRadius(1,1))
-        // .attr("cy",function(){
-        //     if (redraw){
-        //         gw.yScaleSk(gw.bhpos[bh].cy)-
-        //             gw.scaleRadius(d[gw.cols[bh][0]],d["finalmass"]);
-        //     }
-        //     else{return gw.yScaleSk(gw.yout);}})
-        // .attr("r",function(){
-        //     if (redraw){return gw.scaleRadius(d[gw.cols[bh][0]],d["finalmass"]);}
-        //     else{return gw.scaleRadius(1,1);}})
         .attr("fill","url(#gradBH)");
     // add mass icon
     if (!redraw){
@@ -564,13 +591,6 @@ GWCatalogue.prototype.addLab = function(lab){
     labimgdiv.setAttribute("id",lab+'icon');
     labimgdiv.style.width = this.labcontWidth;
     labimgdiv.style.height = this.labcontHeight;
-    // console.log(labimgdiv.classList);
-    // labimgdiv.style.width = "40%";
-    // labimgdiv.style.height = this.iicon.h;
-    // labimgdiv.style.left =
-    //     xScaleSk(bhpos[lab].xicon)-xScaleSkAspect(micon.w)/2;
-    // labimgdiv.style.top = yScaleSk(bhpos[lab].yicon)-yScaleSk(micon.h)/2;
-    // labimgdiv.style.position = "absolute";
     labimgdiv.style.display = "inline-block";
     if (this.labels[lab].icon){
         labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon+"'>"
@@ -581,9 +601,6 @@ GWCatalogue.prototype.addLab = function(lab){
     var labtxtdiv = document.createElement('div');
     labtxtdiv.className = 'sketchlab info';
     labtxtdiv.setAttribute("id",lab+'txt');
-    // labtxtdiv.style.left = xScaleSk(bhpos[lab].xtxt);
-    // labtxtdiv.style.top = yScaleSk(bhpos[lab].ytxt)-yScaleSk(micon.h)/2;
-    // labtxtdiv.style.display = "inline-block";
     labtxtdiv.style.height = "100%";
     labtxtdiv.innerHTML = '--';
     // console.log(labtxtdiv);
@@ -662,6 +679,37 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
             d[this.micon[bh].lab[0]+'Str'];
     // }
 };
+GWCatalogue.prototype.switchUnits = function(){
+    if (!this.d){
+        console.log('not switching')
+        return
+    }
+    if (this.unitSwitch){
+        console.log('switching to false');
+        this.unitSwitch=false;}
+    else{
+        console.log('switching to true');
+        this.unitSwitch=true;}
+
+    for (lab in this.labels){
+        labTxt='';
+        labs=this.labels[lab].lab;
+        if (this.unitSwitch){
+            if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
+        }
+        for (i in labs){
+            labTxt += " "+this.d[labs[i]];
+            if (columns[labs[i]].unit){
+                labTxt += " "+columns[labs[i]].unit;
+            }
+            if (i<this.labels[lab].lab.length-1){
+                labTxt += "<br>";
+            }
+        }
+        console.log(labTxt)
+        document.getElementById(lab+"txt").innerHTML = labTxt;
+    }
+}
 GWCatalogue.prototype.updateSketch = function(d){
     // if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&
     // (sketchName==d["name"])){
@@ -674,21 +722,21 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchTitle.html("Information: "+this.sketchName);
         for (lab in this.labels){
             console.log(this.labels[lab])
-                labTxt=''
-                for (i in this.labels[lab].lab){
-                    labTxt += " "+d[this.labels[lab].lab[i]];
-                    if (columns[this.labels[lab].lab[i]].unit){
-                        labTxt += " "+columns[this.labels[lab].lab[i]].unit;
-                    }
-                    if (i<this.labels[lab].lab.length-1){
-                        labTxt += "<br>";
-                    }
+            labTxt=''
+            for (i in this.labels[lab].lab){
+                labTxt += " "+d[this.labels[lab].lab[i]];
+                if (columns[this.labels[lab].lab[i]].unit){
+                    labTxt += " "+columns[this.labels[lab].lab[i]].unit;
                 }
+                if (i<this.labels[lab].lab.length-1){
+                    labTxt += "<br>";
+                }
+            }
             // if(svgLabs){
             // OBSOLETE
             //     svgSketch.select("text."+lab+"txt").html(labTxt);
             // }else{
-                document.getElementById(lab+"txt").innerHTML = labTxt;
+            document.getElementById(lab+"txt").innerHTML = labTxt;
             // }
         }
     }else if ((this.sketchName==d["name"])){
@@ -696,6 +744,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.flyOutMasses("pri");
         this.flyOutMasses("sec");
         this.flyOutMasses("final");
+        this.d = null;
         // replace title
         this.sketchName="None";
         this.sketchTitle.html("Information Panel");
@@ -712,11 +761,13 @@ GWCatalogue.prototype.updateSketch = function(d){
             this.flyInMasses(d,"pri","fly");
             this.flyInMasses(d,"sec","fly");
             this.flyInMasses(d,"final","fly");
+            this.d = d;
         }else{
             console.log('resizing');
             this.flyInMasses(d,"pri","smooth");
             this.flyInMasses(d,"sec","smooth");
             this.flyInMasses(d,"final","smooth");
+            this.d = d;
         }
         // replace title
         this.sketchName = d["name"];
@@ -782,7 +833,7 @@ GWCatalogue.prototype.formatData = function(d){
                 errcode=errcode.split('-')
                 d[col+'plus'] = +errcode[0] + d[col];
                 d[col+'minus'] = -errcode[1] + d[col];
-                d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+' - '+
+                d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'&ndash;'+
                         parseFloat(d[col+'plus'].toPrecision(3))
                 columns[col+'Str']={'type':'str','unit':columns[col].unit}
             }
@@ -818,6 +869,24 @@ GWCatalogue.prototype.makeGraph = function(){
             .attr("class", "tooltip")
             .style("opacity", 0);
     }
+}
+GWCatalogue.prototype.getUrlVars = function(){
+    // Get URL and query variables
+    var vars = {},hash;
+    var url = window.location.href;
+    if (window.location.href.indexOf('?')!=-1){
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        url = window.location.href.slice(0,window.location.href.indexOf('?'));
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            // vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+    }
+    // console.log("input:",vars);
+    this.urlVars = vars;
+    this.url = url;
 }
 GWCatalogue.prototype.drawGraphInit = function(){
     var gw = this;
