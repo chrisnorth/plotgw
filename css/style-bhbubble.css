@@ -29,18 +29,62 @@ a{
     margin-bottom:0;
     font-size:22px;
 }
-#hdr .help-button{
-    position:absolute;
+#hdr .button {
+    float:right;
     right:0;
     margin-right:10px;
     height:50%;
     width:auto;
 }
-#hdr .help-button img{
+#hdr .button img{
     height:100%;
     float:right;
     width:auto;
     cursor: pointer;
+}
+#hdr .button .button-span{
+    height:100%;
+    float:right;
+    width:auto;
+    cursor: pointer;
+    padding-right:5px;
+}
+#lang-button{
+    /*border:1px solid white;*/
+    cursor:pointer;
+    /*border-radius:5px;*/
+}
+#lang-button .lang-button-cont{
+    width:100%;
+    height:auto;
+}
+#hdr #lang-button img{
+    height:75%;
+    padding-right:5px;
+    padding-left:5px;
+    /*transform: rotate(90deg);*/
+}
+#lang-list{
+    width:auto;
+    margin-top:10px;
+    border:1px solid white;
+    border-bottom-left-radius:5px;
+    border-bottom-right-radius:5px;
+    display:none;
+}
+#lang-list span{
+    display:block;
+    padding:5px;
+    text-align:left;
+}
+#lang-list span.current{
+    font-weight: bold;
+}
+#lang-button.show #lang-list{
+    display:block;
+}
+#lang-button.show img{
+    transform:rotate(180deg);
 }
 #full.right{
     height:90%;
@@ -299,7 +343,7 @@ input.down{
 #help-outer{
     position: fixed;
     width: 200px;
-    height: 28px;
+    height: auto;
     background-color:rgba(0,0,0,1);
     border:solid rgba(255,255,255,1) 5px;
     border-radius:20px;
@@ -326,7 +370,7 @@ input.down{
     margin-left:10%;
     text-align:left;
     padding-bottom:3%;
-    height:10%;
+    height:6%;
     float:left;
 }
 .help-cont img{
@@ -340,8 +384,7 @@ input.down{
 }
 .help-text{
     color:#fff;
-    margin-top:2%;
-    font-size:1.5em;
+    font-size:1.2em;
 }
 @media (max-width: 500px){
     .tooltip span.name{
