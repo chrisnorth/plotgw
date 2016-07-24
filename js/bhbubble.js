@@ -702,13 +702,13 @@ BHBubble.prototype.addLang = function(){
     this.langs={
         "en":{code:"en",name:"English (en)"},
         "fr":{code:"fr",name:"Francais (fr)"},
-        "or":{code:"or",name:"Oriya (or)"},
+        "or":{code:"or",name:"&#2835;&#2849;&#2876;&#2879;&#2822; (or)"},
         "hu":{code:"hu",name:"Magyar (hu)"}
     }
     var bh=this;
     this.langdiv = d3.select("#lang-button");
     this.langlab = d3.select("#lang-label");
-    this.langlab.html("en");
+    this.langlab.html(bh.langs[bh.lang].code);
     this.langdiv.on("click",function(){bh.toggleLangList();});
     this.langlist=document.getElementById("lang-list")
     for(lang in this.langs){
