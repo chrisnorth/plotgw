@@ -23,6 +23,10 @@ BHBubble.prototype.getUrlVars = function(){
     // console.log("input:",vars);
     this.urlVars = vars;
     this.url = url;
+    //set default language
+    if(!this.urlVars.hasOwnProperty("lang")){
+        this.urlVars.lang="en";
+    }
 }
 BHBubble.prototype.makeUrl = function(newKeys){
     // construct new URL with replacement queries if necessary
@@ -39,7 +43,11 @@ BHBubble.prototype.loadLang = function(lang){
     //;load language files - then call rest of load procedure
     var _bh = this;
     _bh.lang = lang;
-    if (!lang){lang="en"};
+    if (!lang){
+        lang="en";
+        console.log("default to",lang);
+        _bh.lang = lang;
+    };
     var url=this.langdir+lang+'.json';
     // console.log(url);
     // Bug fix for reading local JSON file in FF3
@@ -63,7 +71,7 @@ BHBubble.prototype.loadLang = function(lang){
             window.location.replace(_bh.makeUrl({'lang':'en'}));
         },
         success:function(data){
-            //console.log('success',data[0]);
+            console.log('success',data[0]);
             _bh.langdict=data[0];
             if (_bh.langdict.alphabet=="Roman"){
                 document.title=_bh.t("title",document.title);}
@@ -690,6 +698,41 @@ BHBubble.prototype.drawBubbles = function(){
             .html(function(d){return "<p>"+bh.legenddescs[d]+"<p>";});
     }
 }
+BHBubble.prototype.addLang = function(){
+    this.langs={
+        "en":{code:"en",name:"English (en)"},
+        "fr":{code:"fr",name:"Francais (fr)"},
+        "or":{code:"or",name:"Oriya (or)"},
+        "hu":{code:"hu",name:"Magyar (hu)"}
+    }
+    var bh=this;
+    this.langdiv = d3.select("#lang-button");
+    this.langlab = d3.select("#lang-label");
+    this.langlab.html("en");
+    this.langdiv.on("click",function(){bh.toggleLangList();});
+    this.langlist=document.getElementById("lang-list")
+    for(lang in this.langs){
+        langspan=document.createElement("span");
+        var langtxt="";
+        if(bh.langs[lang].code==bh.lang){
+            langtxt = langtxt + "> ";
+            langspan.classList.add("current");
+        }
+        langtxt = langtxt + bh.langs[lang].name;
+        langspan.innerHTML = langtxt;
+        langspan.setAttribute("id",bh.langs[lang].code);
+        langspan.addEventListener("click",function(){
+            window.location.href = bh.makeUrl({lang:this.getAttribute("id")});
+        })
+        langspan.addEventListener("mouseover",function(e){
+                bh.showControlTooltip(e,"Switch to "+bh.langs[this.getAttribute("id")].name);})
+        bh.langlist.appendChild(langspan);
+    }
+
+}
+BHBubble.prototype.toggleLangList = function(){
+    $("#lang-button").toggleClass("show");
+}
 BHBubble.prototype.addHelp = function(){
     // set up help divs
     var bh=this;
@@ -1239,6 +1282,7 @@ BHBubble.prototype.replot = function(valueCol){
 BHBubble.prototype.makePlot = function(){
     this.init();
     this.addHelp();
+    this.addLang();
     this.scalePage();
     this.makeSvg();
     this.loadData();
