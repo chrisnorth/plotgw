@@ -42,8 +42,8 @@
     "Merge binary black holes":"Kettősök összeolvasztása",
     "Unmerge binary black holes":"Kettősök szétválasztása",
     "Show all black holes":"Összes fekete lyuk megjelenítése",
-    "Scale by size":"Méret átmérő alapján",
-    "Scale by mass":"Méret tömeg alapján",
+    "Scale by size":"Körök sugarának átméretezése feketelyuk-sugár szerint",
+    "Scale by mass":"Körök területének átméretezése feketelyuk-tömeg szerint",
     "Help":"Segítség",
     "footer":"Forrás: <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Magyar szöveg: Szölgyén Ákos, Dálya Gergely, Raffai Péter</br>Fejlesztő: Chris North a <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a> megbízásából.</br>Forráskód megtekintése a <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>-on.</br>A röntgenkettősök adatainak forrása: <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
     "Save as SVG": "Mentés SVG formátumban"
