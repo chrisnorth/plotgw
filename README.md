@@ -30,3 +30,5 @@ To provide further translations, translate the text on the right side of [bhbubb
 
 The plots use [d3](https://d3js.org/) to plot data stored in csv files. The display should be responsive on screen resizing. Language translations are read from json files. I should acknowledge Stuart Lowe, as portions of these pages were developed from repositories he largely contributed to.
 
+Note that the analytics.js file used for usage tracking is not stored within this repository, and is only present on the live server.
+
