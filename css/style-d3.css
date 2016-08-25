@@ -201,19 +201,14 @@ input.down{
     opacity:0;
 }
 #options-outer{
-    position: fixed;
+    position: absolute;
     width: 200px;
     height: 28px;
     background-color:rgba(255,255,255,1);
-    border:solid rgba(0,0,0,1) 5px;
-    border-radius:20px;
-    padding:5px;
+    border:solid rgba(0,0,0,1) 2px;
+    border-radius:10px;
+    /*padding:5px;*/
     opacity:0;
-}
-#options-inner{
-    width:100%;
-    height:auto;
-    padding-bottom:10px;
 }
 .options-title{
     width:100%;
@@ -223,4 +218,24 @@ input.down{
 }
 .options-buttons{
     padding-bottom:20px;
+}
+.option{
+    display:inline-block;
+    font-size:16px;
+}
+.option input{
+    font-size:16px;
+}
+.options-box{
+    width:90%;
+    height:40%;
+    padding-left:5%;
+    padding-right:5%;
+    padding-top:10px;
+    padding-bottom:10px;
+    float:left;
+}
+.options-box.bottom{
+    width:40%;
+    height:90%;
 }

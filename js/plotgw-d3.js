@@ -524,8 +524,14 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.1))
         .attr("text-anchor","middle")
-        .attr("font-size","1.5em")
+        .attr("font-size","2em")
         .html("Information Panel");
+    this.sketchTitleHint = this.svgSketch.append("text")
+        .attr("x",this.xScaleSk(0.5))
+        .attr("y",this.yScaleSk(0.2))
+        .attr("text-anchor","middle")
+        .attr("font-size","1em")
+        .html("Click on data points for information");
 
     // this.tooltipSk = document.createElement('div');
     // this.tooltipSk.className = "tooltip";
@@ -719,6 +725,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.flyInMasses(d,"sec","snap");
         this.flyInMasses(d,"final","snap");
         this.sketchTitle.html("Information: "+this.sketchName);
+        this.sketchTitleHint.html("");
         for (lab in this.labels){
             console.log(this.labels[lab])
             labTxt=''
@@ -747,6 +754,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         // replace title
         this.sketchName="None";
         this.sketchTitle.html("Information Panel");
+        this.sketchTitleHint.html("Click on data points for information");
         for (lab in this.labels){
             // if(svgLabs){
             //     svgSketch.select("text."+lab+"txt").html(labBlank);
@@ -771,6 +779,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         // replace title
         this.sketchName = d["name"];
         this.sketchTitle.html("Information: "+this.sketchName);
+        this.sketchTitleHint.html("");
         for (lab in this.labels){
             labTxt=''
             for (i in this.labels[lab].lab){
@@ -928,8 +937,8 @@ GWCatalogue.prototype.drawGraph = function(){
     yBorder = (columns[gw.yvar].border) ? columns[gw.yvar].border : 2;
     yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
     yMax = d3.max(data, gw.yErrP)+yBorder;
-    xAxLineOp = (yMin < 0) ? 1 : 0;
-    yAxLineOp = (xMin < 0) ? 1 : 0;
+    gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
+    gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
     gw.yScale.domain([yMin, yMax]);
 
 
@@ -943,8 +952,8 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class","x-axis axis-line")
         .attr("x1",0).attr("x2",gw.graphWidth)
         .attr("y1",0).attr("y2",0)
-        .style("stroke","rgb(200,200,200)").attr("stroke-width",5)
-        .attr("opacity",xAxLineOp);
+        .style("stroke","rgb(100,100,100)").attr("stroke-width",5)
+        .attr("opacity",gw.xAxLineOp);
     gw.svg.select(".x-axis.axis").call(gw.xAxis)
     gw.svg.select(".x-axis.axis").append("text")
         .attr("class", "x-axis axis-label")
@@ -953,12 +962,6 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y", "2em")
         .style("text-anchor", "middle")
         .text(getLabelUnit(gw.xvar));
-    gw.svg.select(".x-axis.axis").append("line")
-        .attr("class","x-axis axis-line")
-        .attr("x1",0).attr("x2",gw.graphWidth)
-        .attr("y1",0).attr("y2",0)
-        .style("stroke","rgb(200,200,200)").attr("stroke-width",5)
-        .attr("opacity",xAxLineOp);
 
     // y-axis
     gw.svg.append("g")
@@ -969,15 +972,15 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class","y-axis axis-line")
         .attr("x1",0).attr("x2",0)
         .attr("y1",0).attr("y2",gw.graphHeight)
-        .style("stroke","rgb(200,200,200)").attr("stroke-width",5)
-        .attr("opacity",yAxLineOp);
+        .style("stroke","rgb(100,100,100)").attr("stroke-width",5)
+        .attr("opacity",gw.yAxLineOp);
     gw.svg.select(".y-axis.axis").call(gw.yAxis)
     gw.svg.select(".y-axis.axis").append("text")
         .attr("class", "y-axis axis-label")
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("x",-gw.graphHeight/2)
-        .attr("dy", "-30px")
+        .attr("dy", "-50px")
         .style("text-anchor", "middle")
         .text(getLabelUnit(gw.yvar));
 
@@ -1146,10 +1149,7 @@ GWCatalogue.prototype.drawGraph = function(){
     this.optionsbg.on("click",function(){gw.hideOptions();});
     this.optionsouter
       .style("top","200%");
-    this.optionsouter
-      .append("div")
-      .attr("id","options-close")
-      .html("<img src='img/close.png' title='close'>")
+    this.optionsouter.select("#options-close")
       .on("click",function(){gw.hideOptions();});
 
 }
@@ -1273,7 +1273,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             xMax = d3.max(data, gw.xErrP)+xBorder;
             gw.xScale.domain([xMin, xMax]);
         }
-        yAxLineOp = (xMin < 0) ? 1 : 0;
+        gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
 
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
@@ -1300,7 +1300,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .transition()
             .duration(750)
             .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
-            .attr("opacity",yAxLineOp);
+            .attr("opacity",gw.yAxLineOp);
         // Update error bars
         data.forEach(function(d){
             if (d.name==gw.sketchName){
@@ -1335,8 +1335,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
             gw.yScale.domain([yMin, d3.max(data, gw.yErrP)+yBorder]);
         }
-        xAxLineOp = (yMin < 0) ? 1 : 0;
-        console.log("xAxLineOp",xAxLineOp)
+        gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
         // Select the section we want to apply our changes to
         // var svg = d3.select("body").transition();
 
@@ -1357,7 +1356,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .transition()
             .duration(750)
             .attr("y1",-gw.yScale(0)/2).attr("y2",-gw.yScale(0)/2)
-            .attr("opacity",xAxLineOp);
+            .attr("opacity",gw.xAxLineOp);
         data.forEach(function(d){
             if (d.name==gw.sketchName){
                 gw.svg.select("#highlight")
@@ -1377,8 +1376,7 @@ GWCatalogue.prototype.addOptions = function(){
         if (columns[col].avail){
             var divx = document.getElementById('x-buttons');
             var newoptdivx = document.createElement('div');
-            newoptdivx.classNm = 'option '+col;
-            newoptdivx.style.display = 'inline-block';
+            newoptdivx.className = 'option';
             divx.appendChild(newoptdivx);
             var newoptinputx = document.createElement('input');
             newoptinputx.type = 'button';
@@ -1396,8 +1394,7 @@ GWCatalogue.prototype.addOptions = function(){
 
             var divy= document.getElementById('y-buttons');
             var newoptdivy = document.createElement('div');
-            newoptdivy.class = 'option '+col;
-            newoptdivy.style.display = 'inline-block';
+            newoptdivy.className = 'option';
             divy.appendChild(newoptdivy);
             var newoptinputy = document.createElement('input');
             newoptinputy.type = 'button';
@@ -1417,9 +1414,9 @@ GWCatalogue.prototype.addOptions = function(){
 }
 GWCatalogue.prototype.showOptions = function(){
     // fade in semi-transparent background layer (greys out image)
-    this.optionsbg.transition()
-      .duration(500)
-      .style({"opacity":0.5});
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style({"opacity":0.5});
     this.optionsbg.style("height","100%");
     //fade in infopanel
     this.optionsouter.transition()
@@ -1427,8 +1424,17 @@ GWCatalogue.prototype.showOptions = function(){
        .style("opacity",1);
     // set contents and position of infopanel
     // this.infopanel.html(this.iptext(d));
-    this.optionsouter.style("left", "25%").style("top", "25%")
-       .style("width","50%").style("height","auto");
+    this.optionsouter.style("left", document.getElementById('infoouter').offsetLeft-1)
+        .style("top", document.getElementById('infoouter').offsetTop-1)
+        .style("width",document.getElementById('infoouter').offsetWidth-2)
+        .style("height",document.getElementById('infoouter').offsetHeight-2);
+    if (this.portrait){
+        document.getElementById('options-x').classList.add('bottom')
+        document.getElementById('options-y').classList.add('bottom')
+    }else{
+        document.getElementById('options-x').classList.remove('bottom')
+        document.getElementById('options-y').classList.remove('bottom')
+    }
 
 }
 GWCatalogue.prototype.hideOptions = function(d) {
@@ -1438,9 +1444,9 @@ GWCatalogue.prototype.hideOptions = function(d) {
     // move infopanel out of page
     this.optionsouter.style("top","200%");
     // fade out semi-transparent background
-    this.optionsbg.transition()
-      .duration(500)
-      .style("opacity",0);
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style("opacity",0);
     this.optionsbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
 }
@@ -1452,7 +1458,7 @@ GWCatalogue.prototype.addButtons = function(){
         if (columns[col].avail){
             var divx = document.getElementById('xoptions');
             var newoptdivx = document.createElement('div');
-            newoptdivx.classNm = 'option '+col;
+            newoptdivx.className = 'option '+col;
             newoptdivx.style.display = 'inline-block';
             divx.appendChild(newoptdivx);
             var newoptinputx = document.createElement('input');
@@ -1471,7 +1477,7 @@ GWCatalogue.prototype.addButtons = function(){
 
             var divy= document.getElementById('yoptions');
             var newoptdivy = document.createElement('div');
-            newoptdivy.class = 'option '+col;
+            newoptdivy.className = 'option '+col;
             newoptdivy.style.display = 'inline-block';
             divy.appendChild(newoptdivy);
             var newoptinputy = document.createElement('input');
