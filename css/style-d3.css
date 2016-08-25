@@ -103,6 +103,9 @@ input.down{
     height: 100%;
     float:left;
 }
+.labcont#unitswicon{
+    cursor: pointer;
+}
 .sketchlab.info{
     font-size:1.5em;
     padding-left:10px;
