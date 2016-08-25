@@ -17,6 +17,7 @@ The two scalings (by size and mass) scale the area of the displayed circles.
 ### Translations
 BHBubble is also available in:
 * [French](http://gravity.astro.cf.ac.uk/plotgw/BHBubble.html?lang=fr)
+* [Hungarian](http://gravity.astro.cf.ac.uk/plotgw/BHBubble.html?lang=hu)
 * [Odia (Oriya)](http://gravity.astro.cf.ac.uk/plotgw/BHBubble.html?lang=or)
 
 To provide further translations, translate the text on the right side of [bhbubble-lang/en.json](https://github.com/chrisnorth/plotgw/blob/master/bhbubble-lang/en.json). For non-Roman alphabets the contents should use HTML codes. The current recommendation is to use [this (unrelated) page](http://lcogt.net/starinabox/translate.html) to translate to HTML codes.
