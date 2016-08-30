@@ -2,38 +2,38 @@ var columns = {
     name:{code:"name",type:"str"},
     type:{code:"type",type:"str"},
     totalmass:{code:"totalmass",errcode:"totalmasserr",
-        type:"flt",label:"Total Mass",
+        type:"flt",label:"Total Mass",icon:"img/totalmass.svg",
         avail:true,unit:'solar masses'},
     chirpmass:{code:"chirpmass",errcode:"chirpmasserr",
-        type:"flt",label:"Chirp Mass",
+        type:"flt",label:"Chirp Mass",icon:"img/chirpmass.svg",
         avail:true,unit:'solar masses'},
     initmass1:{code:"initmass1",errcode:"initmass1err",
-        type:"flt",label:"Primary Mass",
+        type:"flt",label:"Primary Mass",icon:"img/primass.svg",
         avail:true,unit:'solar masses'},
     initmass2:{code:"initmass2",errcode:"initmass2err",
-        type:"flt",label:"Secondary Mass",
+        type:"flt",label:"Secondary Mass",icon:"img/secmass.svg",
         avail:true,unit:'solar masses'},
     finalmass:{code:"finalmass",errcode:"finalmasserr",
-        type:"flt",label:"Final Mass",
+        type:"flt",label:"Final Mass",icon:"img/finalmass.svg",
         avail:true,unit:'solar masses'},
     massratio:{code:"massratio",errcode:"massratioerr",
-        type:"flt",label:"Mass Ratio",
+        type:"flt",label:"Mass Ratio",icon:"img/massratio.svg",
         avail:true,unit:'',border:0.01},
     initspineff:{code:"initspineff",errcode:"initspinefferr",
-        type:"flt",avail:true,border:0.01,
+        type:"flt",avail:true,border:0.01,icon:"img/initspin.svg",
         label:"Effective inspiral spin magnitude",unit:""},
     initspin1:{code:"initspin1",errcode:"initspin1err",
         type:"flt",avail:false},
     initspin2:{code:"initspin2",errcode:"initspin2err",
         type:"flt",avail:false},
     finalspin:{code:"finalspin",errcode:"finalspinerr",
-        type:"flt",avail:true,border:0.01,
+        type:"flt",avail:true,border:0.01,icon:"img/finalspin.svg",
         label:"Final spin magnitude",unit:""},
     distance:{code:"distance",errcode:"distanceerr",
         type:"flt",label:'Distance',border:20,
-        avail:true,unit:'MPc'},
+        avail:true,unit:'MPc',icon:"img/ruler.svg"},
     redshift:{code:"redshift",errcode:"redshifterr",
-        type:"flt",label:"Redshift",avail:true,border:0.01},
+        type:"flt",label:"Redshift",avail:true,icon:"img/redshift.svg",border:0.01},
     date:{code:"date",
         type:"date",avail:false},
     far:{code:"far",
@@ -49,13 +49,13 @@ var columns = {
     skyarea:{code:"skyarea",
         type:"flt",avail:false},
     energy:{code:"energy",avail:true,label:"Energy released",
-        errcode:"energyerr",border:0.1,
+        errcode:"energyerr",border:0.1,icon:"img/energyrad.svg",
         type:"flt",unit:"solar mass equiv."},
     peaklum:{code:"peaklum",avail:true,label:"Peak luminosity",
-        errcode:"peaklumerr",type:"flt",
+        errcode:"peaklumerr",type:"flt",icon:"img/peaklum.svg",
         unit:"solar mass equiv. per second"},
     peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
-        errcode:"",type:"flt",border:0.1,
+        errcode:"",type:"flt",border:0.1,icon:"data.svg",
         unit:"x 1e-21"},
     data:{code:"data",avail:false,type:'str',label:"Data"}
 }
@@ -186,7 +186,13 @@ var getLabelUnit = function(col){
         return(columns[col].label);
     }
 }
-
+var getIcon = function(col){
+    if (columns[col].icon){
+        return(columns[col].icon);
+    }else{
+        return(null);
+    }
+}
 // Define GWCatalogue class
 function GWCatalogue(){
     // set initial axes
@@ -853,7 +859,7 @@ GWCatalogue.prototype.formatData = function(d){
 GWCatalogue.prototype.makeGraph = function(){
     // this.setSvgScales();
     console.log('makeGraph');
-    svgcont = d3.select("div#graphcontainer").append("div")
+    this.svgcont = d3.select("div#graphcontainer").append("div")
         .attr("id","svg-container")
         .attr("width",this.svgWidth)
         .attr("height",this.svgHeight)
@@ -940,8 +946,9 @@ GWCatalogue.prototype.drawGraph = function(){
     gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
     gw.yScale.domain([yMin, yMax]);
-
-
+    console.log("gw.showerrors",gw.showerrors);
+    if (gw.showerrors == null){gw.showerrors=true};
+    console.log("gw.showerrors",gw.showerrors);
     // x-axis
     gw.svg.append("g")
         .attr("class", "x-axis axis")
@@ -962,6 +969,16 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y", "2em")
         .style("text-anchor", "middle")
         .text(getLabelUnit(gw.xvar));
+    gw.svgcont.append("div")
+        .attr("class", "x-axis axis-icon")
+        // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
+        .style("right", gw.margin.right)
+        .style("bottom", gw.margin.bottom)
+        .style("width","40px")
+        .style("height","40px")
+    .append("img")
+        .attr("id","x-axis-icon")
+        .attr("src",getIcon(gw.xvar));
 
     // y-axis
     gw.svg.append("g")
@@ -983,6 +1000,16 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("dy", "-50px")
         .style("text-anchor", "middle")
         .text(getLabelUnit(gw.yvar));
+    gw.svgcont.append("div")
+        .attr("class", "y-axis axis-icon")
+        // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
+        .style("top", gw.margin.top)
+        .style("left", 0)
+        .style("width","40px")
+        .style("height","40px")
+    .append("img")
+        .attr("id","y-axis-icon")
+        .attr("src",getIcon(gw.yvar));
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
@@ -1141,16 +1168,26 @@ GWCatalogue.prototype.drawGraph = function(){
     this.optionsouter = d3.select('#options-outer')
     //add options icon
     d3.select("#svg-container").append("div")
-      .attr("id","options-icon")
-      .style({"right":gw.margin.right,"top":0,"width":40,"height":40})
+        .attr("id","options-icon")
+        .style({"right":gw.margin.right,"top":0,"width":40,"height":40})
     .append("img")
-      .attr("src","img/settings.svg")
-      .on("click",function(){gw.showOptions();});
+        .attr("src","img/settings.svg")
+        .on("click",function(){gw.showOptions();});
     this.optionsbg.on("click",function(){gw.hideOptions();});
     this.optionsouter
-      .style("top","200%");
+        .style("top","200%");
     this.optionsouter.select("#options-close")
-      .on("click",function(){gw.hideOptions();});
+        .on("click",function(){gw.hideOptions();});
+
+    //add error toggle button
+    d3.select("#svg-container").append("div")
+        .attr("id","errors-icon")
+        .style({"right":gw.margin.right+40,"top":0,"width":40,"height":40})
+    .append("img")
+        .attr("src","img/errors.svg")
+        .attr("class","errors-show")
+        .attr("id","errors-img")
+        .on("click",function(){gw.toggleErrors()});
 
 }
 GWCatalogue.prototype.moveHighlight = function(d){
@@ -1171,7 +1208,7 @@ GWCatalogue.prototype.moveHighlight = function(d){
 }
 GWCatalogue.prototype.updateErrors = function(){
     // svg = d3.select("body").transition();
-    if (columns[this.xvar]["errcode"]==""){
+    if ((columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
         this.svg.selectAll(".errorX")
             .transition()
             .duration(750)
@@ -1210,7 +1247,7 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
             .attr("opacity",1);
     }
-    if (columns[this.yvar]["errcode"]==""){
+    if ((columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
         this.svg.selectAll(".errorY")
             .transition()
             .duration(750)
@@ -1250,7 +1287,20 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("opacity",1);
     }
 }
-
+GWCatalogue.prototype.toggleErrors = function(){
+    console.log(this.svgcont.select("#errors-img"));
+    if (this.showerrors){
+        this.showerrors = false;
+        this.svgcont.select("#errors-img ")
+            .attr("class","errors-hide")
+    }else{
+        this.showerrors = true;
+        this.svgcont.select("#errors-img")
+            .attr("class","errors-show")
+    }
+    console.log("toggling errors");
+    this.updateErrors();
+}
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // set global variable
     this.xvar = xvarNew;
@@ -1296,6 +1346,8 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .transition()
             .duration(750)
             .text(getLabelUnit(gw.xvar));
+        gw.svgcont.select("#x-axis-icon")
+            .attr("src",getIcon(gw.xvar));
         gw.svg.select(".y-axis.axis-line")
             .transition()
             .duration(750)
@@ -1352,6 +1404,8 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .transition()
             .duration(750)
             .text(getLabelUnit(gw.yvar));
+        gw.svgcont.select("#y-axis-icon")
+            .attr("src",getIcon(gw.yvar));
         gw.svg.select(".x-axis.axis-line")
             .transition()
             .duration(750)

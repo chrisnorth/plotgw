@@ -157,6 +157,12 @@ input.down{
 .axis-label{
     font-size:2em;
 }
+.axis-icon{
+    position:absolute;
+}
+.axis-icon img{
+    width:100%;
+}
 .tick line {
     opacity:0.2;
 }
@@ -175,12 +181,24 @@ input.down{
 .tooltip span{
     display:block;
 }
-#options-icon{
+#options-icon, #errors-icon{
     position:absolute;
 }
-#options-icon img{
+#options-icon img, #errors-icon img{
     width:100%;
     cursor:pointer;
+}
+#errors-img.errors-show{
+    opacity:1;
+    transition: opacity 750ms ease-in-out;
+    -moz-transition: opacity 750ms ease-in-out;
+    -webkit-transition: opacity 750ms ease-in-out;
+}
+#errors-img.errors-hide{
+    opacity:0.3;
+    transition: opacity 750ms ease-in-out;
+    -moz-transition: opacity 750ms ease-in-out;
+    -webkit-transition: opacity 750ms ease-in-out;
 }
 #options-close{
     position:absolute;
