@@ -44,7 +44,7 @@ var columns = {
         type:"flt",avail:false},
     sigma:{code:"sigma",
         type:"flt",avail:false},
-    SNR:{code:"SNR",errcode:"",
+    SNR:{code:"SNR",errcode:"",icon:"img/snr.svg",
         type:"flt",avail:true,label:"SNR"},
     skyarea:{code:"skyarea",
         type:"flt",avail:false},
@@ -55,7 +55,7 @@ var columns = {
         errcode:"peaklumerr",type:"flt",icon:"img/peaklum.svg",
         unit:"solar mass equiv. per second"},
     peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
-        errcode:"",type:"flt",border:0.1,icon:"data.svg",
+        errcode:"",type:"flt",border:0.1,icon:"img/peakstrain.svg",
         unit:"x 1e-21"},
     data:{code:"data",avail:false,type:'str',label:"Data"}
 }
@@ -916,8 +916,9 @@ GWCatalogue.prototype.drawGraphInit = function(){
         data.forEach(gw.formatData);
         gw.data = data;
         // console.log(data);
-
+        gw.optionsOn=false;
         gw.makePlot();
+        // gw.initButtons();
 
         // console.log('gw.data',gw.data);
     });
@@ -973,7 +974,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
-        .style("bottom", gw.margin.bottom)
+        .style("bottom", (gw.margin.bottom+40)/2.)
         .style("width","40px")
         .style("height","40px")
     .append("img")
@@ -1004,7 +1005,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "y-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
-        .style("left", 0)
+        .style("left", (gw.margin.left-40)/2.)
         .style("width","40px")
         .style("height","40px")
     .append("img")
@@ -1166,7 +1167,6 @@ GWCatalogue.prototype.drawGraph = function(){
     //add options icon
     this.optionsbg = d3.select('#options-bg');
     this.optionsouter = d3.select('#options-outer')
-    //add options icon
     d3.select("#svg-container").append("div")
         .attr("id","options-icon")
         .style({"right":gw.margin.right,"top":0,"width":40,"height":40})
@@ -1177,6 +1177,15 @@ GWCatalogue.prototype.drawGraph = function(){
     this.optionsouter
         .style("top","200%");
     this.optionsouter.select("#options-close")
+        .on("click",function(){gw.hideOptions();});
+
+    // add info icon
+    d3.select("#svg-container").append("div")
+        .attr("id","info-icon")
+        .attr("class","hidden")
+        .style({"right":gw.margin.right,"top":0,"width":40,"height":40})
+    .append("img")
+        .attr("src","img/info.svg")
         .on("click",function(){gw.hideOptions();});
 
     //add error toggle button
@@ -1426,47 +1435,86 @@ GWCatalogue.prototype.addOptions = function(){
     console.log("add options");
     var gw=this;
     // add buttons
+    var col;
     for (col in columns){
         if (columns[col].avail){
             var divx = document.getElementById('x-buttons');
             var newoptdivx = document.createElement('div');
-            newoptdivx.className = 'option';
+            newoptdivx.className = 'option option-x';
+            newoptdivx.setAttribute("id","button-divx-"+col);
             divx.appendChild(newoptdivx);
-            var newoptinputx = document.createElement('input');
-            newoptinputx.type = 'button';
+            var newoptinputx = document.createElement('img');
+            newoptinputx.type = 'submit';
             newoptinputx.name = col;
-            newoptinputx.value = getLabel(col);
+            // newoptinputx.value = getLabel(col);
             newoptinputx.setAttribute("id","buttonx-"+col);
-            if (col==this.xvar){newoptinputx.classList.add("down")};
+            newoptinputx.classList.add("button");
+            newoptinputx.classList.add("button-x");
+            newoptinputx.src = getIcon(col);
+            newoptinputx.label = getLabel(col);
+            if (col==this.xvar){newoptdivx.classList.add("down")};
+            // newoptinputx.innerHTML = "<img src="+getIcon(col)+" title='"+getLabel(col)+"'>";
             newoptinputx.addEventListener('click',function(){
                 oldXvar = gw.xvar;
-                document.getElementById("buttonx-"+oldXvar).classList.remove("down")
+                newXvar = this.id.split('buttonx-')[1]
+                document.getElementById("button-divx-"+oldXvar).classList.remove("down")
+                document.getElementById("button-divx-"+newXvar).classList.add("down")
                 this.classList.add("down");
                 gw.updateXaxis(this.name);
             });
+            newoptinputx.onmouseover = function(e){
+                gw.showTooltip(e,this.id.split('buttonx-')[1],type="column");};
+            newoptinputx.onmouseout = function(){gw.hideTooltip();};
             newoptdivx.appendChild(newoptinputx);
 
             var divy= document.getElementById('y-buttons');
             var newoptdivy = document.createElement('div');
-            newoptdivy.className = 'option';
+            newoptdivy.className = 'option option-y';
+            newoptdivy.setAttribute("id","button-divy-"+col);
             divy.appendChild(newoptdivy);
-            var newoptinputy = document.createElement('input');
-            newoptinputy.type = 'button';
+            var newoptinputy = document.createElement('img');
+            newoptinputy.type = 'submit';
             newoptinputy.name = col;
-            newoptinputy.value = getLabel(col);
+            // newoptinputy.value = getLabel(col);
             newoptinputy.setAttribute("id","buttony-"+col);
-            if (col==this.yvar){newoptinputy.classList.add("down")};
+            newoptinputy.classList.add("button");
+            newoptinputy.classList.add("button-y");
+            newoptinputy.src = getIcon(col);
+            newoptinputy.label = getLabel(col);
+            if (col==this.yvar){newoptdivy.classList.add("down")};
+            newoptinputy.innerHTML = "<img src="+getIcon(col)+" title='"+getLabel(col)+"'>";
             newoptinputy.addEventListener('click',function(){
                 oldYvar = gw.yvar;
-                document.getElementById("buttony-"+oldYvar).classList.remove("down")
+                newYvar = this.id.split('buttony-')[1]
+                document.getElementById("button-divy-"+oldYvar).classList.remove("down")
+                document.getElementById("button-divy-"+newYvar).classList.add("down")
                 this.classList.add("down");
                 gw.updateYaxis(this.name);
             });
+            newoptinputy.onmouseover = function(e){
+                console.log(this.id.split('buttony-')[1])
+                gw.showTooltip(e,this.id.split('buttony-')[1],type="column");};
+            newoptinputy.onmouseout = function(){gw.hideTooltip();};
             newoptdivy.appendChild(newoptinputy);
         }
     }
 }
+// GWCatalogue.prototype.initButtons = function(){
+//     var gw=this;
+//     d3.selectAll(".option-x").each(function(d){
+//         if (this.id.split('button-divx-')[1]==gw.xvar){
+//             this.classList.add("down")
+//         }
+//     });
+//     d3.selectAll(".option-y").each(function(d){
+//         console.log(this);
+//         if (this.id.split('button-divy-')[1]==gw.yvar){
+//             this.classList.add("down")
+//         }
+//     });
+// }
 GWCatalogue.prototype.showOptions = function(){
+    this.optionsOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
     //   .duration(500)
@@ -1489,9 +1537,11 @@ GWCatalogue.prototype.showOptions = function(){
         document.getElementById('options-x').classList.remove('bottom')
         document.getElementById('options-y').classList.remove('bottom')
     }
-
+    document.getElementById("options-icon").classList.add("hidden");
+    document.getElementById("info-icon").classList.remove("hidden");
 }
 GWCatalogue.prototype.hideOptions = function(d) {
+    this.optionsOn=false;
     // fade out infopanel
     this.optionsouter.transition()
         .duration(500).style("opacity", 0);
@@ -1503,55 +1553,10 @@ GWCatalogue.prototype.hideOptions = function(d) {
     //   .style("opacity",0);
     this.optionsbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
+    document.getElementById("options-icon").classList.remove("hidden");
+    document.getElementById("info-icon").classList.add("hidden");
 }
-GWCatalogue.prototype.addButtons = function(){
-    console.log("add buttons");
-    // Add buttons to top of page
-    var gw=this;
-    for (col in columns){
-        if (columns[col].avail){
-            var divx = document.getElementById('xoptions');
-            var newoptdivx = document.createElement('div');
-            newoptdivx.className = 'option '+col;
-            newoptdivx.style.display = 'inline-block';
-            divx.appendChild(newoptdivx);
-            var newoptinputx = document.createElement('input');
-            newoptinputx.type = 'button';
-            newoptinputx.name = col;
-            newoptinputx.value = getLabel(col);
-            newoptinputx.setAttribute("id","buttonx-"+col);
-            if (col==this.xvar){newoptinputx.classList.add("down")};
-            newoptinputx.addEventListener('click',function(){
-                oldXvar = gw.xvar;
-                document.getElementById("buttonx-"+oldXvar).classList.remove("down")
-                this.classList.add("down");
-                gw.updateXaxis(this.name);
-            });
-            newoptdivx.appendChild(newoptinputx);
-
-            var divy= document.getElementById('yoptions');
-            var newoptdivy = document.createElement('div');
-            newoptdivy.className = 'option '+col;
-            newoptdivy.style.display = 'inline-block';
-            divy.appendChild(newoptdivy);
-            var newoptinputy = document.createElement('input');
-            newoptinputy.type = 'button';
-            newoptinputy.name = col;
-            newoptinputy.value = getLabel(col);
-            newoptinputy.setAttribute("id","buttony-"+col);
-            if (col==this.yvar){newoptinputy.classList.add("down")};
-            newoptinputy.addEventListener('click',function(){
-                oldYvar = gw.yvar;
-                document.getElementById("buttony-"+oldYvar).classList.remove("down")
-                this.classList.add("down");
-                gw.updateYaxis(this.name);
-            });
-            newoptdivy.appendChild(newoptinputy);
-        }
-    }
-}
-//
-GWCatalogue.prototype.showTooltip = function(e,tttxt){
+GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     ttSk = document.getElementById("tooltipSk")
     ttSk.style.transitionDuration = "200ms";
     ttSk.style.opacity = 0.9;
@@ -1559,7 +1564,11 @@ GWCatalogue.prototype.showTooltip = function(e,tttxt){
     ttSk.style.top = e.pageY - 10 ;
     ttSk.style.width = "auto";
     ttSk.style.height = "auto";
-    ttSk.innerHTML = this.ttlabels[tttxt];
+    if (type=="column"){
+        ttSk.innerHTML = columns[tttxt].label;
+    }else{
+        ttSk.innerHTML = this.ttlabels[tttxt];
+    }
 }
 GWCatalogue.prototype.hideTooltip = function(){
     ttSk = document.getElementById("tooltipSk");
@@ -1567,10 +1576,14 @@ GWCatalogue.prototype.hideTooltip = function(){
     ttSk.style.opacity = 0.;
 }
 GWCatalogue.prototype.makePlot = function(){
-    this.drawGraph()
-    this.drawSketch()
-    // this.addButtons()
-    this.addOptions()
+    this.drawGraph();
+    this.drawSketch();
+    // this.addButtons();
+    this.addOptions();
+    if (this.optionsOn){
+        console.log('showing options')
+        this.showOptions();
+    }
 }
 GWCatalogue.prototype.replot = function(){
     var gw=this;
@@ -1583,7 +1596,7 @@ GWCatalogue.prototype.replot = function(){
     this.setScales();
     this.drawGraph();
     this.drawSketch();
-    // this.addOptions();
+    if (this.optionsOn){this.showOptions();}
     this.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.sketchName){
@@ -1592,6 +1605,7 @@ GWCatalogue.prototype.replot = function(){
         }
     });
     gwcat.redraw=false;
+    // gwcat.initButtons();
 }
 // define fly-in & fly-out
 
@@ -1599,7 +1613,6 @@ GWCatalogue.prototype.replot = function(){
 var gwcat = new GWCatalogue
 gwcat.init();
 gwcat.drawGraphInit();
-
 window.addEventListener("resize",function(){
     gwcat.replot();
 

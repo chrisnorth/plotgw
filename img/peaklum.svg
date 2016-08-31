@@ -7,14 +7,14 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   fill="#000000"
-   height="24"
-   viewBox="0 0 24 24"
-   width="24"
+   height="16"
+   viewBox="0 0 16 16"
+   width="16"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="peaklum.svg">
+   sodipodi:docname="peaklum.svg"
+   style="fill:#000000">
   <metadata
      id="metadata14">
     <rdf:RDF>
@@ -43,17 +43,17 @@
      id="namedview10"
      showgrid="false"
      inkscape:zoom="19.666667"
-     inkscape:cx="10.42091"
+     inkscape:cx="10.649724"
      inkscape:cy="10.947975"
      inkscape:window-x="82"
      inkscape:window-y="170"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2" />
   <g
-     id="g4646"
-     transform="matrix(1.1058563,0,0,1.1058563,-1.2702758,-0.94251824)">
+     id="g6207"
+     transform="matrix(0.66931919,0,0,0.66931919,-0.03183015,5.3227232)">
     <g
-       transform="matrix(1.6740867,0,0,1.6740867,-8.4719446,-8.7274621)"
+       transform="matrix(1.8512993,0,0,1.8512993,-10.639029,-18.593837)"
        id="g4468">
       <circle
          style="opacity:0.98999999;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.88772094;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
@@ -71,7 +71,7 @@
          transform="matrix(0.96592582,-0.25881905,0.25881905,0.96592582,0,0)" />
     </g>
     <g
-       transform="matrix(0,-1,1,0,0.2963845,23.703616)"
+       transform="matrix(0,-1.1058563,1.1058563,0,-0.94251713,17.270275)"
        id="g4596">
       <g
          id="g4586">
@@ -125,7 +125,7 @@
     </g>
     <g
        id="g4604"
-       transform="matrix(0.70710678,-0.70710678,0.70710678,0.70710678,-4.7609873,11.913191)">
+       transform="matrix(0.78195849,-0.78195849,0.78195849,0.78195849,-6.5352436,4.2317591)">
       <g
          id="g4606">
         <path
@@ -177,7 +177,7 @@
       </g>
     </g>
     <g
-       transform="matrix(-0.70710678,-0.70710678,0.70710678,-0.70710678,12.209575,28.464603)"
+       transform="matrix(-0.78195849,-0.78195849,0.78195849,-0.78195849,12.23176,22.535242)"
        id="g4618">
       <g
          id="g4620">
@@ -231,7 +231,7 @@
     </g>
     <g
        id="g4632"
-       transform="matrix(-1,0,0,-1,24,23.407232)">
+       transform="matrix(-1.1058563,0,0,-1.1058563,25.270275,16.942517)">
       <g
          id="g4634">
         <path

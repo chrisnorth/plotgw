@@ -7,14 +7,14 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   fill="#000000"
-   height="24"
-   viewBox="0 0 24 24"
-   width="24"
+   height="16"
+   viewBox="0 0 16 16"
+   width="16"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="initrot.svg">
+   sodipodi:docname="initspin.svg"
+   style="fill:#000000">
   <metadata
      id="metadata14">
     <rdf:RDF>
@@ -23,7 +23,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
+        <dc:title></dc:title>
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -43,16 +43,17 @@
      id="namedview10"
      showgrid="false"
      inkscape:zoom="13.906433"
-     inkscape:cx="-10.219326"
+     inkscape:cx="-12.44851"
      inkscape:cy="11.299754"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2" />
   <g
-     id="g4272"
-     transform="translate(-0.14534813,-0.28918774)">
+     id="g4146"
+     transform="matrix(0.6676444,0,0,0.6676444,-0.0117328,5.3294224)">
     <g
+       transform="translate(-0.14534813,-8.2891877)"
        id="g4264">
       <g
          id="g4207"
@@ -108,7 +109,7 @@
       </g>
     </g>
     <g
-       transform="translate(0.71909164,0)"
+       transform="translate(0.57374351,-8.2891877)"
        id="g4256">
       <g
          transform="matrix(0.37458226,-0.37458226,0.37458226,0.37458226,7.455313,16.366593)"

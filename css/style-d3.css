@@ -27,10 +27,10 @@ div#options{
 /*input{
     background-color:#fc0;
 }*/
-input.down{
+button.down{
     background-color:#0cf;
-    border-left:7px;
-    border-right:7px;
+    /*border-left:7px;
+    border-right:7px;*/
 }
 #graphcontainer{
     display:inline-block;
@@ -176,15 +176,20 @@ input.down{
   pointer-events: none;
   background-color:rgba(255,255,255,1);
   border:solid rgba(0,0,0,0.5) 1px;
-  padding:5px
+  padding:5px;
+  /*opacity:0;*/
 }
 .tooltip span{
     display:block;
 }
-#options-icon, #errors-icon{
+#options-icon, #errors-icon, #info-icon{
     position:absolute;
+    display:inline-block;
 }
-#options-icon img, #errors-icon img{
+#options-icon.hidden, #info-icon.hidden{
+    display:none;
+}
+#options-icon img, #errors-icon img, #info-icon img{
     width:100%;
     cursor:pointer;
 }
@@ -215,11 +220,13 @@ input.down{
 #options-bg{
     position:fixed;
     width:100%;
-    height:0;
+    height:10;
     left:0;
-    top:0;
-    background-color: #888;
-    opacity:0;
+    top:-10;
+    background-color: #fff;
+    opacity:0.5;
+    border:solid green 1px;
+    display:none;
 }
 #options-outer{
     position: absolute;
@@ -230,6 +237,7 @@ input.down{
     border-radius:10px;
     /*padding:5px;*/
     opacity:0;
+    padding-top:20px;
 }
 .options-title{
     width:100%;
@@ -239,13 +247,33 @@ input.down{
 }
 .options-buttons{
     padding-bottom:20px;
+    margin-left:20px;
+    margin-right:20px;
 }
 .option{
     display:inline-block;
     font-size:16px;
+    width:15%;
+    border:solid #555 1px;
+    background-color: #ccc;
+    padding:1%;
+    border-radius: 5px;
+    margin:1%;
+    cursor:pointer;
 }
-.option input{
+.option button{
     font-size:16px;
+    width: 100%;
+    height:20%;
+    cursor:pointer;
+}
+.option button img, .option img{
+    width:90%;
+}
+.option.down{
+    background-color:cyan;
+    /*height:20%;
+    top:-10px;*/
 }
 .options-box{
     width:90%;

@@ -8,14 +8,14 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   fill="#000000"
-   height="24"
-   viewBox="0 0 24 24"
-   width="24"
+   height="16"
+   viewBox="0 0 16 16"
+   width="16"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="data.svg">
+   sodipodi:docname="data.svg"
+   style="fill:#000000">
   <metadata
      id="metadata14">
     <rdf:RDF>
@@ -80,182 +80,66 @@
      id="namedview10"
      showgrid="false"
      inkscape:zoom="3.4766083"
-     inkscape:cx="5.7144543"
+     inkscape:cx="-62.023979"
      inkscape:cy="0.8321228"
      inkscape:window-x="0"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:current-layer="svg2" />
-  <path
-     d="M0 0h24v24H0z"
-     fill="none"
-     id="path6" />
-  <g
-     id="g6051"
-     style="fill:none"
-     transform="translate(-77.220801,-1105.3107)">
-    <rect
-       style="fill:none;stroke:none"
-       id="rect6006"
-       width="16"
-       height="16"
-       x="0"
-       y="1084.3622"
-       ry="0.066356063" />
-    <rect
-       style="fill:none;stroke:none"
-       id="rect5932"
-       width="16"
-       height="16"
-       x="0"
-       y="1052.3622"
-       ry="0.066356063" />
-    <rect
-       style="fill:none;stroke:none"
-       id="rect5972"
-       width="16"
-       height="16"
-       x="16"
-       y="1068.3622"
-       ry="0.066356063" />
-    <rect
-       ry="0.066356063"
-       y="1052.3622"
-       x="32"
-       height="16"
-       width="16"
-       id="rect5974"
-       style="fill:none;stroke:none" />
-    <rect
-       ry="0.066356063"
-       y="1084.3622"
-       x="32"
-       height="16"
-       width="16"
-       id="rect6008"
-       style="fill:none;stroke:none" />
-    <rect
-       style="fill:none;stroke:none"
-       id="rect6010"
-       width="16"
-       height="16"
-       x="16"
-       y="1100.3622"
-       ry="0.066356063" />
-    <rect
-       transform="matrix(0,-1,1,0,0,0)"
-       ry="0.066356063"
-       y="6.9337189e-14"
-       x="-1132.3622"
-       height="16"
-       width="16"
-       id="rect6012"
-       style="fill:none;stroke:none" />
-    <rect
-       style="fill:none;stroke:none"
-       id="rect6014"
-       width="16"
-       height="16"
-       x="32"
-       y="1116.3622"
-       ry="0.066356063" />
-    <rect
-       ry="0.066356063"
-       y="1132.3622"
-       x="16"
-       height="16"
-       width="16"
-       id="rect6037"
-       style="fill:none;stroke:none" />
-    <rect
-       style="fill:none;stroke:none"
-       id="rect6039"
-       width="16"
-       height="16"
-       x="-1164.3622"
-       y="6.9337189e-14"
-       ry="0.066356063"
-       transform="matrix(0,-1,1,0,0,0)" />
-    <rect
-       ry="0.066356063"
-       y="1148.3622"
-       x="32"
-       height="16"
-       width="16"
-       id="rect6041"
-       style="fill:none;stroke:none" />
-  </g>
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Century Gothic';-inkscape-font-specification:'Century Gothic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
      x="-26.280432"
-     y="-16.741535"
+     y="-24.741535"
      id="text5513"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan5515"
        x="-26.280432"
-       y="-16.741535" /></text>
-  <g
-     id="g3097"
-     transform="translate(-80.220801,-1086.8107)" />
+       y="-24.741535" /></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Century Gothic';-inkscape-font-specification:'Century Gothic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
      x="-7.8458009"
-     y="-10.323484"
+     y="-18.323484"
      id="text3869"
      sodipodi:linespacing="125%"><tspan
-       y="-10.323484"
+       y="-18.323484"
        x="-7.8458009"
        sodipodi:role="line"
        id="tspan3871" /></text>
-  <g
-     style="fill:#000000;fill-opacity:1"
-     id="g3098"
-     transform="matrix(1,0,0,-1,-112.7208,1161.4137)" />
-  <g
-     transform="translate(-72.720801,-1115.092)"
-     id="g4281"
-     style="fill:#ff0000;stroke:none" />
-  <g
-     id="g3073"
-     style="fill:#f6f6f6;fill-opacity:1"
-     transform="matrix(0.3333332,-0.31249971,0.3333332,0.31249971,-410.34137,-314.37384)" />
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Century Gothic';-inkscape-font-specification:'Century Gothic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
      x="-34.060051"
-     y="-5.2121353"
+     y="-13.212135"
      id="text5513-9"
      sodipodi:linespacing="125%"><tspan
        sodipodi:role="line"
        id="tspan5515-5"
        x="-34.060051"
-       y="-5.2121353" /></text>
-  <g
-     id="g3097-3"
-     transform="translate(-88.000418,-1075.2813)" />
+       y="-13.212135" /></text>
   <text
      xml:space="preserve"
      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:40px;line-height:125%;font-family:'Century Gothic';-inkscape-font-specification:'Century Gothic';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
      x="-15.625418"
-     y="1.2059152"
+     y="-6.7940845"
      id="text3869-9"
      sodipodi:linespacing="125%"><tspan
-       y="1.2059152"
+       y="-6.7940845"
        x="-15.625418"
        sodipodi:role="line"
        id="tspan3871-6" /></text>
   <g
-     style="fill:#000000;fill-opacity:1"
-     id="g3098-2"
-     transform="matrix(1,0,0,-1,-120.50042,1172.9431)" />
-  <g
-     transform="matrix(1.3698186,0,0,1.3698186,-20.875646,-1572.6914)"
-     id="g3295"
-     style="fill:#000000;fill-opacity:1">
+     id="g4856"
+     transform="matrix(0.66666667,0,0,0.66666667,0,5.3333333)">
+    <path
+       style="fill:none"
+       inkscape:connector-curvature="0"
+       id="path6"
+       d="m 0,-8 24,0 0,24 -24,0 z" />
     <g
+       transform="matrix(1.3698186,0,0,1.3698186,-20.875646,-1580.6914)"
        id="g3297"
        style="fill:#000000;fill-opacity:1">
       <path
@@ -268,7 +152,7 @@
     <g
        style="fill:#000000;fill-opacity:1"
        id="g3301"
-       transform="matrix(1,0,0,-1,-3,2315.7244)">
+       transform="matrix(1.3698186,0,0,-1.3698186,-24.985102,1591.431)">
       <path
          style="fill:#000000;fill-opacity:1;stroke:none"
          d="m 27,1154.3622 -5,5 3,0 0,5 4,0 0,-5 3,0 z"
@@ -277,12 +161,4 @@
          sodipodi:nodetypes="cccccccc" />
     </g>
   </g>
-  <g
-     transform="translate(-80.500418,-1103.5626)"
-     id="g4281-2"
-     style="fill:#ff0000;stroke:none" />
-  <g
-     id="g3073-8"
-     style="fill:#f6f6f6;fill-opacity:1"
-     transform="matrix(0.3333332,-0.31249971,0.3333332,0.31249971,-418.12099,-302.84444)" />
 </svg>
