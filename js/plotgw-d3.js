@@ -218,6 +218,9 @@ GWCatalogue.prototype.scaleWindow = function(){
     this.winAspect = this.winFullWidth/this.winFullHeight;
     // console.log(this.winFullWidth,this.winFullHeight,this.winAspect);
 
+    //set scale factor
+    this.scl = window.innerWidth/1500.
+
     info=document.getElementById("infoouter");
     skcont=document.getElementById("sketchcontainer");
     labcont=document.getElementById("labcontainer");
@@ -492,51 +495,53 @@ GWCatalogue.prototype.drawSketch = function(){
 
     if (this.redraw){
         console.log('redrawing masses');
-        for (lab in this.labels){console.log('lab',lab);this.addLab(lab)};
         this.addMasses("pri",true);
         this.addMasses("sec",true);
         this.addMasses("final",true);
     }else{
-        for (lab in this.labels){console.log('lab',lab);this.addLab(lab)};
         this.addMasses("pri",false);
         this.addMasses("sec",false);
         this.addMasses("final",false);
-
-        // add unitswitch button
-        swimgdiv = document.createElement('div');
-        swimgdiv.className = 'icon labcont';
-        swimgdiv.setAttribute("id",'unitswicon');
-        swimgdiv.style.width = this.labcontWidth;
-        swimgdiv.style.height = this.labcontHeight;
-        swimgdiv.style.display = "inline-block";
-        if (this.labels[lab].icon){
-            swimgdiv.innerHTML ="<img src='img/switch.svg'>"
-        }
-        swimgdiv.onmouseover = function(e){
-            gw.showTooltip(e,"switch")}
-        swimgdiv.onmouseout = function(){gw.hideTooltip()};
-        swimgdiv.onclick = function(){gw.switchUnits()};
-        swtxtdiv = document.createElement('div');
-        swtxtdiv.className = 'sketchlab info';
-        swtxtdiv.setAttribute("id",'unitswtxt');
-        swtxtdiv.style.height = "100%";
-        swtxtdiv.innerHTML = 'Switch units';
-        swimgdiv.appendChild(swtxtdiv);
-        document.getElementById('labcontainer').appendChild(swimgdiv);
-        this.unitSwitch=false;
     }
+
+    for (lab in this.labels){this.addLab(lab)};
+
+    // add unitswitch button
+    swimgdiv = document.createElement('div');
+    swimgdiv.className = 'icon labcont';
+    swimgdiv.setAttribute("id",'unitswicon');
+    // swimgdiv.style.width = this.labcontWidth;
+    swimgdiv.style.height = this.labcontHeight;
+    swimgdiv.style.display = "inline-block";
+    if (this.labels[lab].icon){
+        swimgdiv.innerHTML ="<img src='img/switch.svg'>"
+    }
+    swimgdiv.onmouseover = function(e){
+        gw.showTooltip(e,"switch")}
+    swimgdiv.onmouseout = function(){gw.hideTooltip()};
+    swimgdiv.onclick = function(){gw.switchUnits()};
+    swtxtdiv = document.createElement('div');
+    swtxtdiv.className = 'sketchlab info';
+    swtxtdiv.setAttribute("id",'unitswtxt');
+    swtxtdiv.style.height = "100%";
+    // swtxtdiv.style["font-size"] = 1.5*gw.scl+"em";
+    swtxtdiv.innerHTML = 'Switch units';
+    swimgdiv.appendChild(swtxtdiv);
+    document.getElementById('labcontainer').appendChild(swimgdiv);
+    this.unitSwitch=false;
+
     // add title
     this.sketchTitle = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.1))
+        .attr("class","sketch-title")
         .attr("text-anchor","middle")
-        .attr("font-size","2em")
         .html("Information Panel");
     this.sketchTitleHint = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.2))
+        .attr("class","sketch-subtitle")
         .attr("text-anchor","middle")
-        .attr("font-size","1em")
         .html("Click on data points for information");
 
     // this.tooltipSk = document.createElement('div');
@@ -600,7 +605,7 @@ GWCatalogue.prototype.addLab = function(lab){
     labimgdiv = document.createElement('div');
     labimgdiv.className = 'icon labcont';
     labimgdiv.setAttribute("id",lab+'icon');
-    labimgdiv.style.width = this.labcontWidth;
+    // labimgdiv.style.width = this.labcontWidth;
     labimgdiv.style.height = this.labcontHeight;
     labimgdiv.style.display = "inline-block";
     if (this.labels[lab].icon){
@@ -967,7 +972,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis-label")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .attr("x", gw.graphWidth/2)
-        .attr("y", "2em")
+        .attr("y", 2*gw.scl+"em")
         .style("text-anchor", "middle")
         .text(getLabelUnit(gw.xvar));
     gw.svgcont.append("div")
@@ -975,8 +980,8 @@ GWCatalogue.prototype.drawGraph = function(){
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
         .style("bottom", (gw.margin.bottom+40)/2.)
-        .style("width","40px")
-        .style("height","40px")
+        .style("width",40*gw.scl+"px")
+        .style("height",40*gw.scl+"px")
     .append("img")
         .attr("id","x-axis-icon")
         .attr("src",getIcon(gw.xvar));
