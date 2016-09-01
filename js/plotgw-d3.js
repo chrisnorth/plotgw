@@ -219,9 +219,6 @@ GWCatalogue.prototype.scaleWindow = function(){
     this.winAspect = this.winFullWidth/this.winFullHeight;
     // console.log(this.winFullWidth,this.winFullHeight,this.winAspect);
 
-    //set scale factor
-    this.scl = window.innerWidth/1500.
-
     info=document.getElementById("infoouter");
     skcont=document.getElementById("sketchcontainer");
     labcont=document.getElementById("labcontainer");
@@ -289,8 +286,19 @@ GWCatalogue.prototype.scaleWindow = function(){
 GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
     var gw=this;
+    //set scale factor(s)
+    this.xsc = Math.min(1.0,window.innerWidth/1500.)
+    this.ysc = Math.min(1.0,window.innerHeight/900.)
+    this.scl = Math.min(this.xsc,this.ysc)
+    //sketch scale
+    if (this.winAspect<1){
+        this.sksc=this.ysc
+    }else{
+        this.sksc=this.xsc
+    }
+    this.sksc=this.scl
 
-    this.margin = {top: 40, right: 20, bottom: 30, left: 70}
+    this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left: 35*(1+this.xsc)}
     this.graphWidth =
         this.fullGraphWidth - this.margin.left - this.margin.right;
     this.graphHeight =
@@ -355,7 +363,7 @@ GWCatalogue.prototype.setScales = function(){
 
     ///////////////////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////////////
-    this.marginSketch = {top: 0, right: 0, bottom: 0, left: 0}
+    this.marginSketch = {top: 0*this.scl, right: 0*this.scl, bottom: 0*this.scl, left: 0*this.scl}
     //-
         // document.getElementById("sketchtitle").offsetHeight -
         //  marginSketch.top - marginSketch.bottom;
@@ -423,22 +431,6 @@ GWCatalogue.prototype.setScales = function(){
             ttlab:"Final Spin Magnitude",varname:"finalspin"},
         "data":{icon:"img/data.svg",lab:["datalink"],ttlab:"Link to data"}
     }
-    // this.icons = {
-    //     mass:"img/mass-msun.svg",
-    //     date:"img/time.svg",
-    //     dist:"img/ruler.svg",
-    //     typedesc:"img/blank.svg",
-    //     far:"img/dice.svg"};
-    // data columns to read from for labels
-    // this.cols={
-    //     pri:["initmass1"],sec:["initmass2"],final:["finalmass"],
-    //     date:["datestr","timestr"],
-    //     dist:["distanceStr","distanceLyStr"],
-    //     typedesc:["typedesc"],
-    //     far:["fappercent","fartxt"]};
-    // // y-location of BH when they fly out
-    // this.yout = -0.3;
-    // // tooltip labels
     this.ttlabels = {
         pri:"Primary Black Hole Mass",
         sec:"Secondary Black Hole Mass",
@@ -536,12 +528,14 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("y",this.yScaleSk(0.1))
         .attr("class","sketch-title")
         .attr("text-anchor","middle")
+        .style("font-size",(2.0*gw.sksc)+"em")
         .html("Information Panel");
     this.sketchTitleHint = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.2))
         .attr("class","sketch-subtitle")
         .attr("text-anchor","middle")
+        .style("font-size",(1.5*gw.sksc)+"em")
         .html("Click on data points for information");
 
     // this.tooltipSk = document.createElement('div');
@@ -618,6 +612,7 @@ GWCatalogue.prototype.addLab = function(lab){
     labtxtdiv.className = 'sketchlab info';
     labtxtdiv.setAttribute("id",lab+'txt');
     labtxtdiv.style.height = "100%";
+    labtxtdiv.style["font-size"] = (1.5*gw.sksc)+"em";
     labtxtdiv.innerHTML = '--';
     // console.log(labtxtdiv);
     labimgdiv.appendChild(labtxtdiv);
@@ -886,7 +881,7 @@ GWCatalogue.prototype.makeGraph = function(){
         .attr("transform", "translate(" + this.margin.left + "," +
             this.margin.top + ")")
 
-// add the tooltip area to the webpage
+    // add the tooltip area to the webpage
     if (!this.redraw){
         this.tooltip = d3.select("div#graphcontainer").append("div")
             .attr("class", "tooltip")
@@ -976,19 +971,23 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis-label")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .attr("x", gw.graphWidth/2)
-        .attr("y", 2*gw.scl+"em")
+        .attr("y", 1.2*(1+gw.ysc)+"em")
         .style("text-anchor", "middle")
+        .style("font-size",(1+gw.scl)+"em")
         .text(getLabelUnit(gw.xvar));
     gw.svgcont.append("div")
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
-        .style("bottom", (gw.margin.bottom+40)/2.)
-        .style("width",40*gw.scl+"px")
-        .style("height",40*gw.scl+"px")
+        .style("bottom", (gw.margin.bottom+(15*gw.ysc)))
+        .style("width",40*gw.ysc+"px")
+        .style("height",40*gw.ysc+"px")
     .append("img")
         .attr("id","x-axis-icon")
         .attr("src",getIcon(gw.xvar));
+    //scale tick font-size
+    d3.selectAll(".x-axis > .tick > text")
+        .style("font-size",(0.8*(1+gw.ysc))+"em")
 
     // y-axis
     gw.svg.append("g")
@@ -1007,19 +1006,23 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("x",-gw.graphHeight/2)
-        .attr("dy", "-50px")
+        .attr("dy", (-25*(1+gw.xsc))+"px")
         .style("text-anchor", "middle")
+        .style("font-size",(1+gw.scl)+"em")
         .text(getLabelUnit(gw.yvar));
     gw.svgcont.append("div")
         .attr("class", "y-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
-        .style("left", (gw.margin.left-40)/2.)
-        .style("width","40px")
-        .style("height","40px")
+        .style("left", (gw.margin.left-(40*gw.scl))/2.)
+        .style("width",(40*gw.scl)+"px")
+        .style("height",(40*gw.scl)+"px")
     .append("img")
         .attr("id","y-axis-icon")
         .attr("src",getIcon(gw.yvar));
+    //scale tick font-size
+    d3.selectAll(".y-axis > .tick > text")
+        .style("font-size",(0.8*(1+gw.xsc))+"em")
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
@@ -1178,7 +1181,7 @@ GWCatalogue.prototype.drawGraph = function(){
     this.optionsouter = d3.select('#options-outer')
     d3.select("#svg-container").append("div")
         .attr("id","options-icon")
-        .style({"right":gw.margin.right,"top":0,"width":40,"height":40})
+        .style({"right":gw.margin.right,"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
     .append("img")
         .attr("src","img/settings.svg")
         .on("click",function(){gw.showOptions();});
@@ -1192,7 +1195,7 @@ GWCatalogue.prototype.drawGraph = function(){
     d3.select("#svg-container").append("div")
         .attr("id","info-icon")
         .attr("class","hidden")
-        .style({"right":gw.margin.right,"top":0,"width":40,"height":40})
+        .style({"right":gw.margin.right,"top":0,"width":gw.margin.top,"height":gw.margin.top})
     .append("img")
         .attr("src","img/info.svg")
         .on("click",function(){gw.hideOptions();});
@@ -1200,7 +1203,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add error toggle button
     d3.select("#svg-container").append("div")
         .attr("id","errors-icon")
-        .style({"right":gw.margin.right+40,"top":0,"width":40,"height":40})
+        .style({"right":gw.margin.right+gw.margin.top+10,"top":0,"width":gw.margin.top,"height":gw.margin.top})
     .append("img")
         .attr("src","img/errors.svg")
         .attr("class","errors-show")
@@ -1538,7 +1541,7 @@ GWCatalogue.prototype.showOptions = function(){
     this.optionsouter.style("left", document.getElementById('infoouter').offsetLeft-1)
         .style("top", document.getElementById('infoouter').offsetTop-1)
         .style("width",document.getElementById('infoouter').offsetWidth-2)
-        .style("height",document.getElementById('infoouter').offsetHeight-2);
+        .style("height",document.getElementById('infoouter').offsetHeight-22);
     if (this.portrait){
         document.getElementById('options-x').classList.add('bottom')
         document.getElementById('options-y').classList.add('bottom')

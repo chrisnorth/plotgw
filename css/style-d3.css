@@ -278,13 +278,13 @@ button.down{
     width:40%;
     height:90%;
 }
-@media (max-width:1200px){
+/*@media (max-width:1200px){
     .sketchlab.info, .sketchlab.mtxt, .axis-label{
         font-size:1.2em;
     }
 }
 @media (max-width:1000px){
-    .sketchlab.info, .axis-label, .sketch-subtitle{
+    .sketchlab.info, .sketch-subtitle{
         font-size:1.0em;
     }
     .sketchlab.mtxt, .sketch-title{
@@ -292,7 +292,7 @@ button.down{
     }
 }
 @media (max-width:550px){
-    .sketchlab.info, .axis-label, .sketch-subtitle{
+    .sketchlab.info, .sketch-subtitle{
         font-size:0.8em;
         padding-left:5px;
     }
@@ -301,7 +301,7 @@ button.down{
     }
 }
 @media (max-width:350px){
-    .sketchlab.info, .axis-label, .sketch-subtitle{
+    .sketchlab.info, .sketch-subtitle{
         font-size:0.6em;
     }
     .sketch-title, .sketchlab.mtxt{
@@ -309,7 +309,7 @@ button.down{
     }
 }
 @media (max-height:750px){
-    .sketchlab.info, .axis-label, .sketch-subtitle{
+    .sketchlab.info, .sketch-subtitle{
         font-size:0.8em;
     }
     .sketch-title, .sketchlab.mtxt{
@@ -317,10 +317,10 @@ button.down{
     }
 }
 @media (max-height:500px){
-    .sketchlab.info, .axis-label, .sketch-subtitle{
+    .sketchlab.info, .sketch-subtitle{
         font-size:0.6em;
     }
     .sketch-title, .sketchlab.mtxt{
         font-size: 0.8em;
     }
-}
+}*/
