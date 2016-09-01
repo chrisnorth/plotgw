@@ -156,13 +156,13 @@ columns.fartxt = {
             "<br/>yrs";}
         else if (1/d.far<1000){
             return "1 per "+(1./d.far).toFixed(0)+
-            "<br/>yrs";}
+            "<br/>year";}
         else if (1/d.far<1e6){
             return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
-            "<br/>kyr";}
+            "<br/>thousand yr";}
         else{
             return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
-            "<br/>Myr";}
+            "<br/>million yr";}
     },
     'unit':'',
     'unitSwitch':'fartxt'
@@ -209,6 +209,7 @@ GWCatalogue.prototype.init = function(){
         LVT:'Candidate'}
     this.setStyles();
     this.sketchName="None";
+    this.unitSwitch=false;
     this.setScales();
 
 }
@@ -383,7 +384,7 @@ GWCatalogue.prototype.setScales = function(){
     this.bhpos = {
         pri:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.5},
         sec:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",xtxt:0.1,ytxt:0.55,scx:0.25,scy:0.8},
-        final:{cx:0.7,cy:0.7,xicon:"80%",yicon:"60%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
+        final:{cx:0.65,cy:0.7,xicon:"75%",yicon:"60%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
         date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
         dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
         typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
@@ -528,7 +529,6 @@ GWCatalogue.prototype.drawSketch = function(){
     swtxtdiv.innerHTML = 'Switch units';
     swimgdiv.appendChild(swtxtdiv);
     document.getElementById('labcontainer').appendChild(swimgdiv);
-    this.unitSwitch=false;
 
     // add title
     this.sketchTitle = this.svgSketch.append("text")
@@ -791,10 +791,14 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchName = d["name"];
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
+        labs=this.labels[lab].lab;
+        if (this.unitSwitch){
+            if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
+        }
         for (lab in this.labels){
+            console.log(this.labels[lab])
             labTxt=''
             for (i in this.labels[lab].lab){
-                console.log('lab',this.labels[lab].lab[i],d[this.labels[lab].lab[i]])
                 labTxt += " "+d[this.labels[lab].lab[i]];
                 if (columns[this.labels[lab].lab[i]].unit){
                     labTxt += " "+columns[this.labels[lab].lab[i]].unit;

@@ -279,65 +279,48 @@ button.down{
     height:90%;
 }
 @media (max-width:1200px){
-    .sketchlab.info{
-        font-size:1.2em;
-        padding-left:5px;
-    }
-    .sketchlab.mtxt{
-        font-size:1.2em;
-    }
-    .axis-label{
+    .sketchlab.info, .sketchlab.mtxt, .axis-label{
         font-size:1.2em;
     }
 }
 @media (max-width:1000px){
-    .sketchlab.info{
+    .sketchlab.info, .axis-label, .sketch-subtitle{
         font-size:1.0em;
-        padding-left:5px;
     }
-    .sketchlab.mtxt{
-        font-size:1.1em;
-    }
-    .sketch-title{
-        font-size: 1.5em;
-    }
-    .sketch-subtitle{
-        font-size:1.0em
-    }
-    .axis-label{
-        font-size:1.0em;
+    .sketchlab.mtxt, .sketch-title{
+        font-size:1.2em;
     }
 }
 @media (max-width:550px){
-    .sketchlab.info{
+    .sketchlab.info, .axis-label, .sketch-subtitle{
         font-size:0.8em;
         padding-left:5px;
     }
-    .sketchlab.mtxt{
-        font-size:1em;
-    }
-    .sketch-title{
-        font-size: 1.0em;
-    }
-    .sketch-subtitle{
-        font-size:0.8em
-    }
-    .axis-label{
-        font-size:0.8em;
+    .sketchlab.mtxt, .sketch-title{
+        font-size:1.0em;
     }
 }
 @media (max-width:350px){
-    .sketchlab.info{
+    .sketchlab.info, .axis-label, .sketch-subtitle{
         font-size:0.6em;
-        padding-left:5px;
     }
-    .sketch-title{
+    .sketch-title, .sketchlab.mtxt{
         font-size: 0.8em;
     }
-    .sketch-subtitle{
-        font-size:0.6em
-    }
-    .axis-label{
+}
+@media (max-height:750px){
+    .sketchlab.info, .axis-label, .sketch-subtitle{
         font-size:0.8em;
+    }
+    .sketch-title, .sketchlab.mtxt{
+        font-size: 1.0em;
+    }
+}
+@media (max-height:500px){
+    .sketchlab.info, .axis-label, .sketch-subtitle{
+        font-size:0.6em;
+    }
+    .sketch-title, .sketchlab.mtxt{
+        font-size: 0.8em;
     }
 }
