@@ -123,6 +123,13 @@ columns.peaklumtxtMsun = {
     "<br/>M<sub>&#x2609;</sub>c<sup>2</sup>/s")},
     'unit':''
 };
+columns.chirpmasstxt = {
+    'type':'fn',
+    'fn':function(d){return(parseFloat((d['chirpmassminus']).toPrecision(2))+
+    '&ndash;'+parseFloat((d['chirpmassplus']).toPrecision(2))+
+    "<br/>M<sub>&#x2609;</sub>")},
+    'unit':''
+}
 columns.energytxtMsun = {
     'type':'fn',
     'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
@@ -412,7 +419,7 @@ GWCatalogue.prototype.setScales = function(){
     this.labels ={
         "date":{icon:"img/date.svg",lab:["datestr"]},
         "time":{icon:"img/time.svg",lab:["timestr"]},
-        "chirpmass":{icon:"img/chirpmass.svg",lab:["chirpmass"]},
+        "chirpmass":{icon:"img/chirpmass.svg",lab:["chirpmasstxt"]},
         "dist":{icon:"img/ruler.svg",lab:["distancePcStr"],
             labSw:["distanceLyStr"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
