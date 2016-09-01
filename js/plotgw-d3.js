@@ -1,6 +1,15 @@
+/*
+columns structure:
+   code: column name (in CSV) used for data
+   errcode: column name (in CSV) use for errors
+   type: datatype
+   avail: true if available for graph axes
+   label: label used on graph axes
+   icon: icon used on graph axes
+   unit: unit used on graph axes (default=BLANK)
+   border: force the border on axis (default=2)
+*/
 var columns = {
-    name:{code:"name",type:"str"},
-    type:{code:"type",type:"str"},
     totalmass:{code:"totalmass",errcode:"totalmasserr",
         type:"flt",label:"Total Mass",icon:"img/totalmass.svg",
         avail:true,unit:'solar masses'},
@@ -59,6 +68,8 @@ var columns = {
         unit:"x 1e-21"},
     data:{code:"data",avail:false,type:'str',label:"Data"}
 }
+
+// calculate additional columns (unit conversions & strings)
 columns.distanceLy = {
     'type':'fn',
     'fn':function(d){return(Math.round(d['distance']*3.26))},
@@ -71,12 +82,6 @@ columns.distanceLyErr = {
     'unit':'Mly',
     avail:false,label:'DistanceLy'
 };
-// columns.distanceStr = {
-//     'type':'fn',
-//     'fn':function(d){return parseFloat(d['distanceminus'].toPrecision(3))+'-'+
-//             parseFloat(d['distanceplus'].toPrecision(3))},
-//     'unit':'Mly'
-// };
 columns.distancePcStr = {
     'type':'fn',
     'fn':function(d){return parseFloat((d['distanceminus']).toPrecision(3))+
@@ -171,11 +176,8 @@ columns.datalink = {
     'type':'fn',
     fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
 }
-num2Errstr = function(col){
-    return parseFloat((d[col+'plus']*3.26).toPrecision(3))+'-'+
-            parseFloat((d[col+'plus']*3.26).toPrecision(3))
-};
 
+// define functions to get label, icon, unit etc.
 var getLabel = function(col){
     return(columns[col].label);
 }
@@ -193,6 +195,7 @@ var getIcon = function(col){
         return(null);
     }
 }
+
 // Define GWCatalogue class
 function GWCatalogue(){
     // set initial axes
@@ -200,6 +203,7 @@ function GWCatalogue(){
     return this;
 }
 GWCatalogue.prototype.init = function(){
+    //initialyse common values
     this.flySp=1000;
     this.xvar = "initmass1";
     this.yvar = "initmass2";
@@ -214,6 +218,7 @@ GWCatalogue.prototype.init = function(){
 
 }
 GWCatalogue.prototype.scaleWindow = function(){
+    //set window scales (protrait/landscape etc.)
     this.winFullWidth=document.getElementById("full").offsetWidth;
     this.winFullHeight=document.getElementById("full").offsetHeight;
     this.winAspect = this.winFullWidth/this.winFullHeight;
@@ -284,6 +289,7 @@ GWCatalogue.prototype.scaleWindow = function(){
 
 }
 GWCatalogue.prototype.setScales = function(){
+    //define scales
     this.scaleWindow();
     var gw=this;
     //set scale factor(s)
@@ -298,18 +304,15 @@ GWCatalogue.prototype.setScales = function(){
     }
     this.sksc=this.scl
 
+    //graph size & position
     this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left: 35*(1+this.xsc)}
     this.graphWidth =
         this.fullGraphWidth - this.margin.left - this.margin.right;
     this.graphHeight =
         0.9*this.fullGraphHeight - this.margin.top - this.margin.bottom;
-
-    // set errorbar marker width
-    // this.relh = [0.0,1.0];
-    // this.relw = [0,1.0];
     this.xyAspect = this.graphWidth/this.graphHeight;
-    // this.errh = 0.01*(this.relh[1]-this.relh[0]);
-    // this.errw = 0.01*(this.relw[1]-this.relw[0]);//*xyAspect;
+
+    // set axis scales
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
     this.xValue = function(d) {return d[gw.xvar];} // data -> value
@@ -334,7 +337,7 @@ GWCatalogue.prototype.setScales = function(){
             .scale(this.xScale)
             .orient("bottom")
             .innerTickSize(-this.graphHeight);
-    // setup y
+
     //data -> value
     this.yValue = function(d) {return d[gw.yvar];}
     // value -> display
@@ -362,6 +365,7 @@ GWCatalogue.prototype.setScales = function(){
             .innerTickSize(-this.graphWidth);
 
     ///////////////////////////////////////////////////////////////////////////
+    // Set sketch scales
     ///////////////////////////////////////////////////////////////////////////
     this.marginSketch = {top: 0*this.scl, right: 0*this.scl, bottom: 0*this.scl, left: 0*this.scl}
     //-
@@ -376,10 +380,6 @@ GWCatalogue.prototype.setScales = function(){
     this.aspectSketch = this.sketchHeight/this.sketchWidth
     // console.log('sketchcont',this.sketchHeight,this.sketchWidth);
 
-    // labContainer = document.createElement("div")
-    // labContainer.setAttribute("id","labcontainer");
-    // document.getElementById("sketchcontainer").appendChild(labContainer)
-    //
     // set scaleing functions for sketch
     this.scaleRadius = function(mass,ref){
         return(0.2*this.sketchWidth*(mass/100.))}
@@ -388,54 +388,53 @@ GWCatalogue.prototype.setScales = function(){
         return(x*this.sketchWidth*this.aspectSketch)}
     this.yScaleSk = function(y){return(y*this.sketchHeight)}
 
-    // set positions
+    // set black hole positions
+    /* cx,cy=BH position; xicon,yicon: icon-position, scy:shadow y-coordinate
+    */
     this.bhpos = {
-        pri:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",xtxt:0.1,ytxt:0.25,scx:0.25,scy:0.5},
-        sec:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",xtxt:0.1,ytxt:0.55,scx:0.25,scy:0.8},
-        final:{cx:0.65,cy:0.7,xicon:"75%",yicon:"60%",xtxt:0.85,ytxt:0.4,scx:0.6,scy:0.7},
-        date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
-        dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
-        typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
-        far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
-    //icon size and files
+        pri:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",scy:0.5},
+        sec:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",scy:0.8},
+        final:{cx:0.65,cy:0.7,xicon:"75%",yicon:"60%",scy:0.7}
+    };
+        // date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
+        // dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
+        // typedesc:{xicon:0.6,yicon:0.7,xtxt:0.7,ytxt:0.75},
+        // far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
+
+    //mass icon size, src files, and tool-tip text
     this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg",
-        pri:{lab:["initmass1"],ttlab:"Primary Black Hole Mass"},
-        sec:{lab:["initmass2"],ttlab:"Seconary Black Hole Mass"},
-        final:{lab:["finalmass"],ttlab:"Final Black Hole Mass"},
-    }; //mass icons
-    // this.iicon = {w:"10%",h:"10%"}; //info icons
-    // columns to show
+        pri:"initmass1",sec:"initmass2",final:"finalmass"};
+    //y-position for flown-out masses
     this.yout = -0.3;
-    this.labels={
-        "date":{icon:"img/date.svg",lab:["datestr"],
-            ttlab:"Date of detection"},
-        "time":{icon:"img/time.svg",lab:["timestr"],
-            ttlab:"Time of detection"},
+
+    // columns to show on sketch
+    // icon: src file, label: label source, tooltip label)
+    this.labels ={
+        "date":{icon:"img/date.svg",lab:["datestr"]},
+        "time":{icon:"img/time.svg",lab:["timestr"]},
+        "chirpmass":{icon:"img/chirpmass.svg",lab:["chirpmass"]},
         "dist":{icon:"img/ruler.svg",lab:["distancePcStr"],
-            labSw:["distanceLyStr"],
-            ttlab:"Distance",varname:"distance"},
+            labSw:["distanceLyStr"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
             // ttlab:"Category of detection"},
         'far':{icon:"img/dice.svg",lab:["faptxt"],
-            labSw:["fartxt"],
-            ttlab:"False alarm probability and rate",varname:"SNR"},
+            labSw:["fartxt"]},
         'peaklum':{icon:"img/peaklum.svg",lab:["peaklumtxtMsun"],
-            labSw:["peaklumtxtErg"],
-            ttlab:"Peak Luminosity",varname:"peaklum"},
+            labSw:["peaklumtxtErg"]},
         "energy":{icon:"img/energyrad.svg",lab:["energytxtMsun"],
-            labSw:["energytxtErg"],
-            ttlab:"Radiated energy",varname:"energy"},
-        "initspineff":{icon:"img/initspin.svg",lab:["initspineffStr"],
-            ttlab:"Initial Effective Spin Magnitude",varname:"initspineff"},
-        "finalspin":{icon:"img/finalspin.svg",lab:["finalspinStr"],
-            ttlab:"Final Spin Magnitude",varname:"finalspin"},
-        "data":{icon:"img/data.svg",lab:["datalink"],ttlab:"Link to data"}
+            labSw:["energytxtErg"]},
+        "initspineff":{icon:"img/initspin.svg",lab:["initspineffStr"]},
+        "finalspin":{icon:"img/finalspin.svg",lab:["finalspinStr"]},
+        "data":{icon:"img/data.svg",lab:["datalink"]}
     }
+    //tool-top labels
     this.ttlabels = {
         pri:"Primary Black Hole Mass",
         sec:"Secondary Black Hole Mass",
         final:"Final Black Hole Mass",
         date:"Date of detection",
+        time:"Time of detection",
+        chirpmass:"Chirp mass",
         typedesc:"Category of detection",
         far:"False alarm probability and rate",
         dist:"Distance",
@@ -446,11 +445,11 @@ GWCatalogue.prototype.setScales = function(){
         data:"LIGO Open Science Center",
         switch:"Switch Units"
     };
+    //text for black labels
     this.labBlank="--";
 }
 GWCatalogue.prototype.drawSketch = function(){
     // Create sketch panel
-    // console.log("svg scale",this.sketchWidth,this.sketchHeight);
     // Add svg to sketch container
     this.svgSketch = d3.select("div#sketchcontainer").append("svg")
         .attr("preserveAspectRatio", "none")
@@ -460,7 +459,7 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("height", (this.sketchHeight + this.marginSketch.top + this.marginSketch.bottom))
         .append("g")
         .attr("transform", "translate(" + this.marginSketch.left + "," + this.marginSketch.top + ")");
-    // make gradients
+    // define gradients
     this.gradBH = this.svgSketch.append("defs")
       .append("radialGradient")
         .attr("id", "gradBH");
@@ -497,9 +496,10 @@ GWCatalogue.prototype.drawSketch = function(){
         this.addMasses("final",false);
     }
 
+    // add labels
     for (lab in this.labels){this.addLab(lab)};
 
-    // add unitswitch button
+    // add unit-switch button
     swimgdiv = document.createElement('div');
     swimgdiv.className = 'icon labcont';
     swimgdiv.setAttribute("id",'unitswicon');
@@ -517,12 +517,12 @@ GWCatalogue.prototype.drawSketch = function(){
     swtxtdiv.className = 'sketchlab info';
     swtxtdiv.setAttribute("id",'unitswtxt');
     swtxtdiv.style.height = "100%";
-    // swtxtdiv.style["font-size"] = 1.5*gw.scl+"em";
+    swtxtdiv.style["font-size"] = (1.5*gw.sksc)+"em";
     swtxtdiv.innerHTML = 'Switch units';
     swimgdiv.appendChild(swtxtdiv);
     document.getElementById('labcontainer').appendChild(swimgdiv);
 
-    // add title
+    // add title & subtitle to sketch
     this.sketchTitle = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.1))
@@ -548,7 +548,6 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
     // add ellipse for shadow
     gw=this;
     var redraw;
-    // console.log(bh,redraw);
     this.svgSketch.append("ellipse")
         .attr("class","sketch shadow-"+bh)
         .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
@@ -587,10 +586,6 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         masstxtdiv.innerHTML = this.labBlank;
         massicondiv.appendChild(masstxtdiv);
         document.getElementById('sketchcontainer').appendChild(massicondiv);
-        // document.getElementById('sketchcontainer').appendChild(masstxtdiv);
-        // masstxtdiv.onmouseover = function(e){
-        //     showTooltip(e,this.id.split("mtxt-")[1])}
-        // masstxtdiv.onmouseout = function(){hideTooltip()};
     }
 }
 GWCatalogue.prototype.addLab = function(lab){
@@ -614,16 +609,14 @@ GWCatalogue.prototype.addLab = function(lab){
     labtxtdiv.style.height = "100%";
     labtxtdiv.style["font-size"] = (1.5*gw.sksc)+"em";
     labtxtdiv.innerHTML = '--';
-    // console.log(labtxtdiv);
-    labimgdiv.appendChild(labtxtdiv);
     labtxtdiv.onmouseover = function(e){
         gw.showTooltip(e,this.id.split("txt")[0])}
     labtxtdiv.onmouseout = function(){gw.hideTooltip()};
+    labimgdiv.appendChild(labtxtdiv);
     document.getElementById('labcontainer').appendChild(labimgdiv);
 }
 GWCatalogue.prototype.flyOutMasses = function(bh){
-    // fly out masses
-    // if (bh=="final"){this.xout=1.3}else{this.xout=-0.3};
+    // fly out mass (set by "bh")
     this.svgSketch.select('circle.bh-'+bh)
         .transition().duration(this.flySp)
         .attr("cy",this.yScaleSk(this.yout));
@@ -631,77 +624,74 @@ GWCatalogue.prototype.flyOutMasses = function(bh){
         .transition().duration(this.flySp)
         .attr("rx",this.scaleRadius(1,1))
         .attr("ry",this.scaleRadius(1,1));
-    // if (svgLabs){
-    //     svgSketch.select(".mtxt-"+bh).html(labBlank);
-    // }else{
-        document.getElementById("mtxt-"+bh).innerHTML = this.labBlank;
-    // }
+    //replace text in label
+    document.getElementById("mtxt-"+bh).innerHTML = this.labBlank;
+
 };
 GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
-    // if (bh=="final"){this.xout=1.5}else{this.xout=-0.5};
+    // fly in mass
+    // bh = BH to fly in
+    // resize= type of resizing animation
     if (resize=="smooth"){
         // only resize circle & shadow
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh].lab[0]],d["finalmass"]))
+                d[this.micon[bh]],d["finalmass"]))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh].lab[0]],d["finalmass"]));
+                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp)
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh].lab[0]],d["finalmass"]))
+                d[this.micon[bh]],d["finalmass"]))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh].lab[0]],d["finalmass"]));
+                0.2*d[this.micon[bh]],d["finalmass"]));
     }else if(resize=="fly"){
         // resize & fly in
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh].lab[0]],d["finalmass"]));
+                d[this.micon[bh]],d["finalmass"]));
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh].lab[0]],d["finalmass"]));
+                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh].lab[0]],d["finalmass"]))
+                d[this.micon[bh]],d["finalmass"]))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh].lab[0]],d["finalmass"]));
+                0.2*d[this.micon[bh]],d["finalmass"]));
     }else if(resize=="snap"){
+        // snap resize (when redrawing sketch)
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh].lab[0]],d["finalmass"]))
+                d[this.micon[bh]],d["finalmass"]))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh].lab[0]],d["finalmass"]));
+                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh].lab[0]],d["finalmass"]))
+                d[this.micon[bh]],d["finalmass"]))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh].lab[0]],d["finalmass"]));
+                0.2*d[this.micon[bh]],d["finalmass"]));
     };
-    // set labels
-    // if (svgLabs){
-    // OBSOLETE
-    //     svgSketch.select("text.mtxt-"+bh).html(d[cols[bh][0]]);
-    // }else{
-        document.getElementById("mtxt-"+bh).innerHTML =
-            d[this.micon[bh].lab[0]+'Str'];
-    // }
+
+    // update mass label text
+    document.getElementById("mtxt-"+bh).innerHTML =
+        d[this.micon[bh]+'Str'];
 };
 GWCatalogue.prototype.switchUnits = function(){
-    if (!this.d){
-        console.log('not switching')
-        return
-    }
+    // switch between label units
     if (this.unitSwitch){
-        console.log('switching to false');
+        // console.log('switching to false');
         this.unitSwitch=false;}
     else{
-        console.log('switching to true');
+        // console.log('switching to true');
         this.unitSwitch=true;}
-
+    if (!this.d){
+        // no data shown
+        return
+    }
     for (lab in this.labels){
         labTxt='';
         labs=this.labels[lab].lab;
@@ -713,7 +703,7 @@ GWCatalogue.prototype.switchUnits = function(){
             if (columns[labs[i]].unit){
                 labTxt += " "+columns[labs[i]].unit;
             }
-            if (i<this.labels[lab].lab.length-1){
+            if (i<labs.length-1){
                 labTxt += "<br>";
             }
         }
@@ -722,37 +712,36 @@ GWCatalogue.prototype.switchUnits = function(){
     }
 }
 GWCatalogue.prototype.updateSketch = function(d){
-    // if ((document.getElementById("sketchcontainer").classList.contains("nothidden"))&&
-    // (sketchName==d["name"])){
+    // update sketch based on data clicks or resize
     if (this.redraw){
-        console.log('redrawing');
-        console.log('resizing');
+        // resize sketch
         this.flyInMasses(d,"pri","snap");
         this.flyInMasses(d,"sec","snap");
         this.flyInMasses(d,"final","snap");
+        // update title
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
+        // update labels
         for (lab in this.labels){
-            console.log(this.labels[lab])
+            // console.log(this.labels[lab])
             labTxt=''
-            for (i in this.labels[lab].lab){
-                labTxt += " "+d[this.labels[lab].lab[i]];
-                if (columns[this.labels[lab].lab[i]].unit){
-                    labTxt += " "+columns[this.labels[lab].lab[i]].unit;
+            labs=this.labels[lab].lab;
+            if (this.unitSwitch){
+                if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
+            }
+            for (i in labs){
+                labTxt += " "+d[labs[i]];
+                if (columns[labs[i]].unit){
+                    labTxt += " "+columns[labs[i]].unit;
                 }
-                if (i<this.labels[lab].lab.length-1){
+                if (i<labs.length-1){
                     labTxt += "<br>";
                 }
             }
-            // if(svgLabs){
-            // OBSOLETE
-            //     svgSketch.select("text."+lab+"txt").html(labTxt);
-            // }else{
             document.getElementById(lab+"txt").innerHTML = labTxt;
-            // }
         }
     }else if ((this.sketchName==d["name"])){
-        console.log('flying out');
+        // clicked on currently selected datapoint
         this.flyOutMasses("pri");
         this.flyOutMasses("sec");
         this.flyOutMasses("final");
@@ -761,58 +750,47 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchName="None";
         this.sketchTitle.html("Information Panel");
         this.sketchTitleHint.html("Click on data points for information");
+        // replace labels with blank text
         for (lab in this.labels){
-            // if(svgLabs){
-            //     svgSketch.select("text."+lab+"txt").html(labBlank);
-            // }else{
-                document.getElementById(lab+"txt").innerHTML = this.labBlank;
-            // }
+            document.getElementById(lab+"txt").innerHTML = this.labBlank;
         }
     }else{
+        // clicked on un-selelected datapoint
         if ((this.sketchName=="None")||(this.sketchName=="")) {
-            console.log('flying in');
+            // nothing selected, so fly in
             this.flyInMasses(d,"pri","fly");
             this.flyInMasses(d,"sec","fly");
             this.flyInMasses(d,"final","fly");
             this.d = d;
         }else{
-            console.log('resizing');
+            // different data selected, so resize
             this.flyInMasses(d,"pri","smooth");
             this.flyInMasses(d,"sec","smooth");
             this.flyInMasses(d,"final","smooth");
             this.d = d;
         }
-        // replace title
+        // update title
         this.sketchName = d["name"];
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
-        labs=this.labels[lab].lab;
-        if (this.unitSwitch){
-            if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
-        }
+        //update labels
         for (lab in this.labels){
-            console.log(this.labels[lab])
             labTxt=''
-            for (i in this.labels[lab].lab){
-                labTxt += " "+d[this.labels[lab].lab[i]];
-                if (columns[this.labels[lab].lab[i]].unit){
-                    labTxt += " "+columns[this.labels[lab].lab[i]].unit;
+            labs=this.labels[lab].lab;
+            if (this.unitSwitch){
+                if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
+            }
+            for (i in labs){
+                labTxt += " "+d[labs[i]];
+                if (columns[labs[i]].unit){
+                    labTxt += " "+columns[labs[i]].unit;
                 }
-                if (i<this.labels[lab].lab.length-1){
+                if (i<labs.length-1){
                     labTxt += "<br>";
                 }
             }
             document.getElementById(lab+"txt").innerHTML = labTxt;
         }
-    }
-}
-GWCatalogue.prototype.redrawSketch = function(){
-    wWidth = document.getElementById("graphcontainer").offsetWidth;
-    wHeight = document.getElementById("graphcontainer").offsetHeight;
-    wAspect = wWidth/wHeight;
-    console.log(wAspect,this.svgSketch);
-    if (wAspect>0){
-        //landscape
     }
 }
 
@@ -835,13 +813,14 @@ GWCatalogue.prototype.setStyles = function(){
 
 }
 GWCatalogue.prototype.tttext = function(d){
-    // tooltip text
+    // graph tooltip text
     return "<span class='ttname'>"+d["name"]+"</span>"+
     "<span class='ttpri'>"+d[this.xvar]+"</span>"+"<span class='ttsec'>"+d[this.yvar]+"</span>";
 }
 
 GWCatalogue.prototype.formatData = function(d){
-    console.log('formatData',d.name);
+    // generate new columns
+    // console.log('formatData',d.name);
     for (col in columns){
         if (columns[col].type=="fn"){d[col]=columns[col].fn(d);console.log('new column',col,d[col])};
         if (columns[col].type=="flt"){
@@ -861,8 +840,8 @@ GWCatalogue.prototype.formatData = function(d){
     }
 }
 GWCatalogue.prototype.makeGraph = function(){
-    // this.setSvgScales();
-    console.log('makeGraph');
+    // create graph
+    // console.log('makeGraph');
     this.svgcont = d3.select("div#graphcontainer").append("div")
         .attr("id","svg-container")
         .attr("width",this.svgWidth)
@@ -907,6 +886,7 @@ GWCatalogue.prototype.getUrlVars = function(){
     this.url = url;
 }
 GWCatalogue.prototype.drawGraphInit = function(){
+    // initialise graph drawing from data
     var gw = this;
     console.log('drawGraphInit')
     d3.csv("csv/gwcat.csv", function(error, data) {
@@ -930,12 +910,13 @@ GWCatalogue.prototype.drawGraphInit = function(){
 }
 
 GWCatalogue.prototype.drawGraph = function(){
+    // draw graph
     var gw = this;
     // gw.setSvgScales();
     gw.makeGraph();
     data = this.data;
     // console.log(this.graphHeight);
-    console.log('drawGraph');
+    // console.log('drawGraph');
     // console.log('this.data',this.data);
 
     // don't want dots overlapping axis, so add in buffer to data domain
@@ -951,9 +932,7 @@ GWCatalogue.prototype.drawGraph = function(){
     gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
     gw.yScale.domain([yMin, yMax]);
-    console.log("gw.showerrors",gw.showerrors);
     if (gw.showerrors == null){gw.showerrors=true};
-    console.log("gw.showerrors",gw.showerrors);
     // x-axis
     gw.svg.append("g")
         .attr("class", "x-axis axis")
@@ -1212,6 +1191,7 @@ GWCatalogue.prototype.drawGraph = function(){
 
 }
 GWCatalogue.prototype.moveHighlight = function(d){
+    // move highlight circle
     var gw=this;
     if ((this.sketchName==d["name"])){
         // fade out
@@ -1228,8 +1208,10 @@ GWCatalogue.prototype.moveHighlight = function(d){
 
 }
 GWCatalogue.prototype.updateErrors = function(){
-    // svg = d3.select("body").transition();
+    // update error bars
+
     if ((columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
+        // remove x-errors
         this.svg.selectAll(".errorX")
             .transition()
             .duration(750)
@@ -1249,6 +1231,7 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
     }else{
+        // add/update x-errors
         this.svg.selectAll(".errorX")
             .transition()
             .duration(750)
@@ -1269,6 +1252,7 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("opacity",1);
     }
     if ((columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
+        // remove y-errors
         this.svg.selectAll(".errorY")
             .transition()
             .duration(750)
@@ -1288,6 +1272,7 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
     }else{
+        // add/update y-errors
         this.svg.selectAll(".errorY")
             .transition()
             .duration(750)
@@ -1309,7 +1294,8 @@ GWCatalogue.prototype.updateErrors = function(){
     }
 }
 GWCatalogue.prototype.toggleErrors = function(){
-    console.log(this.svgcont.select("#errors-img"));
+    // toggle showing errors
+    // console.log(this.svgcont.select("#errors-img"));
     if (this.showerrors){
         this.showerrors = false;
         this.svgcont.select("#errors-img ")
@@ -1319,10 +1305,11 @@ GWCatalogue.prototype.toggleErrors = function(){
         this.svgcont.select("#errors-img")
             .attr("class","errors-show")
     }
-    console.log("toggling errors");
+    // console.log("toggling errors");
     this.updateErrors();
 }
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
+    // update x-xais to xvarNew
     // set global variable
     this.xvar = xvarNew;
     var gw=this;
@@ -1389,6 +1376,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
 }
 
 GWCatalogue.prototype.updateYaxis = function(yvarNew) {
+    // update y-axis to yvarNew
     // set global variable
     var gw=this;
     var data=gw.data;
@@ -1444,7 +1432,8 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
     // });
 }
 GWCatalogue.prototype.addOptions = function(){
-    console.log("add options");
+    // add options boxetc.
+    // console.log("add options");
     var gw=this;
     // add buttons
     var col;
@@ -1511,21 +1500,9 @@ GWCatalogue.prototype.addOptions = function(){
         }
     }
 }
-// GWCatalogue.prototype.initButtons = function(){
-//     var gw=this;
-//     d3.selectAll(".option-x").each(function(d){
-//         if (this.id.split('button-divx-')[1]==gw.xvar){
-//             this.classList.add("down")
-//         }
-//     });
-//     d3.selectAll(".option-y").each(function(d){
-//         console.log(this);
-//         if (this.id.split('button-divy-')[1]==gw.yvar){
-//             this.classList.add("down")
-//         }
-//     });
-// }
+
 GWCatalogue.prototype.showOptions = function(){
+    //show options
     this.optionsOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -1553,6 +1530,7 @@ GWCatalogue.prototype.showOptions = function(){
     document.getElementById("info-icon").classList.remove("hidden");
 }
 GWCatalogue.prototype.hideOptions = function(d) {
+    // hide options box
     this.optionsOn=false;
     // fade out infopanel
     this.optionsouter.transition()
@@ -1569,6 +1547,7 @@ GWCatalogue.prototype.hideOptions = function(d) {
     document.getElementById("info-icon").classList.add("hidden");
 }
 GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
+    // add tooltip to sketch
     ttSk = document.getElementById("tooltipSk")
     ttSk.style.transitionDuration = "200ms";
     ttSk.style.opacity = 0.9;
@@ -1583,27 +1562,31 @@ GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     }
 }
 GWCatalogue.prototype.hideTooltip = function(){
+    // hide tooltip to skwtch
     ttSk = document.getElementById("tooltipSk");
     ttSk.style.transitionDuration = "500ms";
     ttSk.style.opacity = 0.;
 }
 GWCatalogue.prototype.makePlot = function(){
+    // make plot (calls other function)
     this.drawGraph();
     this.drawSketch();
     // this.addButtons();
     this.addOptions();
     if (this.optionsOn){
-        console.log('showing options')
+        // console.log('showing options')
         this.showOptions();
     }
 }
 GWCatalogue.prototype.replot = function(){
+    // remove plots and redraw (e.g. on window resize)
     var gw=this;
     // console.log(gw.sketchName);
+    // remove elements
     d3.select("svg#svgSketch").remove()
     d3.select("div#svg-container").remove()
     d3.selectAll("div.labcont").remove()
-    // d3.selectAll("div.massicon").remove()
+    // redraw graph and sketch
     this.redraw=true;
     this.setScales();
     this.drawGraph();
