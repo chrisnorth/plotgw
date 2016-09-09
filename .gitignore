@@ -5,4 +5,5 @@ __pycache__/
 analytics.js
 # C extensions
 *.so
+.DS_Store
 
