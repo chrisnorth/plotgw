@@ -3,8 +3,8 @@ import json
 import re
 
 fileIn=open('bbh-test.json','r')
-
 lang='en-US'
+fileOut=open('bbh-test_%s.json'%(lang),'w')
 
 jsIn=json.load(fileIn)
 # extract language dictionary
@@ -38,5 +38,7 @@ print('replacing domains in links')
 domains=links['domains']
 links=replacekeys(links,domains)
 
+jsOut={'datadict':datadict,'links':links,'events':events}
+json.dump(jsOut,fileOut,indent=4)
 # print 'datadict:',datadict
 # print 'links:',links
