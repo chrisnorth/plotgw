@@ -1,208 +1,3 @@
-/*
-columns structure:
-   code: column name (in CSV) used for data
-   errcode: column name (in CSV) use for errors
-   type: datatype
-   avail: true if available for graph axes
-   label: label used on graph axes
-   icon: icon used on graph axes
-   unit: unit used on graph axes (default=BLANK)
-   border: force the border on axis (default=2)
-*/
-var columns = {
-    totalmass:{code:"totalmass",errcode:"totalmasserr",
-        type:"flt",label:"Total Mass",icon:"img/totalmass.svg",
-        avail:true,unit:'solar masses'},
-    chirpmass:{code:"chirpmass",errcode:"chirpmasserr",
-        type:"flt",label:"Chirp Mass",icon:"img/chirpmass.svg",
-        avail:true,unit:'solar masses'},
-    initmass1:{code:"initmass1",errcode:"initmass1err",
-        type:"flt",label:"Primary Mass",icon:"img/primass.svg",
-        avail:true,unit:'solar masses'},
-    initmass2:{code:"initmass2",errcode:"initmass2err",
-        type:"flt",label:"Secondary Mass",icon:"img/secmass.svg",
-        avail:true,unit:'solar masses'},
-    finalmass:{code:"finalmass",errcode:"finalmasserr",
-        type:"flt",label:"Final Mass",icon:"img/finalmass.svg",
-        avail:true,unit:'solar masses'},
-    massratio:{code:"massratio",errcode:"massratioerr",
-        type:"flt",label:"Mass Ratio",icon:"img/massratio.svg",
-        avail:true,unit:'',border:0.01},
-    initspineff:{code:"initspineff",errcode:"initspinefferr",
-        type:"flt",avail:true,border:0.01,icon:"img/initspin.svg",
-        label:"Effective inspiral spin magnitude",unit:""},
-    initspin1:{code:"initspin1",errcode:"initspin1err",
-        type:"flt",avail:false},
-    initspin2:{code:"initspin2",errcode:"initspin2err",
-        type:"flt",avail:false},
-    finalspin:{code:"finalspin",errcode:"finalspinerr",
-        type:"flt",avail:true,border:0.01,icon:"img/finalspin.svg",
-        label:"Final spin magnitude",unit:""},
-    distance:{code:"distance",errcode:"distanceerr",
-        type:"flt",label:'Distance',border:20,
-        avail:true,unit:'MPc',icon:"img/ruler.svg"},
-    redshift:{code:"redshift",errcode:"redshifterr",
-        type:"flt",label:"Redshift",avail:true,icon:"img/redshift.svg",border:0.01},
-    date:{code:"date",
-        type:"date",avail:false},
-    far:{code:"far",
-        type:"flt",avail:false},
-    fap:{code:"fap",
-        type:"flt",},
-    dtHL:{code:"dtHL",
-        type:"flt",avail:false},
-    sigma:{code:"sigma",
-        type:"flt",avail:false},
-    SNR:{code:"SNR",errcode:"",icon:"img/snr.svg",
-        type:"flt",avail:true,label:"SNR"},
-    skyarea:{code:"skyarea",
-        type:"flt",avail:false},
-    energy:{code:"energy",avail:true,label:"Energy released",
-        errcode:"energyerr",border:0.1,icon:"img/energyrad.svg",
-        type:"flt",unit:"solar mass equiv."},
-    peaklum:{code:"peaklum",avail:true,label:"Peak luminosity",
-        errcode:"peaklumerr",type:"flt",icon:"img/peaklum.svg",
-        unit:"solar mass equiv. per second"},
-    peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
-        errcode:"",type:"flt",border:0.1,icon:"img/peakstrain.svg",
-        unit:"x 1e-21"},
-    data:{code:"data",avail:false,type:'str',label:"Data"}
-}
-
-// calculate additional columns (unit conversions & strings)
-columns.distanceLy = {
-    'type':'fn',
-    'fn':function(d){return(Math.round(d['distance']*3.26))},
-    'unit':'Mly',
-    avail:false,label:'DistanceLy',errcode:"distanceLyErr"
-}
-columns.distanceLyErr = {
-    'type':'fn',
-    'fn':function(d){return(Math.round(d['distance']*3.26))},
-    'unit':'Mly',
-    avail:false,label:'DistanceLy'
-};
-columns.distancePcStr = {
-    'type':'fn',
-    'fn':function(d){return parseFloat((d['distanceminus']).toPrecision(3))+
-    '&ndash;'+parseFloat((d['distanceplus']).toPrecision(3))+'<br/>MPc'},
-    'unit':''
-}
-columns.distanceLyStr = {
-    'type':'fn',
-    'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'&ndash;'+
-            parseFloat((d['distanceplus']*3.26).toPrecision(3))+'<br/>million ly'},
-    'unit':''
-}
-columns.datestr = {
-    'type':'fn',
-    'fn':function(d){
-        months=['Jan','Feb','Mar','Apr','May','Jun',
-            'Jul','Aug','Sep','Oct','Nov','Dec'];
-        day=d['date'].split('T')[0].split('-')[0];
-        month=months[parseInt(d['date'].split('T')[0].split('-')[1])-1];
-        year=d['date'].split('T')[0].split('-')[2];
-        return day+' '+month+'<br/>'+year;
-    },
-    'unit':''
-};
-columns.timestr = {
-    'type':'fn',
-    'fn':function(d){return(d['date'].split('T')[1]+"<br/>UT")},
-    'unit':''
-};
-columns.peaklumtxtErg = {
-    'type':'fn',
-    'fn':function(d){return(d['peaklumminus'].toPrecision(2)+'&ndash;'+d['peaklumplus'].toPrecision(2)+"<br/>x10<sup>56</sup> erg/s")},
-    'unit':''
-};
-columns.peaklumtxtMsun = {
-    'type':'fn',
-    'fn':function(d){return(parseFloat((d['peaklumminus']*55.956).toPrecision(2))+
-    '&ndash;'+parseFloat((d['peaklumplus']*55.956).toPrecision(2))+
-    "<br/>M<sub>&#x2609;</sub>c<sup>2</sup>/s")},
-    'unit':''
-};
-columns.chirpmasstxt = {
-    'type':'fn',
-    'fn':function(d){return(parseFloat((d['chirpmassminus']).toPrecision(2))+
-    '&ndash;'+parseFloat((d['chirpmassplus']).toPrecision(2))+
-    "<br/>M<sub>&#x2609;</sub>")},
-    'unit':''
-}
-columns.energytxtMsun = {
-    'type':'fn',
-    'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
-    'unit':''
-};
-columns.energytxtErg = {
-    'type':'fn',
-    'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+
-    '&ndash;'+parseFloat((d['energyplus']*1.787).toPrecision(2))+
-    "<br/>x10<sup>54</sup> erg")},
-    'unit':''
-};
-columns.typedesc = {
-    'type':'fn',
-    'fn':function(d){return(gwcat.typedescs[d['type']])},
-    'unit':''
-}
-columns.fappercent = {
-    'type':'fn',
-    'fn':function(d){return (100.*d.fap).toFixed(6);},
-    'unit':'%',
-    'unitSwitch':'fartxt'
-}
-columns.faptxt = {
-    'type':'fn',
-    'fn':function(d){return (d.fap).toPrecision(3);},
-    'unit':'',
-    'unitSwitch':'fartxt'
-}
-columns.fartxt = {
-    type:'fn',
-    fn:function(d){
-        // return Math.round(1./d.far);
-        if (1/d.far<100){
-            return "1 per "+(1./d.far).toFixed(1)+
-            "<br/>yrs";}
-        else if (1/d.far<1000){
-            return "1 per "+(1./d.far).toFixed(0)+
-            "<br/>year";}
-        else if (1/d.far<1e6){
-            return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
-            "<br/>thousand yr";}
-        else{
-            return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
-            "<br/>million yr";}
-    },
-    'unit':'',
-    'unitSwitch':'fartxt'
-}
-columns.datalink = {
-    'type':'fn',
-    fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
-}
-
-// define functions to get label, icon, unit etc.
-var getLabel = function(col){
-    return(columns[col].label);
-}
-var getLabelUnit = function(col){
-    if (columns[col].unit){
-        return(columns[col].label+' ('+columns[col].unit+')');
-    }else{
-        return(columns[col].label);
-    }
-}
-var getIcon = function(col){
-    if (columns[col].icon){
-        return(columns[col].icon);
-    }else{
-        return(null);
-    }
-}
-
 // Define GWCatalogue class
 function GWCatalogue(){
     // set initial axes
@@ -224,6 +19,215 @@ GWCatalogue.prototype.init = function(){
     this.setScales();
 
 }
+GWCatalogue.prototype.setColumns = function(){
+    /*
+    columns structure:
+       code: column name (in CSV) used for data
+       errcode: column name (in CSV) use for errors
+       type: datatype
+       avail: true if available for graph axes
+       label: label used on graph axes
+       icon: icon used on graph axes
+       unit: unit used on graph axes (default=BLANK)
+       border: force the border on axis (default=2)
+    */
+    this.columns = {
+        totalmass:{code:"totalmass",errcode:"totalmasserr",
+            type:"flt",label:"Total Mass",icon:"img/totalmass.svg",
+            avail:true,unit:'solar masses'},
+        chirpmass:{code:"chirpmass",errcode:"chirpmasserr",
+            type:"flt",label:"Chirp Mass",icon:"img/chirpmass.svg",
+            avail:true,unit:'solar masses'},
+        initmass1:{code:"initmass1",errcode:"initmass1err",
+            type:"flt",label:"Primary Mass",icon:"img/primass.svg",
+            avail:true,unit:'solar masses'},
+        initmass2:{code:"initmass2",errcode:"initmass2err",
+            type:"flt",label:"Secondary Mass",icon:"img/secmass.svg",
+            avail:true,unit:'solar masses'},
+        finalmass:{code:"finalmass",errcode:"finalmasserr",
+            type:"flt",label:"Final Mass",icon:"img/finalmass.svg",
+            avail:true,unit:'solar masses'},
+        massratio:{code:"massratio",errcode:"massratioerr",
+            type:"flt",label:"Mass Ratio",icon:"img/massratio.svg",
+            avail:true,unit:'',border:0.01},
+        initspineff:{code:"initspineff",errcode:"initspinefferr",
+            type:"flt",avail:true,border:0.01,icon:"img/initspin.svg",
+            label:"Effective inspiral spin magnitude",unit:""},
+        initspin1:{code:"initspin1",errcode:"initspin1err",
+            type:"flt",avail:false},
+        initspin2:{code:"initspin2",errcode:"initspin2err",
+            type:"flt",avail:false},
+        finalspin:{code:"finalspin",errcode:"finalspinerr",
+            type:"flt",avail:true,border:0.01,icon:"img/finalspin.svg",
+            label:"Final spin magnitude",unit:""},
+        distance:{code:"distance",errcode:"distanceerr",
+            type:"flt",label:'Distance',border:20,
+            avail:true,unit:'MPc',icon:"img/ruler.svg"},
+        redshift:{code:"redshift",errcode:"redshifterr",
+            type:"flt",label:"Redshift",avail:true,icon:"img/redshift.svg",border:0.01},
+        date:{code:"date",
+            type:"date",avail:false},
+        far:{code:"far",
+            type:"flt",avail:false},
+        fap:{code:"fap",
+            type:"flt",},
+        dtHL:{code:"dtHL",
+            type:"flt",avail:false},
+        sigma:{code:"sigma",
+            type:"flt",avail:false},
+        SNR:{code:"SNR",errcode:"",icon:"img/snr.svg",
+            type:"flt",avail:true,label:"SNR"},
+        skyarea:{code:"skyarea",
+            type:"flt",avail:false},
+        energy:{code:"energy",avail:true,label:"Energy released",
+            errcode:"energyerr",border:0.1,icon:"img/energyrad.svg",
+            type:"flt",unit:"solar mass equiv."},
+        peaklum:{code:"peaklum",avail:true,label:"Peak luminosity",
+            errcode:"peaklumerr",type:"flt",icon:"img/peaklum.svg",
+            unit:"solar mass equiv. per second"},
+        peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
+            errcode:"",type:"flt",border:0.1,icon:"img/peakstrain.svg",
+            unit:"x 1e-21"},
+        data:{code:"data",avail:false,type:'str',label:"Data"}
+    }
+
+    // calculate additional columns (unit conversions & strings)
+    this.columns.distanceLy = {
+        'type':'fn',
+        'fn':function(d){return(Math.round(d['distance']*3.26))},
+        'unit':'Mly',
+        avail:false,label:'DistanceLy',errcode:"distanceLyErr"
+    }
+    this.columns.distanceLyErr = {
+        'type':'fn',
+        'fn':function(d){return(Math.round(d['distance']*3.26))},
+        'unit':'Mly',
+        avail:false,label:'DistanceLy'
+    };
+    this.columns.distancePcStr = {
+        'type':'fn',
+        'fn':function(d){return parseFloat((d['distanceminus']).toPrecision(3))+
+        '&ndash;'+parseFloat((d['distanceplus']).toPrecision(3))+'<br/>MPc'},
+        'unit':''
+    }
+    this.columns.distanceLyStr = {
+        'type':'fn',
+        'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'&ndash;'+
+                parseFloat((d['distanceplus']*3.26).toPrecision(3))+'<br/>million ly'},
+        'unit':''
+    }
+    this.columns.datestr = {
+        'type':'fn',
+        'fn':function(d){
+            months=['Jan','Feb','Mar','Apr','May','Jun',
+                'Jul','Aug','Sep','Oct','Nov','Dec'];
+            day=d['date'].split('T')[0].split('-')[0];
+            month=months[parseInt(d['date'].split('T')[0].split('-')[1])-1];
+            year=d['date'].split('T')[0].split('-')[2];
+            return day+' '+month+'<br/>'+year;
+        },
+        'unit':''
+    };
+    this.columns.timestr = {
+        'type':'fn',
+        'fn':function(d){return(d['date'].split('T')[1]+"<br/>UT")},
+        'unit':''
+    };
+    this.columns.peaklumtxtErg = {
+        'type':'fn',
+        'fn':function(d){return(d['peaklumminus'].toPrecision(2)+'&ndash;'+d['peaklumplus'].toPrecision(2)+"<br/>x10<sup>56</sup> erg/s")},
+        'unit':''
+    };
+    this.columns.peaklumtxtMsun = {
+        'type':'fn',
+        'fn':function(d){return(parseFloat((d['peaklumminus']*55.956).toPrecision(2))+
+        '&ndash;'+parseFloat((d['peaklumplus']*55.956).toPrecision(2))+
+        "<br/>M<sub>&#x2609;</sub>c<sup>2</sup>/s")},
+        'unit':''
+    };
+    this.columns.chirpmasstxt = {
+        'type':'fn',
+        'fn':function(d){return(parseFloat((d['chirpmassminus']).toPrecision(2))+
+        '&ndash;'+parseFloat((d['chirpmassplus']).toPrecision(2))+
+        "<br/>M<sub>&#x2609;</sub>")},
+        'unit':''
+    }
+    this.columns.energytxtMsun = {
+        'type':'fn',
+        'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
+        'unit':''
+    };
+    this.columns.energytxtErg = {
+        'type':'fn',
+        'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+
+        '&ndash;'+parseFloat((d['energyplus']*1.787).toPrecision(2))+
+        "<br/>x10<sup>54</sup> erg")},
+        'unit':''
+    };
+    this.columns.typedesc = {
+        'type':'fn',
+        'fn':function(d){return(gwcat.typedescs[d['type']])},
+        'unit':''
+    }
+    this.columns.fappercent = {
+        'type':'fn',
+        'fn':function(d){return (100.*d.fap).toFixed(6);},
+        'unit':'%',
+        'unitSwitch':'fartxt'
+    }
+    this.columns.faptxt = {
+        'type':'fn',
+        'fn':function(d){return (d.fap).toPrecision(3);},
+        'unit':'',
+        'unitSwitch':'fartxt'
+    }
+    this.columns.fartxt = {
+        type:'fn',
+        fn:function(d){
+            // return Math.round(1./d.far);
+            if (1/d.far<100){
+                return "1 per "+(1./d.far).toFixed(1)+
+                "<br/>yrs";}
+            else if (1/d.far<1000){
+                return "1 per "+(1./d.far).toFixed(0)+
+                "<br/>year";}
+            else if (1/d.far<1e6){
+                return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
+                "<br/>thousand yr";}
+            else{
+                return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
+                "<br/>million yr";}
+        },
+        'unit':'',
+        'unitSwitch':'fartxt'
+    }
+    this.columns.datalink = {
+        'type':'fn',
+        fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
+    }
+
+}
+
+// define functions to get label, icon, unit etc.
+GWCatalogue.prototype.getLabel = function(col){
+    return(this.columns[col].label);
+}
+GWCatalogue.prototype.getLabelUnit = function(col){
+    if (this.columns[col].unit){
+        return(this.columns[col].label+' ('+this.columns[col].unit+')');
+    }else{
+        return(cthis.olumns[col].label);
+    }
+}
+GWCatalogue.prototype.getIcon = function(col){
+    if (this.columns[col].icon){
+        return(this.columns[col].icon);
+    }else{
+        return(null);
+    }
+}
+
+
 GWCatalogue.prototype.scaleWindow = function(){
     //set window scales (protrait/landscape etc.)
     this.winFullWidth=document.getElementById("full").offsetWidth;
@@ -327,12 +331,14 @@ GWCatalogue.prototype.setScales = function(){
     this.xScale = d3.scale.linear().domain([0,100])
         .range([0, this.graphWidth])
         // data -> display
-    this.xMap = function(d) { return gw.xScale(gw.xValue(d));}
+    this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
     // x error bars
     this.xErrP = function(d) {return d[gw.xvar+'plus'];} //error+ -> value
     this.xErrM = function(d) {return d[gw.xvar+'minus'];} //error- -> value
     // x error+ -> display
-    this.xMapErrP = function(d) { return gw.xScale(gw.xErrP(d))}
+    this.xMapErrP = function(d) {
+        console.log('xMapErrP',gw.xValue(d),gw.xErrP(d),gw.xScale(gw.xErrP(d)));
+        return gw.xScale(gw.xErrP(d))}
     // x error- -> display
     this.xMapErrM = function(d) { return gw.xScale(gw.xErrM(d));}
     // x error caps -> display
@@ -707,8 +713,8 @@ GWCatalogue.prototype.switchUnits = function(){
         }
         for (i in labs){
             labTxt += " "+this.d[labs[i]];
-            if (columns[labs[i]].unit){
-                labTxt += " "+columns[labs[i]].unit;
+            if (this.columns[labs[i]].unit){
+                labTxt += " "+this.columns[labs[i]].unit;
             }
             if (i<labs.length-1){
                 labTxt += "<br>";
@@ -738,8 +744,8 @@ GWCatalogue.prototype.updateSketch = function(d){
             }
             for (i in labs){
                 labTxt += " "+d[labs[i]];
-                if (columns[labs[i]].unit){
-                    labTxt += " "+columns[labs[i]].unit;
+                if (this.columns[labs[i]].unit){
+                    labTxt += " "+this.columns[labs[i]].unit;
                 }
                 if (i<labs.length-1){
                     labTxt += "<br>";
@@ -789,8 +795,8 @@ GWCatalogue.prototype.updateSketch = function(d){
             }
             for (i in labs){
                 labTxt += " "+d[labs[i]];
-                if (columns[labs[i]].unit){
-                    labTxt += " "+columns[labs[i]].unit;
+                if (this.columns[labs[i]].unit){
+                    labTxt += " "+this.columns[labs[i]].unit;
                 }
                 if (i<labs.length-1){
                     labTxt += "<br>";
@@ -825,21 +831,27 @@ GWCatalogue.prototype.tttext = function(d){
     "<span class='ttpri'>"+d[this.xvar]+"</span>"+"<span class='ttsec'>"+d[this.yvar]+"</span>";
 }
 
-GWCatalogue.prototype.formatData = function(d){
+GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     // console.log('formatData',d.name);
-    for (col in columns){
-        if (columns[col].type=="fn"){d[col]=columns[col].fn(d);console.log('new column',col,d[col])};
-        if (columns[col].type=="flt"){
+    var gw=this;
+    for (col in gw.columns){
+        if (gw.columns[col].type=="fn"){
+            d[col]=gw.columns[col].fn(d);
+            console.log('new column',col,d[col])
+        };
+        if (gw.columns[col].type=="flt"){
             d[col] = +d[col];
-            if (columns[col]['errcode']){
-                errcode=d[columns[col]['errcode']].split('e')[1]
+            if (gw.columns[col]['errcode']){
+                errcode=d[gw.columns[col]['errcode']].split('e')[1]
                 errcode=errcode.split('-')
                 d[col+'plus'] = +errcode[0] + d[col];
                 d[col+'minus'] = -errcode[1] + d[col];
                 d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'&ndash;'+
                         parseFloat(d[col+'plus'].toPrecision(3))
-                columns[col+'Str']={'type':'str','unit':columns[col].unit}
+                gw.columns[col+'Str']={
+                    'type':'str','unit':gw.columns[col].unit
+                }
             }
         }
         // console.log(col,d[col])
@@ -897,18 +909,21 @@ GWCatalogue.prototype.drawGraphInit = function(){
     var gw = this;
     console.log('drawGraphInit')
     d3.csv("csv/gwcat.csv", function(error, data) {
-        console.log('d3.csv');
+        console.log('gwcat.csv');
         // console.log(gw);
         // change string (from CSV) into number format
         // var data=data;
 
         // var formatData = this.formatData(d)
         // console.log(this.formatData,formatData(d));
-        data.forEach(gw.formatData);
+        gw.setColumns();
+        data.forEach(function(d){gw.formatData(d,gw.columns)});
         gw.data = data;
         // console.log(data);
         gw.optionsOn=false;
+        console.log('columns');
         gw.makePlot();
+        console.log('plotted');
         // gw.initButtons();
 
         // console.log('gw.data',gw.data);
@@ -921,7 +936,8 @@ GWCatalogue.prototype.drawGraph = function(){
     var gw = this;
     // gw.setSvgScales();
     gw.makeGraph();
-    data = this.data;
+    data = gw.data;
+    console.log(gw.xvar,gw.yvar);
     // console.log(this.graphHeight);
     // console.log('drawGraph');
     // console.log('this.data',this.data);
@@ -929,11 +945,11 @@ GWCatalogue.prototype.drawGraph = function(){
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-    xBorder = (columns[gw.xvar].border) ? columns[gw.xvar].border : 2;
+    xBorder = (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2;
     xMin = (d3.min(data, gw.xErrM)<0) ? d3.min(data, gw.xErrM) - xBorder : 0;
     xMax = d3.max(data, gw.xErrP)+xBorder;
     gw.xScale.domain([xMin, xMax]);
-    yBorder = (columns[gw.yvar].border) ? columns[gw.yvar].border : 2;
+    yBorder = (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2;
     yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
     yMax = d3.max(data, gw.yErrP)+yBorder;
     gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
@@ -960,7 +976,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y", 1.2*(1+gw.ysc)+"em")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
-        .text(getLabelUnit(gw.xvar));
+        .text(gw.getLabelUnit(gw.xvar));
     gw.svgcont.append("div")
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -970,7 +986,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("height",40*gw.ysc+"px")
     .append("img")
         .attr("id","x-axis-icon")
-        .attr("src",getIcon(gw.xvar));
+        .attr("src",gw.getIcon(gw.xvar));
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.ysc))+"em")
@@ -995,7 +1011,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("dy", (-25*(1+gw.xsc))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
-        .text(getLabelUnit(gw.yvar));
+        .text(gw.getLabelUnit(gw.yvar));
     gw.svgcont.append("div")
         .attr("class", "y-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -1005,7 +1021,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("height",(40*gw.scl)+"px")
     .append("img")
         .attr("id","y-axis-icon")
-        .attr("src",getIcon(gw.yvar));
+        .attr("src",gw.getIcon(gw.yvar));
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.xsc))+"em")
@@ -1217,7 +1233,7 @@ GWCatalogue.prototype.moveHighlight = function(d){
 GWCatalogue.prototype.updateErrors = function(){
     // update error bars
 
-    if ((columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
+    if ((this.columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
         // remove x-errors
         this.svg.selectAll(".errorX")
             .transition()
@@ -1258,7 +1274,7 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
             .attr("opacity",1);
     }
-    if ((columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
+    if ((this.columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
         // remove y-errors
         this.svg.selectAll(".errorY")
             .transition()
@@ -1328,8 +1344,8 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
 
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        xBorder= (columns[gw.xvar].border) ? columns[gw.xvar].border : 2
-        if (columns[gw.xvar].errcode==""){
+        xBorder= (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2
+        if (gw.columns[gw.xvar].errcode==""){
             xMin = (d3.min(data, gw.xValue)<0) ? d3.min(data, gw.xValue) - xBorder : 0;
             xMax = d3.max(data, gw.xValue)+xBorder;
             gw.xScale.domain([xMin, xMax]);
@@ -1360,9 +1376,9 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         gw.svg.select(".x-axis.axis-label")
             .transition()
             .duration(750)
-            .text(getLabelUnit(gw.xvar));
+            .text(gw.getLabelUnit(gw.xvar));
         gw.svgcont.select("#x-axis-icon")
-            .attr("src",getIcon(gw.xvar));
+            .attr("src",gw.getIcon(gw.xvar));
         gw.svg.select(".y-axis.axis-line")
             .transition()
             .duration(750)
@@ -1395,8 +1411,8 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         // data.forEach(gw.formatData);
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        yBorder= (columns[gw.yvar].border) ? columns[gw.yvar].border : 2
-        if (columns[gw.yvar].errcode==""){
+        yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
+        if (gw.columns[gw.yvar].errcode==""){
             yMin = (d3.min(data, gw.yValue)<0) ? d3.min(data, gw.yValue) - yBorder : 0;
             gw.yScale.domain([yMin, d3.max(data, gw.yValue)+yBorder]);
         }else{
@@ -1419,9 +1435,9 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         gw.svg.selectAll(".y-axis.axis-label")
             .transition()
             .duration(750)
-            .text(getLabelUnit(gw.yvar));
+            .text(gw.getLabelUnit(gw.yvar));
         gw.svgcont.select("#y-axis-icon")
-            .attr("src",getIcon(gw.yvar));
+            .attr("src",gw.getIcon(gw.yvar));
         gw.svg.select(".x-axis.axis-line")
             .transition()
             .duration(750)
@@ -1444,8 +1460,8 @@ GWCatalogue.prototype.addOptions = function(){
     var gw=this;
     // add buttons
     var col;
-    for (col in columns){
-        if (columns[col].avail){
+    for (col in gw.columns){
+        if (gw.columns[col].avail){
             var divx = document.getElementById('x-buttons');
             var newoptdivx = document.createElement('div');
             newoptdivx.className = 'option option-x';
@@ -1454,14 +1470,14 @@ GWCatalogue.prototype.addOptions = function(){
             var newoptinputx = document.createElement('img');
             newoptinputx.type = 'submit';
             newoptinputx.name = col;
-            // newoptinputx.value = getLabel(col);
+            // newoptinputx.value = gw.getLabel(col);
             newoptinputx.setAttribute("id","buttonx-"+col);
             newoptinputx.classList.add("button");
             newoptinputx.classList.add("button-x");
-            newoptinputx.src = getIcon(col);
-            newoptinputx.label = getLabel(col);
+            newoptinputx.src = gw.getIcon(col);
+            newoptinputx.label = gw.getLabel(col);
             if (col==this.xvar){newoptdivx.classList.add("down")};
-            // newoptinputx.innerHTML = "<img src="+getIcon(col)+" title='"+getLabel(col)+"'>";
+            // newoptinputx.innerHTML = "<img src="+gw.getIcon(col)+" title='"+gw.getLabel(col)+"'>";
             newoptinputx.addEventListener('click',function(){
                 oldXvar = gw.xvar;
                 newXvar = this.id.split('buttonx-')[1]
@@ -1483,14 +1499,14 @@ GWCatalogue.prototype.addOptions = function(){
             var newoptinputy = document.createElement('img');
             newoptinputy.type = 'submit';
             newoptinputy.name = col;
-            // newoptinputy.value = getLabel(col);
+            // newoptinputy.value = gw.getLabel(col);
             newoptinputy.setAttribute("id","buttony-"+col);
             newoptinputy.classList.add("button");
             newoptinputy.classList.add("button-y");
-            newoptinputy.src = getIcon(col);
-            newoptinputy.label = getLabel(col);
+            newoptinputy.src = gw.getIcon(col);
+            newoptinputy.label = gw.getLabel(col);
             if (col==this.yvar){newoptdivy.classList.add("down")};
-            newoptinputy.innerHTML = "<img src="+getIcon(col)+" title='"+getLabel(col)+"'>";
+            newoptinputy.innerHTML = "<img src="+gw.getIcon(col)+" title='"+gw.getLabel(col)+"'>";
             newoptinputy.addEventListener('click',function(){
                 oldYvar = gw.yvar;
                 newYvar = this.id.split('buttony-')[1]
@@ -1563,7 +1579,7 @@ GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     ttSk.style.width = "auto";
     ttSk.style.height = "auto";
     if (type=="column"){
-        ttSk.innerHTML = columns[tttxt].label;
+        ttSk.innerHTML = this.columns[tttxt].label;
     }else{
         ttSk.innerHTML = this.ttlabels[tttxt];
     }
@@ -1614,7 +1630,9 @@ GWCatalogue.prototype.replot = function(){
 //labels to add and keep updated
 var gwcat = new GWCatalogue
 gwcat.init();
+console.log('initialised')
 gwcat.drawGraphInit();
+console.log('plotted')
 window.addEventListener("resize",function(){
     gwcat.replot();
 
