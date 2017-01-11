@@ -7,7 +7,7 @@
 		"snr":{"name": "%data.snr.name%", "priority": 3, "sigfig": 3,
 			 "err": 0},
 		"FAR":{"name": "%data.FAR.name%", "priority": 1, "sigfig": 2,
-			 "unit": "data.FAR.unit", "err": 0},
+			 "unit": "%data.FAR.unit%", "err": 0},
 		"sigma":{"name": "%data.sigma.name%", "priority": 6, "sigfig": 2,
 			 "err": 0},
 		"M1":{"name": "%data.M1.name%", "priority": 1, "sigfig": 3,

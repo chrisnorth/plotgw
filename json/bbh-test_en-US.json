@@ -46,7 +46,7 @@
             "sigfig": 2, 
             "err": 0, 
             "name": "False alarm rate", 
-            "unit": "data.FAR.unit"
+            "unit": "yr^-1"
         }, 
         "spinInitEff": {
             "priority": 4, 
