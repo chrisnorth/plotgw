@@ -180,7 +180,7 @@
                 ], 
                 "best": 36.2
             }, 
-            "spinfinal": {
+            "spinFinal": {
                 "ref": "DetPaper", 
                 "err": [
                     0.05, 
@@ -282,7 +282,7 @@
                 ], 
                 "best": 23
             }, 
-            "spinfinal": {
+            "spinFinal": {
                 "err": [
                     0.09, 
                     0.1
@@ -377,7 +377,7 @@
                 ], 
                 "best": 14.2
             }, 
-            "spinfinal": {
+            "spinFinal": {
                 "err": [
                     0.06, 
                     0.06
