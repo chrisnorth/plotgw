@@ -7,8 +7,8 @@ function GWCatalogue(){
 GWCatalogue.prototype.init = function(){
     //initialyse common values
     this.flySp=1000;
-    this.xvar = "initmass1";
-    this.yvar = "initmass2";
+    this.xvar = "M1";
+    this.yvar = "M2";
     this.legenddescs = {GW:'Detections',
         LVT:'Candidates'}
     this.typedescs = {GW:'Detection',
@@ -19,7 +19,7 @@ GWCatalogue.prototype.init = function(){
     this.setScales();
 
 }
-GWCatalogue.prototype.setColumns = function(){
+GWCatalogue.prototype.setColumns = function(datadict){
     /*
     columns structure:
        code: column name (in CSV) used for data
@@ -31,180 +31,166 @@ GWCatalogue.prototype.setColumns = function(){
        unit: unit used on graph axes (default=BLANK)
        border: force the border on axis (default=2)
     */
-    this.columns = {
-        totalmass:{code:"totalmass",errcode:"totalmasserr",
-            type:"flt",label:"Total Mass",icon:"img/totalmass.svg",
-            avail:true,unit:'solar masses'},
-        chirpmass:{code:"chirpmass",errcode:"chirpmasserr",
-            type:"flt",label:"Chirp Mass",icon:"img/chirpmass.svg",
-            avail:true,unit:'solar masses'},
-        initmass1:{code:"initmass1",errcode:"initmass1err",
-            type:"flt",label:"Primary Mass",icon:"img/primass.svg",
-            avail:true,unit:'solar masses'},
-        initmass2:{code:"initmass2",errcode:"initmass2err",
-            type:"flt",label:"Secondary Mass",icon:"img/secmass.svg",
-            avail:true,unit:'solar masses'},
-        finalmass:{code:"finalmass",errcode:"finalmasserr",
-            type:"flt",label:"Final Mass",icon:"img/finalmass.svg",
-            avail:true,unit:'solar masses'},
-        massratio:{code:"massratio",errcode:"massratioerr",
-            type:"flt",label:"Mass Ratio",icon:"img/massratio.svg",
-            avail:true,unit:'',border:0.01},
-        initspineff:{code:"initspineff",errcode:"initspinefferr",
-            type:"flt",avail:true,border:0.01,icon:"img/initspin.svg",
-            label:"Effective inspiral spin magnitude",unit:""},
-        initspin1:{code:"initspin1",errcode:"initspin1err",
-            type:"flt",avail:false},
-        initspin2:{code:"initspin2",errcode:"initspin2err",
-            type:"flt",avail:false},
-        finalspin:{code:"finalspin",errcode:"finalspinerr",
-            type:"flt",avail:true,border:0.01,icon:"img/finalspin.svg",
-            label:"Final spin magnitude",unit:""},
-        distance:{code:"distance",errcode:"distanceerr",
-            type:"flt",label:'Distance',border:20,
-            avail:true,unit:'MPc',icon:"img/ruler.svg"},
-        redshift:{code:"redshift",errcode:"redshifterr",
-            type:"flt",label:"Redshift",avail:true,icon:"img/redshift.svg",border:0.01},
-        date:{code:"date",
-            type:"date",avail:false},
-        far:{code:"far",
-            type:"flt",avail:false},
-        fap:{code:"fap",
-            type:"flt",},
-        dtHL:{code:"dtHL",
-            type:"flt",avail:false},
-        sigma:{code:"sigma",
-            type:"flt",avail:false},
-        SNR:{code:"SNR",errcode:"",icon:"img/snr.svg",
-            type:"flt",avail:true,label:"SNR"},
-        skyarea:{code:"skyarea",
-            type:"flt",avail:false},
-        energy:{code:"energy",avail:true,label:"Energy released",
-            errcode:"energyerr",border:0.1,icon:"img/energyrad.svg",
-            type:"flt",unit:"solar mass equiv."},
-        peaklum:{code:"peaklum",avail:true,label:"Peak luminosity",
-            errcode:"peaklumerr",type:"flt",icon:"img/peaklum.svg",
-            unit:"solar mass equiv. per second"},
-        peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
-            errcode:"",type:"flt",border:0.1,icon:"img/peakstrain.svg",
-            unit:"x 1e-21"},
-        data:{code:"data",avail:false,type:'str',label:"Data"}
+    this.stdlabel = function(d,src){
+        return(
+            parseFloat(d[src].errv[0].toPrecision(d[src].sigfig))+
+            '&ndash;'+
+            parseFloat(d[src].errv[0].toPrecision(d[src].sigfig))+
+            '<br/>'+d[src].unit)
     }
-
-    // calculate additional columns (unit conversions & strings)
-    this.columns.distanceLy = {
-        'type':'fn',
-        'fn':function(d){return(Math.round(d['distance']*3.26))},
-        'unit':'Mly',
-        avail:false,label:'DistanceLy',errcode:"distanceLyErr"
-    }
-    this.columns.distanceLyErr = {
-        'type':'fn',
-        'fn':function(d){return(Math.round(d['distance']*3.26))},
-        'unit':'Mly',
-        avail:false,label:'DistanceLy'
+    colsUpdate = {
+        Mtotal:{icon:"img/totalmass.svg",avail:true,type:'src'},
+        Mchirp:{icon:"img/chirpmass.svg",avail:true,type:'src'},
+        M1:{icon:"img/primass.svg",avail:true,type:'src'},
+        M2:{icon:"img/secmass.svg",avail:true,type:'src'},
+        Mfinal:{icon:"img/finalmass.svg",avail:true,type:'src'},
+        // massratio:{
+        //     type:"flt",icon:"img/massratio.svg",
+        //     avail:true,unit:'',border:0.01},
+        spinInitEff:{avail:true,icon:"img/initspin.svg",
+            border:0.01,type:'src'},
+        spinFinal:{avail:true,icon:"img/finalspin.svg",
+            border:0.01,type:'src'},
+        Ldist:{avail:true, icon:"img/ruler.svg",
+            border:20,type:'src'},
+        z:{avail:true,icon:"img/redshift.svg",
+            border:0.01,type:'src'},
+        UTC:{avail:false,type:'src'},
+        FAR:{avail:false,type:'src'},
+        sigma:{avail:false,type:'src'},
+        snr:{icon:"img/snr.svg",avail:true,type:'src'},
+        skyArea:{avail:false,type:'src'},
+        Erad:{avail:true,icon:"img/energyrad.svg",
+            border:0.1,type:'src'},
+        peakL:{avail:true,icon:"img/peaklum.svg",type:'src'},
+        LdistLy:{type:'derived',
+            name:'Luminosity (Mly)',
+            bestfn:function(d){
+                return(d['Ldist'].best*3.26)},
+            errfn:function(d){
+                return([d['Ldist'].err[0]*3.26,
+                d['Ldist'].err[1]*3.26])},
+            sigfig:2,
+            err:2,
+            unit:'Mly',
+            avail:false},
+        peakLMsun:{
+            type:'derived',
+            bestfn:function(d){
+                return(d['peakL'].best*55.956)},
+            errfn:function(d){
+                return([d['peakL'].err[0]*55.956,
+                d['peakL'].err[1]*55.956])},
+            sigfig:2,
+            err:2,
+            unit:'Msun c<sup>2</sup>',
+            avail:false}
     };
-    this.columns.distancePcStr = {
-        'type':'fn',
-        'fn':function(d){return parseFloat((d['distanceminus']).toPrecision(3))+
-        '&ndash;'+parseFloat((d['distanceplus']).toPrecision(3))+'<br/>MPc'},
-        'unit':''
+    this.columns={}
+    for (c in colsUpdate){
+        if (colsUpdate[c].type=='src'){
+            // console.log(c,datadict[c])
+            this.columns[c]=datadict[c]
+            for (k in colsUpdate[c]){
+                this.columns[c][k]=colsUpdate[c][k]
+            }
+        }else if(colsUpdate[c].type=='derived'){
+            this.columns[c]=colsUpdate[c]
+        }
     }
-    this.columns.distanceLyStr = {
-        'type':'fn',
-        'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'&ndash;'+
-                parseFloat((d['distanceplus']*3.26).toPrecision(3))+'<br/>million ly'},
-        'unit':''
-    }
-    this.columns.datestr = {
-        'type':'fn',
-        'fn':function(d){
-            months=['Jan','Feb','Mar','Apr','May','Jun',
-                'Jul','Aug','Sep','Oct','Nov','Dec'];
-            day=d['date'].split('T')[0].split('-')[0];
-            month=months[parseInt(d['date'].split('T')[0].split('-')[1])-1];
-            year=d['date'].split('T')[0].split('-')[2];
-            return day+' '+month+'<br/>'+year;
-        },
-        'unit':''
-    };
-    this.columns.timestr = {
-        'type':'fn',
-        'fn':function(d){return(d['date'].split('T')[1]+"<br/>UT")},
-        'unit':''
-    };
-    this.columns.peaklumtxtErg = {
-        'type':'fn',
-        'fn':function(d){return(d['peaklumminus'].toPrecision(2)+'&ndash;'+d['peaklumplus'].toPrecision(2)+"<br/>x10<sup>56</sup> erg/s")},
-        'unit':''
-    };
-    this.columns.peaklumtxtMsun = {
-        'type':'fn',
-        'fn':function(d){return(parseFloat((d['peaklumminus']*55.956).toPrecision(2))+
-        '&ndash;'+parseFloat((d['peaklumplus']*55.956).toPrecision(2))+
-        "<br/>M<sub>&#x2609;</sub>c<sup>2</sup>/s")},
-        'unit':''
-    };
-    this.columns.chirpmasstxt = {
-        'type':'fn',
-        'fn':function(d){return(parseFloat((d['chirpmassminus']).toPrecision(2))+
-        '&ndash;'+parseFloat((d['chirpmassplus']).toPrecision(2))+
-        "<br/>M<sub>&#x2609;</sub>")},
-        'unit':''
-    }
-    this.columns.energytxtMsun = {
-        'type':'fn',
-        'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
-        'unit':''
-    };
-    this.columns.energytxtErg = {
-        'type':'fn',
-        'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+
-        '&ndash;'+parseFloat((d['energyplus']*1.787).toPrecision(2))+
-        "<br/>x10<sup>54</sup> erg")},
-        'unit':''
-    };
-    this.columns.typedesc = {
-        'type':'fn',
-        'fn':function(d){return(gwcat.typedescs[d['type']])},
-        'unit':''
-    }
-    this.columns.fappercent = {
-        'type':'fn',
-        'fn':function(d){return (100.*d.fap).toFixed(6);},
-        'unit':'%',
-        'unitSwitch':'fartxt'
-    }
-    this.columns.faptxt = {
-        'type':'fn',
-        'fn':function(d){return (d.fap).toPrecision(3);},
-        'unit':'',
-        'unitSwitch':'fartxt'
-    }
-    this.columns.fartxt = {
-        type:'fn',
-        fn:function(d){
-            // return Math.round(1./d.far);
-            if (1/d.far<100){
-                return "1 per "+(1./d.far).toFixed(1)+
-                "<br/>yrs";}
-            else if (1/d.far<1000){
-                return "1 per "+(1./d.far).toFixed(0)+
-                "<br/>year";}
-            else if (1/d.far<1e6){
-                return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
-                "<br/>thousand yr";}
-            else{
-                return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
-                "<br/>million yr";}
-        },
-        'unit':'',
-        'unitSwitch':'fartxt'
-    }
-    this.columns.datalink = {
-        'type':'fn',
-        fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
-    }
+    // this.columns.distancePcStr = {
+    //     'type':'fn',
+    //     'fn':function(d){
+    // }
+    // this.columns.distanceLyStr = {
+    //     'type':'fn',
+    //     'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'&ndash;'+
+    //             parseFloat((d['distanceplus']*3.26).toPrecision(3))+'<br/>million ly'},
+    //     'unit':''
+    // }
+    // this.columns.datestr = {
+    //     'type':'fn',
+    //     'strfn':function(d){
+    //         months=['Jan','Feb','Mar','Apr','May','Jun',
+    //             'Jul','Aug','Sep','Oct','Nov','Dec'];
+    //         day=d['UTC'].best.split('T')[0].split('-')[0];
+    //         month=months[parseInt(d['UTC'].best.split('T')[0].split('-')[1])-1];
+    //         year=d['UTC'].best.split('T')[0].split('-')[2];
+    //         return day+' '+month+'<br/>'+year;
+    //     },
+    //     'unit':''
+    // };
+    // this.columns.timestr = {
+    //     'type':'fn',
+    //     'strfn':function(d){
+    //         return(d['UTC'].best.split('T')[1]+"<br/>UT")},
+    //     'unit':''
+    // };
+    // this.columns.peaklumtxtErg = {
+    //     'type':'fn',
+    //     'fn':function(d){return(d['peakL'].toPrecision(2)+'&ndash;'+d['peaklumplus'].toPrecision(2)+"<br/>x10<sup>56</sup> erg/s")},
+    //     'unit':''
+    // };
+    // this.columns.chirpmasstxt = {
+    //     'type':'fn',
+    //     'fn':function(d){return(parseFloat((d['chirpmassminus']).toPrecision(2))+
+    //     '&ndash;'+parseFloat((d['chirpmassplus']).toPrecision(2))+
+    //     "<br/>M<sub>&#x2609;</sub>")},
+    //     'unit':''
+    // }
+    // this.columns.energytxtMsun = {
+    //     'type':'fn',
+    //     'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
+    //     'unit':''
+    // };
+    // this.columns.energytxtErg = {
+    //     'type':'fn',
+    //     'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+
+    //     '&ndash;'+parseFloat((d['energyplus']*1.787).toPrecision(2))+
+    //     "<br/>x10<sup>54</sup> erg")},
+    //     'unit':''
+    // };
+    // this.columns.typedesc = {
+    //     'type':'fn',
+    //     'fn':function(d){return(gwcat.typedescs[d['type']])},
+    //     'unit':''
+    // }
+    // this.columns.fappercent = {
+    //     'type':'fn',
+    //     'fn':function(d){return (100.*d.fap).toFixed(6);},
+    //     'unit':'%',
+    //     'unitSwitch':'fartxt'
+    // }
+    // this.columns.faptxt = {
+    //     'type':'fn',
+    //     'fn':function(d){return (d.fap).toPrecision(3);},
+    //     'unit':'',
+    //     'unitSwitch':'fartxt'
+    // }
+    // this.columns.fartxt = {
+    //     type:'fn',
+    //     fn:function(d){
+    //         // return Math.round(1./d.far);
+    //         if (1/d.far<100){
+    //             return "1 per "+(1./d.far).toFixed(1)+
+    //             "<br/>yrs";}
+    //         else if (1/d.far<1000){
+    //             return "1 per "+(1./d.far).toFixed(0)+
+    //             "<br/>year";}
+    //         else if (1/d.far<1e6){
+    //             return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
+    //             "<br/>thousand yr";}
+    //         else{
+    //             return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
+    //             "<br/>million yr";}
+    //     },
+    //     'unit':'',
+    //     'unitSwitch':'fartxt'
+    // }
+    // this.columns.datalink = {
+    //     'type':'fn',
+    //     fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
+    // }
 
 }
 
@@ -326,15 +312,15 @@ GWCatalogue.prototype.setScales = function(){
     // set axis scales
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
-    this.xValue = function(d) {return d[gw.xvar];} // data -> value
+    this.xValue = function(d) {return d[gw.xvar].best;} // data -> value
     // value -> display
     this.xScale = d3.scale.linear().domain([0,100])
         .range([0, this.graphWidth])
         // data -> display
     this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
     // x error bars
-    this.xErrP = function(d) {return d[gw.xvar+'plus'];} //error+ -> value
-    this.xErrM = function(d) {return d[gw.xvar+'minus'];} //error- -> value
+    this.xErrP = function(d) {return d[gw.xvar].errv[1];} //error+ -> value
+    this.xErrM = function(d) {return d[gw.xvar].errv[0];} //error- -> value
     // x error+ -> display
     this.xMapErrP = function(d) {
         console.log('xMapErrP',gw.xValue(d),gw.xErrP(d),gw.xScale(gw.xErrP(d)));
@@ -352,7 +338,7 @@ GWCatalogue.prototype.setScales = function(){
             .innerTickSize(-this.graphHeight);
 
     //data -> value
-    this.yValue = function(d) {return d[gw.yvar];}
+    this.yValue = function(d) {return d[gw.yvar].best;}
     // value -> display
     // this.yScale = d3.scale.linear().
     //     range([this.relh[1]*this.graphHeight, this.relh[0]*this.graphHeight])
@@ -360,8 +346,8 @@ GWCatalogue.prototype.setScales = function(){
     // data -> display
     this.yMap = function(d) { return gw.yScale(gw.yValue(d));}
     // y error bars
-    this.yErrP = function(d) {return d[gw.yvar+'plus'];} //error+ -> value
-    this.yErrM = function(d) {return d[gw.yvar+'minus'];} //error- -> value
+    this.yErrP = function(d) {return d[gw.yvar].errv[1];} //error+ -> value
+    this.yErrM = function(d) {return d[gw.yvar].errv[0];} //error- -> value
     // y error+ -> display
     this.yMapErrP = function(d) { return gw.yScale(gw.yErrP(d));}
     // y error- -> display
@@ -833,27 +819,26 @@ GWCatalogue.prototype.tttext = function(d){
 
 GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
-    // console.log('formatData',d.name);
+    console.log('formatData',d.name);
     var gw=this;
     for (col in gw.columns){
-        if (gw.columns[col].type=="fn"){
-            d[col]=gw.columns[col].fn(d);
+        // console.log(col,gw.columns[col].type);
+        if (gw.columns[col].type=="derived"){
+            d[col]={}
+            d[col].best=gw.columns[col].bestfn(d);
+            d[col].err=gw.columns[col].errfn(d);
             console.log('new column',col,d[col])
-        };
-        if (gw.columns[col].type=="flt"){
-            d[col] = +d[col];
-            if (gw.columns[col]['errcode']){
-                errcode=d[gw.columns[col]['errcode']].split('e')[1]
-                errcode=errcode.split('-')
-                d[col+'plus'] = +errcode[0] + d[col];
-                d[col+'minus'] = -errcode[1] + d[col];
-                d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'&ndash;'+
-                        parseFloat(d[col+'plus'].toPrecision(3))
-                gw.columns[col+'Str']={
-                    'type':'str','unit':gw.columns[col].unit
-                }
+        }else{
+            console.log('existing column',col,d[col])
+        }
+        if (gw.columns[col].err){
+            if (gw.columns[col].err==2){
+                d[col].errv =
+                    [d[col].best-d[col].err[0],
+                    d[col].best+d[col].err[1]]
             }
         }
+        console.log(col,d[col])
         // console.log(col,d[col])
         // console.log(col,d[col]);
     }
@@ -904,21 +889,50 @@ GWCatalogue.prototype.getUrlVars = function(){
     this.urlVars = vars;
     this.url = url;
 }
+// GWCatalogue.prototype.drawGraphInitCsv = function(){
+//     // initialise graph drawing from data
+//     var gw = this;
+//     console.log('drawGraphInit')
+//     d3.csv("csv/gwcat.csv", function(error, data) {
+//         console.log('gwcat.csv');
+//         // console.log(gw);
+//         // change string (from CSV) into number format
+//         // var data=data;
+//
+//         // var formatData = this.formatData(d)
+//         // console.log(this.formatData,formatData(d));
+//         gw.setColumns();
+//         data.forEach(function(d){gw.formatData(d,gw.columns)});
+//         gw.data = data;
+//         // console.log(data);
+//         gw.optionsOn=false;
+//         console.log('columns');
+//         gw.makePlot();
+//         console.log('plotted');
+//         // gw.initButtons();
+//
+//         // console.log('gw.data',gw.data);
+//     });
+// }
+
 GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
-    console.log('drawGraphInit')
-    d3.csv("csv/gwcat.csv", function(error, data) {
-        console.log('gwcat.csv');
-        // console.log(gw);
-        // change string (from CSV) into number format
-        // var data=data;
-
-        // var formatData = this.formatData(d)
-        // console.log(this.formatData,formatData(d));
-        gw.setColumns();
-        data.forEach(function(d){gw.formatData(d,gw.columns)});
-        gw.data = data;
+    d3.json("json/bbh-test_en-US.json", function(error, dataIn) {
+        console.log('json/bbh-test_en-US.json');
+        console.log(dataIn.datadict)
+        gw.data=[]
+        for (e in dataIn.events){
+            dataIn.events[e].name=e;
+            if (e[0]=='G'){t='GW'};
+            if (e[0]=='L'){t='LVT'};
+            dataIn.events[e].type=t;
+            gw.data.push(dataIn.events[e])
+        }
+        console.log('data:',gw.data)
+        gw.setColumns(dataIn.datadict);
+        //console.log('columns:',gw.columns);
+        gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
         // console.log(data);
         gw.optionsOn=false;
         console.log('columns');
@@ -930,7 +944,6 @@ GWCatalogue.prototype.drawGraphInit = function(){
     });
 
 }
-
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
     var gw = this;
