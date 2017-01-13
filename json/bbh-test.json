@@ -68,7 +68,9 @@
 			"text.lvc":"LIGO-Virgo Collaboration",
 			"text.bbh":"binary black hole",
 			"text.bns":"binary neutron star",
-			"text.solarmass":"solar mass"
+			"text.solarmass":"solar mass",
+			"text.date":"Date",
+			"text.time":"Time",
 		}
 	},
 	"events": {
@@ -103,7 +105,7 @@
 			"spinInitEff": {"best":0.0, "err":[0.3, 0.2]},
 			"GPS": {"best":1128678900.44},
 			"Mtotal": {"best":37, "err":[13, 4]},
-			"UTC": "2015-10-12T09:54:43.44",
+			"UTC": {"best":"2015-10-12T09:54:43.44"},
 			"skyArea": {"best":1600},
 			"peakL": {"best":3.1, "err":[0.8, 1.8]},
 			"snr": {"best":9.7},
@@ -122,7 +124,7 @@
 			"spinInitEff": {"best":0.21, "err":[0.2, 0.1]},
 			"GPS": {"best":1135136350.65},
 			"Mtotal": {"best":21.8, "err":[5.9, 1.7]},
-			"UTC": "2015-12-26T03:38:53.65",
+			"UTC": {"best":"2015-12-26T03:38:53.65"},
 			"skyArea": {"best":850},
 			"peakL": {"best":3.3, "err":[0.8, 1.6]},
 			"snr": {"best":13.0},
