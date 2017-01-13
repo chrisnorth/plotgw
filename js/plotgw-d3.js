@@ -15,7 +15,7 @@ GWCatalogue.prototype.init = function(){
         LVT:'Candidate'}
     this.setStyles();
     this.sketchName="None";
-    this.unitSwitch=false;
+    this.unitSwitch=true;
     this.setScales();
 
 }
@@ -31,12 +31,33 @@ GWCatalogue.prototype.setColumns = function(datadict){
        unit: unit used on graph axes (default=BLANK)
        border: force the border on axis (default=2)
     */
+    var gw=this;
     this.stdlabel = function(d,src){
-        return(
-            parseFloat(d[src].errv[0].toPrecision(d[src].sigfig))+
-            '&ndash;'+
-            parseFloat(d[src].errv[0].toPrecision(d[src].sigfig))+
-            '<br/>'+d[src].unit)
+        var gw=this;
+        if (gw.columns[src].err){
+            if (gw.columns[src].err==2){
+                txt=parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))+
+                '&ndash;'+
+                parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))
+                }
+            else{
+                txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+            }
+        }else if (typeof d[src].best=="number"){
+            txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+        }else{
+            txt=d[src].best
+        }
+        if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
+        if (typeof txt == "string"){
+            // replace superscripts
+            reSup=/\^(-?[0-9]*)(?=\s|$)/g
+            txt=txt.replace(reSup,"<sup>$1</sup> ");
+            // replace Msun
+            txt=txt.replace('Msun','M<sub>&#x2609;</sub>')
+        }
+        return(txt)
+
     }
     colsUpdate = {
         Mtotal:{icon:"img/totalmass.svg",avail:true,type:'src'},
@@ -55,8 +76,22 @@ GWCatalogue.prototype.setColumns = function(datadict){
             border:20,type:'src'},
         z:{avail:true,icon:"img/redshift.svg",
             border:0.01,type:'src'},
-        UTC:{avail:false,type:'src'},
-        FAR:{avail:false,type:'src'},
+        UTC:{avail:false,type:'src',strfn:function(d){return('')}},
+        FAR:{avail:false,type:'src',icon:"img/dice.svg",
+            strfn:function(d){
+                if (1/d.FAR.best<100){
+                    return "1 per "+(1./d.FAR.best).toFixed(1)+
+                    "<br/>yrs";}
+                else if (1/d.FAR.best<1000){
+                    return "1 per "+(1./d.FAR.best).toFixed(0)+
+                    "<br/>year";}
+                else if (1/d.FAR.best<1e6){
+                    return "1 per "+((Math.round((1./d.FAR.best)/100)*100)/1e3).toFixed(1)+
+                    "<br/>thousand yr";}
+                else{
+                    return "1 per "+((Math.round((1./d.FAR.best)/1e5)*1e5)/1.e6).toFixed(1)+
+                    "<br/>million yr";}
+            }},
         sigma:{avail:false,type:'src'},
         snr:{icon:"img/snr.svg",avail:true,type:'src'},
         skyArea:{avail:false,type:'src'},
@@ -64,7 +99,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             border:0.1,type:'src'},
         peakL:{avail:true,icon:"img/peaklum.svg",type:'src'},
         LdistLy:{type:'derived',
-            name:'Luminosity (Mly)',
+            namefn:function(){return(gw.columns.Ldist.name)},
             bestfn:function(d){
                 return(d['Ldist'].best*3.26)},
             errfn:function(d){
@@ -76,6 +111,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             avail:false},
         peakLMsun:{
             type:'derived',
+            name:function(){return(gw.columns.peakL.name)},
             bestfn:function(d){
                 return(d['peakL'].best*55.956)},
             errfn:function(d){
@@ -84,7 +120,45 @@ GWCatalogue.prototype.setColumns = function(datadict){
             sigfig:2,
             err:2,
             unit:'Msun c<sup>2</sup>',
-            avail:false}
+            avail:false},
+        EradErg:{
+            type:'derived',
+            namefn:function(){return(gw.columns.Erad.name)},
+            bestfn:function(d){
+                return(d['Erad'].best*1.787)},
+            errfn:function(d){
+                return([d['Erad'].err[0]*1.787,
+                d['Erad'].err[1]*1.787])},
+            err:2,
+            sigfig:2,
+            unit:'10^54 erg'
+        },
+        date:{
+            type:'derived',
+            strfn:function(d){
+                console.log(d);
+                months=['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'];
+                day=d.UTC.best.split('T')[0].split('-')[0];
+                month=months[parseInt(d['UTC'].best.split('T')[0].split('-')[1])-1];
+                year=d['UTC'].best.split('T')[0].split('-')[2];
+                return day+' '+month+'<br/>'+year;
+            },
+            name:'Date',
+            icon:"img/date.svg"},
+        time:{
+            type:'derived',
+            strfn:function(d){
+                return(d['UTC'].best.split('T')[1]+"<br/>UT")
+            },
+            icon:"img/time.svg",
+            name:'Time'},
+        data:{
+            type:'derived',
+            strfn:function(d){
+                return "<a href='"+d.link.url+"' title='"+d.link.text+"'>LOSC</a>"
+            },
+            icon:"img/data.svg"}
     };
     this.columns={}
     for (c in colsUpdate){
@@ -96,6 +170,9 @@ GWCatalogue.prototype.setColumns = function(datadict){
             }
         }else if(colsUpdate[c].type=='derived'){
             this.columns[c]=colsUpdate[c]
+            if (this.columns[c].namefn){
+                this.columns[c].name=this.columns[c].namefn()
+            }
         }
     }
     // this.columns.distancePcStr = {
@@ -196,13 +273,13 @@ GWCatalogue.prototype.setColumns = function(datadict){
 
 // define functions to get label, icon, unit etc.
 GWCatalogue.prototype.getLabel = function(col){
-    return(this.columns[col].label);
+    return(this.columns[col].name);
 }
 GWCatalogue.prototype.getLabelUnit = function(col){
     if (this.columns[col].unit){
-        return(this.columns[col].label+' ('+this.columns[col].unit+')');
+        return(this.columns[col].name+' ('+this.columns[col].unit+')');
     }else{
-        return(cthis.olumns[col].label);
+        return(this.columns[col].name);
     }
 }
 GWCatalogue.prototype.getIcon = function(col){
@@ -322,9 +399,7 @@ GWCatalogue.prototype.setScales = function(){
     this.xErrP = function(d) {return d[gw.xvar].errv[1];} //error+ -> value
     this.xErrM = function(d) {return d[gw.xvar].errv[0];} //error- -> value
     // x error+ -> display
-    this.xMapErrP = function(d) {
-        console.log('xMapErrP',gw.xValue(d),gw.xErrP(d),gw.xScale(gw.xErrP(d)));
-        return gw.xScale(gw.xErrP(d))}
+    this.xMapErrP = function(d) {return gw.xScale(gw.xErrP(d))}
     // x error- -> display
     this.xMapErrM = function(d) { return gw.xScale(gw.xErrM(d));}
     // x error caps -> display
@@ -391,9 +466,9 @@ GWCatalogue.prototype.setScales = function(){
     /* cx,cy=BH position; xicon,yicon: icon-position, scy:shadow y-coordinate
     */
     this.bhpos = {
-        pri:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",scy:0.5},
-        sec:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",scy:0.8},
-        final:{cx:0.65,cy:0.7,xicon:"75%",yicon:"60%",scy:0.7}
+        M1:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",scy:0.5},
+        M2:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",scy:0.8},
+        Mfinal:{cx:0.65,cy:0.7,xicon:"75%",yicon:"60%",scy:0.7}
     };
         // date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
         // dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
@@ -401,46 +476,29 @@ GWCatalogue.prototype.setScales = function(){
         // far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
 
     //mass icon size, src files, and tool-tip text
-    this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg",
-        pri:"initmass1",sec:"initmass2",final:"finalmass"};
+    this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg"};
     //y-position for flown-out masses
     this.yout = -0.3;
 
     // columns to show on sketch
     // icon: src file, label: label source, tooltip label)
     this.labels ={
-        "date":{icon:"img/date.svg",lab:["datestr"]},
-        "time":{icon:"img/time.svg",lab:["timestr"]},
-        "chirpmass":{icon:"img/chirpmass.svg",lab:["chirpmasstxt"]},
-        "dist":{icon:"img/ruler.svg",lab:["distancePcStr"],
-            labSw:["distanceLyStr"]},
+        date:{lab:["date"]},
+        time:{lab:["time"]},
+        Mchirp:{lab:["Mchirp"]},
+        Ldist:{lab:["Ldist"],
+            labSw:["LdistLy"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
             // ttlab:"Category of detection"},
-        'far':{icon:"img/dice.svg",lab:["faptxt"],
-            labSw:["fartxt"]},
-        'peaklum':{icon:"img/peaklum.svg",lab:["peaklumtxtMsun"],
-            labSw:["peaklumtxtErg"]},
-        "energy":{icon:"img/energyrad.svg",lab:["energytxtMsun"],
-            labSw:["energytxtErg"]},
-        "initspineff":{icon:"img/initspin.svg",lab:["initspineffStr"]},
-        "finalspin":{icon:"img/finalspin.svg",lab:["finalspinStr"]},
-        "data":{icon:"img/data.svg",lab:["datalink"]}
+        FAR:{lab:["FAR"]},
+        peakL:{lab:["peakLMsun"],labSw:["peakL"]},
+        Erad:{lab:["Erad"],labSw:["EradErg"]},
+        spinInitEff:{lab:["spinInitEff"]},
+        spinFinal:{lab:["spinFinal"]},
+        data:{icon:"img/data.svg",lab:["data"]}
     }
     //tool-top labels
     this.ttlabels = {
-        pri:"Primary Black Hole Mass",
-        sec:"Secondary Black Hole Mass",
-        final:"Final Black Hole Mass",
-        date:"Date of detection",
-        time:"Time of detection",
-        chirpmass:"Chirp mass",
-        typedesc:"Category of detection",
-        far:"False alarm probability and rate",
-        dist:"Distance",
-        peaklum:"Peak Luminosity",
-        energy:"Energy radiated",
-        initspineff:"Initial Effective Spin Magnitude",
-        finalspin:"Final Spin Magnitude",
         data:"LIGO Open Science Center",
         switch:"Switch Units"
     };
@@ -486,13 +544,13 @@ GWCatalogue.prototype.drawSketch = function(){
 
     if (this.redraw){
         console.log('redrawing masses');
-        this.addMasses("pri",true);
-        this.addMasses("sec",true);
-        this.addMasses("final",true);
+        this.addMasses("M1",true);
+        this.addMasses("M2",true);
+        this.addMasses("Mfinal",true);
     }else{
-        this.addMasses("pri",false);
-        this.addMasses("sec",false);
-        this.addMasses("final",false);
+        this.addMasses("M1",false);
+        this.addMasses("M2",false);
+        this.addMasses("Mfinal",false);
     }
 
     // add labels
@@ -598,6 +656,9 @@ GWCatalogue.prototype.addLab = function(lab){
     labimgdiv.style.display = "inline-block";
     if (this.labels[lab].icon){
         labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon+"'>"
+    }else{
+        console.log(lab);
+        labimgdiv.innerHTML ="<img src='"+this.columns[lab].icon+"'>"
     }
     labimgdiv.onmouseover = function(e){
         gw.showTooltip(e,this.id.split("icon")[0])}
@@ -636,48 +697,48 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
+                this.scaleRadius(d[bh].best,d.Mfinal.best));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp)
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh]],d["finalmass"]));
+                0.2*d[bh].best,d.Mfinal.best));
     }else if(resize=="fly"){
         // resize & fly in
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]));
+                d[bh].best,d.Mfinal.best));
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
+                this.scaleRadius(d[bh].best,d.Mfinal.best));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh]],d["finalmass"]));
+                0.2*d[bh].best,d.Mfinal.best));
     }else if(resize=="snap"){
         // snap resize (when redrawing sketch)
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
+                this.scaleRadius(d[bh].best,d.Mfinal.best));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh]],d["finalmass"]));
+                0.2*d[bh].best,d.Mfinal.best));
     };
 
     // update mass label text
     document.getElementById("mtxt-"+bh).innerHTML =
-        d[this.micon[bh]+'Str'];
+        d[bh].str;
 };
 GWCatalogue.prototype.switchUnits = function(){
     // switch between label units
@@ -692,21 +753,18 @@ GWCatalogue.prototype.switchUnits = function(){
         return
     }
     for (lab in this.labels){
-        labTxt='';
+        // console.log(this.labels[lab])
+        labTxt=''
         labs=this.labels[lab].lab;
         if (this.unitSwitch){
             if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
         }
         for (i in labs){
-            labTxt += " "+this.d[labs[i]];
-            if (this.columns[labs[i]].unit){
-                labTxt += " "+this.columns[labs[i]].unit;
-            }
+            labTxt += " "+this.d[labs[i]].str;
             if (i<labs.length-1){
                 labTxt += "<br>";
             }
         }
-        console.log(labTxt)
         document.getElementById(lab+"txt").innerHTML = labTxt;
     }
 }
@@ -714,9 +772,9 @@ GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
     if (this.redraw){
         // resize sketch
-        this.flyInMasses(d,"pri","snap");
-        this.flyInMasses(d,"sec","snap");
-        this.flyInMasses(d,"final","snap");
+        this.flyInMasses(d,"M1","snap");
+        this.flyInMasses(d,"M2","snap");
+        this.flyInMasses(d,"Mfinal","snap");
         // update title
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
@@ -729,10 +787,7 @@ GWCatalogue.prototype.updateSketch = function(d){
                 if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
             }
             for (i in labs){
-                labTxt += " "+d[labs[i]];
-                if (this.columns[labs[i]].unit){
-                    labTxt += " "+this.columns[labs[i]].unit;
-                }
+                labTxt += " "+d[labs[i]].str;
                 if (i<labs.length-1){
                     labTxt += "<br>";
                 }
@@ -741,9 +796,9 @@ GWCatalogue.prototype.updateSketch = function(d){
         }
     }else if ((this.sketchName==d["name"])){
         // clicked on currently selected datapoint
-        this.flyOutMasses("pri");
-        this.flyOutMasses("sec");
-        this.flyOutMasses("final");
+        this.flyOutMasses("M1");
+        this.flyOutMasses("M2");
+        this.flyOutMasses("Mfinal");
         this.d = null;
         // replace title
         this.sketchName="None";
@@ -757,15 +812,15 @@ GWCatalogue.prototype.updateSketch = function(d){
         // clicked on un-selelected datapoint
         if ((this.sketchName=="None")||(this.sketchName=="")) {
             // nothing selected, so fly in
-            this.flyInMasses(d,"pri","fly");
-            this.flyInMasses(d,"sec","fly");
-            this.flyInMasses(d,"final","fly");
+            this.flyInMasses(d,"M1","fly");
+            this.flyInMasses(d,"M2","fly");
+            this.flyInMasses(d,"Mfinal","fly");
             this.d = d;
         }else{
             // different data selected, so resize
-            this.flyInMasses(d,"pri","smooth");
-            this.flyInMasses(d,"sec","smooth");
-            this.flyInMasses(d,"final","smooth");
+            this.flyInMasses(d,"M1","smooth");
+            this.flyInMasses(d,"M2","smooth");
+            this.flyInMasses(d,"Mfinal","smooth");
             this.d = d;
         }
         // update title
@@ -775,15 +830,13 @@ GWCatalogue.prototype.updateSketch = function(d){
         //update labels
         for (lab in this.labels){
             labTxt=''
-            labs=this.labels[lab].lab;
+            if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
+            else{labs=[lab]}
             if (this.unitSwitch){
                 if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
             }
             for (i in labs){
-                labTxt += " "+d[labs[i]];
-                if (this.columns[labs[i]].unit){
-                    labTxt += " "+this.columns[labs[i]].unit;
-                }
+                labTxt += " "+d[labs[i]].str;
                 if (i<labs.length-1){
                     labTxt += "<br>";
                 }
@@ -814,7 +867,7 @@ GWCatalogue.prototype.setStyles = function(){
 GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
     return "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='ttpri'>"+d[this.xvar]+"</span>"+"<span class='ttsec'>"+d[this.yvar]+"</span>";
+    "<span class='ttpri'>"+d[this.xvar.best]+"</span>"+"<span class='ttsec'>"+d[this.yvar.best]+"</span>";
 }
 
 GWCatalogue.prototype.formatData = function(d,cols){
@@ -822,11 +875,11 @@ GWCatalogue.prototype.formatData = function(d,cols){
     console.log('formatData',d.name);
     var gw=this;
     for (col in gw.columns){
-        // console.log(col,gw.columns[col].type);
+        console.log(col,gw.columns[col].type);
         if (gw.columns[col].type=="derived"){
             d[col]={}
-            d[col].best=gw.columns[col].bestfn(d);
-            d[col].err=gw.columns[col].errfn(d);
+            if (gw.columns[col].bestfn){d[col].best=gw.columns[col].bestfn(d);}
+            if (gw.columns[col].errfn){d[col].err=gw.columns[col].errfn(d);}
             console.log('new column',col,d[col])
         }else{
             console.log('existing column',col,d[col])
@@ -835,9 +888,13 @@ GWCatalogue.prototype.formatData = function(d,cols){
             if (gw.columns[col].err==2){
                 d[col].errv =
                     [d[col].best-d[col].err[0],
-                    d[col].best+d[col].err[1]]
+                    d[col].best+d[col].err[1]];
             }
+        }else if (typeof d[col].best=="number"){
+            d[col].errv =[d[col].best,d[col].best];
         }
+        if (gw.columns[col].strfn){d[col].str=gw.columns[col].strfn(d);}
+        else{d[col].str=gw.stdlabel(d,col);}
         console.log(col,d[col])
         // console.log(col,d[col])
         // console.log(col,d[col]);
@@ -927,6 +984,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
             if (e[0]=='G'){t='GW'};
             if (e[0]=='L'){t='LVT'};
             dataIn.events[e].type=t;
+            dataIn.events[e].link=dataIn.links[e].LOSCData
             gw.data.push(dataIn.events[e])
         }
         console.log('data:',gw.data)
@@ -1591,8 +1649,8 @@ GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     ttSk.style.top = e.pageY - 10 ;
     ttSk.style.width = "auto";
     ttSk.style.height = "auto";
-    if (type=="column"){
-        ttSk.innerHTML = this.columns[tttxt].label;
+    if (this.columns[tttxt]){
+        ttSk.innerHTML = this.columns[tttxt].name;
     }else{
         ttSk.innerHTML = this.ttlabels[tttxt];
     }
