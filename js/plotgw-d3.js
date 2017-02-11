@@ -578,6 +578,7 @@ GWCatalogue.prototype.drawSketch = function(){
     }
 
     // add labels
+    if (this.showerrors == null){this.showerrors=true};
     for (lab in this.labels){this.addLab(lab)};
 
     // add unit-switch button
@@ -776,6 +777,9 @@ GWCatalogue.prototype.switchUnits = function(){
         // no data shown
         return
     }
+    this.redrawLabels();
+}
+GWCatalogue.prototype.redrawLabels = function(){
     for (lab in this.labels){
         // console.log(this.labels[lab])
         labTxt=''
@@ -784,7 +788,11 @@ GWCatalogue.prototype.switchUnits = function(){
             if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
         }
         for (i in labs){
-            labTxt += " "+this.d[labs[i]].str;
+            if (this.showerrors){
+                labTxt += " "+this.d[labs[i]].str;
+            }else{
+                labTxt += " "+this.d[labs[i]].strnoerr;
+            }
             if (i<labs.length-1){
                 labTxt += "<br>";
             }
@@ -803,21 +811,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
         // update labels
-        for (lab in this.labels){
-            // console.log(this.labels[lab])
-            labTxt=''
-            labs=this.labels[lab].lab;
-            if (this.unitSwitch){
-                if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
-            }
-            for (i in labs){
-                labTxt += " "+d[labs[i]].str;
-                if (i<labs.length-1){
-                    labTxt += "<br>";
-                }
-            }
-            document.getElementById(lab+"txt").innerHTML = labTxt;
-        }
+        this.redrawLabels();
     }else if ((this.sketchName==d["name"])){
         // clicked on currently selected datapoint
         this.flyOutMasses("M1");
@@ -852,21 +846,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
         //update labels
-        for (lab in this.labels){
-            labTxt=''
-            if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
-            else{labs=[lab]}
-            if (this.unitSwitch){
-                if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
-            }
-            for (i in labs){
-                labTxt += " "+d[labs[i]].str;
-                if (i<labs.length-1){
-                    labTxt += "<br>";
-                }
-            }
-            document.getElementById(lab+"txt").innerHTML = labTxt;
-        }
+        this.redrawLabels();
     }
 }
 
@@ -920,10 +900,17 @@ GWCatalogue.prototype.formatData = function(d,cols){
         }else if (typeof d[col].best=="number"){
             d[col].errv =[d[col].best,d[col].best];
         }
-        if (gw.columns[col].strfn){d[col].str=gw.columns[col].strfn(d);}
-        else{d[col].str=gw.stdlabel(d,col);}
-        if (gw.columns[col].strfnNoErr){d[col].str=gw.columns[col].strfnNoErr(d);}
-        else{d[col].strnoerr=gw.stdlabelNoErr(d,col);}
+        if (gw.columns[col].strfn){
+            d[col].str=gw.columns[col].strfn(d);
+            if (gw.columns[col].strfnnoerr){
+                d[col].strnoerr=gw.columns[col].strfnnoerr(d);
+            }else{
+                d[col].strnoerr=gw.columns[col].strfn(d);
+            }
+        }else{
+            d[col].str=gw.stdlabel(d,col);
+            d[col].strnoerr=gw.stdlabelNoErr(d,col);
+        }
         // console.log(col,d[col])
         // console.log(col,d[col])
         // console.log(col,d[col]);
@@ -1444,6 +1431,7 @@ GWCatalogue.prototype.toggleErrors = function(){
     }
     // console.log("toggling errors");
     this.updateErrors();
+    this.redrawLabels();
 }
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // update x-xais to xvarNew
