@@ -1,208 +1,3 @@
-/*
-columns structure:
-   code: column name (in CSV) used for data
-   errcode: column name (in CSV) use for errors
-   type: datatype
-   avail: true if available for graph axes
-   label: label used on graph axes
-   icon: icon used on graph axes
-   unit: unit used on graph axes (default=BLANK)
-   border: force the border on axis (default=2)
-*/
-var columns = {
-    totalmass:{code:"totalmass",errcode:"totalmasserr",
-        type:"flt",label:"Total Mass",icon:"img/totalmass.svg",
-        avail:true,unit:'solar masses'},
-    chirpmass:{code:"chirpmass",errcode:"chirpmasserr",
-        type:"flt",label:"Chirp Mass",icon:"img/chirpmass.svg",
-        avail:true,unit:'solar masses'},
-    initmass1:{code:"initmass1",errcode:"initmass1err",
-        type:"flt",label:"Primary Mass",icon:"img/primass.svg",
-        avail:true,unit:'solar masses'},
-    initmass2:{code:"initmass2",errcode:"initmass2err",
-        type:"flt",label:"Secondary Mass",icon:"img/secmass.svg",
-        avail:true,unit:'solar masses'},
-    finalmass:{code:"finalmass",errcode:"finalmasserr",
-        type:"flt",label:"Final Mass",icon:"img/finalmass.svg",
-        avail:true,unit:'solar masses'},
-    massratio:{code:"massratio",errcode:"massratioerr",
-        type:"flt",label:"Mass Ratio",icon:"img/massratio.svg",
-        avail:true,unit:'',border:0.01},
-    initspineff:{code:"initspineff",errcode:"initspinefferr",
-        type:"flt",avail:true,border:0.01,icon:"img/initspin.svg",
-        label:"Effective inspiral spin magnitude",unit:""},
-    initspin1:{code:"initspin1",errcode:"initspin1err",
-        type:"flt",avail:false},
-    initspin2:{code:"initspin2",errcode:"initspin2err",
-        type:"flt",avail:false},
-    finalspin:{code:"finalspin",errcode:"finalspinerr",
-        type:"flt",avail:true,border:0.01,icon:"img/finalspin.svg",
-        label:"Final spin magnitude",unit:""},
-    distance:{code:"distance",errcode:"distanceerr",
-        type:"flt",label:'Distance',border:20,
-        avail:true,unit:'MPc',icon:"img/ruler.svg"},
-    redshift:{code:"redshift",errcode:"redshifterr",
-        type:"flt",label:"Redshift",avail:true,icon:"img/redshift.svg",border:0.01},
-    date:{code:"date",
-        type:"date",avail:false},
-    far:{code:"far",
-        type:"flt",avail:false},
-    fap:{code:"fap",
-        type:"flt",},
-    dtHL:{code:"dtHL",
-        type:"flt",avail:false},
-    sigma:{code:"sigma",
-        type:"flt",avail:false},
-    SNR:{code:"SNR",errcode:"",icon:"img/snr.svg",
-        type:"flt",avail:true,label:"SNR"},
-    skyarea:{code:"skyarea",
-        type:"flt",avail:false},
-    energy:{code:"energy",avail:true,label:"Energy released",
-        errcode:"energyerr",border:0.1,icon:"img/energyrad.svg",
-        type:"flt",unit:"solar mass equiv."},
-    peaklum:{code:"peaklum",avail:true,label:"Peak luminosity",
-        errcode:"peaklumerr",type:"flt",icon:"img/peaklum.svg",
-        unit:"solar mass equiv. per second"},
-    peakstrain:{code:"peakstrain",avail:true,label:"Peak strain",
-        errcode:"",type:"flt",border:0.1,icon:"img/peakstrain.svg",
-        unit:"x 1e-21"},
-    data:{code:"data",avail:false,type:'str',label:"Data"}
-}
-
-// calculate additional columns (unit conversions & strings)
-columns.distanceLy = {
-    'type':'fn',
-    'fn':function(d){return(Math.round(d['distance']*3.26))},
-    'unit':'Mly',
-    avail:false,label:'DistanceLy',errcode:"distanceLyErr"
-}
-columns.distanceLyErr = {
-    'type':'fn',
-    'fn':function(d){return(Math.round(d['distance']*3.26))},
-    'unit':'Mly',
-    avail:false,label:'DistanceLy'
-};
-columns.distancePcStr = {
-    'type':'fn',
-    'fn':function(d){return parseFloat((d['distanceminus']).toPrecision(3))+
-    '&ndash;'+parseFloat((d['distanceplus']).toPrecision(3))+'<br/>MPc'},
-    'unit':''
-}
-columns.distanceLyStr = {
-    'type':'fn',
-    'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'&ndash;'+
-            parseFloat((d['distanceplus']*3.26).toPrecision(3))+'<br/>million ly'},
-    'unit':''
-}
-columns.datestr = {
-    'type':'fn',
-    'fn':function(d){
-        months=['Jan','Feb','Mar','Apr','May','Jun',
-            'Jul','Aug','Sep','Oct','Nov','Dec'];
-        day=d['date'].split('T')[0].split('-')[0];
-        month=months[parseInt(d['date'].split('T')[0].split('-')[1])-1];
-        year=d['date'].split('T')[0].split('-')[2];
-        return day+' '+month+'<br/>'+year;
-    },
-    'unit':''
-};
-columns.timestr = {
-    'type':'fn',
-    'fn':function(d){return(d['date'].split('T')[1]+"<br/>UT")},
-    'unit':''
-};
-columns.peaklumtxtErg = {
-    'type':'fn',
-    'fn':function(d){return(d['peaklumminus'].toPrecision(2)+'&ndash;'+d['peaklumplus'].toPrecision(2)+"<br/>x10<sup>56</sup> erg/s")},
-    'unit':''
-};
-columns.peaklumtxtMsun = {
-    'type':'fn',
-    'fn':function(d){return(parseFloat((d['peaklumminus']*55.956).toPrecision(2))+
-    '&ndash;'+parseFloat((d['peaklumplus']*55.956).toPrecision(2))+
-    "<br/>M<sub>&#x2609;</sub>c<sup>2</sup>/s")},
-    'unit':''
-};
-columns.chirpmasstxt = {
-    'type':'fn',
-    'fn':function(d){return(parseFloat((d['chirpmassminus']).toPrecision(2))+
-    '&ndash;'+parseFloat((d['chirpmassplus']).toPrecision(2))+
-    "<br/>M<sub>&#x2609;</sub>")},
-    'unit':''
-}
-columns.energytxtMsun = {
-    'type':'fn',
-    'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
-    'unit':''
-};
-columns.energytxtErg = {
-    'type':'fn',
-    'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+
-    '&ndash;'+parseFloat((d['energyplus']*1.787).toPrecision(2))+
-    "<br/>x10<sup>54</sup> erg")},
-    'unit':''
-};
-columns.typedesc = {
-    'type':'fn',
-    'fn':function(d){return(gwcat.typedescs[d['type']])},
-    'unit':''
-}
-columns.fappercent = {
-    'type':'fn',
-    'fn':function(d){return (100.*d.fap).toFixed(6);},
-    'unit':'%',
-    'unitSwitch':'fartxt'
-}
-columns.faptxt = {
-    'type':'fn',
-    'fn':function(d){return (d.fap).toPrecision(3);},
-    'unit':'',
-    'unitSwitch':'fartxt'
-}
-columns.fartxt = {
-    type:'fn',
-    fn:function(d){
-        // return Math.round(1./d.far);
-        if (1/d.far<100){
-            return "1 per "+(1./d.far).toFixed(1)+
-            "<br/>yrs";}
-        else if (1/d.far<1000){
-            return "1 per "+(1./d.far).toFixed(0)+
-            "<br/>year";}
-        else if (1/d.far<1e6){
-            return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
-            "<br/>thousand yr";}
-        else{
-            return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
-            "<br/>million yr";}
-    },
-    'unit':'',
-    'unitSwitch':'fartxt'
-}
-columns.datalink = {
-    'type':'fn',
-    fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
-}
-
-// define functions to get label, icon, unit etc.
-var getLabel = function(col){
-    return(columns[col].label);
-}
-var getLabelUnit = function(col){
-    if (columns[col].unit){
-        return(columns[col].label+' ('+columns[col].unit+')');
-    }else{
-        return(columns[col].label);
-    }
-}
-var getIcon = function(col){
-    if (columns[col].icon){
-        return(columns[col].icon);
-    }else{
-        return(null);
-    }
-}
-
 // Define GWCatalogue class
 function GWCatalogue(){
     // set initial axes
@@ -212,18 +7,358 @@ function GWCatalogue(){
 GWCatalogue.prototype.init = function(){
     //initialyse common values
     this.flySp=1000;
-    this.xvar = "initmass1";
-    this.yvar = "initmass2";
+    this.xvar = "M1";
+    this.yvar = "M2";
     this.legenddescs = {GW:'Detections',
         LVT:'Candidates'}
     this.typedescs = {GW:'Detection',
         LVT:'Candidate'}
     this.setStyles();
     this.sketchName="None";
-    this.unitSwitch=false;
+    this.unitSwitch=true;
     this.setScales();
 
 }
+GWCatalogue.prototype.stdlabel = function(d,src){
+    var gw=this;
+    if (gw.columns[src].err){
+        if (gw.columns[src].err==2){
+            txt=parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))+
+            '&ndash;'+
+            parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))
+            }
+        else{
+            txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+        }
+    }else if (typeof d[src].best=="number"){
+        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+    }else{
+        txt=d[src].best
+    }
+    if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
+    if (typeof txt == "string"){
+        // replace superscripts
+        reSup=/\^(-?[0-9]*)(?=\s|$)/g
+        txt=txt.replace(reSup,"<sup>$1</sup> ");
+        // replace Msun
+        txt=txt.replace('Msun','M<sub>&#x2609;</sub>')
+    }
+    return(txt)
+}
+
+GWCatalogue.prototype.stdlabelNoErr = function(d,src){
+    var gw=this;
+    if (typeof d[src].best=="number"){
+        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+    }else{
+        txt=d[src].best
+    }
+    if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
+    if (typeof txt == "string"){
+        // replace superscripts
+        reSup=/\^(-?[0-9]*)(?=\s|$)/g
+        txt=txt.replace(reSup,"<sup>$1</sup> ");
+        // replace Msun
+        txt=txt.replace('Msun','M<sub>&#x2609;</sub>')
+    }
+    return(txt)
+}
+GWCatalogue.prototype.oneline = function(strIn){
+    reBr=/\<br\/\>/g;
+    strOut=strIn.replace(reBr,' ');
+    return(strOut)
+}
+
+GWCatalogue.prototype.setColumns = function(datadict){
+    /*
+    columns structure:
+       code: column name (in CSV) used for data
+       errcode: column name (in CSV) use for errors
+       type: datatype
+       avail: true if available for graph axes
+       label: label used on graph axes
+       icon: icon used on graph axes
+       unit: unit used on graph axes (default=BLANK)
+       border: force the border on axis (default=2)
+    */
+    var gw=this;
+
+    colsUpdate = {
+        Mtotal:{icon:"img/totalmass.svg",avail:true,type:'src'},
+        Mchirp:{icon:"img/chirpmass.svg",avail:true,type:'src'},
+        M1:{icon:"img/primass.svg",avail:true,type:'src'},
+        M2:{icon:"img/secmass.svg",avail:true,type:'src'},
+        Mfinal:{icon:"img/finalmass.svg",avail:true,type:'src'},
+        // massratio:{
+        //     type:"flt",icon:"img/massratio.svg",
+        //     avail:true,unit:'',border:0.01},
+        spinInitEff:{avail:true,icon:"img/initspin.svg",
+            border:0.01,type:'src'},
+        spinFinal:{avail:true,icon:"img/finalspin.svg",
+            border:0.01,type:'src'},
+        Ldist:{avail:true, icon:"img/ruler.svg",
+            border:20,type:'src'},
+        z:{avail:true,icon:"img/redshift.svg",
+            border:0.01,type:'src'},
+        UTC:{avail:false,type:'src',strfn:function(d){return('')}},
+        FAR:{avail:false,type:'src',icon:"img/dice.svg",
+            strfn:function(d){
+                if (1/d.FAR.best<100){
+                    return "1 per "+(1./d.FAR.best).toFixed(1)+
+                    "<br/>yrs";}
+                else if (1/d.FAR.best<1000){
+                    return "1 per "+(1./d.FAR.best).toFixed(0)+
+                    "<br/>year";}
+                else if (1/d.FAR.best<1e6){
+                    return "1 per "+((Math.round((1./d.FAR.best)/100)*100)/1e3).toFixed(1)+
+                    "<br/>thousand yr";}
+                else{
+                    return "1 per "+((Math.round((1./d.FAR.best)/1e5)*1e5)/1.e6).toFixed(1)+
+                    "<br/>million yr";}
+            }},
+        sigma:{avail:false,type:'src'},
+        snr:{icon:"img/snr.svg",avail:true,type:'src'},
+        skyArea:{avail:false,type:'src'},
+        Erad:{avail:true,icon:"img/energyrad.svg",
+            border:0.1,type:'src'},
+        peakL:{avail:true,icon:"img/peaklum.svg",type:'src'},
+        M1kg:{type:'derived',
+            namefn:function(){return(gw.columns.M1.name)},
+            bestfn:function(d){
+                return(d['M1'].best/2.)},
+            errfn:function(d){
+                return([d['M1'].err[0]/2.,
+                d['M1'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
+        M2kg:{type:'derived',
+            namefn:function(){return(gw.columns.M2.name)},
+            bestfn:function(d){
+                return(d['M2'].best/2.)},
+            errfn:function(d){
+                return([d['M2'].err[0]/2.,
+                d['M2'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
+        Mfinalkg:{type:'derived',
+            namefn:function(){return(gw.columns.Mfinal.name)},
+            bestfn:function(d){
+                return(d['Mfinal'].best/2.)},
+            errfn:function(d){
+                return([d['Mfinal'].err[0]/2.,
+                d['Mfinal'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
+        Mchirpkg:{type:'derived',
+            namefn:function(){return(gw.columns.Mchirp.name)},
+            bestfn:function(d){
+                return(d['Mchirp'].best/2.)},
+            errfn:function(d){
+                return([d['Mchirp'].err[0]/2.,
+                d['Mchirp'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
+        LdistLy:{type:'derived',
+            namefn:function(){return(gw.columns.Ldist.name)},
+            bestfn:function(d){
+                return(d['Ldist'].best*3.26)},
+            errfn:function(d){
+                return([d['Ldist'].err[0]*3.26,
+                d['Ldist'].err[1]*3.26])},
+            sigfig:2,
+            err:2,
+            unit:'Mly',
+            avail:false},
+        peakLMsun:{
+            type:'derived',
+            name:function(){return(gw.columns.peakL.name)},
+            bestfn:function(d){
+                return(d['peakL'].best*55.956)},
+            errfn:function(d){
+                return([d['peakL'].err[0]*55.956,
+                d['peakL'].err[1]*55.956])},
+            sigfig:2,
+            err:2,
+            unit:'Msun c<sup>2</sup>',
+            avail:false},
+        EradErg:{
+            type:'derived',
+            namefn:function(){return(gw.columns.Erad.name)},
+            bestfn:function(d){
+                return(d['Erad'].best*1.787)},
+            errfn:function(d){
+                return([d['Erad'].err[0]*1.787,
+                d['Erad'].err[1]*1.787])},
+            err:2,
+            sigfig:2,
+            unit:'10^54 erg'
+        },
+        date:{
+            type:'derived',
+            strfn:function(d){
+                // console.log(d);
+                months=['Jan','Feb','Mar','Apr','May','Jun',
+                    'Jul','Aug','Sep','Oct','Nov','Dec'];
+                day=d.UTC.best.split('T')[0].split('-')[0];
+                month=months[parseInt(d['UTC'].best.split('T')[0].split('-')[1])-1];
+                year=d['UTC'].best.split('T')[0].split('-')[2];
+                return day+' '+month+'<br/>'+year;
+            },
+            name:'Date',
+            icon:"img/date.svg"},
+        time:{
+            type:'derived',
+            strfn:function(d){
+                return(d['UTC'].best.split('T')[1]+"<br/>UT")
+            },
+            icon:"img/time.svg",
+            name:'Time'},
+        data:{
+            type:'derived',
+            strfn:function(d){
+                return "<a href='"+d.link.url+"' title='"+d.link.text+"'>LOSC</a>"
+            },
+            icon:"img/data.svg"}
+    };
+    this.columns={}
+    for (c in colsUpdate){
+        if (colsUpdate[c].type=='src'){
+            // console.log(c,datadict[c])
+            this.columns[c]=datadict[c]
+            for (k in colsUpdate[c]){
+                this.columns[c][k]=colsUpdate[c][k]
+            }
+        }else if(colsUpdate[c].type=='derived'){
+            this.columns[c]=colsUpdate[c]
+            if (this.columns[c].namefn){
+                this.columns[c].name=this.columns[c].namefn()
+            }
+        }
+    }
+    // this.columns.distancePcStr = {
+    //     'type':'fn',
+    //     'fn':function(d){
+    // }
+    // this.columns.distanceLyStr = {
+    //     'type':'fn',
+    //     'fn':function(d){return parseFloat((d['distanceminus']*3.26).toPrecision(3))+'&ndash;'+
+    //             parseFloat((d['distanceplus']*3.26).toPrecision(3))+'<br/>million ly'},
+    //     'unit':''
+    // }
+    // this.columns.datestr = {
+    //     'type':'fn',
+    //     'strfn':function(d){
+    //         months=['Jan','Feb','Mar','Apr','May','Jun',
+    //             'Jul','Aug','Sep','Oct','Nov','Dec'];
+    //         day=d['UTC'].best.split('T')[0].split('-')[0];
+    //         month=months[parseInt(d['UTC'].best.split('T')[0].split('-')[1])-1];
+    //         year=d['UTC'].best.split('T')[0].split('-')[2];
+    //         return day+' '+month+'<br/>'+year;
+    //     },
+    //     'unit':''
+    // };
+    // this.columns.timestr = {
+    //     'type':'fn',
+    //     'strfn':function(d){
+    //         return(d['UTC'].best.split('T')[1]+"<br/>UT")},
+    //     'unit':''
+    // };
+    // this.columns.peaklumtxtErg = {
+    //     'type':'fn',
+    //     'fn':function(d){return(d['peakL'].toPrecision(2)+'&ndash;'+d['peaklumplus'].toPrecision(2)+"<br/>x10<sup>56</sup> erg/s")},
+    //     'unit':''
+    // };
+    // this.columns.chirpmasstxt = {
+    //     'type':'fn',
+    //     'fn':function(d){return(parseFloat((d['chirpmassminus']).toPrecision(2))+
+    //     '&ndash;'+parseFloat((d['chirpmassplus']).toPrecision(2))+
+    //     "<br/>M<sub>&#x2609;</sub>")},
+    //     'unit':''
+    // }
+    // this.columns.energytxtMsun = {
+    //     'type':'fn',
+    //     'fn':function(d){return(d['energyminus'].toPrecision(2)+'&ndash;'+d['energyplus'].toPrecision(2)+"<br/>M<sub>&#x2609;</sub>c<sup>2</sup>")},
+    //     'unit':''
+    // };
+    // this.columns.energytxtErg = {
+    //     'type':'fn',
+    //     'fn':function(d){return(parseFloat((d['energyminus']*1.787).toPrecision(2))+
+    //     '&ndash;'+parseFloat((d['energyplus']*1.787).toPrecision(2))+
+    //     "<br/>x10<sup>54</sup> erg")},
+    //     'unit':''
+    // };
+    // this.columns.typedesc = {
+    //     'type':'fn',
+    //     'fn':function(d){return(gwcat.typedescs[d['type']])},
+    //     'unit':''
+    // }
+    // this.columns.fappercent = {
+    //     'type':'fn',
+    //     'fn':function(d){return (100.*d.fap).toFixed(6);},
+    //     'unit':'%',
+    //     'unitSwitch':'fartxt'
+    // }
+    // this.columns.faptxt = {
+    //     'type':'fn',
+    //     'fn':function(d){return (d.fap).toPrecision(3);},
+    //     'unit':'',
+    //     'unitSwitch':'fartxt'
+    // }
+    // this.columns.fartxt = {
+    //     type:'fn',
+    //     fn:function(d){
+    //         // return Math.round(1./d.far);
+    //         if (1/d.far<100){
+    //             return "1 per "+(1./d.far).toFixed(1)+
+    //             "<br/>yrs";}
+    //         else if (1/d.far<1000){
+    //             return "1 per "+(1./d.far).toFixed(0)+
+    //             "<br/>year";}
+    //         else if (1/d.far<1e6){
+    //             return "1 per "+((Math.round((1./d.far)/100)*100)/1e3).toFixed(1)+
+    //             "<br/>thousand yr";}
+    //         else{
+    //             return "1 per "+((Math.round((1./d.far)/1e5)*1e5)/1.e6).toFixed(1)+
+    //             "<br/>million yr";}
+    //     },
+    //     'unit':'',
+    //     'unitSwitch':'fartxt'
+    // }
+    // this.columns.datalink = {
+    //     'type':'fn',
+    //     fn:function(d){return "<a href='"+d.data+"' title='Data link'>LOSC</a>"}
+    // }
+
+}
+
+// define functions to get label, icon, unit etc.
+GWCatalogue.prototype.getLabel = function(col){
+    return(this.columns[col].name);
+}
+GWCatalogue.prototype.getLabelUnit = function(col){
+    if (this.columns[col].unit){
+        return(this.columns[col].name+' ('+this.columns[col].unit+')');
+    }else{
+        return(this.columns[col].name);
+    }
+}
+GWCatalogue.prototype.getIcon = function(col){
+    if (this.columns[col].icon){
+        return(this.columns[col].icon);
+    }else{
+        return(null);
+    }
+}
+
+
 GWCatalogue.prototype.scaleWindow = function(){
     //set window scales (protrait/landscape etc.)
     this.winFullWidth=document.getElementById("full").offsetWidth;
@@ -237,7 +372,7 @@ GWCatalogue.prototype.scaleWindow = function(){
     graph=document.getElementById("graphcontainer");
     if (this.winAspect<1){
         // portrait
-        console.log('portrait');
+        // console.log('portrait');
         this.portrait=true;
         this.sketchFullWidth = 0.9*this.winFullWidth;
         this.sketchFullHeight = 0.5*this.sketchFullWidth;
@@ -247,7 +382,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         info.style["margin-left"]="5%";
         this.sketchWidth = 0.45*this.sketchFullWidth;
         this.sketchHeight = this.sketchFullHeight;
-        console.log(this.sketchHeight,this.sketchFullHeight);
+        console.log('portrait:',this.sketchHeight,this.sketchFullHeight);
         this.labWidth = 0.5*this.sketchFullWidth;
         this.labHeight = this.sketchFullHight;
         //this.labcontWidth="45%";
@@ -256,7 +391,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         // info.style.left = "0%";
     }else{
         // landscape window
-        console.log('landscape')
+        // console.log('landscape')
         this.portrait=false;
         this.sketchFullHeight = 0.85*this.winFullHeight;
         this.sketchFullWidth = 0.5*this.sketchFullHeight;
@@ -266,7 +401,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         info.style["margin-left"]=0;
         this.sketchWidth = this.sketchFullWidth;
         this.sketchHeight = 0.5*this.sketchFullHeight;
-        // console.log(this.sketchHeight,this.sketchFullHeight);
+        console.log('landscape:',this.sketchHeight,this.sketchFullHeight);
         this.sketchAspect = this.sketchFullWidth/this.sketchFullHeight;
         this.labWidth = this.sketchFullWidth;
         this.labHeight = 0.5*this.sketchFullHight;
@@ -322,17 +457,17 @@ GWCatalogue.prototype.setScales = function(){
     // set axis scales
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
-    this.xValue = function(d) {return d[gw.xvar];} // data -> value
+    this.xValue = function(d) {return d[gw.xvar].best;} // data -> value
     // value -> display
     this.xScale = d3.scale.linear().domain([0,100])
         .range([0, this.graphWidth])
         // data -> display
-    this.xMap = function(d) { return gw.xScale(gw.xValue(d));}
+    this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
     // x error bars
-    this.xErrP = function(d) {return d[gw.xvar+'plus'];} //error+ -> value
-    this.xErrM = function(d) {return d[gw.xvar+'minus'];} //error- -> value
+    this.xErrP = function(d) {return d[gw.xvar].errv[1];} //error+ -> value
+    this.xErrM = function(d) {return d[gw.xvar].errv[0];} //error- -> value
     // x error+ -> display
-    this.xMapErrP = function(d) { return gw.xScale(gw.xErrP(d))}
+    this.xMapErrP = function(d) {return gw.xScale(gw.xErrP(d))}
     // x error- -> display
     this.xMapErrM = function(d) { return gw.xScale(gw.xErrM(d));}
     // x error caps -> display
@@ -346,7 +481,7 @@ GWCatalogue.prototype.setScales = function(){
             .innerTickSize(-this.graphHeight);
 
     //data -> value
-    this.yValue = function(d) {return d[gw.yvar];}
+    this.yValue = function(d) {return d[gw.yvar].best;}
     // value -> display
     // this.yScale = d3.scale.linear().
     //     range([this.relh[1]*this.graphHeight, this.relh[0]*this.graphHeight])
@@ -354,8 +489,8 @@ GWCatalogue.prototype.setScales = function(){
     // data -> display
     this.yMap = function(d) { return gw.yScale(gw.yValue(d));}
     // y error bars
-    this.yErrP = function(d) {return d[gw.yvar+'plus'];} //error+ -> value
-    this.yErrM = function(d) {return d[gw.yvar+'minus'];} //error- -> value
+    this.yErrP = function(d) {return d[gw.yvar].errv[1];} //error+ -> value
+    this.yErrM = function(d) {return d[gw.yvar].errv[0];} //error- -> value
     // y error+ -> display
     this.yMapErrP = function(d) { return gw.yScale(gw.yErrP(d));}
     // y error- -> display
@@ -399,9 +534,9 @@ GWCatalogue.prototype.setScales = function(){
     /* cx,cy=BH position; xicon,yicon: icon-position, scy:shadow y-coordinate
     */
     this.bhpos = {
-        pri:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",scy:0.5},
-        sec:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",scy:0.8},
-        final:{cx:0.65,cy:0.7,xicon:"75%",yicon:"60%",scy:0.7}
+        M1:{cx:0.3,cy:0.5,xicon:"5%",yicon:"40%",scy:0.5},
+        M2:{cx:0.3,cy:0.8,xicon:"5%",yicon:"70%",scy:0.8},
+        Mfinal:{cx:0.65,cy:0.7,xicon:"75%",yicon:"60%",scy:0.7}
     };
         // date:{xicon:0.1,yicon:0.7,xtxt:0.2,ytxt:0.725},
         // dist:{xicon:0.1,yicon:0.85,xtxt:0.2,ytxt:0.875},
@@ -409,46 +544,31 @@ GWCatalogue.prototype.setScales = function(){
         // far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
 
     //mass icon size, src files, and tool-tip text
-    this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg",
-        pri:"initmass1",sec:"initmass2",final:"finalmass"};
+    this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg"};
     //y-position for flown-out masses
     this.yout = -0.3;
 
     // columns to show on sketch
     // icon: src file, label: label source, tooltip label)
     this.labels ={
-        "date":{icon:"img/date.svg",lab:["datestr"]},
-        "time":{icon:"img/time.svg",lab:["timestr"]},
-        "chirpmass":{icon:"img/chirpmass.svg",lab:["chirpmasstxt"]},
-        "dist":{icon:"img/ruler.svg",lab:["distancePcStr"],
-            labSw:["distanceLyStr"]},
+
+        date:{lab:["date"]},
+        time:{lab:["time"]},
+        Mchirp:{lab:["Mchirp"],
+            labSw:["Mchirpkg"]},
+        Ldist:{lab:["Ldist"],
+            labSw:["LdistLy"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
             // ttlab:"Category of detection"},
-        'far':{icon:"img/dice.svg",lab:["faptxt"],
-            labSw:["fartxt"]},
-        'peaklum':{icon:"img/peaklum.svg",lab:["peaklumtxtMsun"],
-            labSw:["peaklumtxtErg"]},
-        "energy":{icon:"img/energyrad.svg",lab:["energytxtMsun"],
-            labSw:["energytxtErg"]},
-        "initspineff":{icon:"img/initspin.svg",lab:["initspineffStr"]},
-        "finalspin":{icon:"img/finalspin.svg",lab:["finalspinStr"]},
-        "data":{icon:"img/data.svg",lab:["datalink"]}
+        FAR:{lab:["FAR"]},
+        peakL:{lab:["peakLMsun"],labSw:["peakL"]},
+        Erad:{lab:["Erad"],labSw:["EradErg"]},
+        spinInitEff:{lab:["spinInitEff"]},
+        spinFinal:{lab:["spinFinal"]},
+        data:{icon:"img/data.svg",lab:["data"]}
     }
     //tool-top labels
     this.ttlabels = {
-        pri:"Primary Black Hole Mass",
-        sec:"Secondary Black Hole Mass",
-        final:"Final Black Hole Mass",
-        date:"Date of detection",
-        time:"Time of detection",
-        chirpmass:"Chirp mass",
-        typedesc:"Category of detection",
-        far:"False alarm probability and rate",
-        dist:"Distance",
-        peaklum:"Peak Luminosity",
-        energy:"Energy radiated",
-        initspineff:"Initial Effective Spin Magnitude",
-        finalspin:"Final Spin Magnitude",
         data:"LIGO Open Science Center",
         switch:"Switch Units"
     };
@@ -493,17 +613,18 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("stop-color", this.colShadow[1]);
 
     if (this.redraw){
-        console.log('redrawing masses');
-        this.addMasses("pri",true);
-        this.addMasses("sec",true);
-        this.addMasses("final",true);
+        // console.log('redrawing masses');
+        this.addMasses("M1",true);
+        this.addMasses("M2",true);
+        this.addMasses("Mfinal",true);
     }else{
-        this.addMasses("pri",false);
-        this.addMasses("sec",false);
-        this.addMasses("final",false);
+        this.addMasses("M1",false);
+        this.addMasses("M2",false);
+        this.addMasses("Mfinal",false);
     }
 
     // add labels
+    if (this.showerrors == null){this.showerrors=true};
     for (lab in this.labels){this.addLab(lab)};
 
     // add unit-switch button
@@ -583,7 +704,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         massicondiv.innerHTML =
             "<img src='"+this.micon.file+"'>"
         massicondiv.onmouseover = function(e){
-            console.log(this.id)
+            // console.log(this.id)
             gw.showTooltip(e,this.id.split("icon")[1])}
         massicondiv.onmouseout = function(){gw.hideTooltip()};
         // add mass text
@@ -606,6 +727,9 @@ GWCatalogue.prototype.addLab = function(lab){
     labimgdiv.style.display = "inline-block";
     if (this.labels[lab].icon){
         labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon+"'>"
+    }else{
+        // console.log(lab);
+        labimgdiv.innerHTML ="<img src='"+this.columns[lab].icon+"'>"
     }
     labimgdiv.onmouseover = function(e){
         gw.showTooltip(e,this.id.split("icon")[0])}
@@ -644,48 +768,53 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
+                this.scaleRadius(d[bh].best,d.Mfinal.best));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp)
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh]],d["finalmass"]));
+                0.2*d[bh].best,d.Mfinal.best));
     }else if(resize=="fly"){
         // resize & fly in
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]));
+                d[bh].best,d.Mfinal.best));
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
+                this.scaleRadius(d[bh].best,d.Mfinal.best));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh]],d["finalmass"]));
+                0.2*d[bh].best,d.Mfinal.best));
     }else if(resize=="snap"){
         // snap resize (when redrawing sketch)
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[this.micon[bh]],d["finalmass"]));
+                this.scaleRadius(d[bh].best,d.Mfinal.best));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .attr("rx",this.scaleRadius(
-                d[this.micon[bh]],d["finalmass"]))
+                d[bh].best,d.Mfinal.best))
             .attr("ry",this.scaleRadius(
-                0.2*d[this.micon[bh]],d["finalmass"]));
+                0.2*d[bh].best,d.Mfinal.best));
     };
 
     // update mass label text
-    document.getElementById("mtxt-"+bh).innerHTML =
-        d[this.micon[bh]+'Str'];
+    if (this.showerrors){
+        console.log('error',d[bh]);
+        document.getElementById("mtxt-"+bh).innerHTML = d[bh].str;
+    }else{
+        console.log('noerror',d[bh]);
+        document.getElementById("mtxt-"+bh).innerHTML = d[bh].strnoerr;
+    }
 };
 GWCatalogue.prototype.switchUnits = function(){
     // switch between label units
@@ -699,59 +828,60 @@ GWCatalogue.prototype.switchUnits = function(){
         // no data shown
         return
     }
+    this.redrawLabels();
+}
+GWCatalogue.prototype.redrawLabels = function(){
     for (lab in this.labels){
-        labTxt='';
+        // console.log(this.labels[lab])
+        labTxt=''
         labs=this.labels[lab].lab;
         if (this.unitSwitch){
             if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
         }
         for (i in labs){
-            labTxt += " "+this.d[labs[i]];
-            if (columns[labs[i]].unit){
-                labTxt += " "+columns[labs[i]].unit;
+            if (this.showerrors){
+                labTxt += " "+this.d[labs[i]].str;
+            }else{
+                labTxt += " "+this.d[labs[i]].strnoerr;
             }
             if (i<labs.length-1){
                 labTxt += "<br>";
             }
         }
-        console.log(labTxt)
         document.getElementById(lab+"txt").innerHTML = labTxt;
+    }
+    masses=['M1','M2','Mfinal']
+    for (m in masses){
+        bh=masses[m]
+        // update mass label text
+        if (this.unitSwitch){dbh=this.d[bh+'kg']}
+        else{dbh=this.d[bh]}
+        if (this.showerrors){
+            console.log('error',bh,this.d[bh]);
+            document.getElementById("mtxt-"+bh).innerHTML = dbh.str;
+        }else{
+            console.log('noerror',bh,this.d[bh]);
+            document.getElementById("mtxt-"+bh).innerHTML = dbh.strnoerr;
+        }
     }
 }
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
     if (this.redraw){
         // resize sketch
-        this.flyInMasses(d,"pri","snap");
-        this.flyInMasses(d,"sec","snap");
-        this.flyInMasses(d,"final","snap");
+        this.flyInMasses(d,"M1","snap");
+        this.flyInMasses(d,"M2","snap");
+        this.flyInMasses(d,"Mfinal","snap");
         // update title
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
         // update labels
-        for (lab in this.labels){
-            // console.log(this.labels[lab])
-            labTxt=''
-            labs=this.labels[lab].lab;
-            if (this.unitSwitch){
-                if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
-            }
-            for (i in labs){
-                labTxt += " "+d[labs[i]];
-                if (columns[labs[i]].unit){
-                    labTxt += " "+columns[labs[i]].unit;
-                }
-                if (i<labs.length-1){
-                    labTxt += "<br>";
-                }
-            }
-            document.getElementById(lab+"txt").innerHTML = labTxt;
-        }
+        this.redrawLabels();
     }else if ((this.sketchName==d["name"])){
         // clicked on currently selected datapoint
-        this.flyOutMasses("pri");
-        this.flyOutMasses("sec");
-        this.flyOutMasses("final");
+        this.flyOutMasses("M1");
+        this.flyOutMasses("M2");
+        this.flyOutMasses("Mfinal");
         this.d = null;
         // replace title
         this.sketchName="None";
@@ -765,15 +895,15 @@ GWCatalogue.prototype.updateSketch = function(d){
         // clicked on un-selelected datapoint
         if ((this.sketchName=="None")||(this.sketchName=="")) {
             // nothing selected, so fly in
-            this.flyInMasses(d,"pri","fly");
-            this.flyInMasses(d,"sec","fly");
-            this.flyInMasses(d,"final","fly");
+            this.flyInMasses(d,"M1","fly");
+            this.flyInMasses(d,"M2","fly");
+            this.flyInMasses(d,"Mfinal","fly");
             this.d = d;
         }else{
             // different data selected, so resize
-            this.flyInMasses(d,"pri","smooth");
-            this.flyInMasses(d,"sec","smooth");
-            this.flyInMasses(d,"final","smooth");
+            this.flyInMasses(d,"M1","smooth");
+            this.flyInMasses(d,"M2","smooth");
+            this.flyInMasses(d,"Mfinal","smooth");
             this.d = d;
         }
         // update title
@@ -781,23 +911,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchTitle.html("Information: "+this.sketchName);
         this.sketchTitleHint.html("");
         //update labels
-        for (lab in this.labels){
-            labTxt=''
-            labs=this.labels[lab].lab;
-            if (this.unitSwitch){
-                if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
-            }
-            for (i in labs){
-                labTxt += " "+d[labs[i]];
-                if (columns[labs[i]].unit){
-                    labTxt += " "+columns[labs[i]].unit;
-                }
-                if (i<labs.length-1){
-                    labTxt += "<br>";
-                }
-            }
-            document.getElementById(lab+"txt").innerHTML = labTxt;
-        }
+        this.redrawLabels();
     }
 }
 
@@ -822,26 +936,47 @@ GWCatalogue.prototype.setStyles = function(){
 GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
     return "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='ttpri'>"+d[this.xvar]+"</span>"+"<span class='ttsec'>"+d[this.yvar]+"</span>";
+    "<span class='ttpri'>"+this.columns[this.xvar].name+
+        ": "+this.oneline(d[this.xvar].strnoerr)+"</span>"+
+    "<span class='ttsec'>"+this.columns[this.yvar].name +
+        ": "+this.oneline(d[this.yvar].strnoerr)+"</span>";
 }
 
-GWCatalogue.prototype.formatData = function(d){
+GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
-    // console.log('formatData',d.name);
-    for (col in columns){
-        if (columns[col].type=="fn"){d[col]=columns[col].fn(d);console.log('new column',col,d[col])};
-        if (columns[col].type=="flt"){
-            d[col] = +d[col];
-            if (columns[col]['errcode']){
-                errcode=d[columns[col]['errcode']].split('e')[1]
-                errcode=errcode.split('-')
-                d[col+'plus'] = +errcode[0] + d[col];
-                d[col+'minus'] = -errcode[1] + d[col];
-                d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'&ndash;'+
-                        parseFloat(d[col+'plus'].toPrecision(3))
-                columns[col+'Str']={'type':'str','unit':columns[col].unit}
-            }
+    console.log('formatData',d.name);
+    var gw=this;
+    for (col in gw.columns){
+        // console.log(col,gw.columns[col].type);
+        if (gw.columns[col].type=="derived"){
+            d[col]={}
+            if (gw.columns[col].bestfn){d[col].best=gw.columns[col].bestfn(d);}
+            if (gw.columns[col].errfn){d[col].err=gw.columns[col].errfn(d);}
+            // console.log('new column',col,d[col])
+        }else{
+            // console.log('existing column',col,d[col])
         }
+        if (gw.columns[col].err){
+            if (gw.columns[col].err==2){
+                d[col].errv =
+                    [d[col].best-d[col].err[0],
+                    d[col].best+d[col].err[1]];
+            }
+        }else if (typeof d[col].best=="number"){
+            d[col].errv =[d[col].best,d[col].best];
+        }
+        if (gw.columns[col].strfn){
+            d[col].str=gw.columns[col].strfn(d);
+            if (gw.columns[col].strfnnoerr){
+                d[col].strnoerr=gw.columns[col].strfnnoerr(d);
+            }else{
+                d[col].strnoerr=gw.columns[col].strfn(d);
+            }
+        }else{
+            d[col].str=gw.stdlabel(d,col);
+            d[col].strnoerr=gw.stdlabelNoErr(d,col);
+        }
+        // console.log(col,d[col])
         // console.log(col,d[col])
         // console.log(col,d[col]);
     }
@@ -892,36 +1027,69 @@ GWCatalogue.prototype.getUrlVars = function(){
     this.urlVars = vars;
     this.url = url;
 }
+// GWCatalogue.prototype.drawGraphInitCsv = function(){
+//     // initialise graph drawing from data
+//     var gw = this;
+//     console.log('drawGraphInit')
+//     d3.csv("csv/gwcat.csv", function(error, data) {
+//         console.log('gwcat.csv');
+//         // console.log(gw);
+//         // change string (from CSV) into number format
+//         // var data=data;
+//
+//         // var formatData = this.formatData(d)
+//         // console.log(this.formatData,formatData(d));
+//         gw.setColumns();
+//         data.forEach(function(d){gw.formatData(d,gw.columns)});
+//         gw.data = data;
+//         // console.log(data);
+//         gw.optionsOn=false;
+//         console.log('columns');
+//         gw.makePlot();
+//         console.log('plotted');
+//         // gw.initButtons();
+//
+//         // console.log('gw.data',gw.data);
+//     });
+// }
+
 GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
-    console.log('drawGraphInit')
-    d3.csv("csv/gwcat.csv", function(error, data) {
-        console.log('d3.csv');
-        // console.log(gw);
-        // change string (from CSV) into number format
-        // var data=data;
-
-        // var formatData = this.formatData(d)
-        // console.log(this.formatData,formatData(d));
-        data.forEach(gw.formatData);
-        gw.data = data;
+    d3.json("json/bbh-test_en-US.json", function(error, dataIn) {
+        console.log('json/bbh-test_en-US.json');
+        console.log(dataIn.datadict)
+        gw.data=[]
+        for (e in dataIn.events){
+            dataIn.events[e].name=e;
+            if (e[0]=='G'){t='GW'};
+            if (e[0]=='L'){t='LVT'};
+            dataIn.events[e].type=t;
+            dataIn.events[e].link=dataIn.links[e].LOSCData
+            gw.data.push(dataIn.events[e])
+        }
+        console.log('data:',gw.data)
+        gw.setColumns(dataIn.datadict);
+        //console.log('columns:',gw.columns);
+        gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
         // console.log(data);
         gw.optionsOn=false;
+        // console.log('columns');
         gw.makePlot();
+        console.log('plotted');
         // gw.initButtons();
 
         // console.log('gw.data',gw.data);
     });
 
 }
-
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
     var gw = this;
     // gw.setSvgScales();
     gw.makeGraph();
-    data = this.data;
+    data = gw.data;
+    console.log('plotting ',gw.xvar,' vs ',gw.yvar);
     // console.log(this.graphHeight);
     // console.log('drawGraph');
     // console.log('this.data',this.data);
@@ -929,17 +1097,18 @@ GWCatalogue.prototype.drawGraph = function(){
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-    xBorder = (columns[gw.xvar].border) ? columns[gw.xvar].border : 2;
+    xBorder = (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2;
     xMin = (d3.min(data, gw.xErrM)<0) ? d3.min(data, gw.xErrM) - xBorder : 0;
     xMax = d3.max(data, gw.xErrP)+xBorder;
     gw.xScale.domain([xMin, xMax]);
-    yBorder = (columns[gw.yvar].border) ? columns[gw.yvar].border : 2;
+    yBorder = (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2;
     yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
     yMax = d3.max(data, gw.yErrP)+yBorder;
     gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
     gw.yScale.domain([yMin, yMax]);
     if (gw.showerrors == null){gw.showerrors=true};
+
     // x-axis
     gw.svg.append("g")
         .attr("class", "x-axis axis")
@@ -960,7 +1129,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y", 1.2*(1+gw.ysc)+"em")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
-        .text(getLabelUnit(gw.xvar));
+        .text(gw.getLabelUnit(gw.xvar));
     gw.svgcont.append("div")
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -970,7 +1139,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("height",40*gw.ysc+"px")
     .append("img")
         .attr("id","x-axis-icon")
-        .attr("src",getIcon(gw.xvar));
+        .attr("src",gw.getIcon(gw.xvar));
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.ysc))+"em")
@@ -995,7 +1164,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("dy", (-25*(1+gw.xsc))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
-        .text(getLabelUnit(gw.yvar));
+        .text(gw.getLabelUnit(gw.yvar));
     gw.svgcont.append("div")
         .attr("class", "y-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -1005,7 +1174,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("height",(40*gw.scl)+"px")
     .append("img")
         .attr("id","y-axis-icon")
-        .attr("src",getIcon(gw.yvar));
+        .attr("src",gw.getIcon(gw.yvar));
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.xsc))+"em")
@@ -1023,7 +1192,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
-    // add top of y error bar
+    // add top of x error bar
     errorGroup.selectAll(".errorXp")
         .data(data)
     .enter().append("line")
@@ -1035,7 +1204,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
-    // add bottom of y error bar
+    // add bottom of x error bar
     errorGroup.selectAll(".errorXm")
         .data(data)
     .enter().append("line")
@@ -1085,6 +1254,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
 
+    // add highlight circle
     gw.svg.append("g")
         .attr("class","g-highlight")
         .attr("transform", "translate("+gw.margin.left+","+
@@ -1100,6 +1270,12 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("cx",gw.xScale(0))
         .attr("cy",gw.yScale(0))
         .attr("r",15)
+    if (gw.d){
+        console.log('current gwcat.d:',gw.d)
+        gw.initHighlight(gw.d);
+    }else{
+        console.log('no gwcat.d')
+    }
     // draw dots
     gw.svg.selectAll(".dot")
       .data(data)
@@ -1212,12 +1388,18 @@ GWCatalogue.prototype.moveHighlight = function(d){
             .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
             .style("opacity",1);
     }
-
+}
+GWCatalogue.prototype.initHighlight = function(d){
+    // move highlight circle
+    var gw=this;
+    gw.svg.select("#highlight")
+        .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
+        .style("opacity",1);
 }
 GWCatalogue.prototype.updateErrors = function(){
     // update error bars
 
-    if ((columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
+    if ((this.columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
         // remove x-errors
         this.svg.selectAll(".errorX")
             .transition()
@@ -1258,7 +1440,7 @@ GWCatalogue.prototype.updateErrors = function(){
             .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
             .attr("opacity",1);
     }
-    if ((columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
+    if ((this.columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
         // remove y-errors
         this.svg.selectAll(".errorY")
             .transition()
@@ -1314,6 +1496,7 @@ GWCatalogue.prototype.toggleErrors = function(){
     }
     // console.log("toggling errors");
     this.updateErrors();
+    this.redrawLabels();
 }
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // update x-xais to xvarNew
@@ -1328,8 +1511,8 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
 
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        xBorder= (columns[gw.xvar].border) ? columns[gw.xvar].border : 2
-        if (columns[gw.xvar].errcode==""){
+        xBorder= (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2
+        if (gw.columns[gw.xvar].errcode==""){
             xMin = (d3.min(data, gw.xValue)<0) ? d3.min(data, gw.xValue) - xBorder : 0;
             xMax = d3.max(data, gw.xValue)+xBorder;
             gw.xScale.domain([xMin, xMax]);
@@ -1360,9 +1543,9 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         gw.svg.select(".x-axis.axis-label")
             .transition()
             .duration(750)
-            .text(getLabelUnit(gw.xvar));
+            .text(gw.getLabelUnit(gw.xvar));
         gw.svgcont.select("#x-axis-icon")
-            .attr("src",getIcon(gw.xvar));
+            .attr("src",gw.getIcon(gw.xvar));
         gw.svg.select(".y-axis.axis-line")
             .transition()
             .duration(750)
@@ -1395,8 +1578,8 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         // data.forEach(gw.formatData);
         // don't want dots overlapping axis, so add in buffer to data domain
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        yBorder= (columns[gw.yvar].border) ? columns[gw.yvar].border : 2
-        if (columns[gw.yvar].errcode==""){
+        yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
+        if (gw.columns[gw.yvar].errcode==""){
             yMin = (d3.min(data, gw.yValue)<0) ? d3.min(data, gw.yValue) - yBorder : 0;
             gw.yScale.domain([yMin, d3.max(data, gw.yValue)+yBorder]);
         }else{
@@ -1419,9 +1602,9 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         gw.svg.selectAll(".y-axis.axis-label")
             .transition()
             .duration(750)
-            .text(getLabelUnit(gw.yvar));
+            .text(gw.getLabelUnit(gw.yvar));
         gw.svgcont.select("#y-axis-icon")
-            .attr("src",getIcon(gw.yvar));
+            .attr("src",gw.getIcon(gw.yvar));
         gw.svg.select(".x-axis.axis-line")
             .transition()
             .duration(750)
@@ -1444,8 +1627,8 @@ GWCatalogue.prototype.addOptions = function(){
     var gw=this;
     // add buttons
     var col;
-    for (col in columns){
-        if (columns[col].avail){
+    for (col in gw.columns){
+        if (gw.columns[col].avail){
             var divx = document.getElementById('x-buttons');
             var newoptdivx = document.createElement('div');
             newoptdivx.className = 'option option-x';
@@ -1454,14 +1637,14 @@ GWCatalogue.prototype.addOptions = function(){
             var newoptinputx = document.createElement('img');
             newoptinputx.type = 'submit';
             newoptinputx.name = col;
-            // newoptinputx.value = getLabel(col);
+            // newoptinputx.value = gw.getLabel(col);
             newoptinputx.setAttribute("id","buttonx-"+col);
             newoptinputx.classList.add("button");
             newoptinputx.classList.add("button-x");
-            newoptinputx.src = getIcon(col);
-            newoptinputx.label = getLabel(col);
+            newoptinputx.src = gw.getIcon(col);
+            newoptinputx.label = gw.getLabel(col);
             if (col==this.xvar){newoptdivx.classList.add("down")};
-            // newoptinputx.innerHTML = "<img src="+getIcon(col)+" title='"+getLabel(col)+"'>";
+            // newoptinputx.innerHTML = "<img src="+gw.getIcon(col)+" title='"+gw.getLabel(col)+"'>";
             newoptinputx.addEventListener('click',function(){
                 oldXvar = gw.xvar;
                 newXvar = this.id.split('buttonx-')[1]
@@ -1483,14 +1666,14 @@ GWCatalogue.prototype.addOptions = function(){
             var newoptinputy = document.createElement('img');
             newoptinputy.type = 'submit';
             newoptinputy.name = col;
-            // newoptinputy.value = getLabel(col);
+            // newoptinputy.value = gw.getLabel(col);
             newoptinputy.setAttribute("id","buttony-"+col);
             newoptinputy.classList.add("button");
             newoptinputy.classList.add("button-y");
-            newoptinputy.src = getIcon(col);
-            newoptinputy.label = getLabel(col);
+            newoptinputy.src = gw.getIcon(col);
+            newoptinputy.label = gw.getLabel(col);
             if (col==this.yvar){newoptdivy.classList.add("down")};
-            newoptinputy.innerHTML = "<img src="+getIcon(col)+" title='"+getLabel(col)+"'>";
+            newoptinputy.innerHTML = "<img src="+gw.getIcon(col)+" title='"+gw.getLabel(col)+"'>";
             newoptinputy.addEventListener('click',function(){
                 oldYvar = gw.yvar;
                 newYvar = this.id.split('buttony-')[1]
@@ -1500,7 +1683,7 @@ GWCatalogue.prototype.addOptions = function(){
                 gw.updateYaxis(this.name);
             });
             newoptinputy.onmouseover = function(e){
-                console.log(this.id.split('buttony-')[1])
+                // console.log(this.id.split('buttony-')[1])
                 gw.showTooltip(e,this.id.split('buttony-')[1],type="column");};
             newoptinputy.onmouseout = function(){gw.hideTooltip();};
             newoptdivy.appendChild(newoptinputy);
@@ -1562,8 +1745,8 @@ GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     ttSk.style.top = e.pageY - 10 ;
     ttSk.style.width = "auto";
     ttSk.style.height = "auto";
-    if (type=="column"){
-        ttSk.innerHTML = columns[tttxt].label;
+    if (this.columns[tttxt]){
+        ttSk.innerHTML = this.columns[tttxt].name;
     }else{
         ttSk.innerHTML = this.ttlabels[tttxt];
     }
@@ -1614,7 +1797,9 @@ GWCatalogue.prototype.replot = function(){
 //labels to add and keep updated
 var gwcat = new GWCatalogue
 gwcat.init();
+console.log('initialised')
 gwcat.drawGraphInit();
+console.log('plotted')
 window.addEventListener("resize",function(){
     gwcat.replot();
 
