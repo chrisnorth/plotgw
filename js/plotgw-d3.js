@@ -136,7 +136,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         date:{
             type:'derived',
             strfn:function(d){
-                console.log(d);
+                // console.log(d);
                 months=['Jan','Feb','Mar','Apr','May','Jun',
                     'Jul','Aug','Sep','Oct','Nov','Dec'];
                 day=d.UTC.best.split('T')[0].split('-')[0];
@@ -304,7 +304,7 @@ GWCatalogue.prototype.scaleWindow = function(){
     graph=document.getElementById("graphcontainer");
     if (this.winAspect<1){
         // portrait
-        console.log('portrait');
+        // console.log('portrait');
         this.portrait=true;
         this.sketchFullWidth = 0.9*this.winFullWidth;
         this.sketchFullHeight = 0.5*this.sketchFullWidth;
@@ -314,7 +314,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         info.style["margin-left"]="5%";
         this.sketchWidth = 0.45*this.sketchFullWidth;
         this.sketchHeight = this.sketchFullHeight;
-        console.log(this.sketchHeight,this.sketchFullHeight);
+        console.log('portrait:',this.sketchHeight,this.sketchFullHeight);
         this.labWidth = 0.5*this.sketchFullWidth;
         this.labHeight = this.sketchFullHight;
         //this.labcontWidth="45%";
@@ -323,7 +323,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         // info.style.left = "0%";
     }else{
         // landscape window
-        console.log('landscape')
+        // console.log('landscape')
         this.portrait=false;
         this.sketchFullHeight = 0.85*this.winFullHeight;
         this.sketchFullWidth = 0.5*this.sketchFullHeight;
@@ -333,7 +333,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         info.style["margin-left"]=0;
         this.sketchWidth = this.sketchFullWidth;
         this.sketchHeight = 0.5*this.sketchFullHeight;
-        // console.log(this.sketchHeight,this.sketchFullHeight);
+        console.log('landscape:',this.sketchHeight,this.sketchFullHeight);
         this.sketchAspect = this.sketchFullWidth/this.sketchFullHeight;
         this.labWidth = this.sketchFullWidth;
         this.labHeight = 0.5*this.sketchFullHight;
@@ -543,7 +543,7 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("stop-color", this.colShadow[1]);
 
     if (this.redraw){
-        console.log('redrawing masses');
+        // console.log('redrawing masses');
         this.addMasses("M1",true);
         this.addMasses("M2",true);
         this.addMasses("Mfinal",true);
@@ -633,7 +633,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         massicondiv.innerHTML =
             "<img src='"+this.micon.file+"'>"
         massicondiv.onmouseover = function(e){
-            console.log(this.id)
+            // console.log(this.id)
             gw.showTooltip(e,this.id.split("icon")[1])}
         massicondiv.onmouseout = function(){gw.hideTooltip()};
         // add mass text
@@ -657,7 +657,7 @@ GWCatalogue.prototype.addLab = function(lab){
     if (this.labels[lab].icon){
         labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon+"'>"
     }else{
-        console.log(lab);
+        // console.log(lab);
         labimgdiv.innerHTML ="<img src='"+this.columns[lab].icon+"'>"
     }
     labimgdiv.onmouseover = function(e){
@@ -875,14 +875,14 @@ GWCatalogue.prototype.formatData = function(d,cols){
     console.log('formatData',d.name);
     var gw=this;
     for (col in gw.columns){
-        console.log(col,gw.columns[col].type);
+        // console.log(col,gw.columns[col].type);
         if (gw.columns[col].type=="derived"){
             d[col]={}
             if (gw.columns[col].bestfn){d[col].best=gw.columns[col].bestfn(d);}
             if (gw.columns[col].errfn){d[col].err=gw.columns[col].errfn(d);}
-            console.log('new column',col,d[col])
+            // console.log('new column',col,d[col])
         }else{
-            console.log('existing column',col,d[col])
+            // console.log('existing column',col,d[col])
         }
         if (gw.columns[col].err){
             if (gw.columns[col].err==2){
@@ -895,7 +895,7 @@ GWCatalogue.prototype.formatData = function(d,cols){
         }
         if (gw.columns[col].strfn){d[col].str=gw.columns[col].strfn(d);}
         else{d[col].str=gw.stdlabel(d,col);}
-        console.log(col,d[col])
+        // console.log(col,d[col])
         // console.log(col,d[col])
         // console.log(col,d[col]);
     }
@@ -993,7 +993,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
         // console.log(data);
         gw.optionsOn=false;
-        console.log('columns');
+        // console.log('columns');
         gw.makePlot();
         console.log('plotted');
         // gw.initButtons();
@@ -1008,7 +1008,7 @@ GWCatalogue.prototype.drawGraph = function(){
     // gw.setSvgScales();
     gw.makeGraph();
     data = gw.data;
-    console.log(gw.xvar,gw.yvar);
+    console.log('plotting ',gw.xvar,' vs ',gw.yvar);
     // console.log(this.graphHeight);
     // console.log('drawGraph');
     // console.log('this.data',this.data);
@@ -1027,6 +1027,7 @@ GWCatalogue.prototype.drawGraph = function(){
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
     gw.yScale.domain([yMin, yMax]);
     if (gw.showerrors == null){gw.showerrors=true};
+
     // x-axis
     gw.svg.append("g")
         .attr("class", "x-axis axis")
@@ -1110,7 +1111,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
-    // add top of y error bar
+    // add top of x error bar
     errorGroup.selectAll(".errorXp")
         .data(data)
     .enter().append("line")
@@ -1122,7 +1123,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
-    // add bottom of y error bar
+    // add bottom of x error bar
     errorGroup.selectAll(".errorXm")
         .data(data)
     .enter().append("line")
@@ -1172,6 +1173,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
 
+    // add highlight circle
     gw.svg.append("g")
         .attr("class","g-highlight")
         .attr("transform", "translate("+gw.margin.left+","+
@@ -1187,6 +1189,12 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("cx",gw.xScale(0))
         .attr("cy",gw.yScale(0))
         .attr("r",15)
+    if (gw.d){
+        console.log('current gwcat.d:',gw.d)
+        gw.initHighlight(gw.d);
+    }else{
+        console.log('no gwcat.d')
+    }
     // draw dots
     gw.svg.selectAll(".dot")
       .data(data)
@@ -1299,7 +1307,13 @@ GWCatalogue.prototype.moveHighlight = function(d){
             .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
             .style("opacity",1);
     }
-
+}
+GWCatalogue.prototype.initHighlight = function(d){
+    // move highlight circle
+    var gw=this;
+    gw.svg.select("#highlight")
+        .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
+        .style("opacity",1);
 }
 GWCatalogue.prototype.updateErrors = function(){
     // update error bars
@@ -1587,7 +1601,7 @@ GWCatalogue.prototype.addOptions = function(){
                 gw.updateYaxis(this.name);
             });
             newoptinputy.onmouseover = function(e){
-                console.log(this.id.split('buttony-')[1])
+                // console.log(this.id.split('buttony-')[1])
                 gw.showTooltip(e,this.id.split('buttony-')[1],type="column");};
             newoptinputy.onmouseout = function(){gw.hideTooltip();};
             newoptdivy.appendChild(newoptinputy);
