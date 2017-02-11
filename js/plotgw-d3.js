@@ -19,6 +19,56 @@ GWCatalogue.prototype.init = function(){
     this.setScales();
 
 }
+GWCatalogue.prototype.stdlabel = function(d,src){
+    var gw=this;
+    if (gw.columns[src].err){
+        if (gw.columns[src].err==2){
+            txt=parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))+
+            '&ndash;'+
+            parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))
+            }
+        else{
+            txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+        }
+    }else if (typeof d[src].best=="number"){
+        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+    }else{
+        txt=d[src].best
+    }
+    if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
+    if (typeof txt == "string"){
+        // replace superscripts
+        reSup=/\^(-?[0-9]*)(?=\s|$)/g
+        txt=txt.replace(reSup,"<sup>$1</sup> ");
+        // replace Msun
+        txt=txt.replace('Msun','M<sub>&#x2609;</sub>')
+    }
+    return(txt)
+}
+
+GWCatalogue.prototype.stdlabelNoErr = function(d,src){
+    var gw=this;
+    if (typeof d[src].best=="number"){
+        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+    }else{
+        txt=d[src].best
+    }
+    if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
+    if (typeof txt == "string"){
+        // replace superscripts
+        reSup=/\^(-?[0-9]*)(?=\s|$)/g
+        txt=txt.replace(reSup,"<sup>$1</sup> ");
+        // replace Msun
+        txt=txt.replace('Msun','M<sub>&#x2609;</sub>')
+    }
+    return(txt)
+}
+GWCatalogue.prototype.oneline = function(strIn){
+    reBr=/\<br\/\>/g;
+    strOut=strIn.replace(reBr,' ');
+    return(strOut)
+}
+
 GWCatalogue.prototype.setColumns = function(datadict){
     /*
     columns structure:
@@ -32,33 +82,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
        border: force the border on axis (default=2)
     */
     var gw=this;
-    this.stdlabel = function(d,src){
-        var gw=this;
-        if (gw.columns[src].err){
-            if (gw.columns[src].err==2){
-                txt=parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))+
-                '&ndash;'+
-                parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))
-                }
-            else{
-                txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
-            }
-        }else if (typeof d[src].best=="number"){
-            txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
-        }else{
-            txt=d[src].best
-        }
-        if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
-        if (typeof txt == "string"){
-            // replace superscripts
-            reSup=/\^(-?[0-9]*)(?=\s|$)/g
-            txt=txt.replace(reSup,"<sup>$1</sup> ");
-            // replace Msun
-            txt=txt.replace('Msun','M<sub>&#x2609;</sub>')
-        }
-        return(txt)
 
-    }
     colsUpdate = {
         Mtotal:{icon:"img/totalmass.svg",avail:true,type:'src'},
         Mchirp:{icon:"img/chirpmass.svg",avail:true,type:'src'},
@@ -867,7 +891,10 @@ GWCatalogue.prototype.setStyles = function(){
 GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
     return "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='ttpri'>"+d[this.xvar.best]+"</span>"+"<span class='ttsec'>"+d[this.yvar.best]+"</span>";
+    "<span class='ttpri'>"+this.columns[this.xvar].name+
+        ": "+this.oneline(d[this.xvar].strnoerr)+"</span>"+
+    "<span class='ttsec'>"+this.columns[this.yvar].name +
+        ": "+this.oneline(d[this.yvar].strnoerr)+"</span>";
 }
 
 GWCatalogue.prototype.formatData = function(d,cols){
@@ -895,6 +922,8 @@ GWCatalogue.prototype.formatData = function(d,cols){
         }
         if (gw.columns[col].strfn){d[col].str=gw.columns[col].strfn(d);}
         else{d[col].str=gw.stdlabel(d,col);}
+        if (gw.columns[col].strfnNoErr){d[col].str=gw.columns[col].strfnNoErr(d);}
+        else{d[col].strnoerr=gw.stdlabelNoErr(d,col);}
         // console.log(col,d[col])
         // console.log(col,d[col])
         // console.log(col,d[col]);
