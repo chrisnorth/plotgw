@@ -15,7 +15,7 @@ GWCatalogue.prototype.init = function(){
         LVT:'Candidate'}
     this.setStyles();
     this.sketchName="None";
-    this.unitSwitch=true;
+    this.unitSwitch=false;
     this.setScales();
 
 }
