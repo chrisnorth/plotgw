@@ -122,6 +122,50 @@ GWCatalogue.prototype.setColumns = function(datadict){
         Erad:{avail:true,icon:"img/energyrad.svg",
             border:0.1,type:'src'},
         peakL:{avail:true,icon:"img/peaklum.svg",type:'src'},
+        M1kg:{type:'derived',
+            namefn:function(){return(gw.columns.M1.name)},
+            bestfn:function(d){
+                return(d['M1'].best/2.)},
+            errfn:function(d){
+                return([d['M1'].err[0]/2.,
+                d['M1'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
+        M2kg:{type:'derived',
+            namefn:function(){return(gw.columns.M2.name)},
+            bestfn:function(d){
+                return(d['M2'].best/2.)},
+            errfn:function(d){
+                return([d['M2'].err[0]/2.,
+                d['M2'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
+        Mfinalkg:{type:'derived',
+            namefn:function(){return(gw.columns.Mfinal.name)},
+            bestfn:function(d){
+                return(d['Mfinal'].best/2.)},
+            errfn:function(d){
+                return([d['Mfinal'].err[0]/2.,
+                d['Mfinal'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
+        Mchirpkg:{type:'derived',
+            namefn:function(){return(gw.columns.Mchirp.name)},
+            bestfn:function(d){
+                return(d['Mchirp'].best/2.)},
+            errfn:function(d){
+                return([d['Mchirp'].err[0]/2.,
+                d['Mchirp'].err[1]/2.])},
+            sigfig:2,
+            err:2,
+            unit:'10^30 kg',
+            avail:false},
         LdistLy:{type:'derived',
             namefn:function(){return(gw.columns.Ldist.name)},
             bestfn:function(d){
@@ -507,9 +551,11 @@ GWCatalogue.prototype.setScales = function(){
     // columns to show on sketch
     // icon: src file, label: label source, tooltip label)
     this.labels ={
+
         date:{lab:["date"]},
         time:{lab:["time"]},
-        Mchirp:{lab:["Mchirp"]},
+        Mchirp:{lab:["Mchirp"],
+            labSw:["Mchirpkg"]},
         Ldist:{lab:["Ldist"],
             labSw:["LdistLy"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
@@ -808,12 +854,14 @@ GWCatalogue.prototype.redrawLabels = function(){
     for (m in masses){
         bh=masses[m]
         // update mass label text
+        if (this.unitSwitch){dbh=this.d[bh+'kg']}
+        else{dbh=this.d[bh]}
         if (this.showerrors){
             console.log('error',bh,this.d[bh]);
-            document.getElementById("mtxt-"+bh).innerHTML = this.d[bh].str;
+            document.getElementById("mtxt-"+bh).innerHTML = dbh.str;
         }else{
             console.log('noerror',bh,this.d[bh]);
-            document.getElementById("mtxt-"+bh).innerHTML = this.d[bh].strnoerr;
+            document.getElementById("mtxt-"+bh).innerHTML = dbh.strnoerr;
         }
     }
 }
