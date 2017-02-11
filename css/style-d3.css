@@ -280,6 +280,31 @@ button.down{
     width:40%;
     height:90%;
 }
+@media (max-width:1200px){
+    .options-title{
+        font-size:1.5em;
+    }
+}
+@media (max-width:1000px){
+    .options-title{
+        font-size:1.2em;
+    }
+}
+@media (max-width:750px){
+    .options-title{
+        font-size:1.0em;
+    }
+}
+@media (max-width:550px){
+    .options-title{
+        font-size:0.8em;
+    }
+}
+@media (max-width:350px){
+    .options-title{
+        font-size:0.6em;
+    }
+}
 /*@media (max-width:1200px){
     .sketchlab.info, .sketchlab.mtxt, .axis-label{
         font-size:1.2em;
