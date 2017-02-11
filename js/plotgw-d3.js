@@ -762,8 +762,13 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
     };
 
     // update mass label text
-    document.getElementById("mtxt-"+bh).innerHTML =
-        d[bh].str;
+    if (this.showerrors){
+        console.log('error',d[bh]);
+        document.getElementById("mtxt-"+bh).innerHTML = d[bh].str;
+    }else{
+        console.log('noerror',d[bh]);
+        document.getElementById("mtxt-"+bh).innerHTML = d[bh].strnoerr;
+    }
 };
 GWCatalogue.prototype.switchUnits = function(){
     // switch between label units
@@ -798,6 +803,18 @@ GWCatalogue.prototype.redrawLabels = function(){
             }
         }
         document.getElementById(lab+"txt").innerHTML = labTxt;
+    }
+    masses=['M1','M2','Mfinal']
+    for (m in masses){
+        bh=masses[m]
+        // update mass label text
+        if (this.showerrors){
+            console.log('error',bh,this.d[bh]);
+            document.getElementById("mtxt-"+bh).innerHTML = this.d[bh].str;
+        }else{
+            console.log('noerror',bh,this.d[bh]);
+            document.getElementById("mtxt-"+bh).innerHTML = this.d[bh].strnoerr;
+        }
     }
 }
 GWCatalogue.prototype.updateSketch = function(d){
