@@ -711,6 +711,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         masstxtdiv = document.createElement('div');
         masstxtdiv.className = 'sketchlab mtxt';
         masstxtdiv.setAttribute('id','mtxt-'+bh);
+        masstxtdiv.style["font-size"] = (1.5*this.sksc)+"em";
         masstxtdiv.innerHTML = this.labBlank;
         massicondiv.appendChild(masstxtdiv);
         document.getElementById('sketchcontainer').appendChild(massicondiv);
