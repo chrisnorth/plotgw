@@ -550,7 +550,10 @@ GWCatalogue.prototype.setScales = function(){
         // far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
 
     //mass icon size, src files, and tool-tip text
-    this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg"};
+    this.micon = {w:"20%",h:"20%",
+        file:{'M1':"img/primass.svg",
+            'M2':"img/secmass.svg",
+            'Mfinal':"img/finalmass.svg"}};
     //y-position for flown-out masses
     this.yout = -0.3;
 
@@ -708,7 +711,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         massicondiv.style.top = this.bhpos[bh].yicon;
         massicondiv.style.position = "absolute";
         massicondiv.innerHTML =
-            "<img src='"+this.micon.file+"'>"
+            "<img src='"+this.micon.file[bh]+"'>"
         massicondiv.onmouseover = function(e){
             // console.log(this.id)
             gw.showTooltip(e,this.id.split("icon")[1])}
@@ -863,6 +866,8 @@ GWCatalogue.prototype.redrawLabels = function(){
         // update mass label text
         if (this.unitSwitch){dbh=this.d[bh+'kg']}
         else{dbh=this.d[bh]}
+        document.getElementById("mtxt-"+bh)
+            .style["font-size"] = (1.5*this.sksc)+"em";
         if (this.showerrors){
             console.log('error',bh,this.d[bh]);
             document.getElementById("mtxt-"+bh).innerHTML = dbh.str;
