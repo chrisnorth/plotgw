@@ -435,16 +435,22 @@ GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
     var gw=this;
     //set scale factor(s)
-    this.xsc = Math.min(1.0,window.innerWidth/1500.)
+    this.xsc = Math.min(1.0,window.innerWidth/1400.)
     this.ysc = Math.min(1.0,window.innerHeight/900.)
     this.scl = Math.min(this.xsc,this.ysc)
     //sketch scale
     if (this.winAspect<1){
-        this.sksc=this.ysc
+        // portrait
+        this.sksc=Math.min(1.0,this.xsc*2.)
+        d3.selectAll(".options-title")
+            .attr("class","options-title portrait");
     }else{
+        // landscape
         this.sksc=this.xsc
+        d3.selectAll(".options-title")
+            .attr("class","options-title landscape");
     }
-    this.sksc=this.scl
+    // this.sksc=this.scl
 
     //graph size & position
     this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left: 35*(1+this.xsc)}
@@ -1135,9 +1141,9 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
-        .style("bottom", (gw.margin.bottom+(15*gw.ysc)))
-        .style("width",40*gw.ysc+"px")
-        .style("height",40*gw.ysc+"px")
+        .style("bottom", (gw.margin.bottom+(15*gw.xsc)))
+        .style("width",40*gw.xsc+"px")
+        .style("height",40*gw.xsc+"px")
     .append("img")
         .attr("id","x-axis-icon")
         .attr("src",gw.getIcon(gw.xvar));
@@ -1171,8 +1177,8 @@ GWCatalogue.prototype.drawGraph = function(){
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
         .style("left", (gw.margin.left-(40*gw.scl))/2.)
-        .style("width",(40*gw.scl)+"px")
-        .style("height",(40*gw.scl)+"px")
+        .style("width",(40*gw.xsc)+"px")
+        .style("height",(40*gw.xsc)+"px")
     .append("img")
         .attr("id","y-axis-icon")
         .attr("src",gw.getIcon(gw.yvar));
@@ -1284,7 +1290,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("class", "dot")
       .attr("transform", "translate("+gw.margin.left+","+
         gw.margin.top+")")
-      .attr("r", 7)
+      .attr("r", 7/gw.sksc)
       .attr("cx", gw.xMap)
       .attr("cy", gw.yMap)
       .attr("cursor","pointer")
