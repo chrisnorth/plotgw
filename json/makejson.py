@@ -2,21 +2,26 @@
 import json
 import re
 
-fileIn=open('bbh-test.json','r')
+fileInDataDict='datadict.json'
 lang='en-US'
+fileInLang='lang_%s.json'%lang
+# fileInLinks='links.json'
+fileInEvents='events.json'
+
 fileOutAll=open('bbh-test_%s.json'%(lang),'w')
 fileOutDataDict=open('datadict_%s.json'%(lang),'w')
-fileOutLang=open('langdict_%s.json'%(lang),'w')
-fileOutEvents=open('events.json','w')
+# fileOutLang=open('langdict_%s.json'%(lang),'w')
 
-jsIn=json.load(fileIn)
+# jsIn=json.load(fileIn)
 # extract language dictionary
-lang=jsIn['langdict'][lang]
+# lang=jsIn['langdict'][lang]
+# datadict=jsIn['datadict']
+# events=jsIn['events']
 
-datadict=jsIn['datadict']
-events=jsIn['events']
-links=jsIn['links']
-
+# read in files
+lang=json.load(open(fileInLang,'r'))
+datadict=json.load(open(fileInDataDict,'r'))
+events=json.load(open(fileInEvents,'r'))
 def replacekeys(holder,transdict):
     for key in holder:
         if type(holder[key])==dict:
@@ -34,18 +39,23 @@ def replacekeys(holder,transdict):
                     print 'Unknown key: %s'%(dkey)
     return holder
 
-print 'replacing names in datadict'
-datadict=replacekeys(datadict,lang)
+# replace data in datadict
+# print 'replacing names in datadict'
+# datadict=replacekeys(datadict,lang)
 
-print('replacing domains in links')
-domains=links['domains']
-links=replacekeys(links,domains)
+# domains=lang['domains']
+links=events['links']
+# print('replacing domains in links')
+# links=replacekeys(links,lang)
 
-json.dump({'datadict':datadict,'links':links,'events':events},fileOutAll,indent=4)
-json.dump(lang,fileOutLang,indent=4)
+
+# compile all into one file
+json.dump({'datadict':datadict,'events':events,'lang':lang},fileOutAll,indent=4)
+# json.dump(lang,fileOutLang,indent=4)
 json.dump(datadict,fileOutDataDict,indent=4)
-json.dump({'events':events,'links':links},fileOutEvents,indent=4)
-
+# json.dump({'events':events,'links':links},fileOutEvents,indent=4)
+fileOutAll.close()
+fileOutDataDict.close()
 
 # print 'datadict:',datadict
 # print 'links:',links

@@ -1,0 +1,83 @@
+{
+    "domains":{
+        "losc":"https://losc.ligo.org",
+        "losc.events":"https://losc.ligo.org/events",
+        "losc.store":"https://losc.ligo.org/s",
+        "gracedb.events":"https://gracedb.ligo.org/events"
+    },
+    "GW150914": {
+        "DetPaper":{
+            "url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102",
+            "text": "PRL Paper",
+            "type": "paper"
+        }, "LOSCData":{
+            "url": "%losc.events%/GW150914/",
+            "text": "Open Data page",
+            "type":"web-data"
+        }, "GraceDB":{
+            "url": "%gracedb.events%/view/G184098",
+            "text": "GraceDB page",
+            "type": "web-data"
+        }, "SkymapFile":{
+            "url": "%losc.store%/events/GW150914/P1500227/LALInference_skymap.fits.gz",
+            "text": "Final Skymap",
+            "type": "file"
+        }, "SkymapAladin":{
+            "url": "%losc.store%/skymapViewer/aladin/index.html#GW150914:LALI",
+            "text": "Skymap Viewer",
+            "type": "web"
+        }
+    },
+    "LVT151012": {
+        "O1BBH":{
+            "url":"LINK"
+        },"LOSCData":{
+            "url": "%losc.events%/LVT151012/",
+            "text": "Open Data page",
+            "type": "web-data"
+        }, "GraceDB1":{
+            "url": "%gracedb.events%/view/G192005",
+            "text": "GraceDB page",
+            "type": "web-data"
+        }, "GraceGB2":{
+            "url": "%gracedb.events%/view/G192004",
+            "text": "GraceDB page",
+            "type": "web-data"
+        }, "SkymapFile":{
+            "url": "%losc.store%/events/LVT151012/P1500227/LALInference_skymap1.fits.gz",
+            "text": "Final Skymap",
+            "type":"file"
+        }, "SkymapAladin":{
+            "url": "%losc.store%/skymapViewer/aladin/index.html#LVT151012:LAL1",
+            "text": "Skymap Viewer",
+            "type":"web"
+        }
+    },
+    "GW151226": {
+        "DetPaper":{
+            "url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.241103",
+            "text": "PRL Paper",
+            "type":"paper"
+        }, "LOSCData":{
+            "url": "%losc.events%/GW151226/",
+            "text": "Open Data page",
+            "type":"web-data"
+        }, "GraceDB1":{
+            "url": "%gracedb.events%/view/G211117",
+            "text": "GraceDB page",
+            "type":"web-data"
+        }, "GraceDB2":{
+            "url": "%gracedb.events%/view/G211182",
+            "text": "GraceDB page",
+            "type":"web-data"
+        }, "SkymapFile":{
+            "url": "%losc.store%/events/GW151226/P1500227/LALInference_skymap_2.fits.gz",
+            "text": "Final Skymap",
+            "type":"file"
+        }, "SkymapAladin":{
+            "url": "%losc.store%/skymapViewer/aladin/index.html#GW151226:LALI2",
+            "text": "Skymap Viewer",
+            "type":"web"
+        }
+    }
+}
