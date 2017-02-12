@@ -1265,7 +1265,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("class", "dot")
       .attr("transform", "translate("+gw.margin.left+","+
         gw.margin.top+")")
-      .attr("r", 7/gw.sksc)
+      .attr("r", Math.min(10.,7/gw.sksc))
       .attr("cx", gw.xMap)
       .attr("cy", gw.yMap)
       .attr("cursor","pointer")
