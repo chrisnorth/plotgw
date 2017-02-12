@@ -972,7 +972,7 @@ GWCatalogue.prototype.makeGraph = function(){
 
     // add the tooltip area to the webpage
     if (!this.redraw){
-        this.tooltip = d3.select("div#graphcontainer").append("div")
+        this.tooltip = d3.select("div#full").append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
     }
