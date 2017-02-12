@@ -234,7 +234,7 @@ button.down{
 .options-title{
     width:100%;
     text-align:center;
-    font-size:2em;
+    font-size:2.5em;
     padding-bottom:10px;
 }
 .options-buttons{
@@ -279,6 +279,40 @@ button.down{
 .options-box.bottom{
     width:40%;
     height:90%;
+}
+@media (max-width:1200px){
+    .options-title.landscape{
+        font-size:2.5em;
+    }
+}
+@media (max-width:1000px){
+    .options-title.landscape{
+        font-size:2.0em;
+    }
+}
+@media (max-width:750px){
+    .options-title.landscape{
+        font-size:1.5em;
+    }
+    .options-title.portrait{
+        font-size:2.0em;
+    }
+}
+@media (max-width:550px){
+    .options-title.landscape{
+        font-size:1.2em;
+    }
+    .options-title.portrait{
+        font-size:1.5em;
+    }
+}
+@media (max-width:350px){
+    .options-title.landscape{
+        font-size:1.0em;
+    }
+    .options-title.portrait{
+        font-size:1.2em;
+    }
 }
 /*@media (max-width:1200px){
     .sketchlab.info, .sketchlab.mtxt, .axis-label{

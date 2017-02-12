@@ -15,7 +15,7 @@ GWCatalogue.prototype.init = function(){
         LVT:'Candidate'}
     this.setStyles();
     this.sketchName="None";
-    this.unitSwitch=true;
+    this.unitSwitch=false;
     this.setScales();
 
 }
@@ -89,9 +89,6 @@ GWCatalogue.prototype.setColumns = function(datadict){
         M1:{icon:"img/primass.svg",avail:true,type:'src'},
         M2:{icon:"img/secmass.svg",avail:true,type:'src'},
         Mfinal:{icon:"img/finalmass.svg",avail:true,type:'src'},
-        // massratio:{
-        //     type:"flt",icon:"img/massratio.svg",
-        //     avail:true,unit:'',border:0.01},
         spinInitEff:{avail:true,icon:"img/initspin.svg",
             border:0.01,type:'src'},
         spinFinal:{avail:true,icon:"img/finalspin.svg",
@@ -166,6 +163,24 @@ GWCatalogue.prototype.setColumns = function(datadict){
             err:2,
             unit:'10^30 kg',
             avail:false},
+        massratio:{type:"derived",
+            name:"Mass ratio",
+            bestfn:function(d){
+                return(d['M1'].best/d['M2'].best)},
+            errfn:function(d){
+                return(
+                    [d['massratio'].best*Math.sqrt(
+                        Math.pow(d['M1'].err[0]/d['M1'].best,2)+
+                        Math.pow(d['M2'].err[0]/d['M2'].best,2)),
+                    d['massratio'].best*Math.sqrt(
+                        Math.pow(d['M1'].err[1]/d['M1'].best,2)+
+                        Math.pow(d['M2'].err[1]/d['M2'].best,2))])},
+            sigfig:2,
+            err:2,
+            unit:'',
+            icon:"img/massratio.svg",
+            avail:true,
+            border:0.01},
         LdistLy:{type:'derived',
             namefn:function(){return(gw.columns.Ldist.name)},
             bestfn:function(d){
@@ -435,16 +450,22 @@ GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
     var gw=this;
     //set scale factor(s)
-    this.xsc = Math.min(1.0,window.innerWidth/1500.)
+    this.xsc = Math.min(1.0,window.innerWidth/1400.)
     this.ysc = Math.min(1.0,window.innerHeight/900.)
     this.scl = Math.min(this.xsc,this.ysc)
     //sketch scale
     if (this.winAspect<1){
-        this.sksc=this.ysc
+        // portrait
+        this.sksc=Math.min(1.0,this.xsc*2.)
+        d3.selectAll(".options-title")
+            .attr("class","options-title portrait");
     }else{
+        // landscape
         this.sksc=this.xsc
+        d3.selectAll(".options-title")
+            .attr("class","options-title landscape");
     }
-    this.sksc=this.scl
+    // this.sksc=this.scl
 
     //graph size & position
     this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left: 35*(1+this.xsc)}
@@ -544,7 +565,10 @@ GWCatalogue.prototype.setScales = function(){
         // far:{xicon:0.6,yicon:0.85,xtxt:0.7,ytxt:0.9}};
 
     //mass icon size, src files, and tool-tip text
-    this.micon = {w:"20%",h:"20%",file:"img/mass-msun.svg"};
+    this.micon = {w:"20%",h:"20%",
+        file:{'M1':"img/primass.svg",
+            'M2':"img/secmass.svg",
+            'Mfinal':"img/finalmass.svg"}};
     //y-position for flown-out masses
     this.yout = -0.3;
 
@@ -556,6 +580,7 @@ GWCatalogue.prototype.setScales = function(){
         time:{lab:["time"]},
         Mchirp:{lab:["Mchirp"],
             labSw:["Mchirpkg"]},
+        massratio:{lab:["massratio"]},
         Ldist:{lab:["Ldist"],
             labSw:["LdistLy"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
@@ -702,7 +727,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         massicondiv.style.top = this.bhpos[bh].yicon;
         massicondiv.style.position = "absolute";
         massicondiv.innerHTML =
-            "<img src='"+this.micon.file+"'>"
+            "<img src='"+this.micon.file[bh]+"'>"
         massicondiv.onmouseover = function(e){
             // console.log(this.id)
             gw.showTooltip(e,this.id.split("icon")[1])}
@@ -711,6 +736,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         masstxtdiv = document.createElement('div');
         masstxtdiv.className = 'sketchlab mtxt';
         masstxtdiv.setAttribute('id','mtxt-'+bh);
+        masstxtdiv.style["font-size"] = (1.5*this.sksc)+"em";
         masstxtdiv.innerHTML = this.labBlank;
         massicondiv.appendChild(masstxtdiv);
         document.getElementById('sketchcontainer').appendChild(massicondiv);
@@ -738,7 +764,7 @@ GWCatalogue.prototype.addLab = function(lab){
     labtxtdiv.className = 'sketchlab info';
     labtxtdiv.setAttribute("id",lab+'txt');
     labtxtdiv.style.height = "100%";
-    labtxtdiv.style["font-size"] = (1.5*gw.sksc)+"em";
+    labtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
     labtxtdiv.innerHTML = '--';
     labtxtdiv.onmouseover = function(e){
         gw.showTooltip(e,this.id.split("txt")[0])}
@@ -856,6 +882,8 @@ GWCatalogue.prototype.redrawLabels = function(){
         // update mass label text
         if (this.unitSwitch){dbh=this.d[bh+'kg']}
         else{dbh=this.d[bh]}
+        document.getElementById("mtxt-"+bh)
+            .style["font-size"] = (1.5*this.sksc)+"em";
         if (this.showerrors){
             console.log('error',bh,this.d[bh]);
             document.getElementById("mtxt-"+bh).innerHTML = dbh.str;
@@ -1134,9 +1162,9 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
-        .style("bottom", (gw.margin.bottom+(15*gw.ysc)))
-        .style("width",40*gw.ysc+"px")
-        .style("height",40*gw.ysc+"px")
+        .style("bottom", (gw.margin.bottom+(15*gw.xsc)))
+        .style("width",40*gw.xsc+"px")
+        .style("height",40*gw.xsc+"px")
     .append("img")
         .attr("id","x-axis-icon")
         .attr("src",gw.getIcon(gw.xvar));
@@ -1170,8 +1198,8 @@ GWCatalogue.prototype.drawGraph = function(){
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
         .style("left", (gw.margin.left-(40*gw.scl))/2.)
-        .style("width",(40*gw.scl)+"px")
-        .style("height",(40*gw.scl)+"px")
+        .style("width",(40*gw.xsc)+"px")
+        .style("height",(40*gw.xsc)+"px")
     .append("img")
         .attr("id","y-axis-icon")
         .attr("src",gw.getIcon(gw.yvar));
@@ -1283,7 +1311,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("class", "dot")
       .attr("transform", "translate("+gw.margin.left+","+
         gw.margin.top+")")
-      .attr("r", 7)
+      .attr("r", 7/gw.sksc)
       .attr("cx", gw.xMap)
       .attr("cy", gw.yMap)
       .attr("cursor","pointer")
