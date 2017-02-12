@@ -89,9 +89,6 @@ GWCatalogue.prototype.setColumns = function(datadict){
         M1:{icon:"img/primass.svg",avail:true,type:'src'},
         M2:{icon:"img/secmass.svg",avail:true,type:'src'},
         Mfinal:{icon:"img/finalmass.svg",avail:true,type:'src'},
-        // massratio:{
-        //     type:"flt",icon:"img/massratio.svg",
-        //     avail:true,unit:'',border:0.01},
         spinInitEff:{avail:true,icon:"img/initspin.svg",
             border:0.01,type:'src'},
         spinFinal:{avail:true,icon:"img/finalspin.svg",
@@ -166,6 +163,24 @@ GWCatalogue.prototype.setColumns = function(datadict){
             err:2,
             unit:'10^30 kg',
             avail:false},
+        massratio:{type:"derived",
+            name:"Mass ratio",
+            bestfn:function(d){
+                return(d['M1'].best/d['M2'].best)},
+            errfn:function(d){
+                return(
+                    [d['massratio'].best*Math.sqrt(
+                        Math.pow(d['M1'].err[0]/d['M1'].best,2)+
+                        Math.pow(d['M2'].err[0]/d['M2'].best,2)),
+                    d['massratio'].best*Math.sqrt(
+                        Math.pow(d['M1'].err[1]/d['M1'].best,2)+
+                        Math.pow(d['M2'].err[1]/d['M2'].best,2))])},
+            sigfig:2,
+            err:2,
+            unit:'',
+            icon:"img/massratio.svg",
+            avail:true,
+            border:0.01},
         LdistLy:{type:'derived',
             namefn:function(){return(gw.columns.Ldist.name)},
             bestfn:function(d){
@@ -565,6 +580,7 @@ GWCatalogue.prototype.setScales = function(){
         time:{lab:["time"]},
         Mchirp:{lab:["Mchirp"],
             labSw:["Mchirpkg"]},
+        massratio:{lab:["massratio"]},
         Ldist:{lab:["Ldist"],
             labSw:["LdistLy"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
