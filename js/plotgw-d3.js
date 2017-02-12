@@ -764,7 +764,7 @@ GWCatalogue.prototype.addLab = function(lab){
     labtxtdiv.className = 'sketchlab info';
     labtxtdiv.setAttribute("id",lab+'txt');
     labtxtdiv.style.height = "100%";
-    labtxtdiv.style["font-size"] = (1.5*gw.sksc)+"em";
+    labtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
     labtxtdiv.innerHTML = '--';
     labtxtdiv.onmouseover = function(e){
         gw.showTooltip(e,this.id.split("txt")[0])}
