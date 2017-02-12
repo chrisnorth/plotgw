@@ -1,0 +1,115 @@
+{
+    "UTC": {
+        "priority": 1, 
+        "sigfig": 0, 
+        "type": "varchar", 
+        "name": "UTC time", 
+        "err": 0
+    }, 
+    "Erad": {
+        "priority": 6, 
+        "sigfig": 2, 
+        "err": 2, 
+        "name": "Radiated energy", 
+        "unit": "Msun c^2"
+    }, 
+    "Mtotal": {
+        "priority": 2, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "Total mass", 
+        "unit": "Msun"
+    }, 
+    "spinFinal": {
+        "priority": 3, 
+        "sigfig": 2, 
+        "name": "Final spin", 
+        "err": 2
+    }, 
+    "Ldist": {
+        "priority": 2, 
+        "sigfig": 2, 
+        "err": 2, 
+        "name": "Luminosity distance", 
+        "unit": "Mpc"
+    }, 
+    "Mchirp": {
+        "priority": 3, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "Chirp mass", 
+        "unit": "Msun"
+    }, 
+    "FAR": {
+        "priority": 1, 
+        "sigfig": 2, 
+        "err": 0, 
+        "name": "False alarm rate", 
+        "unit": "yr^-1"
+    }, 
+    "spinInitEff": {
+        "priority": 4, 
+        "sigfig": 2, 
+        "name": "Effective inspiral spin", 
+        "err": 2
+    }, 
+    "skyArea": {
+        "priority": 5, 
+        "sigfig": 2, 
+        "err": 0, 
+        "name": "Sky Localization", 
+        "unit": "deg^2"
+    }, 
+    "M1": {
+        "priority": 1, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "Primary mass", 
+        "unit": "Msun"
+    }, 
+    "M2": {
+        "priority": 1, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "Secondary mass", 
+        "unit": "Msun"
+    }, 
+    "Mfinal": {
+        "priority": 2, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "Final mass", 
+        "unit": "Msun"
+    }, 
+    "snr": {
+        "priority": 3, 
+        "sigfig": 3, 
+        "name": "Signal to Noise Ratio", 
+        "err": 0
+    }, 
+    "peakL": {
+        "priority": 6, 
+        "sigfig": 2, 
+        "err": 2, 
+        "name": "Peak luminosity", 
+        "unit": "10^56 erg s^-1"
+    }, 
+    "z": {
+        "priority": 2, 
+        "sigfig": 2, 
+        "name": "Source redshift", 
+        "err": 2
+    }, 
+    "sigma": {
+        "priority": 6, 
+        "sigfig": 2, 
+        "name": "Significance", 
+        "err": 0
+    }, 
+    "GPS": {
+        "priority": 4, 
+        "sigfig": 12, 
+        "name": "GPS time", 
+        "err": 0
+    }
+}
