@@ -1,0 +1,115 @@
+{
+    "UTC": {
+        "priority": 1, 
+        "sigfig": 0, 
+        "type": "varchar", 
+        "name": "%data.UTC.name%", 
+        "err": 0
+    }, 
+    "Erad": {
+        "priority": 6, 
+        "sigfig": 2, 
+        "err": 2, 
+        "name": "%data.Erad.name%", 
+        "unit": "%data.Erad.unit%"
+    }, 
+    "Mtotal": {
+        "priority": 2, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "%data.Mtotal.name%", 
+        "unit": "Msun"
+    }, 
+    "spinFinal": {
+        "priority": 3, 
+        "sigfig": 2, 
+        "name": "%data.spinFinal.name%", 
+        "err": 2
+    }, 
+    "Ldist": {
+        "priority": 2, 
+        "sigfig": 2, 
+        "err": 2, 
+        "name": "%data.Ldist.name%", 
+        "unit": "Mpc"
+    }, 
+    "Mchirp": {
+        "priority": 3, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "%data.Mchirp.name%", 
+        "unit": "%data.Mchirp.unit%"
+    }, 
+    "FAR": {
+        "priority": 1, 
+        "sigfig": 2, 
+        "err": 0, 
+        "name": "%data.FAR.name%", 
+        "unit": "%data.FAR.unit%"
+    }, 
+    "spinInitEff": {
+        "priority": 4, 
+        "sigfig": 2, 
+        "name": "Effective inspiral spin", 
+        "err": 2
+    }, 
+    "skyArea": {
+        "priority": 5, 
+        "sigfig": 2, 
+        "err": 0, 
+        "name": "%data.skyArea.name%", 
+        "unit": "%data.skyArea.unit%"
+    }, 
+    "M1": {
+        "priority": 1, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "%data.M1.name%", 
+        "unit": "%data.M1.unit%"
+    }, 
+    "M2": {
+        "priority": 1, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "%data.M2.name%", 
+        "unit": "%data.M2.unit%"
+    }, 
+    "Mfinal": {
+        "priority": 2, 
+        "sigfig": 3, 
+        "err": 2, 
+        "name": "%data.Mfinal.name%", 
+        "unit": "%data.Mfinal.unit%"
+    }, 
+    "snr": {
+        "priority": 3, 
+        "sigfig": 3, 
+        "name": "%data.snr.name%", 
+        "err": 0
+    }, 
+    "peakL": {
+        "priority": 6, 
+        "sigfig": 2, 
+        "err": 2, 
+        "name": "%data.peakL.name%", 
+        "unit": "%data.peakL.unit%"
+    }, 
+    "z": {
+        "priority": 2, 
+        "sigfig": 2, 
+        "name": "%data.z.name%", 
+        "err": 2
+    }, 
+    "sigma": {
+        "priority": 6, 
+        "sigfig": 2, 
+        "name": "%data.sigma.name%", 
+        "err": 0
+    }, 
+    "GPS": {
+        "priority": 4, 
+        "sigfig": 12, 
+        "name": "%data.GPS.name%", 
+        "err": 0
+    }
+}
