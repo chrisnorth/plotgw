@@ -5,7 +5,7 @@
     "data.FAR.name":"False alarm rate",
     "data.FAR.unit":"yr^-1",
     "data.FAR.unit.1per":"1 per",
-    "data.FAR.unit.yrs":"yrs",
+    "data.FAR.unit.yr":"yr",
     "data.FAR.unit.kyr":"thousand yr",
     "data.FAR.unit.Myr":"million yr",
     "data.sigma.name":"Significance",
