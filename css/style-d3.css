@@ -181,27 +181,33 @@ button.down{
 }
 #options-icon, #errors-icon, #info-icon, #help-icon{
     background-color:yellow;
+    transition: background-color 750ms ease-in-out;
+    -moz-transition: background-color 750ms ease-in-out;
+    -webkit-transition: background-color 750ms ease-in-out;
 }
 #options-icon.hidden, #errors-icon.hidden, #info-icon.hidden, #help-icon.hidden{
     opacity:0.5;
     background-color:gray;
+    transition: background-color 750ms ease-in-out;
+    -moz-transition: background-color 750ms ease-in-out;
+    -webkit-transition: background-color 750ms ease-in-out;
 }
 #options-icon img, #errors-icon img, #info-icon img, #help-icon img{
     width:100%;
     cursor:pointer;
 }
-#errors-img.errors-show{
+/*#errors-img.errors-show{
     opacity:1;
     transition: opacity 750ms ease-in-out;
     -moz-transition: opacity 750ms ease-in-out;
     -webkit-transition: opacity 750ms ease-in-out;
-}
-#errors-img.errors-hide{
+}*/
+/*#errors-img.errors-hide{
     opacity:0.3;
     transition: opacity 750ms ease-in-out;
     -moz-transition: opacity 750ms ease-in-out;
     -webkit-transition: opacity 750ms ease-in-out;
-}
+}*/
 #options-close{
     position:absolute;
     width:30px;
