@@ -13,6 +13,7 @@ GWCatalogue.prototype.init = function(){
     this.sketchName="None";
     this.unitSwitch=false;
     this.setScales();
+    this.d=null;
 
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
@@ -20,13 +21,18 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
     // plaintext = plaintext || false;
     // search textIn for %...%\
     re=/\%(.+?)\%/g;
-    match=re.exec(textIn);
+    matches=[]
+    var match=re.exec(textIn);
+    while (match!=null){
+        matches.push(match[1])
+        match=re.exec(textIn)
+    }
     textOut=textIn;
-    if (match){
-        nmatch=match.length-1
-        for (n in match.splice(1,match.length)){
-            mx0=match[n];
-            mx1=mx0.replace(/\%/g,'');
+    if (matches){
+        nmatch=matches.length
+        for (n in matches){
+            mx0='%'+matches[n]+'%';
+            mx1=matches[n];
             if (this.langdict[mx1]){
                 textOut=textOut.replace(mx0,this.langdict[mx1]);
             }else{
@@ -400,11 +406,23 @@ GWCatalogue.prototype.setScales = function(){
         this.sksc=Math.min(1.0,this.xsc*2.)
         d3.selectAll(".options-title")
             .attr("class","options-title portrait");
+        d3.selectAll(".help-title")
+            .attr("class","help-title portrait");
+        d3.selectAll(".help-text")
+            .attr("class","help-text portrait");
+        d3.selectAll(".help-cont-text")
+            .attr("class","help-cont-text portrait");
     }else{
         // landscape
-        this.sksc=this.xsc
+        this.sksc=Math.min(1.0,this.ysc)
         d3.selectAll(".options-title")
             .attr("class","options-title landscape");
+        d3.selectAll(".help-title")
+            .attr("class","help-title landscape");
+        d3.selectAll(".help-text")
+            .attr("class","help-text landscape");
+        d3.selectAll(".help-cont-text")
+            .attr("class","help-cont-text landscape");
     }
     // this.sksc=this.scl
 
@@ -610,25 +628,27 @@ GWCatalogue.prototype.drawSketch = function(){
     swtxtdiv.className = 'sketchlab info';
     swtxtdiv.setAttribute("id",'unitswtxt');
     swtxtdiv.style.height = "100%";
-    swtxtdiv.style["font-size"] = (1.5*gw.sksc)+"em";
+    swtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
     swtxtdiv.innerHTML = this.tl('%tooltip.switchunits%');
     swimgdiv.appendChild(swtxtdiv);
     document.getElementById('labcontainer').appendChild(swimgdiv);
 
     // add title & subtitle to sketch
+    if (this.portrait){fs=(3.0*gw.xsc)}
+    else{fs=(1.5*gw.ysc)}
     this.sketchTitle = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.1))
         .attr("class","sketch-title")
         .attr("text-anchor","middle")
-        .style("font-size",(2.0*gw.sksc)+"em")
+        .style("font-size",fs+"em")
         .html(this.tl("%text.information.title%"));
     this.sketchTitleHint = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.2))
         .attr("class","sketch-subtitle")
         .attr("text-anchor","middle")
-        .style("font-size",(1.5*gw.sksc)+"em")
+        .style("font-size",(0.75*fs)+"em")
         .html(this.tl("%text.information.subtitle%"));
 
     // this.tooltipSk = document.createElement('div');
@@ -676,7 +696,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         masstxtdiv = document.createElement('div');
         masstxtdiv.className = 'sketchlab mtxt';
         masstxtdiv.setAttribute('id','mtxt-'+bh);
-        masstxtdiv.style["font-size"] = (1.5*this.sksc)+"em";
+        masstxtdiv.style["font-size"] = (1.2*this.sksc)+"em";
         masstxtdiv.innerHTML = this.labBlank;
         massicondiv.appendChild(masstxtdiv);
         document.getElementById('sketchcontainer').appendChild(massicondiv);
@@ -775,10 +795,10 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
 
     // update mass label text
     if (this.showerrors){
-        console.log('error',d[bh]);
+        // console.log('error',d[bh]);
         document.getElementById("mtxt-"+bh).innerHTML = this.tl(d[bh].str);
     }else{
-        console.log('noerror',d[bh]);
+        // console.log('noerror',d[bh]);
         document.getElementById("mtxt-"+bh).innerHTML = this.tl(d[bh].strnoerr);
     }
 };
@@ -804,32 +824,36 @@ GWCatalogue.prototype.redrawLabels = function(){
         if (this.unitSwitch){
             if (this.labels[lab].labSw){labs=this.labels[lab].labSw}
         }
-        for (i in labs){
-            if (this.showerrors){
-                labTxt += " "+this.d[labs[i]].str;
-            }else{
-                labTxt += " "+this.d[labs[i]].strnoerr;
+        if (this.d!=null){
+            for (i in labs){
+                if (this.showerrors){
+                    labTxt += " "+this.d[labs[i]].str;
+                }else{
+                    labTxt += " "+this.d[labs[i]].strnoerr;
+                }
+                if (i<labs.length-1){
+                    labTxt += "<br>";
+                }
             }
-            if (i<labs.length-1){
-                labTxt += "<br>";
-            }
+            document.getElementById(lab+"txt").innerHTML = this.tl(labTxt);
         }
-        document.getElementById(lab+"txt").innerHTML = this.tl(labTxt);
     }
     masses=['M1','M2','Mfinal']
     for (m in masses){
         bh=masses[m]
         // update mass label text
-        if (this.unitSwitch){dbh=this.d[bh+'kg']}
-        else{dbh=this.d[bh]}
-        document.getElementById("mtxt-"+bh)
-            .style["font-size"] = (1.5*this.sksc)+"em";
-        if (this.showerrors){
-            console.log('error',bh,this.d[bh]);
-            document.getElementById("mtxt-"+bh).innerHTML = this.tl(dbh.str);
-        }else{
-            console.log('noerror',bh,this.d[bh]);
-            document.getElementById("mtxt-"+bh).innerHTML = this.tl(dbh.strnoerr);
+        if (this.d!=null){
+            if (this.unitSwitch){dbh=this.d[bh+'kg']}
+            else{dbh=this.d[bh]}
+            document.getElementById("mtxt-"+bh)
+                .style["font-size"] = (1.2*this.sksc)+"em";
+            if (this.showerrors){
+                // console.log('error',bh,this.d[bh]);
+                document.getElementById("mtxt-"+bh).innerHTML = this.tl(dbh.str);
+            }else{
+                // console.log('noerror',bh,this.d[bh]);
+                document.getElementById("mtxt-"+bh).innerHTML = this.tl(dbh.strnoerr);
+            }
         }
     }
 }
@@ -1047,6 +1071,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
         // console.log(data);
         gw.optionsOn=false;
+        gw.helpOn=false;
         // console.log('columns');
         gw.makePlot();
         console.log('plotted');
@@ -1109,7 +1134,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis-label")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .attr("x", gw.graphWidth/2)
-        .attr("y", 1.2*(1+gw.ysc)+"em")
+        .attr("y", 1.2*(1+gw.scl)+"em")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.xvar,true));
@@ -1117,15 +1142,15 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
-        .style("bottom", (gw.margin.bottom+(15*gw.xsc)))
-        .style("width",40*gw.xsc+"px")
-        .style("height",40*gw.xsc+"px")
+        .style("bottom", (gw.margin.bottom+(15*gw.scl)))
+        .style("width",40*gw.scl+"px")
+        .style("height",40*gw.scl+"px")
     .append("img")
         .attr("id","x-axis-icon")
         .attr("src",gw.getIcon(gw.xvar));
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
-        .style("font-size",(0.8*(1+gw.ysc))+"em")
+        .style("font-size",(0.8*(1+gw.scl))+"em")
 
     // y-axis
     gw.svg.append("g")
@@ -1144,7 +1169,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("x",-gw.graphHeight/2)
-        .attr("dy", (-25*(1+gw.xsc))+"px")
+        .attr("dy", (-20*(1+gw.scl))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.yvar,true));
@@ -1153,14 +1178,14 @@ GWCatalogue.prototype.drawGraph = function(){
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
         .style("left", (gw.margin.left-(40*gw.scl))/2.)
-        .style("width",(40*gw.xsc)+"px")
-        .style("height",(40*gw.xsc)+"px")
+        .style("width",(40*gw.scl)+"px")
+        .style("height",(40*gw.scl)+"px")
     .append("img")
         .attr("id","y-axis-icon")
         .attr("src",gw.getIcon(gw.yvar));
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
-        .style("font-size",(0.8*(1+gw.xsc))+"em")
+        .style("font-size",(0.8*(1+gw.scl))+"em")
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
@@ -1326,12 +1351,13 @@ GWCatalogue.prototype.drawGraph = function(){
     this.optionsouter = d3.select('#options-outer')
     d3.select("#svg-container").append("div")
         .attr("id","options-icon")
-        .style({"right":gw.margin.right,"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
+        .attr("class","hidden")
+        .style({"right":gw.margin.right+gw.margin.top+10,"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              gw.tooltip.html(gw.tl('%tooltip.toggleoptions%'))
+              gw.tooltip.html(gw.tl('%tooltip.showoptions%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1355,21 +1381,12 @@ GWCatalogue.prototype.drawGraph = function(){
     // add info icon
     d3.select("#svg-container").append("div")
         .attr("id","info-icon")
-        .attr("class","hidden")
         .style({"right":gw.margin.right,"top":0,"width":gw.margin.top,"height":gw.margin.top})
-    .append("img")
-        .attr("src","img/info.svg")
-        .on("click",function(){gw.hideOptions();});
-
-    //add error toggle button
-    d3.select("#svg-container").append("div")
-        .attr("id","errors-icon")
-        .style({"right":gw.margin.right+gw.margin.top+10,"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              gw.tooltip.html(gw.tl('%tooltip.toggleerrors%'))
+              gw.tooltip.html(gw.tl('%tooltip.showinfo%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1382,10 +1399,62 @@ GWCatalogue.prototype.drawGraph = function(){
           //   document.getElementById("sketchcontainer").style.opacity=0.;
         })
     .append("img")
+        .attr("src","img/info.svg")
+        .on("click",function(){gw.hideOptions();gw.hideHelp();});
+
+    //add help icon
+    this.helpbg = d3.select('#help-outer-bg');
+    this.helpouter = d3.select('#help-outer')
+    d3.select("#svg-container").append("div")
+        .attr("id","help-icon")
+        .attr("class","hidden")
+        .style({"right":gw.margin.right+2*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
+        .on("mouseover", function(d) {
+              gw.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              gw.tooltip.html(gw.tl('%tooltip.showhelp%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            gw.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("sketchcontainer").style.opacity=0.;
+        })
+    .append("img")
+        .attr("src","img/help.svg")
+        .on("click",function(){gw.showHelp();});
+    this.helpbg.on("click",function(){gw.hideHelp();});
+    this.helpouter
+        .style("top","200%");
+    this.helpouter.select("#help-close")
+        .on("click",function(){gw.hideHelp();});
+
+
+    //add error toggle button
+    d3.select("#svg-container").append("div")
+        .attr("id","errors-icon")
+        .style({"right":gw.margin.right+3*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            if (gw.showerrors){
+                gw.showTooltipManual("%tooltip.errors.off%");
+            }else{
+                gw.showTooltipManual("%tooltip.errors.on%");
+            }
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        })
+
+    .append("img")
         .attr("src","img/errors.svg")
         .attr("class","errors-show")
         .attr("id","errors-img")
-        .on("click",function(){gw.toggleErrors()});
+        .on("click",function(){gw.toggleErrors();gw.hideTooltipManual();});
 
 }
 GWCatalogue.prototype.moveHighlight = function(d){
@@ -1502,10 +1571,14 @@ GWCatalogue.prototype.toggleErrors = function(){
     // console.log(this.svgcont.select("#errors-img"));
     if (this.showerrors){
         this.showerrors = false;
+        this.svgcont.select("#errors-icon ")
+            .attr("class","hidden")
         this.svgcont.select("#errors-img ")
             .attr("class","errors-hide")
     }else{
         this.showerrors = true;
+        this.svgcont.select("#errors-icon ")
+            .attr("class","")
         this.svgcont.select("#errors-img")
             .attr("class","errors-show")
     }
@@ -1708,6 +1781,7 @@ GWCatalogue.prototype.addOptions = function(){
 
 GWCatalogue.prototype.showOptions = function(){
     //show options
+    if (this.helpOn){this.hideHelp()}
     this.optionsOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -1731,8 +1805,9 @@ GWCatalogue.prototype.showOptions = function(){
         document.getElementById('options-x').classList.remove('bottom')
         document.getElementById('options-y').classList.remove('bottom')
     }
-    document.getElementById("options-icon").classList.add("hidden");
-    document.getElementById("info-icon").classList.remove("hidden");
+    document.getElementById("options-icon").classList.remove("hidden");
+    document.getElementById("info-icon").classList.add("hidden");
+    document.getElementById("help-icon").classList.add("hidden");
 }
 GWCatalogue.prototype.hideOptions = function(d) {
     // hide options box
@@ -1748,8 +1823,91 @@ GWCatalogue.prototype.hideOptions = function(d) {
     //   .style("opacity",0);
     this.optionsbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
-    document.getElementById("options-icon").classList.remove("hidden");
+    document.getElementById("options-icon").classList.add("hidden");
+    if (this.helpOn){
+        document.getElementById("help-icon").classList.remove("hidden");
+    }else{
+        document.getElementById("info-icon").classList.remove("hidden");
+    }
+}
+GWCatalogue.prototype.addHelp = function(){
+    // add help to panel
+    d3.select("#help-title")
+        .html(this.tl("%text.help.title%"))
+    d3.select("#help-text")
+        .html(this.tl("%text.help.text%%text.help.about%"));
+    d3.select("#help-help-text")
+        .html(this.tl("%text.help.help%"));
+    d3.select("#help-settings-text")
+        .html(this.tl("%text.help.settings%"));
+    d3.select("#help-errors-text")
+        .html(this.tl("%text.help.errors%"));
+    d3.select("#help-info-text")
+        .html(this.tl("%text.help.info%"));
+    if (this.portrait){
+        d3.select('.help-title')
+            .style("font-size",(5.0*this.xsc)+"em")
+        d3.selectAll('.help-cont-text')
+            .style("font-size",(2.0*this.xsc)+"em")
+        d3.selectAll('.help-text')
+            .style("font-size",(2.0*this.xsc)+"em")
+    }else{
+        d3.select('.help-title')
+            .style("font-size",(2.5*this.ysc)+"em")
+        d3.selectAll('.help-cont-text')
+            .style("font-size",(1.2*this.ysc)+"em")
+        d3.selectAll('.help-text')
+            .style("font-size",(1.2*this.ysc)+"em")
+    }
+}
+GWCatalogue.prototype.showHelp = function(){
+    //show options
+    if (this.optionsOn){this.hideOptions();}
+    this.helpOn=true;
+    // fade in semi-transparent background layer (greys out image)
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style({"opacity":0.5});
+    this.helpbg.style("height","100%");
+    //fade in infopanel
+    this.helpouter = d3.select('#help-outer')
+    this.helpouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    // this.infopanel.html(this.iptext(d));
+    this.helpouter.style("left", document.getElementById('infoouter').offsetLeft-1)
+        .style("top", document.getElementById('infoouter').offsetTop-1)
+        .style("width",document.getElementById('infoouter').offsetWidth-2)
+        .style("height",document.getElementById('infoouter').offsetHeight-22);
+    if (this.portrait){
+        document.getElementById('help-block-text').classList.add('bottom')
+        document.getElementById('help-block-icons').classList.add('bottom')
+    }else{
+        document.getElementById('help-block-text').classList.remove('bottom')
+        document.getElementById('help-block-icons').classList.remove('bottom')
+    }
+    document.getElementById("options-icon").classList.add("hidden");
     document.getElementById("info-icon").classList.add("hidden");
+    document.getElementById("help-icon").classList.remove("hidden");
+}
+GWCatalogue.prototype.hideHelp = function(d) {
+    // hide options box
+    this.helpOn=false;
+    // fade out infopanel
+    this.helpouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.helpouter.style("top","200%");
+    // fade out semi-transparent background
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style("opacity",0);
+    this.helpbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
+    document.getElementById("options-icon").classList.add("hidden");
+    document.getElementById("info-icon").classList.remove("hidden");
+    document.getElementById("help-icon").classList.add("hidden");
 }
 GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     // add tooltip to sketch
@@ -1762,8 +1920,10 @@ GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     ttSk.style.height = "auto";
     if (this.columns[tttxt]){
         ttSk.innerHTML = this.tl(this.columns[tttxt].name);
-    }else{
+    }else if(this.ttlabels[tttxt]){
         ttSk.innerHTML = this.tl(this.ttlabels[tttxt]);
+    }else{
+        ttSk.innerHTML = this.tl(tttxt);
     }
 }
 GWCatalogue.prototype.hideTooltip = function(){
@@ -1772,15 +1932,36 @@ GWCatalogue.prototype.hideTooltip = function(){
     ttSk.style.transitionDuration = "500ms";
     ttSk.style.opacity = 0.;
 }
+GWCatalogue.prototype.showTooltipManual = function(txt){
+    var gw=this;
+    gw.tooltip.transition()
+        .duration(200)
+        .style("opacity", .9);
+    gw.tooltip.html(gw.tl(txt))
+        .style("left", (d3.event.pageX + 10) + "px")
+        .style("top", (d3.event.pageY-10) + "px")
+        .style("width","auto")
+        .style("height","auto");
+}
+GWCatalogue.prototype.hideTooltipManual = function(){
+    gw.tooltip.transition()
+        .duration(500)
+        .style("opacity", 0);
+}
 GWCatalogue.prototype.makePlot = function(){
     // make plot (calls other function)
     this.drawGraph();
     this.drawSketch();
     // this.addButtons();
     this.addOptions();
+    this.addHelp();
     if (this.optionsOn){
         // console.log('showing options')
         this.showOptions();
+    }
+    if (this.helpOn){
+        // console.log('showing options')
+        this.showHelp();
     }
 }
 GWCatalogue.prototype.replot = function(){
@@ -1797,6 +1978,8 @@ GWCatalogue.prototype.replot = function(){
     this.drawGraph();
     this.drawSketch();
     if (this.optionsOn){this.showOptions();}
+    this.addHelp();
+    if (this.helpOn){this.showHelp();}
     this.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.sketchName){
