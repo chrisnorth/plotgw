@@ -17,7 +17,7 @@ GWCatalogue.prototype.init = function(){
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
     // translate text given dict
-    plaintext = plaintext || false;
+    // plaintext = plaintext || false;
     // search textIn for %...%\
     re=/\%(.+?)\%/g;
     match=re.exec(textIn);
@@ -124,20 +124,21 @@ GWCatalogue.prototype.setColumns = function(datadict){
         UTC:{avail:false,type:'src',strfn:function(d){return('')}},
         FAR:{avail:false,type:'src',icon:"img/dice.svg",
             strfn:function(d){
-                if (1/d.FAR.best<100){
-                    strOut="%data.FAR.unit.1per% "+(1./d.FAR.best).toFixed(1)+
-                    "<br/>%data.FAR.unit.yr%";
-                }else if (1/d.FAR.best<1000){
-                    strOut="%data.FAR.unit.1per% "+(1./d.FAR.best).toFixed(0)+
-                    "<br/>%data.FAR.unit.yr%";
+                if (1/d.FAR.best<1000){
+                    strOut="%data.FAR.unit.1per%<br/>"+
+                    (1./d.FAR.best).toPrecision(gw.columns.FAR.sigfig)+
+                    " %data.FAR.unit.yr%";
+                // }else if (1/d.FAR.best<1000){
+                //     strOut="%data.FAR.unit.1per%<br/>"+(1./d.FAR.best).toFixed(0)+
+                //     "<%data.FAR.unit.yr%";
                 }else if (1/d.FAR.best<1e6){
-                    strOut="%data.FAR.unit.1per% "
-                    +((Math.round((1./d.FAR.best)/100)*100)/1e3).toFixed(1)+
-                    "<br/>%data.FAR.unit.kyr%";
+                    strOut="%data.FAR.unit.1per%<br/>"
+                    +((1./d.FAR.best)/1e3).toPrecision(gw.columns.FAR.sigfig)+
+                    " %data.FAR.unit.kyr%";
                 }else{
-                    strOut="%data.FAR.unit.1per% "
-                    +((Math.round((1./d.FAR.best)/1e5)*1e5)/1.e6).toFixed(1)+
-                    "<br/>%data.FAR.unit.Myr%";
+                    strOut="%data.FAR.unit.1per%<br/>"
+                    +((1./d.FAR.best)/1e6).toPrecision(gw.columns.FAR.sigfig)+
+                    " %data.FAR.unit.Myr%";
                 }
                 return(gw.tl(strOut));
             }
@@ -254,9 +255,9 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 day=d.UTC.best.split('T')[0].split('-')[0];
                 month=months[parseInt(d['UTC'].best.split('T')[0].split('-')[1])-1];
                 year=d['UTC'].best.split('T')[0].split('-')[2];
-                return day+' '+month+'<br/>'+year;
+                return(day+'<br/>'+month+' '+year);
             },
-            name:'%text.date%',
+            name:'%tooltip.detdate%',
             icon:"img/date.svg"},
         time:{
             type:'derived',
@@ -264,7 +265,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 return(d['UTC'].best.split('T')[1]+"<br/>UT")
             },
             icon:"img/time.svg",
-            name:'%text.time%'},
+            name:'%tooltip.dettime%'},
         data:{
             type:'derived',
             strfn:function(d){
@@ -1557,7 +1558,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         gw.svg.select(".x-axis.axis-label")
             .transition()
             .duration(750)
-            .text(gw.getLabelUnit(gw.xvar));
+            .text(gw.getLabelUnit(gw.xvar,true));
         gw.svgcont.select("#x-axis-icon")
             .attr("src",gw.getIcon(gw.xvar));
         gw.svg.select(".y-axis.axis-line")
@@ -1616,7 +1617,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         gw.svg.selectAll(".y-axis.axis-label")
             .transition()
             .duration(750)
-            .text(gw.getLabelUnit(gw.yvar));
+            .text(gw.getLabelUnit(gw.yvar),true);
         gw.svgcont.select("#y-axis-icon")
             .attr("src",gw.getIcon(gw.yvar));
         gw.svg.select(".x-axis.axis-line")
