@@ -14,6 +14,7 @@ GWCatalogue.prototype.init = function(){
     this.unitSwitch=false;
     this.setScales();
     this.d=null;
+    this.debug=false;
 
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
@@ -36,7 +37,7 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
             if (this.langdict[mx1]){
                 textOut=textOut.replace(mx0,this.langdict[mx1]);
             }else{
-                console.log('ERROR: "'+mx1+'" not found in dictionary');
+                if(this.debug){console.log('ERROR: "'+mx1+'" not found in dictionary');}
             }
         }
     }
@@ -344,7 +345,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         info.style["margin-left"]="5%";
         this.sketchWidth = 0.45*this.sketchFullWidth;
         this.sketchHeight = this.sketchFullHeight;
-        console.log('portrait:',this.sketchHeight,this.sketchFullHeight);
+        if(this.debug){console.log('portrait:',this.sketchHeight,this.sketchFullHeight);}
         this.labWidth = 0.5*this.sketchFullWidth;
         this.labHeight = this.sketchFullHight;
         //this.labcontWidth="45%";
@@ -363,7 +364,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         info.style["margin-left"]=0;
         this.sketchWidth = this.sketchFullWidth;
         this.sketchHeight = 0.5*this.sketchFullHeight;
-        console.log('landscape:',this.sketchHeight,this.sketchFullHeight);
+        if(this.debug){console.log('landscape:',this.sketchHeight,this.sketchFullHeight);}
         this.sketchAspect = this.sketchFullWidth/this.sketchFullHeight;
         this.labWidth = this.sketchFullWidth;
         this.labHeight = 0.5*this.sketchFullHight;
@@ -937,7 +938,7 @@ GWCatalogue.prototype.tttext = function(d){
 
 GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
-    console.log('formatData',d.name);
+    if (this.debug){console.log('formatData',d.name);}
     var gw=this;
     for (col in gw.columns){
         // console.log(col,gw.columns[col].type);
@@ -1051,7 +1052,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     var gw = this;
     gw.fileIn="json/bbh-test_en-US.json"
     d3.json(gw.fileIn, function(error, dataIn) {
-        console.log(gw.fileIn);
+        if(this.debug){console.log(gw.fileIn);}
         gw.data=[]
         gw.langdict=dataIn.lang
         for (e in dataIn.events.data){
@@ -1064,7 +1065,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
             dataIn.events.data[e].link=link;
             gw.data.push(dataIn.events.data[e]);
         }
-        console.log('data:',gw.data)
+        if(this.debug){console.log('data:',gw.data);}
         gw.setlang();
         gw.setColumns(dataIn.datadict);
         //console.log('columns:',gw.columns);
@@ -1074,7 +1075,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.helpOn=false;
         // console.log('columns');
         gw.makePlot();
-        console.log('plotted');
+        if(this.debug){console.log('plotted');}
         // gw.initButtons();
 
         // console.log('gw.data',gw.data);
@@ -1097,7 +1098,7 @@ GWCatalogue.prototype.drawGraph = function(){
     // gw.setSvgScales();
     gw.makeGraph();
     data = gw.data;
-    console.log('plotting ',gw.xvar,' vs ',gw.yvar);
+    if(this.debug){console.log('plotting ',gw.xvar,' vs ',gw.yvar);}
     // console.log(this.graphHeight);
     // console.log('drawGraph');
     // console.log('this.data',this.data);
@@ -1279,10 +1280,10 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("cy",gw.yScale(0))
         .attr("r",15)
     if (gw.d){
-        console.log('current gwcat.d:',gw.d)
+        if(this.debug){console.log('current gwcat.d:',gw.d);}
         gw.initHighlight(gw.d);
     }else{
-        console.log('no gwcat.d')
+        if(this.debug){console.log('no gwcat.d');}
     }
     // draw dots
     gw.svg.selectAll(".dot")
@@ -1995,9 +1996,9 @@ GWCatalogue.prototype.replot = function(){
 //labels to add and keep updated
 var gwcat = new GWCatalogue
 gwcat.init();
-console.log('initialised')
+if(this.debug){console.log('initialised');}
 gwcat.drawGraphInit();
-console.log('plotted')
+if(this.debug){console.log('plotted');}
 window.addEventListener("resize",function(){
     gwcat.replot();
 
