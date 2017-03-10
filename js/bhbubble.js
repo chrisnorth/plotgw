@@ -105,8 +105,7 @@ BHBubble.prototype.tN = function(key){
     var systems = {
             devanagari: 2406, tamil: 3046, kannada:  3302,
             telugu: 3174, marathi: 2406, malayalam: 3430,
-            oriya: 2918, gurmukhi: 2662, nagari: 2534, gujarati: 2790,
-            chinese: 38646,
+            oriya: 2918, gurmukhi: 2662, nagari: 2534, gujarati: 2790
         };
     if (!systems.hasOwnProperty(this.langdict.name.toLowerCase())){return key;}
     zero = 48; // char code for Arabic zero
@@ -706,7 +705,7 @@ BHBubble.prototype.addLang = function(){
         "fr":{code:"fr",name:"Francais (fr)"},
         "or":{code:"or",name:"&#2835;&#2849;&#2876;&#2879;&#2822; (or)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
-        "zhhk":{code:"zhhk",name:"&#20013;&#25991; (zh-hk)"}
+        "zhhk":{code:"zhhk",name:"繁體中文(香港) (zh-hk)"}
     }
     var bh=this;
     this.langdiv = d3.select("#lang-button");
