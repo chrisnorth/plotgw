@@ -703,8 +703,9 @@ BHBubble.prototype.addLang = function(){
     this.langs={
         "en":{code:"en",name:"English (en)"},
         "fr":{code:"fr",name:"Francais (fr)"},
-        "or":{code:"or",name:"&#2835;&#2849;&#2876;&#2879;&#2822; (or)"},
+        "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
+        "cy":{code:"cy",name:"Cymraeg (cy)"},
         "zhhk":{code:"zhhk",name:"繁體中文(香港) (zh-hk)"}
     }
     var bh=this;
