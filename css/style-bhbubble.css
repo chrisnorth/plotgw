@@ -80,9 +80,12 @@ a{
     padding:5px;
     text-align:left;
 }
-#lang-list span.current{
+span.lang-item.current{
     font-weight: bold;
     color:yellow;
+}
+span.lang-item.current:before{
+    content:"▶ "
 }
 #lang-button.show #lang-list{
     display:block;

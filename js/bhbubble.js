@@ -701,11 +701,11 @@ BHBubble.prototype.drawBubbles = function(){
 }
 BHBubble.prototype.addLang = function(){
     this.langs={
+        "cy":{code:"cy",name:"Cymraeg (cy)"},
         "en":{code:"en",name:"English (en)"},
         "fr":{code:"fr",name:"Francais (fr)"},
-        "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
-        "cy":{code:"cy",name:"Cymraeg (cy)"},
+        "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
         "zhhk":{code:"zhhk",name:"繁體中文(香港) (zh-hk)"}
     }
     var bh=this;
@@ -718,11 +718,9 @@ BHBubble.prototype.addLang = function(){
         langspan=document.createElement("span");
         var langtxt="";
         langtxt = langtxt + bh.langs[lang].name;
+        langspan.classList.add("lang-item");
         if(bh.langs[lang].code==bh.lang){
-            langtxt = "▶ " + langtxt;
             langspan.classList.add("current");
-        }else{
-            langtxt = langtxt;
         }
         langspan.innerHTML = langtxt;
         langspan.setAttribute("id",bh.langs[lang].code);
