@@ -717,11 +717,13 @@ BHBubble.prototype.addLang = function(){
     for(lang in this.langs){
         langspan=document.createElement("span");
         var langtxt="";
-        if(bh.langs[lang].code==bh.lang){
-            langtxt = langtxt + "> ";
-            langspan.classList.add("current");
-        }
         langtxt = langtxt + bh.langs[lang].name;
+        if(bh.langs[lang].code==bh.lang){
+            langtxt = "▶ " + langtxt;
+            langspan.classList.add("current");
+        }else{
+            langtxt = langtxt;
+        }
         langspan.innerHTML = langtxt;
         langspan.setAttribute("id",bh.langs[lang].code);
         langspan.addEventListener("click",function(){
@@ -729,12 +731,15 @@ BHBubble.prototype.addLang = function(){
         })
         langspan.addEventListener("mouseover",function(e){
                 bh.showControlTooltip(e,"Switch to "+bh.langs[this.getAttribute("id")].name);})
+        langspan.addEventListener("mouseout",function(e){
+                bh.hideControlTooltip();})
         bh.langlist.appendChild(langspan);
     }
 
 }
 BHBubble.prototype.toggleLangList = function(){
     $("#lang-button").toggleClass("show");
+    $("#lang-label").toggleClass("show");
 }
 BHBubble.prototype.addHelp = function(){
     // set up help divs
