@@ -31,7 +31,13 @@ BHBubble.prototype.getUrlVars = function(){
 BHBubble.prototype.makeUrl = function(newKeys){
     // construct new URL with replacement queries if necessary
     newUrlVars = this.urlVars;
-    for (key in newKeys){newUrlVars[key]=newKeys[key];}
+    for (key in newKeys){
+        if (!newKeys[key]){
+            delete newUrlVars[key];
+        }else{
+            newUrlVars[key]=newKeys[key];
+        }
+    }
     newUrl = this.url+'?';
     for (key in newUrlVars){
         newUrl=newUrl + key+'='+newUrlVars[key]+'&';
@@ -342,25 +348,66 @@ BHBubble.prototype.filterData = function(data,filterType){
 
     return data;
 }
-
+BHBubble.prototype.dataLoaded = function(){
+    if (this.nloaded>=2){
+        return(true);
+    }else{
+        return(false);
+    }
+}
 BHBubble.prototype.loadData = function(){
     //load data - then call next functions
+    this.inputFileGwDefault="csv/bhcat_gw.csv"
     if (this.langdict.hasOwnProperty('inputFile')){
-        this.inputFile="csv/"+this.langdict.inputFile;
-    }else{this.inputFile="csv/bhcat.csv";}
+        this.inputFileGw="csv/"+this.langdict.inputFile;
+    }else{
+        this.inputFileGw=this.inputFileGwDefault;
+    }
+    this.inputFileXray="csv/bhcat_xray.csv";
+    if (this.urlVars.infile){
+        this.inputFileGw=this.urlVars.infile;
+    }
     // console.log('file',this.inputFile);
     var bh=this;
-    d3.csv(this.inputFile, function(error, data){
+    bh.nloaded=0
+    console.log(this.inputFileGw);
+    d3.csv(this.inputFileGw, function(error, data){
+        if (error){
+            if (bh.inputFileGw==bh.inputFileGwDefault){
+                alert("Fatel error loading input file: '"+bh.inputFileGw+"'. Sorry!")
+            }else{
+                alert("Problem loading input file: '"+bh.inputFileGw+"'. Reverting to default '"+bh.inputFileGwDefault+"'.");
+                window.location.replace(bh.makeUrl({'infile':null}));
+            }
+        }
         data= bh.filterData(data,bh.filterType);
-        bh.data = data;
+        bh.dataGw = data;
+        bh.nloaded++;
         //call next functions
-        bh.formatData(bh.valueCol)
-        bh.drawBubbles();
+        if (bh.dataLoaded()){
+            bh.formatData(bh.valueCol)
+            bh.drawBubbles();
+        }
+    })
+    d3.csv(this.inputFileXray, function(error, data){
+        if (error){alert("Fatal error loading input file: '"+bh.inputFileXray+"'. Sorry!")}
+        data= bh.filterData(data,bh.filterType);
+        bh.dataXray = data;
+        bh.nloaded++;
+        //call next functions
+        if (bh.dataLoaded()){
+            bh.formatData(bh.valueCol)
+            bh.drawBubbles();
+        }
     })
 }
 BHBubble.prototype.formatData = function(valueCol){
     // Calculate errors and make links between black hole mergers
     var bh=this;
+    bh.data=bh.dataGw;
+    for (i in bh.dataXray){
+        bh.data.push(bh.dataXray[i]);
+    }
     //convert numerical values from strings to numbers
     //bubbles needs very specific format, convert data to this.
     this.data.forEach(function(d){
