@@ -374,7 +374,7 @@ BHBubble.prototype.loadData = function(){
     d3.csv(this.inputFileGw, function(error, data){
         if (error){
             if (bh.inputFileGw==bh.inputFileGwDefault){
-                alert("Fatel error loading input file: '"+bh.inputFileGw+"'. Sorry!")
+                alert("Fatal error loading input file: '"+bh.inputFileGw+"'. Sorry!")
             }else{
                 alert("Problem loading input file: '"+bh.inputFileGw+"'. Reverting to default '"+bh.inputFileGwDefault+"'.");
                 window.location.replace(bh.makeUrl({'infile':null}));
