@@ -1152,7 +1152,7 @@ BHBubble.prototype.iptext = function(d){
         // text = text+ "<span class='info'>X-ray detection</span>";
         //companion
         text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-            this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType);
+            this.t(d.compType)+" ("+this.tN(d.compMass)+" M<sub>&#x2609;</sub>) ";
         if (d.refcomp!="-"){text = text +
             " <sup>["+this.tN(rx)+"]</sup>";rct=rx;rx++;}else{rct=false;}
         if (d.refcompmass!="-"){text = text +
@@ -1178,7 +1178,7 @@ BHBubble.prototype.iptext = function(d){
             " ("+this.t(d.BHtype)+")</span>";
         if (d.compType!="None"){
             text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-                this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType)+"</span>";
+                this.t(d.compType)+" ("+this.tN(d.compMass)+" M<sub>&#x2609;</sub>) "+"</span>";
         }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
         text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.tN(d.distance)+
             " "+this.t("million light years")+"</span>";
