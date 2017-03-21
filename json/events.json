@@ -1,0 +1,138 @@
+{
+    "data":{
+        "GW150914": {
+            "M1": {"best":36.2, "err":[5.2, 3.8], "ref":"DetPaper"},
+            "M2": {"best":29.1, "err":[3.7, 4.4], "ref":"DetPaper"},
+            "z": {"best":0.09, "err":[0.03, 0.04], "ref":"DetPaper"},
+            "spinFinal": {"best":0.68, "err":[0.05, 0.06], "ref":"DetPaper"},
+            "sigma": {"best":5.3, "ref":"DetPaper"},
+            "Mfinal": {"best":62.3, "err":[3.7, 3.1], "ref":"DetPaper"},
+            "Erad": {"best":3.0, "err":[0.5, 0.4], "ref":"DetPaper"},
+            "FAR": {"best":6e-07, "ref":"DetPaper"},
+            "spinInitEff": {"best":-0.06, "err":[0.14, 0.14], "ref":"DetPaper"},
+            "GPS": {"best":1126259462.0, "ref":"DetPaper"},
+            "Mtotal": {"best":65.3, "err":[4.1, 3.4], "ref":"DetPaper"},
+            "UTC": {"best":"2015-09-14T09:50:45", "ref":"DetPaper"},
+            "skyArea": {"best":230, "ref":"DetPaper"},
+            "peakL": {"best":3.6, "err":[0.5, 0.4], "ref":"DetPaper"},
+            "snr": {"best":23.7, "ref":"DetPaper"},
+            "Mchirp": {"best":28.1, "err":[1.8, 1.5], "ref":"DetPaper"},
+            "Ldist": {"best":420, "err":[150, 180], "ref":"DetPaper"}
+        },
+        "LVT151012": {
+            "M1": {"best":23, "err":[18, 6]},
+            "M2": {"best":13, "err":[4, 5]},
+            "z": {"best":0.2, "err":[0.09, 0.09]},
+            "spinFinal": {"best":0.66, "err":[0.09, 0.1]},
+            "sigma": {"best":1.7},
+            "Mfinal": {"best":35, "err":[14, 4]},
+            "Erad": {"best":1.5, "err":[0.3, 0.4]},
+            "FAR": {"best":0.37},
+            "spinInitEff": {"best":0.0, "err":[0.3, 0.2]},
+            "GPS": {"best":1128678900.44},
+            "Mtotal": {"best":37, "err":[13, 4]},
+            "UTC": {"best":"2015-10-12T09:54:43.44"},
+            "skyArea": {"best":1600},
+            "peakL": {"best":3.1, "err":[0.8, 1.8]},
+            "snr": {"best":9.7},
+            "Mchirp": {"best":15.1, "err":[1.4, 1.1]},
+            "Ldist": {"best":1000, "err":[500, 500]}
+        },
+        "GW151226": {
+            "M1": {"best":14.2, "err":[8.3, 3.7]},
+            "M2": {"best":7.5, "err":[2.3, 2.3]},
+            "z": {"best":0.09, "err":[0.03, 0.04]},
+            "spinFinal": {"best":0.74, "err":[0.06, 0.06]},
+            "sigma": {"best":5.3},
+            "Mfinal": {"best":20.8, "err":[6.1, 1.7]},
+            "Erad": {"best":1.0, "err":[0.1, 0.2]},
+            "FAR": {"best":6e-07},
+            "spinInitEff": {"best":0.21, "err":[0.2, 0.1]},
+            "GPS": {"best":1135136350.65},
+            "Mtotal": {"best":21.8, "err":[5.9, 1.7]},
+            "UTC": {"best":"2015-12-26T03:38:53.65"},
+            "skyArea": {"best":850},
+            "peakL": {"best":3.3, "err":[0.8, 1.6]},
+            "snr": {"best":13.0},
+            "Mchirp": {"best":8.9, "err":[0.3, 0.3]},
+            "Ldist": {"best":440, "err":[180, 190]}
+        }
+    },
+    "links":{
+        "GW150914": {
+            "DetPaper":{
+                "url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102",
+                "text": "PRL Paper",
+                "type": "paper"
+            }, "LOSCData":{
+                "url": "%domain.losc.events%/GW150914/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }, "GraceDB":{
+                "url": "%domain.gracedb.events%/view/G184098",
+                "text": "GraceDB page",
+                "type": "web-data"
+            }, "SkymapFile":{
+                "url": "%domain.losc.store%/events/GW150914/P1500227/LALInference_skymap.fits.gz",
+                "text": "Final Skymap",
+                "type": "file"
+            }, "SkymapAladin":{
+                "url": "%domain.losc.store%/skymapViewer/aladin/index.html#GW150914:LALI",
+                "text": "Skymap Viewer",
+                "type": "web"
+            }
+        },
+        "LVT151012": {
+            "O1BBH":{
+                "url":"LINK"
+            },"LOSCData":{
+                "url": "%domain.losc.events%/LVT151012/",
+                "text": "Open Data page",
+                "type": "web-data"
+            }, "GraceDB1":{
+                "url": "%domain.gracedb.events%/view/G192005",
+                "text": "GraceDB page",
+                "type": "web-data"
+            }, "GraceGB2":{
+                "url": "%domain.gracedb.events%/view/G192004",
+                "text": "GraceDB page",
+                "type": "web-data"
+            }, "SkymapFile":{
+                "url": "%domain.losc.store%/events/LVT151012/P1500227/LALInference_skymap1.fits.gz",
+                "text": "Final Skymap",
+                "type":"file"
+            }, "SkymapAladin":{
+                "url": "%domain.losc.store%/skymapViewer/aladin/index.html#LVT151012:LAL1",
+                "text": "Skymap Viewer",
+                "type":"web"
+            }
+        },
+        "GW151226": {
+            "DetPaper":{
+                "url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.241103",
+                "text": "PRL Paper",
+                "type":"paper"
+            }, "LOSCData":{
+                "url": "%domain.losc.events%/GW151226/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }, "GraceDB1":{
+                "url": "%domain.gracedb.events%/view/G211117",
+                "text": "GraceDB page",
+                "type":"web-data"
+            }, "GraceDB2":{
+                "url": "%domain.gracedb.events%/view/G211182",
+                "text": "GraceDB page",
+                "type":"web-data"
+            }, "SkymapFile":{
+                "url": "%domain.losc.store%/events/GW151226/P1500227/LALInference_skymap_2.fits.gz",
+                "text": "Final Skymap",
+                "type":"file"
+            }, "SkymapAladin":{
+                "url": "%domain.losc.store%/skymapViewer/aladin/index.html#GW151226:LALI2",
+                "text": "Skymap Viewer",
+                "type":"web"
+            }
+        }
+    }
+}

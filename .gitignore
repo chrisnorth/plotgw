@@ -6,4 +6,4 @@ analytics.js
 # C extensions
 *.so
 .DS_Store
-
+dev/*

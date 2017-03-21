@@ -67,6 +67,7 @@ BHBubble.prototype.loadLang = function(lang){
         dataType: 'json',
         error:function(data){
             alert('Error loading language '+_bh.lang+'. Reverting to English as default');
+            console.log(data);
             //navigate to same page, but lang="en"
             window.location.replace(_bh.makeUrl({'lang':'en'}));
         },
@@ -700,10 +701,12 @@ BHBubble.prototype.drawBubbles = function(){
 }
 BHBubble.prototype.addLang = function(){
     this.langs={
+        "cy":{code:"cy",name:"Cymraeg (cy)"},
         "en":{code:"en",name:"English (en)"},
         "fr":{code:"fr",name:"Francais (fr)"},
-        "or":{code:"or",name:"&#2835;&#2849;&#2876;&#2879;&#2822; (or)"},
-        "hu":{code:"hu",name:"Magyar (hu)"}
+        "hu":{code:"hu",name:"Magyar (hu)"},
+        "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
+        "zhhk":{code:"zhhk",name:"繁體中文(香港) (zh-hk)"}
     }
     var bh=this;
     this.langdiv = d3.select("#lang-button");
@@ -714,11 +717,11 @@ BHBubble.prototype.addLang = function(){
     for(lang in this.langs){
         langspan=document.createElement("span");
         var langtxt="";
+        langtxt = langtxt + bh.langs[lang].name;
+        langspan.classList.add("lang-item");
         if(bh.langs[lang].code==bh.lang){
-            langtxt = langtxt + "> ";
             langspan.classList.add("current");
         }
-        langtxt = langtxt + bh.langs[lang].name;
         langspan.innerHTML = langtxt;
         langspan.setAttribute("id",bh.langs[lang].code);
         langspan.addEventListener("click",function(){
@@ -726,12 +729,15 @@ BHBubble.prototype.addLang = function(){
         })
         langspan.addEventListener("mouseover",function(e){
                 bh.showControlTooltip(e,"Switch to "+bh.langs[this.getAttribute("id")].name);})
+        langspan.addEventListener("mouseout",function(e){
+                bh.hideControlTooltip();})
         bh.langlist.appendChild(langspan);
     }
 
 }
 BHBubble.prototype.toggleLangList = function(){
     $("#lang-button").toggleClass("show");
+    $("#lang-label").toggleClass("show");
 }
 BHBubble.prototype.addHelp = function(){
     // set up help divs
@@ -1146,7 +1152,7 @@ BHBubble.prototype.iptext = function(d){
         // text = text+ "<span class='info'>X-ray detection</span>";
         //companion
         text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-            this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType);
+            this.t(d.compType)+" ("+this.tN(d.compMass)+" M<sub>&#x2609;</sub>) ";
         if (d.refcomp!="-"){text = text +
             " <sup>["+this.tN(rx)+"]</sup>";rct=rx;rx++;}else{rct=false;}
         if (d.refcompmass!="-"){text = text +
@@ -1172,7 +1178,7 @@ BHBubble.prototype.iptext = function(d){
             " ("+this.t(d.BHtype)+")</span>";
         if (d.compType!="None"){
             text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-                this.tN(d.compMass)+" M<sub>&#x2609;</sub> "+this.t(d.compType)+"</span>";
+                this.t(d.compType)+" ("+this.tN(d.compMass)+" M<sub>&#x2609;</sub>) "+"</span>";
         }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
         text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.tN(d.distance)+
             " "+this.t("million light years")+"</span>";

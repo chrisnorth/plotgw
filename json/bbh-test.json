@@ -71,6 +71,9 @@
 			"text.solarmass":"solar mass",
 			"text.date":"Date",
 			"text.time":"Time",
+			"text.horizontal-axis":"Horizontal Axis",
+			"text.vertical-axis":"Vertical Axis",
+			"text.information":"Information"
 		}
 	},
 	"events": {
