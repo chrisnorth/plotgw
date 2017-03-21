@@ -45,7 +45,7 @@ BHBubble.prototype.loadLang = function(lang){
     _bh.lang = lang;
     if (!lang){
         lang="en";
-        console.log("default to",lang);
+        if(_bh.urlVars.debug){console.log("default to",lang);}
         _bh.lang = lang;
     };
     var url=this.langdir+lang+'.json';
@@ -72,7 +72,7 @@ BHBubble.prototype.loadLang = function(lang){
             window.location.replace(_bh.makeUrl({'lang':'en'}));
         },
         success:function(data){
-            console.log('success',data[0]);
+            if (_bh.urlVars.debug){console.log('success',data[0]);}
             _bh.langdict=data[0];
             if (_bh.langdict.alphabet=="Roman"){
                 document.title=_bh.t("title",document.title);}
