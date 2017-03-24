@@ -557,61 +557,6 @@ BHBubble.prototype.drawBubbles = function(){
     // console.log("drawBubbles",this.data[0].r);
     var bh=this;
 
-    // console.log(arrows);
-    // console.log(arrowpos);
-    this.addcurve = function(id){
-        r1=bh.arrowpos[bh.arrows[id][0]].r;
-        r2=bh.arrowpos[bh.arrows[id][1]].r;
-        x1=bh.arrowpos[bh.arrows[id][0]].x;
-        x2=bh.arrowpos[bh.arrows[id][1]].x;
-        y1=bh.arrowpos[bh.arrows[id][0]].y;
-        y2=bh.arrowpos[bh.arrows[id][1]].y;
-        //   console.log(col);
-        ang = Math.atan2((y2-y1),(x2-x1));
-        r1s=r1*Math.sin(ang);
-        r1c=r1*Math.cos(ang);
-        r2s=r2*Math.sin(ang);
-        r2c=r2*Math.cos(ang);
-        x1r1 = x1 + r1s/2;
-        x1r2 = x1 - r1s/2;
-        y1r1 = y1 - r1c/2;
-        y1r2 = y1 + r1c/2;
-        x2r1 = (r1*x2+r2*x1)/(r1+r2) + r1s/2;
-        x2r2 = (r1*x2+r2*x1)/(r1+r2) - r1s/2;
-        y2r1 = (r1*y2+r2*y1)/(r1+r2) - r1c/2;
-        y2r2 = (r1*y2+r2*y1)/(r1+r2) + r1c/2;
-        x3r1 = x2 + r2s*.75;
-        x3r2 = x2 - r2s*.75;
-        y3r1 = y2 - r2c*.75;
-        y3r2 = y2 + r2c*.75;
-        // points = "M"+x1r1+","+y1r1+" L"+x2r1+","+y2r1+" L"+x3r1+","+y3r1+
-        // " L"+x3r2+","+y3r2+" L"+x2r2+","+y2r2+" L"+x1r2+","+y1r2;
-        bh.lineData = [{"x":x1r1,"y":y1r1},{"x":x2r1,"y":y2r1},{"x":x3r1,"y":y3r1},
-            {"x":x3r2,"y":y3r2},{"x":x2r2,"y":y2r2},{"x":x1r2,"y":y1r2}];
-        col=bh.arrowpos[bh.arrows[id][0]].c;
-        bh.lineFunc = d3.svg.line()
-            .x(function(d){return d.x;})
-            .y(function(d){return d.y;})
-            .interpolate("cardinal-closed")
-    //   console.log(points);
-        bh.svg.append("path")
-          .attr("d",bh.lineFunc(bh.lineData))
-          .attr("class","merger")
-          .attr("fill",col);
-        //   .attr("opacity",0.5)
-        //   .style({"stroke":"red","stroke-width":2,"opacity":0.5});
-    }
-    // if (
-    //     ((this.filterType!="nofin")&&(this.filterType!="noinit"))&&
-    //     ((this.displayFilter!="nofin")&&(this.displayFilter!="noinit"))){
-    //     for (id in this.arrows){
-    //         // addtriangle(i);
-    //         // addpolygon(i);
-    //         this.addcurve(id);
-    //         this.svg.selectAll("path.merger")
-    //             .attr("opacity",0.5);
-    //     }
-    // }
     this.bubbles = this.svg.append("g")
         .attr("transform", "translate(0,0)")
         .attr("width", this.svgSize).attr("height", this.svgSize)
@@ -645,60 +590,35 @@ BHBubble.prototype.drawBubbles = function(){
 
     //format the text for each bubble
 
-    if ((this.alphabet=="Roman")||(this.alphabet!="Roman")){
-        //add as SVG text item
-        this.bubbles.append("text")
-            .attr("x", function(d){ return d.x; })
-            .attr("y", function(d){ return d.y + 5; })
-            .attr("text-anchor", "middle")
-            .text(function(d){return bh.getText(d);})
-            .attr("class","bh-circle-text")
-            .attr("opacity",function(d){return bh.getOpacity(d)})
-            .attr("id",function(d){return "bh-circle-text-"+d.id;})
-            .style({
-                "fill":function(d){
-                    if (d.r > (2 * d.r - 8) / this.getComputedTextLength() * 8){
-                        return bh.textcolor2(bh.cValue(d));
-                    }else{
-                        return "white";
-                    }},
-                "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                "font-size":function(d) {
-                    // if (d.name.search('GW')>-1){
-                    // console.log(d.name,Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px" );}
-                    return Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
-            })
-            .on("mouseover", function(d) {bh.showTooltip(d);})
-            .on("mouseout", function(d) {bh.hideTooltip(d);})
-            .on("click",function(d){bh.showInfopanel(d);});
-        d3.selectAll("text")
-            .text(function(d){ return bh.getText(d); });
-    }else{
-        //add as foreignObject
-        this.bubbles.append("foreignObject")
-            .attr("x", function(d){ return d.x -d.r; })
-            .attr("y", function(d){ return d.y - 5; })
-            .attr("width",function(d){return 2*d.r})
-            .attr("height","28px")
-            .attr("class","bh-circle-text")
-            .attr("id",function(d){return "bh-circle-text-"+d.id;});
-        d3.selectAll(".bh-circle-text")
-            .append("xhtml:body")
-                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
-                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                    "font-size": function(d) { return 0.2*d.r},
-                    "background-color":"rgba(0,0,0,0)"
-                        // return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
-                })
-                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
-                .on("mouseover", function(d) {bh.showTooltip(d);})
-                .on("mouseout", function(d) {bh.hideTooltip(d);})
-                .on("click",function(d){bh.showInfopanel(d);});
-    }
-    // for (i in arrows){
-    //     // addtriangle(i);
-    //     addcurve(i);
-    // }
+    //add as SVG text item
+    this.bubbles.append("text")
+        .attr("x", function(d){ return d.x; })
+        .attr("y", function(d){ return d.y + 5; })
+        .attr("text-anchor", "middle")
+        .text(function(d){return bh.getText(d);})
+        .attr("class","bh-circle-text")
+        .attr("opacity",function(d){return bh.getOpacity(d)})
+        .attr("id",function(d){return "bh-circle-text-"+d.id;})
+    d3.selectAll("text")
+        .style({
+            "fill":function(d){
+                if (d.r > (2 * d.r - 8) / this.getComputedTextLength() * 8){
+                    return bh.textcolor2(bh.cValue(d));
+                }else{
+                    return "white";
+                }},
+            "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+            "font-size":function(d) {
+                return 0.2*d.r}
+                // if (d.name.search('GW')>-1){
+                // console.log(d.name,Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px" );}
+                // return Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
+        })
+        .on("mouseover", function(d) {bh.showTooltip(d);})
+        .on("mouseout", function(d) {bh.hideTooltip(d);})
+        .on("click",function(d){bh.showInfopanel(d);});
+    d3.selectAll("text")
+        .text(function(d){ return bh.getText(d); });
 
     // replace text and circles with display values
     d3.selectAll(".bh-circle")
@@ -1067,58 +987,37 @@ BHBubble.prototype.doAnimation = function(){
     var bh=this;
     for (id in this.arrows){
         //move intialcircles
-        d3.selectAll('#bh-circle-'+this.arrows[id][0])
+        d3.select('#bh-circle-'+this.arrows[id][0])
             .transition().duration(this.mergeDuration)
             .attr("cx",function(d){return bh.getX(d);})
-            // this.arrowpos[this.arrows[id][1]].x)
             .attr("cy",function(d){return bh.getY(d);})
-            // this.arrowpos[this.arrows[id][1]].y)
-            // .attr("stroke","black")
-            .attr("r",function(d){return bh.getRadius(d);});
-            //move final circles
-        d3.selectAll('#bh-circle-'+this.arrows[id][1])
+            .attr("r",function(d){return bh.getRadius(d);})
+            .style("fill", function(d){return bh.fillcolor2(bh.cValue(d))})
+            .attr("opacity",function(d){return bh.getOpacity(d);});
+        //move final circles
+        d3.select('#bh-circle-'+this.arrows[id][1])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("r",function(d){return bh.getRadius(d)})
-            // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
-            .attr("opacity",function(d){return bh.getOpacity(d);});
-        if (this.alphabet=="Roman"){
-            //hide initial text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
-                .transition().duration(this.mergeDuration).delay(250)
-                .attr("opacity",function(d){return bh.getOpacity(d);})
-                .text(function(d){ return bh.getText(d); });
-            //show final text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
-                .transition().duration(this.mergeDuration).delay(250)
-                .attr("opacity",function(d){return bh.getOpacity(d);})
-                .text(function(d){ return bh.getText(d); });
-        }else{
-            //hide initial text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][0]).selectAll("body").remove()
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
-                .append("xhtml:body")
-                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
-                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                    "font-size": function(d) { return 0.2*d.r},
-                    "background-color":"rgba(0,0,0,0)"
-                })
-                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
-                .on("mouseover", function(d) {bh.showTooltip(d);})
-                .on("mouseout", function(d) {bh.hideTooltip(d);})
-                .on("click",function(d){bh.showInfopanel(d);});
-            //show final text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][1]).selectAll("body").remove()
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
-                .append("xhtml:body")
-                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
-                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                    "font-size": function(d) { return 0.2*d.r},
-                    "background-color":"rgba(0,0,0,0)"})
-                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
-                .on("mouseover", function(d) {bh.showTooltip(d);})
-                .on("mouseout", function(d) {bh.hideTooltip(d);})
-                .on("click",function(d){bh.showInfopanel(d);});
-        }
+            .attr("opacity",function(d){return bh.getOpacity(d);})
+            .style("fill", function(d){return bh.fillcolor2(bh.cValue(d))});
+
+        //hide initial text
+        d3.select('#bh-circle-text-'+this.arrows[id][0])
+            .transition().duration(this.mergeDuration).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity(d);})
+            .text(function(d){ return bh.getText(d); });
+        //show final text
+        d3.select('#bh-circle-text-'+this.arrows[id][1])
+            .transition().duration(this.mergeDuration).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity(d);})
+            .text(function(d){ return bh.getText(d); })
+            .style({
+                "fill":function(d){
+                        return bh.textcolor2(bh.cValue(d));
+                },
+                "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+                "font-size":function(d) {return 0.2*d.r}
+            });
     }
 }
 BHBubble.prototype.conttttext = function(text){
