@@ -31,7 +31,13 @@ BHBubble.prototype.getUrlVars = function(){
 BHBubble.prototype.makeUrl = function(newKeys){
     // construct new URL with replacement queries if necessary
     newUrlVars = this.urlVars;
-    for (key in newKeys){newUrlVars[key]=newKeys[key];}
+    for (key in newKeys){
+        if (!newKeys[key]){
+            delete newUrlVars[key];
+        }else{
+            newUrlVars[key]=newKeys[key];
+        }
+    }
     newUrl = this.url+'?';
     for (key in newUrlVars){
         newUrl=newUrl + key+'='+newUrlVars[key]+'&';
@@ -42,7 +48,10 @@ BHBubble.prototype.makeUrl = function(newKeys){
 BHBubble.prototype.loadLang = function(lang){
     //;load language files - then call rest of load procedure
     var _bh = this;
+    var reload = (_bh.lang) ? true:false;
+    if (this.urlVars.debug){console.log('reload',reload);}
     _bh.lang = lang;
+    _bh.langloaded=false;
     if (!lang){
         lang="en";
         if(_bh.urlVars.debug){console.log("default to",lang);}
@@ -67,16 +76,45 @@ BHBubble.prototype.loadLang = function(lang){
         dataType: 'json',
         error:function(data){
             alert('Error loading language '+_bh.lang+'. Reverting to English as default');
-            console.log(data);
+            if (_bh.urlVars.debug){console.log(data);}
             //navigate to same page, but lang="en"
-            window.location.replace(_bh.makeUrl({'lang':'en'}));
+            // window.location.replace(_bh.makeUrl({'lang':'en'}));
+            window.history.pushState({},null,_bh.makeUrl({'lang':'en'}));
+            _bh.lang=null;
+            _bh.loadLang('en');
         },
         success:function(data){
             if (_bh.urlVars.debug){console.log('success',data[0]);}
             _bh.langdict=data[0];
-            if (_bh.langdict.alphabet=="Roman"){
+            _bh.nameCol = (_bh.langdict.hasOwnProperty("nameCol")) ? _bh.langdict.nameCol : "name";
+            _bh.alphabet = (_bh.langdict.hasOwnProperty("alphabet")) ? _bh.langdict.alphabet : "Roman";
+            if (_bh.alphabet=="Roman"){
                 document.title=_bh.t("title",document.title);}
-            _bh.makePlot();}
+            _bh.langloaded=true;
+            _bh.legenddescs = {
+                1:_bh.t("Gravitational Wave Candidate"),
+                2:_bh.t("Gravitational Wave Detection"),
+                3:_bh.t("X-ray Binary")};
+            if (_bh.urlVars.debug){console.log('loaded: '+_bh.lang)}
+            if (reload){
+                // change language
+                _bh.langlab.html(_bh.langs[_bh.lang].code);
+                d3.select(".lang-item.current").classed("current",false);
+                d3.select(".lang-item#"+_bh.lang).classed("current",true);
+                // Replace help
+                _bh.addHelp();
+                // update URL
+                window.history.pushState({},null,_bh.makeUrl({'lang':_bh.lang}));
+                // update footer
+                footer=document.getElementById("footer-txt");
+                footer.innerHTML = _bh.t("footer",footertxt);
+                // update title
+                d3.select('#hdr h1').html(_bh.t("title","Known Stellar-mass Black Holes"));
+                // replot
+                _bh.replot();
+            }
+            else{_bh.makePlot();}
+        }
     })
 }
 BHBubble.prototype.t = function(key,def){
@@ -131,10 +169,6 @@ BHBubble.prototype.init = function(){
     this.cVals={LVT:1,GW:2,Xray:3};
     // var cValue = function(d){if(d.method=="GW"){return 1;}else{return 2;};};
     this.cValue = function(d){return this.cVals[d.method]};
-    this.legenddescs = {
-        1:this.t("Gravitational Wave Candidate"),
-        2:this.t("Gravitational Wave Detection"),
-        3:this.t("X-ray Binary")};
     //define comparitor sort function(blank for null)
     this.sort = "gwfirst";
     this.valueCol='massBHsq';
@@ -174,28 +208,6 @@ BHBubble.prototype.makeSvg = function(){
     }
     document.getElementById("generate").innerHTML=this.t("Save as SVG");
 
-    // if (this.controlLoc == 'right'){
-    //     this.divcont = document.createElement('div');
-    //     this.divcont.setAttribute("id","controls");
-    //     this.divcont.classList.add("right");
-    //     this.divcont.classList.remove("bottom");
-    //     this.divcont.style.width = 0.1*this.pgWidth+"px";
-    //     this.divcont.style.marginLeft = 0;
-    //     if (this.pgMargin.right > 0.1*this.bubWidth){
-    //         this.divcont.style.marginRight = this.pgMargin.right - 0.1*this.bubWidth;
-    //     }else{
-    //         this.divcont.style.marginRight = 0;
-    //     }
-    //     full.appendChild(this.divcont);
-    // }else{
-    //     this.divcont = document.createElement('div');
-    //     this.divcont.setAttribute("id","controls")
-    //     full.insertBefore(this.divcont,full.children[0]);
-    //     this.divcont.classList.add("bottom");
-    //     this.divcont.classList.remove("right");
-    //     this.divcont.style.marginLeft = this.pgMargin.left+"px";
-    //     this.divcont.style.width = (this.bubWidth-this.pgMargin.left)+"px";
-    // }
 }
 BHBubble.prototype.scalePage = function(){
     // Set scale of elements given page size
@@ -226,9 +238,6 @@ BHBubble.prototype.scalePage = function(){
         this.full.classList.remove("right");
         // bubcont.style.height = this.pgWidth+"px";
     }
-    // store bubcont size
-    // this.addButtons();
-    // this.contWidth = document.getElementById("controls").offsetWidth;
     if (this.controlLoc=='right'){
         // document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
         this.bubHeight = document.getElementById("bubble-container").offsetHeight;
@@ -240,28 +249,12 @@ BHBubble.prototype.scalePage = function(){
         // console.log(this.bubWidth,this.bubHeight)
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }
-    // this.pgMargin = {left:(this.pgWidth-this.svgSize)/2.,right:(this.pgWidth-this.svgSize)/2.};
-    // console.log(this.pgAspect,this.controlLoc);
-    // d3.select("#full")
-    //     .style("width","100")
-    //     .style("margin-left",this.pgMargin.left+"px");
-    // d3.select("#bubble-container")
-    //     .style("width","auto")
-        // .style("margin-left",this.pgMargin.left+"px");
-    //add control panelfull = document.getElementById('full');
-    // this.divcont = document.createElement('div');
-    // this.divcont.setAttribute("id","controls");
-    // this.divcont.classList.add("right");
-    // if (this.controlLoc=="right"){full.appendChild(this.divcont)}
-    // else{full.insertBefore(this.divcont,full.children[0]);}
-
-    // console.log()
 }
 BHBubble.prototype.addTooltips = function(){
     this.tooltip = d3.select("body").append("div")
-        .attr("class", "tooltip");
+        .attr("class", "tooltip reloadable");
     this.conttooltip = d3.select("body").append("div")
-        .attr("class", "conttooltip");
+        .attr("class", "conttooltip reloadable");
 }
 
 BHBubble.prototype.comparitor = function(sort){
@@ -290,14 +283,7 @@ BHBubble.prototype.comparitor = function(sort){
         return null;
     }
 }
-// BHBubble.prototype.filter = function(d){
-//     if (this.filterType=="nofin"){
-//         return !d.children;
-//     }else{
-//         console.log(d.name,d.children);
-//         return function(d){return !d.children;};
-//     }
-// }
+
 BHBubble.prototype.filterFn = function(filterType){
     // define filter function
     if (filterType=="nofin"){
@@ -342,25 +328,71 @@ BHBubble.prototype.filterData = function(data,filterType){
 
     return data;
 }
-
+BHBubble.prototype.dataLoaded = function(){
+    if ((this.nloaded>=2) && (this.langloaded)){
+        return(true);
+    }else{
+        return(false);
+    }
+}
 BHBubble.prototype.loadData = function(){
     //load data - then call next functions
+    this.inputFileGwDefault="csv/bhcat_gw.csv"
     if (this.langdict.hasOwnProperty('inputFile')){
-        this.inputFile="csv/"+this.langdict.inputFile;
-    }else{this.inputFile="csv/bhcat.csv";}
+        this.inputFileGw="csv/"+this.langdict.inputFile;
+    }else{
+        this.inputFileGw=this.inputFileGwDefault;
+    }
+    this.inputFileXray="csv/bhcat_xray.csv";
+    if (this.urlVars.infile){
+        this.inputFileGw=this.urlVars.infile;
+    }
     // console.log('file',this.inputFile);
     var bh=this;
-    d3.csv(this.inputFile, function(error, data){
+    bh.nloaded=0
+    if (this.urlVars.debug){console.log(this.inputFileGw);}
+    d3.csv(this.inputFileGw, function(error, data){
+        if (error){
+            if (bh.inputFileGw==bh.inputFileGwDefault){
+                alert("Fatal error loading input file: '"+bh.inputFileGw+"'. Sorry!")
+            }else{
+                alert("Problem loading input file: '"+bh.inputFileGw+"'. Reverting to default '"+bh.inputFileGwDefault+"'.");
+                window.location.replace(bh.makeUrl({'infile':null}));
+            }
+        }
         data= bh.filterData(data,bh.filterType);
-        bh.data = data;
+        bh.dataGw = data;
+        bh.nloaded++;
+        if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGw)}
         //call next functions
-        bh.formatData(bh.valueCol)
-        bh.drawBubbles();
+        if (bh.dataLoaded()){
+            bh.formatData(bh.valueCol)
+            bh.drawBubbles();
+        }else{
+            if (bh.urlVars.debug){console.log('not ready yet')}
+        }
+    })
+    d3.csv(this.inputFileXray, function(error, data){
+        if (error){alert("Fatal error loading input file: '"+bh.inputFileXray+"'. Sorry!")}
+        data= bh.filterData(data,bh.filterType);
+        bh.dataXray = data;
+        bh.nloaded++;
+        if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileXray)}
+        //call next functions
+        if (bh.dataLoaded()){
+            bh.formatData(bh.valueCol)
+            bh.drawBubbles();
+        }else{
+            if (bh.urlVars.debug){console.log('not ready yet')}
+        }
     })
 }
 BHBubble.prototype.formatData = function(valueCol){
     // Calculate errors and make links between black hole mergers
     var bh=this;
+    bh.data=[]
+    for (i in bh.dataGw){bh.data.push(bh.dataGw[i]);}
+    for (i in bh.dataXray){bh.data.push(bh.dataXray[i]);}
     //convert numerical values from strings to numbers
     //bubbles needs very specific format, convert data to this.
     this.data.forEach(function(d){
@@ -439,7 +471,35 @@ BHBubble.prototype.getText = function(d){
         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
         ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
     ){
-        return "";}else{return d[bh.nameCol]}
+        return "";
+    }else{
+        return(bh.getUtf8(d[bh.nameCol]));
+    }
+}
+BHBubble.prototype.getUtf8 = function(textIn){
+    if (this.alphabet=="Roman"){
+        return textIn;
+    }else{
+        re=/\&\#([0-9]*);/g;
+        matches=[];
+        var match=re.exec(textIn);
+        while (match!=null){
+            matches.push(parseInt(match[1]));
+            match=re.exec(textIn);
+        }
+        textOut=textIn;
+        if (matches){
+            nmatch=matches.length
+            for (n in matches){
+                mx0='&#'+matches[n]+';';
+                // mx1='\u2784';
+                mx1=String.fromCharCode(matches[n]);
+                textOut=textOut.replace(mx0,mx1);
+            }
+        }
+        // console.log(textIn,"->",textOut);
+        return(textOut);
+    }
 }
 BHBubble.prototype.getRadius = function(d){
     // get radius of a BH element given a displayFilter
@@ -486,61 +546,6 @@ BHBubble.prototype.drawBubbles = function(){
     // console.log("drawBubbles",this.data[0].r);
     var bh=this;
 
-    // console.log(arrows);
-    // console.log(arrowpos);
-    this.addcurve = function(id){
-        r1=bh.arrowpos[bh.arrows[id][0]].r;
-        r2=bh.arrowpos[bh.arrows[id][1]].r;
-        x1=bh.arrowpos[bh.arrows[id][0]].x;
-        x2=bh.arrowpos[bh.arrows[id][1]].x;
-        y1=bh.arrowpos[bh.arrows[id][0]].y;
-        y2=bh.arrowpos[bh.arrows[id][1]].y;
-        //   console.log(col);
-        ang = Math.atan2((y2-y1),(x2-x1));
-        r1s=r1*Math.sin(ang);
-        r1c=r1*Math.cos(ang);
-        r2s=r2*Math.sin(ang);
-        r2c=r2*Math.cos(ang);
-        x1r1 = x1 + r1s/2;
-        x1r2 = x1 - r1s/2;
-        y1r1 = y1 - r1c/2;
-        y1r2 = y1 + r1c/2;
-        x2r1 = (r1*x2+r2*x1)/(r1+r2) + r1s/2;
-        x2r2 = (r1*x2+r2*x1)/(r1+r2) - r1s/2;
-        y2r1 = (r1*y2+r2*y1)/(r1+r2) - r1c/2;
-        y2r2 = (r1*y2+r2*y1)/(r1+r2) + r1c/2;
-        x3r1 = x2 + r2s*.75;
-        x3r2 = x2 - r2s*.75;
-        y3r1 = y2 - r2c*.75;
-        y3r2 = y2 + r2c*.75;
-        // points = "M"+x1r1+","+y1r1+" L"+x2r1+","+y2r1+" L"+x3r1+","+y3r1+
-        // " L"+x3r2+","+y3r2+" L"+x2r2+","+y2r2+" L"+x1r2+","+y1r2;
-        bh.lineData = [{"x":x1r1,"y":y1r1},{"x":x2r1,"y":y2r1},{"x":x3r1,"y":y3r1},
-            {"x":x3r2,"y":y3r2},{"x":x2r2,"y":y2r2},{"x":x1r2,"y":y1r2}];
-        col=bh.arrowpos[bh.arrows[id][0]].c;
-        bh.lineFunc = d3.svg.line()
-            .x(function(d){return d.x;})
-            .y(function(d){return d.y;})
-            .interpolate("cardinal-closed")
-    //   console.log(points);
-        bh.svg.append("path")
-          .attr("d",bh.lineFunc(bh.lineData))
-          .attr("class","merger")
-          .attr("fill",col);
-        //   .attr("opacity",0.5)
-        //   .style({"stroke":"red","stroke-width":2,"opacity":0.5});
-    }
-    // if (
-    //     ((this.filterType!="nofin")&&(this.filterType!="noinit"))&&
-    //     ((this.displayFilter!="nofin")&&(this.displayFilter!="noinit"))){
-    //     for (id in this.arrows){
-    //         // addtriangle(i);
-    //         // addpolygon(i);
-    //         this.addcurve(id);
-    //         this.svg.selectAll("path.merger")
-    //             .attr("opacity",0.5);
-    //     }
-    // }
     this.bubbles = this.svg.append("g")
         .attr("transform", "translate(0,0)")
         .attr("width", this.svgSize).attr("height", this.svgSize)
@@ -574,74 +579,40 @@ BHBubble.prototype.drawBubbles = function(){
 
     //format the text for each bubble
 
-    if (this.alphabet=="Roman"){
-        //add as SVG text item
-        this.bubbles.append("text")
-            .attr("x", function(d){ return d.x; })
-            .attr("y", function(d){ return d.y + 5; })
-            .attr("text-anchor", "middle")
-            .text(function(d){return d[bh.nameCol];})
-            .attr("class","bh-circle-text")
-            .attr("opacity",function(d){return bh.getOpacity(d)})
-            .attr("id",function(d){return "bh-circle-text-"+d.id;})
-            .style({
-                "fill":function(d){
-                    if (d.r > (2 * d.r - 8) / this.getComputedTextLength() * 8){
-                        return bh.textcolor2(bh.cValue(d));
-                    }else{
-                        return "white";
-                    }},
-                "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                "font-size":function(d) {
-                    // if (d.name.search('GW')>-1){
-                    // console.log(d.name,Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px" );}
-                    return Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
-            })
-            .on("mouseover", function(d) {bh.showTooltip(d);})
-            .on("mouseout", function(d) {bh.hideTooltip(d);})
-            .on("click",function(d){bh.showInfopanel(d);});
-        d3.selectAll("text")
-            .text(function(d){ return bh.getText(d); });
-    }else{
-        //add as foreignObject
-        this.bubbles.append("foreignObject")
-            .attr("x", function(d){ return d.x -d.r; })
-            .attr("y", function(d){ return d.y - 5; })
-            .attr("width",function(d){return 2*d.r})
-            .attr("height","28px")
-            .attr("class","bh-circle-text")
-            .attr("id",function(d){return "bh-circle-text-"+d.id;});
-        d3.selectAll(".bh-circle-text")
-            .append("xhtml:body")
-                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
-                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                    "font-size": function(d) { return 0.2*d.r},
-                    "background-color":"rgba(0,0,0,0)"
-                        // return Math.min(2 * d.r, (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
-                })
-                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
-                .on("mouseover", function(d) {bh.showTooltip(d);})
-                .on("mouseout", function(d) {bh.hideTooltip(d);})
-                .on("click",function(d){bh.showInfopanel(d);});
-    }
-    // for (i in arrows){
-    //     // addtriangle(i);
-    //     addcurve(i);
-    // }
+    //add as SVG text item
+    this.bubbles.append("text")
+        .attr("x", function(d){ return d.x; })
+        .attr("y", function(d){ return d.y + 5; })
+        .attr("text-anchor", "middle")
+        .text(function(d){return bh.getText(d);})
+        .attr("class","bh-circle-text")
+        .attr("opacity",function(d){return bh.getOpacity(d)})
+        .attr("id",function(d){return "bh-circle-text-"+d.id;})
+    d3.selectAll("text")
+        .style({
+            "fill":function(d){
+                if (d.r > (2 * d.r - 8) / this.getComputedTextLength() * 8){
+                    return bh.textcolor2(bh.cValue(d));
+                }else{
+                    return "white";
+                }},
+            "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+            "font-size":function(d) {
+                return 0.2*d.r}
+                // if (d.name.search('GW')>-1){
+                // console.log(d.name,Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px" );}
+                // return Math.min((2*d.r), (2 * d.r - 8) / this.getComputedTextLength() * 8) + "px"; }
+        })
+        .on("mouseover", function(d) {bh.showTooltip(d);})
+        .on("mouseout", function(d) {bh.hideTooltip(d);})
+        .on("click",function(d){bh.showInfopanel(d);});
+    d3.selectAll("text")
+        .text(function(d){ return bh.getText(d); });
 
     // replace text and circles with display values
     d3.selectAll(".bh-circle")
         .attr("r",function(d){return bh.getRadius(d);})
-    // for (i in this.arrows){
-    //     // addtriangle(i);
-    //     // addpolygon(i);
-    //     if (
-    //         ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
-    //         ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
-    //     ){
-    //         d3.select(this.arrows[i][0]).attr("cx",this.arrowpos[this.arrows[i][0]].x);
-    //     }
-    // }
+
     // add legend
     this.legend = this.svg.selectAll(".legend")
       .data(this.fillcolor2.domain())
@@ -662,7 +633,7 @@ BHBubble.prototype.drawBubbles = function(){
       .style("stroke","#000");
 
     // draw legend text
-    if (this.alphabet=="Roman"){
+    if ((this.alphabet=="Roman")||(this.alphabet!="Roman")){
         //add as SVG text object
         this.legend.append("text")
             .attr("x", 36)
@@ -674,6 +645,7 @@ BHBubble.prototype.drawBubbles = function(){
             .text(function(d){return bh.legenddescs[d];});
     }else{
         // add as HTML object
+        // OBSOLETE now everything is utf-8
         this.legend.append("foreignObject")
             .attr("x", 36)
             .attr("y", 15)
@@ -714,7 +686,12 @@ BHBubble.prototype.addLang = function(){
         langspan.innerHTML = langtxt;
         langspan.setAttribute("id",bh.langs[lang].code);
         langspan.addEventListener("click",function(){
-            window.location.href = bh.makeUrl({lang:this.getAttribute("id")});
+            bh.newlang=this.getAttribute("id");
+            console.log('replotting new language:',bh.lang,"->",bh.newlang)
+            d3.selectAll('.reloadable').remove();
+            bh.svg.selectAll('.legend').remove();
+            bh.loadLang(bh.newlang);
+            // window.location.href = bh.makeUrl({lang:this.getAttribute("id")});
         })
         langspan.addEventListener("mouseover",function(e){
                 bh.showControlTooltip(e,"Switch to "+bh.langs[this.getAttribute("id")].name);})
@@ -758,9 +735,7 @@ BHBubble.prototype.addHelp = function(){
     this.helpbg.on("click",function(){bh.hideHelp();});
     this.helpouter
         .style("top","200%");
-    this.helpouter
-        .append("div")
-        .attr("class","helpclose")
+    d3.selectAll("#help-close")
         .html("<img src='img/close.png' title='"+this.t("Close")+"'>")
         .on("click",function(){bh.hideHelp();});
     // build help text
@@ -783,7 +758,7 @@ BHBubble.prototype.addHelp = function(){
         .html(this.t("Scale"));
     for (cont in this.scales){
         helpcont=this.helpinner.append("div")
-            .attr("class","help-cont")
+            .attr("class","help-cont reloadable")
             .attr("id","help-"+cont);
         helpcont.append("img")
             .attr("class","scale")
@@ -823,9 +798,10 @@ BHBubble.prototype.addButtons = function(width){
         this.divcont.classList.remove("right");
         full.insertBefore(this.divcont,full.children[0]);
     }
+    this.divcont.classList.add("reloadable")
     //
     spancont = document.createElement('div');
-    spancont.className = "control-lab "+((this.controlLoc == 'right')?'right':'bottom');
+    spancont.className = "control-lab reloadable "+((this.controlLoc == 'right')?'right':'bottom');
     spancont.innerHTML = this.t("Mergers");
     this.divcont.appendChild(spancont);
     //set font size
@@ -839,7 +815,7 @@ BHBubble.prototype.addButtons = function(width){
     //
     // this.divcont.innerHTML('<span>Controls:</span>');
     this.animcont = document.createElement('div');
-    this.animcont.className = 'control merge merger '+((this.controlLoc == 'right')?'right':'bottom');
+    this.animcont.className = 'control merge merger reloadable '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.controlLoc == 'right'){this.animcont.width = "80%";}
     else{this.animcont.height = "100%";}
     if (this.displayFilter=="noinit"){this.animcont.classList.add("current");}
@@ -862,7 +838,7 @@ BHBubble.prototype.addButtons = function(width){
     //
     //unmerger button
     this.animcontun = document.createElement('div');
-    this.animcontun.className = 'control merge unmerger '+((this.controlLoc == 'right')?'right':'bottom');
+    this.animcontun.className = 'control merge unmerger reloadable '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.displayFilter=="nofin"){this.animcontun.classList.add("current");}
     // animcontun.style.display = 'inline-block';
     this.divcont.appendChild(this.animcontun);
@@ -883,7 +859,7 @@ BHBubble.prototype.addButtons = function(width){
     //
     //show all button
     this.animcontall = document.createElement('div');
-    this.animcontall.className = 'control merge all '+((this.controlLoc == 'right')?'right':'bottom');
+    this.animcontall.className = 'control merge all reloadable '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.displayFilter=="all"){this.animcontall.classList.add("current");}
     this.divcont.appendChild(this.animcontall);
     animimgall = document.createElement('img');
@@ -897,7 +873,7 @@ BHBubble.prototype.addButtons = function(width){
     //
     //Scale label
     spancontscale = document.createElement('div');
-    spancontscale.className = "control-lab "+((this.controlLoc == 'right')?'right':'bottom');
+    spancontscale.className = "control-lab reloadable "+((this.controlLoc == 'right')?'right':'bottom');
     // scaletext = document.createTextNode(this.t("Scale"));
     // spancontscale.appendChild(scaletext);
     spancontscale.innerHTML = this.t("Scale");
@@ -913,7 +889,7 @@ BHBubble.prototype.addButtons = function(width){
     //
     //scale size button
     this.scalecontsize = document.createElement('div');
-    this.scalecontsize.className = 'control scale scale-size '+((this.controlLoc == 'right')?'right':'bottom');
+    this.scalecontsize.className = 'control scale scale-size reloadable '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.valueCol=="massBHsq"){this.scalecontsize.classList.add("current");}
     // animcontun.style.display = 'inline-block';
     this.divcont.appendChild(this.scalecontsize);
@@ -934,7 +910,7 @@ BHBubble.prototype.addButtons = function(width){
     //
     //scale mass button
     this.scalecontmass = document.createElement('div');
-    this.scalecontmass.className = 'control scale scale-mass '+((this.controlLoc == 'right')?'right':'bottom');
+    this.scalecontmass.className = 'control scale scale-mass reloadable '+((this.controlLoc == 'right')?'right':'bottom');
     if (this.valueCol=="massBH"){this.scalecontmass.classList.add("current");}
     // animcontun.style.display = 'inline-block';
     this.divcont.appendChild(this.scalecontmass);
@@ -1000,58 +976,37 @@ BHBubble.prototype.doAnimation = function(){
     var bh=this;
     for (id in this.arrows){
         //move intialcircles
-        d3.selectAll('#bh-circle-'+this.arrows[id][0])
+        d3.select('#bh-circle-'+this.arrows[id][0])
             .transition().duration(this.mergeDuration)
             .attr("cx",function(d){return bh.getX(d);})
-            // this.arrowpos[this.arrows[id][1]].x)
             .attr("cy",function(d){return bh.getY(d);})
-            // this.arrowpos[this.arrows[id][1]].y)
-            // .attr("stroke","black")
-            .attr("r",function(d){return bh.getRadius(d);});
-            //move final circles
-        d3.selectAll('#bh-circle-'+this.arrows[id][1])
+            .attr("r",function(d){return bh.getRadius(d);})
+            .style("fill", function(d){return bh.fillcolor2(bh.cValue(d))})
+            .attr("opacity",function(d){return bh.getOpacity(d);});
+        //move final circles
+        d3.select('#bh-circle-'+this.arrows[id][1])
             .transition().duration(this.mergeDuration).delay(250)
             .attr("r",function(d){return bh.getRadius(d)})
-            // .attr("cy",this.arrowpos[this.arrows[a][1]].y)
-            .attr("opacity",function(d){return bh.getOpacity(d);});
-        if (this.alphabet=="Roman"){
-            //hide initial text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
-                .transition().duration(this.mergeDuration).delay(250)
-                .attr("opacity",function(d){return bh.getOpacity(d);})
-                .text(function(d){ return bh.getText(d); });
-            //show final text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
-                .transition().duration(this.mergeDuration).delay(250)
-                .attr("opacity",function(d){return bh.getOpacity(d);})
-                .text(function(d){ return bh.getText(d); });
-        }else{
-            //hide initial text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][0]).selectAll("body").remove()
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][0])
-                .append("xhtml:body")
-                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
-                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                    "font-size": function(d) { return 0.2*d.r},
-                    "background-color":"rgba(0,0,0,0)"
-                })
-                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
-                .on("mouseover", function(d) {bh.showTooltip(d);})
-                .on("mouseout", function(d) {bh.hideTooltip(d);})
-                .on("click",function(d){bh.showInfopanel(d);});
-            //show final text
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][1]).selectAll("body").remove()
-            d3.selectAll('#bh-circle-text-'+this.arrows[id][1])
-                .append("xhtml:body")
-                .style({"color":function(d){return bh.textcolor2(bh.cValue(d));},
-                    "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
-                    "font-size": function(d) { return 0.2*d.r},
-                    "background-color":"rgba(0,0,0,0)"})
-                .html(function(d){return "<span>"+bh.getText(d)+"</span>";})
-                .on("mouseover", function(d) {bh.showTooltip(d);})
-                .on("mouseout", function(d) {bh.hideTooltip(d);})
-                .on("click",function(d){bh.showInfopanel(d);});
-        }
+            .attr("opacity",function(d){return bh.getOpacity(d);})
+            .style("fill", function(d){return bh.fillcolor2(bh.cValue(d))});
+
+        //hide initial text
+        d3.select('#bh-circle-text-'+this.arrows[id][0])
+            .transition().duration(this.mergeDuration).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity(d);})
+            .text(function(d){ return bh.getText(d); });
+        //show final text
+        d3.select('#bh-circle-text-'+this.arrows[id][1])
+            .transition().duration(this.mergeDuration).delay(250)
+            .attr("opacity",function(d){return bh.getOpacity(d);})
+            .text(function(d){ return bh.getText(d); })
+            .style({
+                "fill":function(d){
+                        return bh.textcolor2(bh.cValue(d));
+                },
+                "font-family":"Helvetica Neue, Helvetica, Arial, san-serif",
+                "font-size":function(d) {return 0.2*d.r}
+            });
     }
 }
 BHBubble.prototype.conttttext = function(text){
@@ -1084,7 +1039,7 @@ BHBubble.prototype.hideControlTooltip = function(d) {
 }
 BHBubble.prototype.tttext = function(d){
     //create tooltip text
-    text =  "<span class='name'>"+d[this.nameCol]+"</span>";
+    text =  "<span class='name'>"+this.getText(d)+"</span>";
     //mass already has numbers converted
     text = text + "<span class='info'>"+this.t("Mass")+": "+d["massBHstr"]+" M<sub>&#x2609;</sub></span>";
     if(d["method"]=='Xray'){
@@ -1131,7 +1086,7 @@ BHBubble.prototype.hideTooltip = function(d) {
 BHBubble.prototype.iptext = function(d){
     //initialise reference number
     rx=1;
-    text =  "<span class='name'>"+d[this.nameCol]+"</span>";
+    text =  "<span class='name'>"+this.getText(d)+"</span>";
     if(d["method"]=='Xray'){
         text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
         if (d.refbhmass!='-'){text = text +
@@ -1261,14 +1216,12 @@ BHBubble.prototype.replot = function(valueCol){
     var oldValueCol = this.valueCol;
     this.valueCol = (valueCol) ? valueCol : oldValueCol;
     this.scalePage()
-    this.formatData(this.valueCol);
+    if (this.valueCol!=this.oldValueCol){
+        this.formatData(this.valueCol);
+    }
     // this.makeSvg();
     d3.select("svg").remove();
-    d3.selectAll("#controls").remove();
-    d3.selectAll(".control").remove();
-    d3.selectAll(".control-lab").remove();
-    d3.selectAll(".conttooltip").remove();
-    d3.selectAll(".tooltip").remove()
+    d3.selectAll(".reloadable").remove();
     this.drawBubbles();
     this.makeDownload();
     this.addButtons();
@@ -1293,7 +1246,8 @@ bub.getUrlVars();
 // load language
 bub.langdir='bhbubble-lang/';
 bub.loadLang(bub.urlVars.lang);
-// NB: loadLang calls makePlot function
+// bub.makePlot();
+// NB: "loadLang" calls makePlot function on first load
 
 window.addEventListener("resize",function(){
     bub.replot();
