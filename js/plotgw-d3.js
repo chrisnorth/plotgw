@@ -14,8 +14,47 @@ GWCatalogue.prototype.init = function(){
     this.unitSwitch=false;
     this.setScales();
     this.d=null;
-    this.debug=false;
+    this.debug=true;
 
+}
+GWCatalogue.prototype.getUrlVars = function(){
+    // Get URL and query variables
+    var vars = {},hash;
+    var url = window.location.href;
+    if (window.location.href.indexOf('?')!=-1){
+        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+        url = window.location.href.slice(0,window.location.href.indexOf('?'));
+        for(var i = 0; i < hashes.length; i++)
+        {
+            hash = hashes[i].split('=');
+            // vars.push(hash[0]);
+            vars[hash[0]] = hash[1];
+        }
+    }
+    // console.log("input:",vars);
+    this.urlVars = vars;
+    this.url = url;
+    //set default language
+    if(!this.urlVars.hasOwnProperty("lang")){
+        this.urlVars.lang="en-US";
+    }
+}
+GWCatalogue.prototype.makeUrl = function(newKeys){
+    // construct new URL with replacement queries if necessary
+    newUrlVars = this.urlVars;
+    for (key in newKeys){
+        if (!newKeys[key]){
+            delete newUrlVars[key];
+        }else{
+            newUrlVars[key]=newKeys[key];
+        }
+    }
+    newUrl = this.url+'?';
+    for (key in newUrlVars){
+        newUrl=newUrl + key+'='+newUrlVars[key]+'&';
+    }
+    newUrl = newUrl.slice(0,newUrl.length-1);
+    return newUrl;
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
     // translate text given dict
@@ -284,6 +323,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
     };
     this.columns={}
     for (c in colsUpdate){
+        console.log(c,colsUpdate[c],datadict)
         if (colsUpdate[c].type=='src'){
             // console.log(c,datadict[c])
             this.columns[c]=datadict[c]
@@ -1021,66 +1061,73 @@ GWCatalogue.prototype.getUrlVars = function(){
     this.urlVars = vars;
     this.url = url;
 }
-// GWCatalogue.prototype.drawGraphInitCsv = function(){
-//     // initialise graph drawing from data
-//     var gw = this;
-//     console.log('drawGraphInit')
-//     d3.csv("csv/gwcat.csv", function(error, data) {
-//         console.log('gwcat.csv');
-//         // console.log(gw);
-//         // change string (from CSV) into number format
-//         // var data=data;
-//
-//         // var formatData = this.formatData(d)
-//         // console.log(this.formatData,formatData(d));
-//         gw.setColumns();
-//         data.forEach(function(d){gw.formatData(d,gw.columns)});
-//         gw.data = data;
-//         // console.log(data);
-//         gw.optionsOn=false;
-//         console.log('columns');
-//         gw.makePlot();
-//         console.log('plotted');
-//         // gw.initButtons();
-//
-//         // console.log('gw.data',gw.data);
-//     });
-// }
 
 GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
-    gw.fileIn="json/bbh-test_en-US.json"
-    d3.json(gw.fileIn, function(error, dataIn) {
-        if(this.debug){console.log(gw.fileIn);}
-        gw.data=[]
-        gw.langdict=dataIn.lang
-        for (e in dataIn.events.data){
-            dataIn.events.data[e].name=e;
+    gw.loaded=0;
+    gw.toLoad=3;
+    gw.data=[];
+    gw.optionsOn=false;
+    gw.helpOn=false;
+
+    gw.fileInLang="json/lang_en-US.json";
+    gw.fileInDataDict="json/datadict.json";
+    gw.fileInEventsDefault="json/events.json";
+    if (gw.urlVars.eventsFile){gw.fileInEvents=gw.urlVars.eventsFile}
+    else{gw.fileInEvents=gw.fileInEventsDefault}
+
+
+    d3.json(gw.fileInLang, function(error, dataIn) {
+        if (error){
+            console.log(error);
+            alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
+        }
+        gw.loaded++;
+        if(this.debug){console.log(gw.fileInLang);}
+        gw.langdict=dataIn
+        gw.setlang();
+        if (gw.loaded==gw.toLoad){
+            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            gw.makePlot();
+            if(this.debug){console.log('plotted');}
+        }
+    });
+    d3.json(gw.fileInEvents, function(error, dataIn) {
+        if (error){
+            console.log(error);
+            alert("Fatal error loading input file: '"+gw.fileInEvents+"'. Sorry!");
+        }
+        gw.loaded++;
+        for (e in dataIn.data){
+            dataIn.data[e].name=e;
             if (e[0]=='G'){t='GW'};
             if (e[0]=='L'){t='LVT'};
-            dataIn.events.data[e].type=t;
-            link=dataIn.events.links[e].LOSCData;
+            dataIn.data[e].type=t;
+            link=dataIn.links[e].LOSCData;
             link.url=gw.tl(link.url);
-            dataIn.events.data[e].link=link;
-            gw.data.push(dataIn.events.data[e]);
+            dataIn.data[e].link=link;
+            gw.data.push(dataIn.data[e]);
         }
-        if(this.debug){console.log('data:',gw.data);}
-        gw.setlang();
-        gw.setColumns(dataIn.datadict);
-        //console.log('columns:',gw.columns);
-        gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-        // console.log(data);
-        gw.optionsOn=false;
-        gw.helpOn=false;
-        // console.log('columns');
-        gw.makePlot();
-        if(this.debug){console.log('plotted');}
-        // gw.initButtons();
-
-        // console.log('gw.data',gw.data);
+        if(this.debug){console.log('data pre-format:',gw.data);}
+        if (gw.loaded==gw.toLoad){
+            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            gw.makePlot();
+            if(this.debug){console.log('plotted');}
+        }
     });
-
+    d3.json(gw.fileInDataDict, function(error, dataIn) {
+        if (error){
+            alert("Fatal error loading input file: '"+gw.fileInDataDict+"'. Sorry!")
+        }
+        gw.loaded++;
+        gw.setColumns(dataIn);
+        if (gw.loaded==gw.toLoad){
+            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            gw.makePlot();
+            if(this.debug){console.log('plotted');}
+        }
+    });
 }
 GWCatalogue.prototype.setlang = function(){
     d3.select("#options-x > .options-title")
@@ -1997,6 +2044,7 @@ GWCatalogue.prototype.replot = function(){
 var gwcat = new GWCatalogue
 gwcat.init();
 if(this.debug){console.log('initialised');}
+gwcat.getUrlVars();
 gwcat.drawGraphInit();
 if(this.debug){console.log('plotted');}
 window.addEventListener("resize",function(){
