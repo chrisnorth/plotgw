@@ -54,7 +54,7 @@ BHBubble.prototype.loadLang = function(lang){
     _bh.langloaded=false;
     if (!lang){
         lang="en";
-        if (this.urlVars.debug){console.log("default to",lang);}
+        if(_bh.urlVars.debug){console.log("default to",lang);}
         _bh.lang = lang;
     };
     var url=this.langdir+lang+'.json';
