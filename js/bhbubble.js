@@ -411,18 +411,6 @@ BHBubble.prototype.formatData = function(valueCol){
         .padding(15);
     this.nodes = this.bubble.nodes({children:this.data})
         .filter(this.filterFn(this.filterType));
-    // data.forEach(
-    //     d.massBH = +d[col];
-    //         if (columns[col]['errcode']){
-    //             errcode=d[columns[col]['errcode']].split('-')
-    //             d[col+'plus'] = +errcode[0] + d[col];
-    //             d[col+'minus'] = -errcode[1] + d[col];
-    //             d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'-'+
-    //                     parseFloat(d[col+'plus'].toPrecision(3))
-    //             columns[col+'Str']={'type':'str','unit':columns[col].unit}
-    //         }
-    //     }
-    // )
     this.arrows={};
     this.arrowpos = {};
     this.name2id=function(name){
@@ -431,6 +419,7 @@ BHBubble.prototype.formatData = function(valueCol){
     this.data.forEach(function(d){
         // console.log(d);
         d.id = bh.name2id(d.name);
+        console.log(d.id,d.name,d.compType);
         // console.log(d.name,d.id);
         bh.arrowpos[d.id]={x:d.x,y:d.y,r:d.r,c:bh.fillcolor2(bh.cValue(d)),type:d.BHtype};
         // if ((d.method=="GW")||(d.method=="LVT")){
