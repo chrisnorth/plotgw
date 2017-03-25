@@ -435,14 +435,6 @@ BHBubble.prototype.loadData = function(){
                 evs[b].refcomp=refcomp;
                 evs[b].refper=refper;
             }
-            if (bh.langdict.hasOwnProperty('nameCol')){
-                nc=bh.langdict.nameCol;
-                rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
-                tr=rename.exec(i)
-                pri[nc]=bh.t(tr[1])+bh.tN(tr[2])+bh.t('-A')
-                sec[nc]=bh.t(tr[1])+bh.tN(tr[2])+bh.t('-B')
-                fin[nc]=bh.t(tr[1])+bh.tN(tr[2])
-            }
             data.push(sec);
             data.push(fin);
             data.push(pri);
@@ -541,6 +533,12 @@ BHBubble.prototype.formatData = function(valueCol){
             d.massBHminus = +errcode;
             d.massBHstr = bh.t('approx.')+' '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
         }else{if (this.urlVars.debug){console.log('Data format err:',d.massBHerr,d);}}
+        if (bh.langdict.hasOwnProperty('nameCol')&&(d.binType=='Binary black hole')){
+            nc=bh.langdict.nameCol;
+            rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
+            tr=rename.exec(d.name)
+            d[nc]=bh.t(tr[1])+bh.tN(tr[2])+bh.t(tr[3])
+        }
     });
     this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
     // data = data.map(function(d){
@@ -1331,9 +1329,7 @@ BHBubble.prototype.replot = function(valueCol){
     var oldValueCol = this.valueCol;
     this.valueCol = (valueCol) ? valueCol : oldValueCol;
     this.scalePage()
-    if (this.valueCol!=this.oldValueCol){
-        this.formatData(this.valueCol);
-    }
+    this.formatData(this.valueCol);
     // this.makeSvg();
     d3.select("svg").remove();
     d3.selectAll(".reloadable").remove();
