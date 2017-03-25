@@ -451,7 +451,6 @@ BHBubble.prototype.formatData = function(valueCol){
     this.data.forEach(function(d){
         // console.log(d);
         d.id = bh.name2id(d.name);
-        console.log(d.id,d.name,d.compType);
         // console.log(d.name,d.id);
         bh.arrowpos[d.id]={x:d.x,y:d.y,r:d.r,c:bh.fillcolor2(bh.cValue(d)),type:d.BHtype};
         // if ((d.method=="GW")||(d.method=="LVT")){
@@ -687,7 +686,7 @@ BHBubble.prototype.addLang = function(){
         langspan.setAttribute("id",bh.langs[lang].code);
         langspan.addEventListener("click",function(){
             bh.newlang=this.getAttribute("id");
-            console.log('replotting new language:',bh.lang,"->",bh.newlang)
+            if (by.urlVars.debug){console.log('replotting new language:',bh.lang,"->",bh.newlang)}
             d3.selectAll('.reloadable').remove();
             bh.svg.selectAll('.legend').remove();
             bh.loadLang(bh.newlang);
