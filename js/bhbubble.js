@@ -338,19 +338,128 @@ BHBubble.prototype.dataLoaded = function(){
 BHBubble.prototype.loadData = function(){
     //load data - then call next functions
     this.inputFileGwDefault="csv/bhcat_gw.csv"
+    this.inputFileEventsDefault="json/events.json"
     if (this.langdict.hasOwnProperty('inputFile')){
         this.inputFileGw="csv/"+this.langdict.inputFile;
     }else{
         this.inputFileGw=this.inputFileGwDefault;
     }
+    if (this.langdict.hasOwnProperty('inputFile')){
+        this.inputFileEvents="json/"+this.langdict.inputFile;
+    }else{
+        this.inputFileEvents=this.inputFileEventsDefault;
+    }
     this.inputFileXray="csv/bhcat_xray.csv";
     if (this.urlVars.infile){
         this.inputFileGw=this.urlVars.infile;
+    }
+    if (this.urlVars.eventsFile){
+        this.inputFileEvents=this.urlVars.eventsFile;
     }
     // console.log('file',this.inputFile);
     var bh=this;
     bh.nloaded=0
     if (this.urlVars.debug){console.log(this.inputFileGw);}
+
+    d3.json(this.inputFileEvents,function(error,jsonIn){
+        if (error){
+            if (bh.inputFileEvents==bh.inputFileEventsDefault){
+                alert("Fatal error loading input file: '"+bh.inputFileEvents+"'. Sorry!")
+            }else{
+                alert("Problem loading input file: '"+bh.inputFileEvents+"'. Reverting to default '"+bh.inputFileEventsDefault+"'.");
+                window.location.replace(bh.makeUrl({'eventsFile':null}));
+            }
+        }
+        dataJson=jsonIn.data;
+        links=jsonIn.links
+        data = [];
+        nametr={};
+        for (i in dataJson){
+            dj=dataJson[i]
+            pri=[]
+            sec=[]
+            fin=[]
+            console.log(i,dj);
+            pri={
+                name:i+'-A',
+                massBH:dj.M1.best,
+                massBHerr:'e'+parseFloat(dj.M1.err[1])+'-'+
+                    parseFloat(dj.M1.err[0]),
+                compMass:dj.M2.best,
+                compType:'Black hole',
+                parentName:i,
+                BHtype:'primary',
+            }
+            sec={
+                name:i+'-B',
+                massBH:dj.M2.best,
+                massBHerr:'e'+parseFloat(dj.M2.err[1])+'-'+
+                    parseFloat(dj.M2.err[0]),
+                compMass:dj.M1.best,
+                compType:'Black hole',
+                parentName:i,
+                BHtype:'secondary',
+            }
+            fin={
+                name:i,
+                massBH:dj.Mfinal.best,
+                massBHerr:'e'+parseFloat(dj.Mfinal.err[1])+'-'+
+                    parseFloat(dj.Mfinal.err[0]),
+                compMass:'None',
+                compType:'None',
+                parentName:'',
+                BHtype:'final',
+            }
+            if (i[0]=='G'){method='GW'}
+            else if (i[0]=='L'){method='LVT'}
+            paper='<a target="_blank" href="'+
+                links[i].DetPaper.url+'">'+
+                links[i].DetPaper.text+'</a>';
+            binType='Binary black hole';
+            period='';
+            loc='Extragalactic'
+            distance=parseInt(3.26*(dj.Ldist.best-dj.Ldist.err[0]))+
+                '-'+parseInt(3.26*(dj.Ldist.best+dj.Ldist.err[1]));
+            refcompmass='';
+            refcomp='';
+            refper='';
+            evs={pri:pri,sec:sec,fin:fin}
+            for (b in evs){
+                evs[b].method=method;
+                evs[b].period=period;
+                evs[b].location=loc;
+                evs[b].distance=distance;
+                evs[b].binType=binType;
+                evs[b].refbhmass=paper;
+                evs[b].refcompmass=refcompmass;
+                evs[b].refcomp=refcomp;
+                evs[b].refper=refper;
+            }
+            if (bh.langdict.hasOwnProperty('nameCol')){
+                nc=bh.langdict.nameCol;
+                rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
+                tr=rename.exec(i)
+                pri[nc]=bh.t(tr[1])+bh.tN(tr[2])+bh.t('-A')
+                sec[nc]=bh.t(tr[1])+bh.tN(tr[2])+bh.t('-B')
+                fin[nc]=bh.t(tr[1])+bh.tN(tr[2])
+            }
+            data.push(sec);
+            data.push(fin);
+            data.push(pri);
+        }
+        data= bh.filterData(data,bh.filterType);
+        bh.dataGw = data;
+        bh.nloaded++;
+        if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileEvents)}
+        //call next functions
+        if (bh.dataLoaded()){
+            bh.formatData(bh.valueCol)
+            bh.drawBubbles();
+        }else{
+            if (bh.urlVars.debug){console.log('not ready yet')}
+        }
+    });
+
     d3.csv(this.inputFileGw, function(error, data){
         if (error){
             if (bh.inputFileGw==bh.inputFileGwDefault){
@@ -361,8 +470,8 @@ BHBubble.prototype.loadData = function(){
             }
         }
         data= bh.filterData(data,bh.filterType);
-        bh.dataGw = data;
-        bh.nloaded++;
+        bh.dataGwOld = data;
+        // bh.nloaded++;
         if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGw)}
         //call next functions
         if (bh.dataLoaded()){
@@ -443,18 +552,6 @@ BHBubble.prototype.formatData = function(valueCol){
         .padding(15);
     this.nodes = this.bubble.nodes({children:this.data})
         .filter(this.filterFn(this.filterType));
-    // data.forEach(
-    //     d.massBH = +d[col];
-    //         if (columns[col]['errcode']){
-    //             errcode=d[columns[col]['errcode']].split('-')
-    //             d[col+'plus'] = +errcode[0] + d[col];
-    //             d[col+'minus'] = -errcode[1] + d[col];
-    //             d[col+'Str'] = parseFloat(d[col+'minus'].toPrecision(3))+'-'+
-    //                     parseFloat(d[col+'plus'].toPrecision(3))
-    //             columns[col+'Str']={'type':'str','unit':columns[col].unit}
-    //         }
-    //     }
-    // )
     this.arrows={};
     this.arrowpos = {};
     this.name2id=function(name){
@@ -698,7 +795,7 @@ BHBubble.prototype.addLang = function(){
         langspan.setAttribute("id",bh.langs[lang].code);
         langspan.addEventListener("click",function(){
             bh.newlang=this.getAttribute("id");
-            console.log('replotting new language:',bh.lang,"->",bh.newlang)
+            if (bh.urlVars.debug){console.log('replotting new language:',bh.lang,"->",bh.newlang)}
             d3.selectAll('.reloadable').remove();
             bh.svg.selectAll('.legend').remove();
             bh.loadLang(bh.newlang);

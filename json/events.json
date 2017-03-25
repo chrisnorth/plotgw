@@ -62,7 +62,7 @@
         "GW150914": {
             "DetPaper":{
                 "url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102",
-                "text": "PRL Paper",
+                "text": "LIGO Scientific Collaboration & Virgo Collaboration, 2016, Phys. Rev. Lett. 116 241103",
                 "type": "paper"
             }, "LOSCData":{
                 "url": "%domain.losc.events%/GW150914/",
@@ -83,8 +83,10 @@
             }
         },
         "LVT151012": {
-            "O1BBH":{
-                "url":"LINK"
+            "DetPaper":{
+                "url":"https://doi.org/10.1103/PhysRevX.6.041015",
+                "text":"LIGO Scientific Collaboration & Virgo Collaboration, 2016, Phys. Rev. Lett. X 6 041015",
+                "type":"paper"
             },"LOSCData":{
                 "url": "%domain.losc.events%/LVT151012/",
                 "text": "Open Data page",
