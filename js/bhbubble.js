@@ -584,6 +584,13 @@ BHBubble.prototype.getText = function(d){
         return(bh.getUtf8(d[bh.nameCol]));
     }
 }
+BHBubble.prototype.getName = function(d){
+    if (this.alphabet=="Roman"){
+        return(d.name);
+    }else{
+        return(bh.getUtf8(d[bh.nameCol]));
+    }
+}
 BHBubble.prototype.getUtf8 = function(textIn){
     if (this.alphabet=="Roman"){
         return textIn;
@@ -1147,7 +1154,7 @@ BHBubble.prototype.hideControlTooltip = function(d) {
 }
 BHBubble.prototype.tttext = function(d){
     //create tooltip text
-    text =  "<span class='name'>"+this.getText(d)+"</span>";
+    text =  "<span class='name'>"+this.getName(d)+"</span>";
     //mass already has numbers converted
     text = text + "<span class='info'>"+this.t("Mass")+": "+d["massBHstr"]+" M<sub>&#x2609;</sub></span>";
     if(d["method"]=='Xray'){
@@ -1194,7 +1201,7 @@ BHBubble.prototype.hideTooltip = function(d) {
 BHBubble.prototype.iptext = function(d){
     //initialise reference number
     rx=1;
-    text =  "<span class='name'>"+this.getText(d)+"</span>";
+    text =  "<span class='name'>"+this.getName(d)+"</span>";
     if(d["method"]=='Xray'){
         text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
         if (d.refbhmass!='-'){text = text +
