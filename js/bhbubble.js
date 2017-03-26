@@ -329,6 +329,7 @@ BHBubble.prototype.filterData = function(data,filterType){
     return data;
 }
 BHBubble.prototype.dataLoaded = function(){
+    // check 2 data files and language file are loaded
     if ((this.nloaded>=2) && (this.langloaded)){
         return(true);
     }else{
@@ -337,30 +338,39 @@ BHBubble.prototype.dataLoaded = function(){
 }
 BHBubble.prototype.loadData = function(){
     //load data - then call next functions
-    this.inputFileGwDefault="csv/bhcat_gw.csv"
-    this.inputFileEventsDefault="json/events.json"
-    if (this.langdict.hasOwnProperty('inputFile')){
-        this.inputFileGw="csv/"+this.langdict.inputFile;
-    }else{
-        this.inputFileGw=this.inputFileGwDefault;
+    var bh=this;
+
+    // this.inputFileGwDefault="csv/bhcat_gw.csv"
+    // if (this.langdict.hasOwnProperty('inputFile')){
+    //     this.inputFileGw="csv/"+this.langdict.inputFile;
+    // }else{
+    //     this.inputFileGw=this.inputFileGwDefault;
+    // }
+    if (this.urlVars.infile){
+        alert('"infile" variable is obsolete. Please use "eventsFile" instead.');
     }
-    if (this.langdict.hasOwnProperty('inputFile')){
+
+    // set input file for GW events
+    this.inputFileEventsDefault="json/events.json"
+    if (this.langdict.hasOwnProperty('eventsFile')){
         this.inputFileEvents="json/"+this.langdict.inputFile;
     }else{
         this.inputFileEvents=this.inputFileEventsDefault;
     }
-    this.inputFileXray="csv/bhcat_xray.csv";
-    if (this.urlVars.infile){
-        this.inputFileGw=this.urlVars.infile;
-    }
     if (this.urlVars.eventsFile){
         this.inputFileEvents=this.urlVars.eventsFile;
     }
-    // console.log('file',this.inputFile);
-    var bh=this;
-    bh.nloaded=0
-    if (this.urlVars.debug){console.log(this.inputFileGw);}
 
+    // set input file for xray binaries
+    this.inputFileXray="csv/bhcat_xray.csv";
+    if (this.urlVars.xrayFile){
+        this.inputFileXray=this.urlVars.xrayFile;
+    }
+    // set loaded counter
+    bh.nloaded=0
+    if (this.urlVars.debug){console.log(this.inputFileEvents);}
+
+    // read in GW data and reformat
     d3.json(this.inputFileEvents,function(error,jsonIn){
         if (error){
             if (bh.inputFileEvents==bh.inputFileEventsDefault){
@@ -452,27 +462,7 @@ BHBubble.prototype.loadData = function(){
         }
     });
 
-    d3.csv(this.inputFileGw, function(error, data){
-        if (error){
-            if (bh.inputFileGw==bh.inputFileGwDefault){
-                alert("Fatal error loading input file: '"+bh.inputFileGw+"'. Sorry!")
-            }else{
-                alert("Problem loading input file: '"+bh.inputFileGw+"'. Reverting to default '"+bh.inputFileGwDefault+"'.");
-                window.location.replace(bh.makeUrl({'infile':null}));
-            }
-        }
-        data= bh.filterData(data,bh.filterType);
-        bh.dataGwOld = data;
-        // bh.nloaded++;
-        if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGw)}
-        //call next functions
-        if (bh.dataLoaded()){
-            bh.formatData(bh.valueCol)
-            bh.drawBubbles();
-        }else{
-            if (bh.urlVars.debug){console.log('not ready yet')}
-        }
-    })
+    // read in Xray data
     d3.csv(this.inputFileXray, function(error, data){
         if (error){alert("Fatal error loading input file: '"+bh.inputFileXray+"'. Sorry!")}
         data= bh.filterData(data,bh.filterType);
@@ -487,6 +477,28 @@ BHBubble.prototype.loadData = function(){
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     })
+    // d3.csv(this.inputFileGw, function(error, data){
+    //     if (error){
+    //         if (bh.inputFileGw==bh.inputFileGwDefault){
+    //             alert("Fatal error loading input file: '"+bh.inputFileGw+"'. Sorry!")
+    //         }else{
+    //             alert("Problem loading input file: '"+bh.inputFileGw+"'. Reverting to default '"+bh.inputFileGwDefault+"'.");
+    //             window.location.replace(bh.makeUrl({'infile':null}));
+    //         }
+    //     }
+    //     data= bh.filterData(data,bh.filterType);
+    //     bh.dataGwOld = data;
+    //     // bh.nloaded++;
+    //     if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGw)}
+    //     //call next functions
+    //     if (bh.dataLoaded()){
+    //         bh.formatData(bh.valueCol)
+    //         bh.drawBubbles();
+    //     }else{
+    //         if (bh.urlVars.debug){console.log('not ready yet')}
+    //     }
+    // })
+
 }
 BHBubble.prototype.formatData = function(valueCol){
     // Calculate errors and make links between black hole mergers
