@@ -93,9 +93,9 @@ GWCatalogue.prototype.stdlabel = function(d,src){
     var gw=this;
     if (gw.columns[src].err){
         if (gw.columns[src].err==2){
-            txt=parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))+
+            txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
             '&ndash;'+
-            parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))
+            parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
             }
         else{
             txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
@@ -471,8 +471,8 @@ GWCatalogue.prototype.setScales = function(){
         // data -> display
     this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
     // x error bars
-    this.xErrP = function(d) {return d[gw.xvar].errv[1];} //error+ -> value
-    this.xErrM = function(d) {return d[gw.xvar].errv[0];} //error- -> value
+    this.xErrP = function(d) {return d[gw.xvar].errv[0];} //error+ -> value
+    this.xErrM = function(d) {return d[gw.xvar].errv[1];} //error- -> value
     // x error+ -> display
     this.xMapErrP = function(d) {return gw.xScale(gw.xErrP(d))}
     // x error- -> display
@@ -496,8 +496,8 @@ GWCatalogue.prototype.setScales = function(){
     // data -> display
     this.yMap = function(d) { return gw.yScale(gw.yValue(d));}
     // y error bars
-    this.yErrP = function(d) {return d[gw.yvar].errv[1];} //error+ -> value
-    this.yErrM = function(d) {return d[gw.yvar].errv[0];} //error- -> value
+    this.yErrP = function(d) {return d[gw.yvar].errv[0];} //error+ -> value
+    this.yErrM = function(d) {return d[gw.yvar].errv[1];} //error- -> value
     // y error+ -> display
     this.yMapErrP = function(d) { return gw.yScale(gw.yErrP(d));}
     // y error- -> display
@@ -979,8 +979,8 @@ GWCatalogue.prototype.formatData = function(d,cols){
         if (gw.columns[col].err){
             if (gw.columns[col].err==2){
                 d[col].errv =
-                    [d[col].best-d[col].err[0],
-                    d[col].best+d[col].err[1]];
+                    [d[col].best+d[col].err[0],
+                    d[col].best-d[col].err[1]];
             }
         }else if (typeof d[col].best=="number"){
             d[col].errv =[d[col].best,d[col].best];
