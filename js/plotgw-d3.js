@@ -1057,17 +1057,26 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.optionsOn=false;
     gw.helpOn=false;
 
-    gw.fileInLang="json/lang_en-US.json";
+    gw.langDefault="en";
     gw.fileInDataDict="json/datadict.json";
     gw.fileInEventsDefault="json/events.json";
-    if (gw.urlVars.eventsFile){gw.fileInEvents=gw.urlVars.eventsFile}
-    else{gw.fileInEvents=gw.fileInEventsDefault}
-
+    if (gw.urlVars.eventsFile){
+        gw.fileInEvents=gw.urlVars.eventsFile;
+    }else{gw.fileInEvents=gw.fileInEventsDefault}
+    if (gw.urlVars.lang){
+        gw.lang=gw.urlVars.lang;
+    }else{gw.lang=gw.langDefault}
+    gw.fileInLang="lang/lang_"+gw.lang+".json"
 
     d3.json(gw.fileInLang, function(error, dataIn) {
         if (error){
-            console.log(error);
-            alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
+            if (gw.lang==gw.langDefault){
+                console.log(error);
+                alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
+            }else{
+                alert('Error loading language '+gw.lang+'. Reverting to '+gw.langDefault+' as default');
+                window.location.replace(gw.makeUrl({'lang':gw.langDefault}));
+            }
         }
         gw.loaded++;
         if(this.debug){console.log(gw.fileInLang);}
