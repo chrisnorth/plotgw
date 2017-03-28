@@ -239,21 +239,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             err:2,
             unit:'%data.Mass.unit.kg%',
             avail:false},
-        massratio:{type:"derived",
-            name:"Mass ratio",
-            bestfn:function(d){
-                return(d['M1'].best/d['M2'].best)},
-            errfn:function(d){
-                return(
-                    [d['massratio'].best*Math.sqrt(
-                        Math.pow(d['M1'].err[0]/d['M1'].best,2)+
-                        Math.pow(d['M2'].err[0]/d['M2'].best,2)),
-                    d['massratio'].best*Math.sqrt(
-                        Math.pow(d['M1'].err[1]/d['M1'].best,2)+
-                        Math.pow(d['M2'].err[1]/d['M2'].best,2))])},
-            sigfig:2,
-            err:2,
-            unit:'',
+        Mratio:{type:"src",
             icon:"img/massratio.svg",
             avail:true,
             border:0.01},
@@ -580,7 +566,7 @@ GWCatalogue.prototype.setScales = function(){
         time:{lab:["time"]},
         Mchirp:{lab:["Mchirp"],
             labSw:["Mchirpkg"]},
-        massratio:{lab:["massratio"]},
+        Mratio:{lab:["Mratio"]},
         Ldist:{lab:["Ldist"],
             labSw:["LdistLy"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
