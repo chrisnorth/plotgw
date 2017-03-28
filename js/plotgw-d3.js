@@ -76,6 +76,7 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
             if (this.langdict[mx1]){
                 textOut=textOut.replace(mx0,this.langdict[mx1]);
             }else{
+                textOut=textOut;
                 if(this.debug){console.log('ERROR: "'+mx1+'" not found in dictionary');}
             }
         }
@@ -1079,10 +1080,11 @@ GWCatalogue.prototype.drawGraphInit = function(){
             }
         }
         gw.loaded++;
-        if(this.debug){console.log(gw.fileInLang);}
+        if(gw.debug){console.log(gw.fileInLang);}
         gw.langdict=dataIn
         gw.setlang();
         if (gw.loaded==gw.toLoad){
+            gw.setColumns(gw.datadict);
             gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
             gw.makePlot();
             if(this.debug){console.log('plotted');}
@@ -1104,11 +1106,12 @@ GWCatalogue.prototype.drawGraphInit = function(){
             dataIn.data[e].link=link;
             gw.data.push(dataIn.data[e]);
         }
-        if(this.debug){console.log('data pre-format:',gw.data);}
+        if(gw.debug){console.log('data pre-format:',gw.data);}
         if (gw.loaded==gw.toLoad){
+            gw.setColumns(gw.datadict);
             gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
             gw.makePlot();
-            if(this.debug){console.log('plotted');}
+            if(gw.debug){console.log('plotted');}
         }
     });
     d3.json(gw.fileInDataDict, function(error, dataIn) {
@@ -1116,11 +1119,13 @@ GWCatalogue.prototype.drawGraphInit = function(){
             alert("Fatal error loading input file: '"+gw.fileInDataDict+"'. Sorry!")
         }
         gw.loaded++;
-        gw.setColumns(dataIn);
+        gw.datadict=dataIn;
+        if(gw.debug){console.log('data pre-format:',gw.data);}
         if (gw.loaded==gw.toLoad){
+            gw.setColumns(gw.datadict);
             gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
             gw.makePlot();
-            if(this.debug){console.log('plotted');}
+            if(gw.debug){console.log('plotted');}
         }
     });
 }
