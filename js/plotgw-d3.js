@@ -242,7 +242,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         Mratio:{type:"src",
             icon:"img/massratio.svg",
             avail:true,
-            border:0.01},
+            border:0.1},
         LdistLy:{type:'derived',
             namefn:function(){return(gw.columns.Ldist.name)},
             bestfn:function(d){
