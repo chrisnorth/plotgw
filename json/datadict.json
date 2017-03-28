@@ -21,6 +21,8 @@
         "err": 2},
     "Mfinal":{"name": "%data.Mfinal.name%", "priority": 2, "sigfig": 3,
         "unit": "%data.Mfinal.unit%", "err": 2},
+    "Mratio":{"name": "%data.Mratio.name%", "priority": 2, "sigfig": 3,
+        "unit":false, "err": 2},
     "spinFinal":{"name": "%data.spinFinal.name%", "priority": 3, "sigfig": 2,
          "err": 2},
     "Erad":{"name": "%data.Erad.name%", "priority": 6, "sigfig": 2,

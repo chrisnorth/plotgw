@@ -48,6 +48,7 @@
     "Show all black holes": "Dangos pob twll du",
     "Help": "Help",
     "footer":"Wedi cynnal gan <a href='http://www.astro.cf.ac.uk'>Ysgol Ffiseg a Seryddiaeth, Prifysgol Caerdydd </a></br>Cynhelyr gan Chris North ar ran y <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. Mae’r ffynhonnell ar gael o <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Data deuaidd Pelydr-X yn seiliedig ar <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
-    "Save as SVG":"Cadw fel SVG"
+    "Save as SVG":"Cadw fel SVG",
+    "Change language":"Newid iaith"
 }
 ]

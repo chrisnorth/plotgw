@@ -20,6 +20,7 @@
     "data.Mfinal.name":"Final mass",
     "data.Mfinal.unit":"Msun",
     "data.Mass.unit.kg":"10^30 kg",
+    "data.Mratio.name":"Mass ratio",
     "data.spinFinal.name":"Final spin",
     "data.Erad.name":"Radiated energy",
     "data.Erad.unit":"Msun c^2",
