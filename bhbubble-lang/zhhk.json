@@ -48,6 +48,7 @@
     "Show all black holes":"展示所有黑洞",
     "Help":"幫助",
     "footer":"寄存於<a href='http://www.astro.cf.ac.uk'>卡迪夫大學 物理及天文學院</a></br>。由 基斯·諾斯 代表 <a href='http://www.ligo.org'>激光干涉重力波天文台 科學合作組織</a>維護。 代碼可在<a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>查看。</br>X射線雙星數據取至<a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>。",
-    "Save as SVG":"儲存為 SVG"
+    "Save as SVG":"儲存為 SVG",
+    "Change language":"改變語言"
 }
 ]

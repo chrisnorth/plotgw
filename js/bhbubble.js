@@ -818,12 +818,22 @@ BHBubble.prototype.addLang = function(){
             bh.loadLang(bh.newlang);
             // window.location.href = bh.makeUrl({lang:this.getAttribute("id")});
         })
-        langspan.addEventListener("mouseover",function(e){
-                bh.showControlTooltip(e,"Switch to "+bh.langs[this.getAttribute("id")].name);})
-        langspan.addEventListener("mouseout",function(e){
-                bh.hideControlTooltip();})
         bh.langlist.appendChild(langspan);
     }
+    document.getElementById("lang-label").addEventListener("mouseover",function(e){
+        console.log("dfd")
+        bh.showControlTooltip(e,bh.t("Change language"));
+    });
+    document.getElementById("lang-label").addEventListener("mouseout",function(){
+        bh.hideControlTooltip();
+    });
+    document.getElementById("lang-icon").addEventListener("mouseover",function(e){
+        console.log("dfd")
+        bh.showControlTooltip(e,bh.t("Change language"));
+    });
+    document.getElementById("lang-icon").addEventListener("mouseout",function(){
+        bh.hideControlTooltip();
+    });
 
 }
 BHBubble.prototype.toggleLangList = function(){
