@@ -15,7 +15,14 @@ GWCatalogue.prototype.init = function(){
     this.setScales();
     this.d=null;
     this.debug=true;
-
+    this.langs = {
+        "de":{code:"de",name:"Deutsch (de)"},
+        "en":{code:"en",name:"English (en)"},
+        "fr":{code:"fr",name:"Francais (fr)"},
+        // "de2":{code:"de",name:"Deutsch (de)"},
+        // "en2":{code:"en",name:"English (en)"},
+        // "fr2":{code:"fr",name:"Francais (fr)"},
+    }
 }
 GWCatalogue.prototype.getUrlVars = function(){
     // Get URL and query variables
@@ -377,6 +384,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="20%";
+        this.langcontHeight="40%";
         // info.style.top = "50%";
         // info.style.left = "0%";
     }else{
@@ -397,6 +405,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = 0.5*this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="10%";
+        this.langcontHeight="20%";
         // info.style.top = "";
         // info.style.left = "";
     }
@@ -432,25 +441,21 @@ GWCatalogue.prototype.setScales = function(){
     if (this.winAspect<1){
         // portrait
         this.sksc=Math.min(1.0,this.xsc*2.)
-        d3.selectAll(".options-title")
-            .attr("class","options-title portrait");
-        d3.selectAll(".help-title")
-            .attr("class","help-title portrait");
-        d3.selectAll(".help-text")
-            .attr("class","help-text portrait");
-        d3.selectAll(".help-cont-text")
-            .attr("class","help-cont-text portrait");
+        d3.selectAll(".panel-title")
+            .attr("class","panel-title portrait");
+        d3.selectAll(".panel-text")
+            .attr("class","panel-text portrait");
+        d3.selectAll(".panel-cont-text")
+            .attr("class","panel-cont-text portrait");
     }else{
         // landscape
         this.sksc=Math.min(1.0,this.ysc)
-        d3.selectAll(".options-title")
-            .attr("class","options-title landscape");
-        d3.selectAll(".help-title")
-            .attr("class","help-title landscape");
-        d3.selectAll(".help-text")
-            .attr("class","help-text landscape");
-        d3.selectAll(".help-cont-text")
-            .attr("class","help-cont-text landscape");
+        d3.selectAll(".panel-title")
+            .attr("class","panel-title landscape");
+        d3.selectAll(".panel-text")
+            .attr("class","panel-text landscape");
+        d3.selectAll(".panel-cont-text")
+            .attr("class","panel-cont-text landscape");
     }
     // this.sksc=this.scl
 
@@ -635,32 +640,36 @@ GWCatalogue.prototype.drawSketch = function(){
     }
 
     // add labels
-    if (this.showerrors == null){this.showerrors=true};
-    for (lab in this.labels){this.addLab(lab)};
+    if (this.redraw){
+        d3.selectAll('.labcont').style('height',this.labcontHeight)
+        d3.selectAll('.lang-cont').style('height',this.langcontHeight)
+    }else{
+        if (this.showerrors == null){this.showerrors=true};
+        for (lab in this.labels){this.addLab(lab)};
 
-    // add unit-switch button
-    swimgdiv = document.createElement('div');
-    swimgdiv.className = 'icon labcont';
-    swimgdiv.setAttribute("id",'unitswicon');
-    // swimgdiv.style.width = this.labcontWidth;
-    swimgdiv.style.height = this.labcontHeight;
-    swimgdiv.style.display = "inline-block";
-    if (this.labels[lab].icon){
-        swimgdiv.innerHTML ="<img src='img/switch.svg'>"
+        // add unit-switch button
+        swimgdiv = document.createElement('div');
+        swimgdiv.className = 'icon labcont';
+        swimgdiv.setAttribute("id",'unitswicon');
+        // swimgdiv.style.width = this.labcontWidth;
+        swimgdiv.style.height = this.labcontHeight;
+        swimgdiv.style.display = "inline-block";
+        if (this.labels[lab].icon){
+            swimgdiv.innerHTML ="<img src='img/switch.svg'>"
+        }
+        swimgdiv.onmouseover = function(e){
+            gw.showTooltip(e,"switch")}
+        swimgdiv.onmouseout = function(){gw.hideTooltip()};
+        swimgdiv.onclick = function(){gw.switchUnits()};
+        swtxtdiv = document.createElement('div');
+        swtxtdiv.className = 'sketchlab info';
+        swtxtdiv.setAttribute("id",'unitswtxt');
+        swtxtdiv.style.height = "100%";
+        swtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
+        swtxtdiv.innerHTML = this.tl('%tooltip.switchunits%');
+        swimgdiv.appendChild(swtxtdiv);
+        document.getElementById('labcontainer').appendChild(swimgdiv);
     }
-    swimgdiv.onmouseover = function(e){
-        gw.showTooltip(e,"switch")}
-    swimgdiv.onmouseout = function(){gw.hideTooltip()};
-    swimgdiv.onclick = function(){gw.switchUnits()};
-    swtxtdiv = document.createElement('div');
-    swtxtdiv.className = 'sketchlab info';
-    swtxtdiv.setAttribute("id",'unitswtxt');
-    swtxtdiv.style.height = "100%";
-    swtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
-    swtxtdiv.innerHTML = this.tl('%tooltip.switchunits%');
-    swimgdiv.appendChild(swtxtdiv);
-    document.getElementById('labcontainer').appendChild(swimgdiv);
-
     // add title & subtitle to sketch
     if (this.portrait){fs=(3.0*gw.xsc)}
     else{fs=(1.5*gw.ysc)}
@@ -1057,6 +1066,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.data=[];
     gw.optionsOn=false;
     gw.helpOn=false;
+    gw.lengOn=false;
 
     gw.langDefault="en";
     gw.fileInDataDict="json/datadict.json";
@@ -1065,31 +1075,11 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.fileInEvents=gw.urlVars.eventsFile;
     }else{gw.fileInEvents=gw.fileInEventsDefault}
     if (gw.urlVars.lang){
-        gw.lang=gw.urlVars.lang;
-    }else{gw.lang=gw.langDefault}
-    gw.fileInLang="lang/lang_"+gw.lang+".json"
+        lang=gw.urlVars.lang;
+    }else{lang=gw.langDefault}
 
-    d3.json(gw.fileInLang, function(error, dataIn) {
-        if (error){
-            if (gw.lang==gw.langDefault){
-                console.log(error);
-                alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
-            }else{
-                alert('Error loading language '+gw.lang+'. Reverting to '+gw.langDefault+' as default');
-                window.location.replace(gw.makeUrl({'lang':gw.langDefault}));
-            }
-        }
-        gw.loaded++;
-        if(gw.debug){console.log(gw.fileInLang);}
-        gw.langdict=dataIn
-        gw.setlang();
-        if (gw.loaded==gw.toLoad){
-            gw.setColumns(gw.datadict);
-            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-            gw.makePlot();
-            if(this.debug){console.log('plotted');}
-        }
-    });
+    gw.loadLang(lang);
+
     d3.json(gw.fileInEvents, function(error, dataIn) {
         if (error){
             console.log(error);
@@ -1129,7 +1119,43 @@ GWCatalogue.prototype.drawGraphInit = function(){
         }
     });
 }
-GWCatalogue.prototype.setlang = function(){
+GWCatalogue.prototype.loadLang = function(lang){
+    var gw=this;
+    var reload = (gw.lang) ? true:false;
+    gw.lang=lang;
+    gw.fileInLang="lang/lang_"+lang+".json"
+    d3.json(gw.fileInLang, function(error, dataIn) {
+        if (error){
+            if (gw.lang==gw.langDefault){
+                console.log(error);
+                alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
+            }else{
+                alert('Error loading language '+gw.lang+'. Reverting to '+gw.langDefault+' as default');
+                window.location.replace(gw.makeUrl({'lang':gw.langDefault}));
+            }
+        }
+        gw.loaded++;
+        if(gw.debug){console.log(gw.fileInLang);}
+        gw.langdict=dataIn;
+        if (reload){
+            if (this.debug){console.log('reload language');}
+            gw.replot();
+            gw.setLang();
+            d3.select(".lang-cont.current").classed("current",false);
+            d3.select("#lang-"+gw.lang+"-cont").classed("current",true);
+        }else{
+            gw.setLang();
+            if (gw.loaded==gw.toLoad){
+                gw.setColumns(gw.datadict);
+                gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+                gw.makePlot();
+                if(this.debug){console.log('plotted');}
+            }
+        }
+    });
+
+}
+GWCatalogue.prototype.setLang = function(){
     d3.select("#options-x > .options-title")
         .html(this.tl('%text.horizontal-axis%'))
     d3.select("#options-y > .options-title")
@@ -1448,7 +1474,7 @@ GWCatalogue.prototype.drawGraph = function(){
         })
     .append("img")
         .attr("src","img/info.svg")
-        .on("click",function(){gw.hideOptions();gw.hideHelp();});
+        .on("click",function(){gw.hideOptions();gw.hideHelp();gw.hideLang();});
 
     //add help icon
     this.helpbg = d3.select('#help-outer-bg');
@@ -1472,8 +1498,7 @@ GWCatalogue.prototype.drawGraph = function(){
                  .duration(500)
                  .style("opacity", 0);
           //   document.getElementById("sketchcontainer").style.opacity=0.;
-        })
-    .append("img")
+        }).append("img")
         .attr("src","img/help.svg")
         .on("click",function(){gw.showHelp();});
     this.helpbg.on("click",function(){gw.hideHelp();});
@@ -1481,7 +1506,6 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("top","200%");
     this.helpouter.select("#help-close")
         .on("click",function(){gw.hideHelp();});
-
 
     //add error toggle button
     d3.select("#svg-container").append("div")
@@ -1496,14 +1520,42 @@ GWCatalogue.prototype.drawGraph = function(){
         })
         .on("mouseout",function(){
             gw.hideTooltipManual();
-        })
-
-    .append("img")
+        }).append("img")
         .attr("src","img/errors.svg")
         .attr("class","errors-show")
         .attr("id","errors-img")
         .on("click",function(){gw.toggleErrors();gw.hideTooltipManual();});
 
+    // add language button
+    this.langbg = d3.select('#lang-outer-bg');
+    this.langouter = d3.select('#lang-outer')
+    d3.select("#svg-container").append("div")
+        .attr("id","lang-icon")
+        .attr("class","hidden")
+        .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
+        .on("mouseover", function(d) {
+              gw.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              gw.tooltip.html(gw.tl('%tooltip.showlang%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            gw.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("sketchcontainer").style.opacity=0.;
+        }).append("img")
+        .attr("src","img/lang.svg")
+        .on("click",function(){console.log('showing lang');gw.showLang();});
+    this.langbg.on("click",function(){gw.hideLang();});
+    this.langouter
+        .style("top","200%");
+    this.langouter.select("#lang-close")
+        .on("click",function(){gw.hideLang();});
 }
 GWCatalogue.prototype.moveHighlight = function(d){
     // move highlight circle
@@ -1763,9 +1815,11 @@ GWCatalogue.prototype.addOptions = function(){
     var gw=this;
     // add buttons
     var col;
+    var divx = document.getElementById('x-buttons');
+    var divy= document.getElementById('y-buttons');
+
     for (col in gw.columns){
         if (gw.columns[col].avail){
-            var divx = document.getElementById('x-buttons');
             var newoptdivx = document.createElement('div');
             newoptdivx.className = 'option option-x';
             newoptdivx.setAttribute("id","button-divx-"+col);
@@ -1794,7 +1848,6 @@ GWCatalogue.prototype.addOptions = function(){
             newoptinputx.onmouseout = function(){gw.hideTooltip();};
             newoptdivx.appendChild(newoptinputx);
 
-            var divy= document.getElementById('y-buttons');
             var newoptdivy = document.createElement('div');
             newoptdivy.className = 'option option-y';
             newoptdivy.setAttribute("id","button-divy-"+col);
@@ -1825,11 +1878,49 @@ GWCatalogue.prototype.addOptions = function(){
             newoptdivy.appendChild(newoptinputy);
         }
     }
+
+    // gw.langs={
+    //     "en":{code:"en",name:"English (en)"},
+    //     "fr":{code:"fr",name:"Francais (fr)"},
+    //     "de":{code:"de",name:"Deutsch (de)"},
+    // }
+    // var divl= document.getElementById('lang-buttons');
+    // for (lang in gw.langs){
+    //     var newoptdivl = document.createElement('div');
+    //     newoptdivl.className = 'option option-lang';
+    //     newoptdivl.setAttribute("id","button-divl-"+lang);
+    //     divy.appendChild(newoptdivy);
+    //     var newoptinputl = document.createElement('span');
+    //     newoptinputl.type = 'submit';
+    //     newoptinputl.name = lang;
+    //     // newoptinputy.value = gw.getLabel(col);
+    //     newoptinputl.setAttribute("id","buttonl-"+lang);
+    //     newoptinputl.classList.add("button");
+    //     newoptinputl.classList.add("buttonl");
+    //     newoptinputl.src = gw.getIcon(col);
+    //     newoptinputl.label = gw.getLabel(col);
+    //     if (lang==this.lang){newoptdivl.classList.add("down")};
+    //     newoptinputl.innerHTML = lang;
+    //     newoptinputl.addEventListener('click',function(){
+    //         oldLang = gw.lang;
+    //         newLang = this.id.split('buttonl-')[1]
+    //         document.getElementById("button-divl-"+oldLang).classList.remove("down")
+    //         document.getElementById("button-divl-"+newLang).classList.add("down")
+    //         this.classList.add("down");
+    //         // gw.updateLang(this.name);
+    //     });
+    //     newoptinputl.onmouseover = function(e){
+    //         // console.log(this.id.split('buttony-')[1])
+    //         gw.showTooltip(e,this.id.split('buttonl-')[1],type="lang");};
+    //     newoptinputy.onmouseout = function(){gw.hideTooltip();};
+    //     newoptdivy.appendChild(newoptinputl);
+    // }
 }
 
 GWCatalogue.prototype.showOptions = function(){
     //show options
     if (this.helpOn){this.hideHelp()}
+    if (this.langOn){this.hideLang()}
     this.optionsOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -1855,7 +1946,6 @@ GWCatalogue.prototype.showOptions = function(){
     }
     document.getElementById("options-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
-    document.getElementById("help-icon").classList.add("hidden");
 }
 GWCatalogue.prototype.hideOptions = function(d) {
     // hide options box
@@ -1872,11 +1962,7 @@ GWCatalogue.prototype.hideOptions = function(d) {
     this.optionsbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("options-icon").classList.add("hidden");
-    if (this.helpOn){
-        document.getElementById("help-icon").classList.remove("hidden");
-    }else{
-        document.getElementById("info-icon").classList.remove("hidden");
-    }
+    document.getElementById("info-icon").classList.remove("hidden");
 }
 GWCatalogue.prototype.addHelp = function(){
     // add help to panel
@@ -1911,6 +1997,7 @@ GWCatalogue.prototype.addHelp = function(){
 GWCatalogue.prototype.showHelp = function(){
     //show options
     if (this.optionsOn){this.hideOptions();}
+    if (this.langOn){this.hideLang();}
     this.helpOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -1935,9 +2022,8 @@ GWCatalogue.prototype.showHelp = function(){
         document.getElementById('help-block-text').classList.remove('bottom')
         document.getElementById('help-block-icons').classList.remove('bottom')
     }
-    document.getElementById("options-icon").classList.add("hidden");
-    document.getElementById("info-icon").classList.add("hidden");
     document.getElementById("help-icon").classList.remove("hidden");
+    document.getElementById("info-icon").classList.add("hidden");
 }
 GWCatalogue.prototype.hideHelp = function(d) {
     // hide options box
@@ -1953,10 +2039,115 @@ GWCatalogue.prototype.hideHelp = function(d) {
     //   .style("opacity",0);
     this.helpbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
-    document.getElementById("options-icon").classList.add("hidden");
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("help-icon").classList.add("hidden");
 }
+
+GWCatalogue.prototype.addLang = function(replot){
+    // add help to panel
+    var gw=this;
+
+    d3.select("#lang-title")
+        .html(this.tl("%text.lang.title%"))
+        d3.select("#lang-text")
+            .html(this.tl("%text.lang.text%"));
+    if (this.portrait){
+        d3.select('#lang-title')
+            .style("font-size",(5.0*this.xsc)+"em")
+    }else{
+        d3.select('#lang-title')
+            .style("font-size",(2.5*this.ysc)+"em")
+    }
+    if (replot){
+        d3.selectAll('.lang-cont').remove()
+    }
+    for (lang in this.langs){
+        langdiv = document.createElement('div');
+        langdiv.className = 'panel-cont lang-cont';
+        if (lang==gw.lang){
+            langdiv.classList.add('current')
+        }
+        langdiv.style.height = gw.langcontHeight;
+        langdiv.setAttribute("id",'lang-'+lang+'-cont');
+        langicondiv = document.createElement('div');
+        langicondiv.className='panel-cont-icon'
+        langicondiv.setAttribute("id",'lang-'+lang+'-icon');
+        langicondiv.innerHTML =lang;
+        langicondiv.addEventListener('click',function(){
+            newlang = this.id.split('-')[1];
+            oldlang = gw.lang;
+            if (newlang!=oldlang){
+                gw.loadLang(newlang);
+            }
+        });
+        langdiv.appendChild(langicondiv);
+        // langdiv.onmouseover = function(e){
+        //     gw.showTooltip(e,this.id.split("icon")[0])}
+        // labimgdiv.onmouseout = function(){gw.hideTooltip()};
+        langtxtdiv = document.createElement('div');
+        langtxtdiv.className = 'panel-cont-text panel-lang';
+        langtxtdiv.setAttribute("id",'lang-'+lang+'-txt');
+        langtxtdiv.style.height = "100%";
+        langtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
+        langtxtdiv.innerHTML = gw.langs[lang].name;
+        // langtxtdiv.onmouseover = function(e){
+        //     gw.showTooltip(e,this.id.split("txt")[0])}
+        // labtxtdiv.onmouseout = function(){gw.hideTooltip()};
+        langdiv.appendChild(langtxtdiv);
+        document.getElementById('lang-block-icons').appendChild(langdiv);
+    }
+}
+
+GWCatalogue.prototype.showLang = function(){
+    //show options
+    if (this.optionsOn){this.hideOptions();}
+    if (this.helpOn){this.hideHelp();}
+    this.langOn=true;
+    // fade in semi-transparent background layer (greys out image)
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style({"opacity":0.5});
+    this.langbg.style("height","100%");
+    //fade in infopanel
+    this.langouter = d3.select('#lang-outer')
+    this.langouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    // this.infopanel.html(this.iptext(d));
+    this.langouter.style("left", document.getElementById('infoouter').offsetLeft-1)
+        .style("top", document.getElementById('infoouter').offsetTop-1)
+        .style("width",document.getElementById('infoouter').offsetWidth-2)
+        .style("height",document.getElementById('infoouter').offsetHeight-22);
+    if (this.portrait){
+        document.getElementById('lang-block-text').classList.add('bottom')
+        document.getElementById('lang-block-icons').classList.add('bottom')
+    }else{
+        document.getElementById('lang-block-text').classList.remove('bottom')
+        document.getElementById('lang-block-icons').classList.remove('bottom')
+    }
+    document.getElementById("lang-icon").classList.remove("hidden");
+    document.getElementById("info-icon").classList.add("hidden");
+}
+GWCatalogue.prototype.hideLang = function(d) {
+    // hide options box
+    this.langOn=false;
+    // fade out infopanel
+    this.langouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.langouter.style("top","200%");
+    // fade out semi-transparent background
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style("opacity",0);
+    this.langbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
+    document.getElementById("info-icon").classList.remove("hidden");
+    document.getElementById("lang-icon").classList.add("hidden");
+}
+
+
 GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     // add tooltip to sketch
     ttSk = document.getElementById("tooltipSk")
@@ -2003,6 +2194,7 @@ GWCatalogue.prototype.makePlot = function(){
     // this.addButtons();
     this.addOptions();
     this.addHelp();
+    this.addLang(false);
     if (this.optionsOn){
         // console.log('showing options')
         this.showOptions();
@@ -2019,15 +2211,16 @@ GWCatalogue.prototype.replot = function(){
     // remove elements
     d3.select("svg#svgSketch").remove()
     d3.select("div#svg-container").remove()
-    d3.selectAll("div.labcont").remove()
+    // d3.selectAll("div.labcont").remove()
     // redraw graph and sketch
     this.redraw=true;
     this.setScales();
     this.drawGraph();
     this.drawSketch();
-    if (this.optionsOn){this.showOptions();}
     this.addHelp();
+    if (this.optionsOn){this.showOptions();}
     if (this.helpOn){this.showHelp();}
+    if (this.langOn){this.showLang();}
     this.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.sketchName){

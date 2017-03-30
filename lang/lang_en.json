@@ -59,6 +59,8 @@
     "text.help.settings":"Change the graph properties, such as the horizontal and vertical axes",
     "text.help.help":"Show this help panel",
     "text.help.errors":"Turn errors on and off, both in the graph and the information panel",
+    "text.lang.title":"Language",
+    "text.lang.text":"Chose your language from the options below",
     "tooltip.losc":"LIGO Open Science Center",
     "tooltip.switchunits":"Switch units",
     "tooltip.toggleerrors":"Toggle Errors",

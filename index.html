@@ -32,47 +32,61 @@
             <div id="sketchcontainer"></div>
             <div id="labcontainer"></div>
         </div>
-        <div id="options-bg"></div>
-        <div id="options-outer">
+        <div id="options-bg" class="panel-bg"></div>
+        <div id="options-outer" class="panel-outer">
             <div id="options-x" class="options-box">
-                <div class="options-title">Horizontal axis</div>
+                <div class="panel-title">Horizontal axis</div>
                 <div class="options-buttons" id="x-buttons"></div>
             </div>
             <div id="options-y" class="options-box">
-                <div class="options-title">Vertical axis</div>
+                <div class="panel-title">Vertical axis</div>
                 <div class="options-buttons" id="y-buttons"></div>
             </div>
-            <div id="options-close">
+            <div id="options-lang" class="options-box">
+                <div class="panel-title">Language</div>
+                <div class="options-buttons" id="lang-buttons"></div>
+            </div>
+            <div id="options-close" class="panel-close">
                 <img src="img/close.png" title="close">
             </div>
         </div>
-        <div id="help-bg"></div>
-        <div id="help-outer">
-            <div id="help-title" class="help-title">
+        <div id="help-bg" class="panel-bg"></div>
+        <div id="help-outer" class="panel-outer">
+            <div id="help-title" class="panel-title"></div>
+            <div class="panel-block" id="help-block-text">
+                <div class="panel-text" id="help-text"></div>
+                <div class="panel-text" id="help-about"></div>
             </div>
-            <div class="help-block" id="help-block-text">
-                <div class="help-text" id="help-text"></div>
-                <div class="help-text" id="help-about"></div>
-            </div>
-            <div class="help-block" id="help-block-icons">
-                <div class="help-cont" id="help-help-cont">
-                    <img class="help-img" src="img/help.svg">
-                    <div class="help-cont-text" id="help-help-text">help</div>
+            <div class="panel-block" id="help-block-icons">
+                <div class="panel-cont" id="help-help-cont">
+                    <img class="panel-cont-img" src="img/help.svg">
+                    <div class="panel-cont-text" id="help-help-text">help</div>
                 </div>
-                <div class="help-cont" id="help-info-cont">
-                    <img class="help-img" src="img/info.svg">
-                    <div class="help-cont-text" id="help-info-text">info</div>
+                <div class="panel-cont" id="help-info-cont">
+                    <img class="panel-img" src="img/info.svg">
+                    <div class="panel-cont-text" id="help-info-text">info</div>
                 </div>
-                <div class="help-cont" id="help-settings-cont">
-                    <img class="help-img" src="img/settings.svg">
-                    <div class="help-cont-text" id="help-settings-text">settings</div>
+                <div class="panel-cont" id="help-settings-cont">
+                    <img class="panel-cont-img" src="img/settings.svg">
+                    <div class="panel-cont-text" id="help-settings-text">settings</div>
                 </div>
-                <div class="help-cont" id="help-errors-cont">
-                    <img class="help-img" src="img/errors.svg">
-                    <div class="help-cont-text" id="help-errors-text">errors</div>
+                <div class="panel-cont" id="help-errors-cont">
+                    <img class="panel-cont-img" src="img/errors.svg">
+                    <div class="panel-cont-text" id="help-errors-text">errors</div>
                 </div>
             </div>
-            <div id="help-close">
+            <div id="help-close" class="panel-close">
+                <img src="img/close.png" title="close">
+            </div>
+        </div>
+        <div id="lang-bg" class="panel-bg"></div>
+        <div id="lang-outer" class="panel-outer">
+            <div id="lang-title" class="panel-title"></div>
+            <div class="panel-block" id="lang-block-text">
+                <div class="panel-text" id="lang-text"></div>
+            <div class="lang-block" id="lang-block-icons">
+            </div>
+            <div id="lang-close" class="panel-close">
                 <img src="img/close.png" title="close">
             </div>
         </div>
