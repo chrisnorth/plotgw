@@ -1138,13 +1138,13 @@ GWCatalogue.prototype.loadLang = function(lang){
         if(gw.debug){console.log(gw.fileInLang);}
         gw.langdict=dataIn;
         if (reload){
-            if (this.debug){console.log('reload language');}
+            if (gw.debug){console.log('reload language',gw.lang);}
+            // gw.setLang();
             gw.replot();
-            gw.setLang();
             d3.select(".lang-cont.current").classed("current",false);
             d3.select("#lang-"+gw.lang+"-cont").classed("current",true);
         }else{
-            gw.setLang();
+            // gw.setLang();
             if (gw.loaded==gw.toLoad){
                 gw.setColumns(gw.datadict);
                 gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
@@ -1156,6 +1156,9 @@ GWCatalogue.prototype.loadLang = function(lang){
 
 }
 GWCatalogue.prototype.setLang = function(){
+    // should be run before graph is made
+    if (this.debug){console.log('setting',this.lang);}
+    if (this.debug){console.log(this.tl('%text.candidates%'));}
     d3.select("#options-x > .options-title")
         .html(this.tl('%text.horizontal-axis%'))
     d3.select("#options-y > .options-title")
@@ -1164,6 +1167,10 @@ GWCatalogue.prototype.setLang = function(){
         LVT:this.tl('%text.candidates%')}
     this.typedescs = {GW:this.tl('%text.detection%'),
         LVT:this.tl('%text.candidate%')}
+    d3.select('#lang-title')
+        .html(this.tl('%text.lang.title%'))
+    d3.select('#lang-text')
+        .html(this.tl('%text.lang.text%'))
 }
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
@@ -2189,6 +2196,7 @@ GWCatalogue.prototype.hideTooltipManual = function(){
 }
 GWCatalogue.prototype.makePlot = function(){
     // make plot (calls other function)
+    this.setLang();
     this.drawGraph();
     this.drawSketch();
     // this.addButtons();
@@ -2215,6 +2223,7 @@ GWCatalogue.prototype.replot = function(){
     // redraw graph and sketch
     this.redraw=true;
     this.setScales();
+    this.setLang();
     this.drawGraph();
     this.drawSketch();
     this.addHelp();
