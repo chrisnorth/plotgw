@@ -101,8 +101,6 @@ BHBubble.prototype.loadLang = function(lang){
                 _bh.langlab.html(_bh.langs[_bh.lang].code);
                 d3.select(".lang-item.current").classed("current",false);
                 d3.select(".lang-item#"+_bh.lang).classed("current",true);
-                // Replace help
-                _bh.addHelp();
                 // update URL
                 window.history.pushState({},null,_bh.makeUrl({'lang':_bh.lang}));
                 // update footer
@@ -876,11 +874,11 @@ BHBubble.prototype.addHelp = function(){
         .on("click",function(){bh.hideHelp();});
     // build help text
     this.helpinner.append("div")
-        .attr("class","help-title")
+        .attr("class","help-title reloadable")
         .html(this.t("Mergers"));
     for (cont in this.anim){
         helpcont=this.helpinner.append("div")
-            .attr("class","help-cont")
+            .attr("class","help-cont reloadable")
             .attr("id","help-"+cont);
         helpcont.append("img")
             .attr("class","anim")
@@ -888,9 +886,10 @@ BHBubble.prototype.addHelp = function(){
         helpcont.append("div")
             .attr("class","help-text")
             .html(this.anim[cont].tt);
+        console.log('Adding',this.anim[cont].tt)
     }
     this.helpinner.append("div")
-        .attr("class","help-title")
+        .attr("class","help-title reloadable")
         .html(this.t("Scale"));
     for (cont in this.scales){
         helpcont=this.helpinner.append("div")
@@ -902,6 +901,7 @@ BHBubble.prototype.addHelp = function(){
         helpcont.append("div")
             .attr("class","help-text")
             .html(this.scales[cont].tt);
+        console.log('Adding',this.scales[cont].tt)
     }
 }
 BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
@@ -1356,6 +1356,7 @@ BHBubble.prototype.replot = function(valueCol){
     // this.makeSvg();
     d3.select("svg").remove();
     d3.selectAll(".reloadable").remove();
+    this.addHelp();
     this.drawBubbles();
     this.makeDownload();
     this.addButtons();
