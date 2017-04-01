@@ -7,9 +7,15 @@ function GWCatalogue(){
 GWCatalogue.prototype.init = function(){
     //initialyse common values
     this.flySp=1000;
-    this.defaults={xvar:"M1",yvar:"M2",panel:"info",lang:"en"}
+    this.defaults={
+        xvar:"M1",
+        yvar:"M2",
+        panel:"info",
+        lang:"en",
+        showerrors:true,
+    }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
-    this.yvar = (this.urlVars.y) ? this.urlVars.y : "M2";
+    this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
     this.setStyles();
     this.sketchName="None";
     this.unitSwitch=false;
@@ -51,11 +57,17 @@ GWCatalogue.prototype.getUrlVars = function(){
 GWCatalogue.prototype.makeUrl = function(newKeys,full){
     // construct new URL with replacement queries if necessary
     newUrlVars = this.urlVars;
-    allKeys = {"x":this.xvar,
-        "y":this.yvar,
-        "lang":[this.lang,this.langDefault],
-        "err":[this.showerrors,true],
-        "panel":[this.getPanel(),"info"],
+    allKeys = {"x":[this.xvar,this.defaults.xvar],
+        "y":[this.yvar,this.defaults.yvar],
+        "lang":[this.lang,this.defaults.lang],
+        "err":[this.showerrors,this.defaults.showerrors],
+        "panel":[this.getPanel(),this.defaults.panel],
+    }
+    for (key in allKeys){
+        if (this.debug){console.log(key,allKeys[key]);}
+        if (allKeys[key][0]!=allKeys[key][1]){
+            newUrlVars[key]=allKeys[key][0]
+        }
     }
     for (key in newKeys){
         if (!newKeys[key]){
@@ -76,6 +88,11 @@ GWCatalogue.prototype.getPanel = function(){
     else if(this.helpOn){return "help";}
     else if(this.langOn){return "lang";}
     else{return "info"}
+}
+GWCatalogue.prototype.setPanel = function(panel){
+    if (panel=="options"){this.showOptions();}
+    else if(panel=="help"){this.showHelp();}
+    else if(panel=="lang"){this.showLang();}
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
     // translate text given dict
@@ -331,7 +348,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
     };
     this.columns={}
     for (c in colsUpdate){
-        console.log(c,colsUpdate[c],datadict)
+        // console.log(c,colsUpdate[c],datadict)
         if (colsUpdate[c].type=='src'){
             // console.log(c,datadict[c])
             this.columns[c]=datadict[c]
@@ -1139,7 +1156,7 @@ GWCatalogue.prototype.loadLang = function(lang,nodisplay){
     var gw=this;
     var reload = (gw.lang) ? true:false;
     gw.lang=lang;
-    gw.fileInLang="lang/lang_"+lang+".json"
+    gw.fileInLang="lang/lang_"+lang+".json";
     d3.json(gw.fileInLang, function(error, dataIn) {
         if (error){
             if (gw.lang==gw.defaults.lang){
@@ -1147,20 +1164,26 @@ GWCatalogue.prototype.loadLang = function(lang,nodisplay){
                 alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
             }else{
                 alert('Error loading language '+gw.lang+'. Reverting to '+gw.defaults.lang+' as default');
+                console.log('error loading',gw.lang,error);
+                // window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
+                // gw.loaded-=1;
+                // gw.lang=null;
+                // gw.loadLang(gw.defaults.lang);
                 window.location.replace(gw.makeUrl({'lang':gw.defaults.lang}));
             }
         }
-        gw.loaded++;
         if(gw.debug){console.log(gw.fileInLang);}
         if(!nodisplay){
             gw.langdict=dataIn;
             if (reload){
-                if (gw.debug){console.log('reload language',gw.lang);}
+                if (gw.debug){console.log('reloaded language',gw.lang);}
                 // gw.setLang();
                 gw.replot();
                 d3.select(".lang-cont.current").classed("current",false);
-                d3.select("#lang-"+gw.lang+"-cont").classed("current",true);
+                d3.select("#lang_"+gw.lang+"_cont").classed("current",true);
             }else{
+                if (gw.debug){console.log('loaded language',gw.lang,gw.langdict);}
+                gw.loaded++;
                 // gw.setLang();
                 if (gw.loaded==gw.toLoad){
                     gw.setColumns(gw.datadict);
@@ -1174,12 +1197,10 @@ GWCatalogue.prototype.loadLang = function(lang,nodisplay){
             return dataIn
         }
     });
-
 }
 GWCatalogue.prototype.setLang = function(){
     // should be run before graph is made
     if (this.debug){console.log('setting',this.lang);}
-    if (this.debug){console.log(this.tl('%text.candidates%'));}
     d3.select("#options-x > .options-title")
         .html(this.tl('%text.horizontal-axis%'))
     d3.select("#options-y > .options-title")
@@ -1563,7 +1584,7 @@ GWCatalogue.prototype.drawGraph = function(){
           //   document.getElementById("sketchcontainer").style.opacity=0.;
         }).append("img")
         .attr("src","img/lang.svg")
-        .on("click",function(){console.log('showing lang');gw.showLang();});
+        .on("click",function(){console.log('showing lang panel');gw.showLang();});
     // this.langbg.on("click",function(){gw.hideLang();});
     this.langouter
         .style("top","200%");
@@ -1725,13 +1746,13 @@ GWCatalogue.prototype.toggleErrors = function(){
     if (this.showerrors){
         this.showerrors = false;
         this.svgcont.select("#errors-icon ")
-            .attr("class","hidden")
+            .attr("class","graph-icon hidden")
         this.svgcont.select("#errors-img ")
             .attr("class","errors-hide")
     }else{
         this.showerrors = true;
         this.svgcont.select("#errors-icon ")
-            .attr("class","")
+            .attr("class","graph-icon")
         this.svgcont.select("#errors-img")
             .attr("class","errors-show")
     }
@@ -1980,7 +2001,7 @@ GWCatalogue.prototype.showOptions = function(){
     // this.optionsbg.transition()
     //   .duration(500)
     //   .style({"opacity":0.5});
-    this.optionsbg.style("height","100%");
+    // this.optionsbg.style("height","100%");
     //fade in infopanel
     this.optionsouter.transition()
        .duration(500)
@@ -2013,7 +2034,7 @@ GWCatalogue.prototype.hideOptions = function(d) {
     // this.optionsbg.transition()
     //   .duration(500)
     //   .style("opacity",0);
-    this.optionsbg.style("height",0);
+    // this.optionsbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("options-icon").classList.add("hidden");
     document.getElementById("info-icon").classList.remove("hidden");
@@ -2057,7 +2078,7 @@ GWCatalogue.prototype.showHelp = function(){
     // this.optionsbg.transition()
     //   .duration(500)
     //   .style({"opacity":0.5});
-    this.helpbg.style("height","100%");
+    // this.helpbg.style("height","100%");
     //fade in infopanel
     this.helpouter = d3.select('#help-outer')
     this.helpouter.transition()
@@ -2091,7 +2112,7 @@ GWCatalogue.prototype.hideHelp = function(d) {
     // this.optionsbg.transition()
     //   .duration(500)
     //   .style("opacity",0);
-    this.helpbg.style("height",0);
+    // this.helpbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("help-icon").classList.add("hidden");
@@ -2131,8 +2152,10 @@ GWCatalogue.prototype.addLang = function(replot){
             newlang = this.id.split('_')[1];
             oldlang = gw.lang;
             if (newlang!=oldlang){
+                window.history.pushState({},null,gw.makeUrl({'lang':newlang}));
                 gw.loadLang(newlang);
             }
+
         });
         langdiv.appendChild(langicondiv);
         // langdiv.onmouseover = function(e){
@@ -2161,7 +2184,7 @@ GWCatalogue.prototype.showLang = function(){
     // this.optionsbg.transition()
     //   .duration(500)
     //   .style({"opacity":0.5});
-    this.langbg.style("height","100%");
+    // this.langbg.style("height","100%");
     //fade in infopanel
     this.langouter = d3.select('#lang-outer')
     this.langouter.transition()
@@ -2174,10 +2197,8 @@ GWCatalogue.prototype.showLang = function(){
         .style("width",document.getElementById('infoouter').offsetWidth-2)
         .style("height",document.getElementById('infoouter').offsetHeight-22);
     if (this.portrait){
-        document.getElementById('lang-block-text').classList.add('bottom')
         document.getElementById('lang-block-icons').classList.add('bottom')
     }else{
-        document.getElementById('lang-block-text').classList.remove('bottom')
         document.getElementById('lang-block-icons').classList.remove('bottom')
     }
     document.getElementById("lang-icon").classList.remove("hidden");
@@ -2195,7 +2216,7 @@ GWCatalogue.prototype.hideLang = function(d) {
     // this.optionsbg.transition()
     //   .duration(500)
     //   .style("opacity",0);
-    this.langbg.style("height",0);
+    // this.langbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("lang-icon").classList.add("hidden");
@@ -2217,7 +2238,14 @@ GWCatalogue.prototype.showShare = function(){
         document.getElementById('share-icon').offsetWidth/2 -
         document.getElementById('share-outer').offsetWidth/2)
     d3.select("#twitter-share-button")
-        .attr("href",gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=").replace(/\s/g,"%20")+gw.makeUrl().replace("file:///","http%3A%2F%2F").replace(/&/g,'%26').replace(/:/g,'%3A').replace(/\//g,'%2F').replace(/\?/g,'%3F').replace(/=/g,'%3D')+gw.tl("&hashtags=%share.twitter.hashtag%&url="))
+        .attr("href",
+            gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=").replace(/\s/g,"%20")+
+            gw.makeUrl().replace("file:///","http%3A%2F%2F").replace(/&/g,'%26').replace(/:/g,'%3A').replace(/\//g,'%2F').replace(/\?/g,'%3F').replace(/=/g,'%3D')+
+            gw.tl("&hashtags=%share.twitter.hashtag%"))
+    // d3.select("#twitter-share-button")
+    //     .attr("href",gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%").replace(/\s/g,"%20")+
+    //         "&url=http://www.ligo.org%26hf%3D40"+
+    //         gw.tl("&hashtags=%share.twitter.hashtag%&url="))
 }
 GWCatalogue.prototype.hideShare = function(){
     //show share pot
@@ -2276,14 +2304,15 @@ GWCatalogue.prototype.makePlot = function(){
     this.addOptions();
     this.addHelp();
     this.addLang(false);
-    if (this.optionsOn){
-        // console.log('showing options')
-        this.showOptions();
-    }
-    if (this.helpOn){
-        // console.log('showing options')
-        this.showHelp();
-    }
+    this.setPanel(this.getPanel());
+    // if (this.optionsOn){
+    //     // console.log('showing options')
+    //     this.showOptions();
+    // }
+    // if (this.helpOn){
+    //     // console.log('showing options')
+    //     this.showHelp();
+    // }
 }
 GWCatalogue.prototype.replot = function(){
     // remove plots and redraw (e.g. on window resize)
