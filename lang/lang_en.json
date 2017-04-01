@@ -34,6 +34,7 @@
     "data.z.name":"Source redshift",
     "data.skyArea.name":"Sky Localization",
     "data.skyArea.unit":"deg^2",
+    "text.page.title":"LIGO Compact Binary Catalogue",
     "text.Msun.unit":"Msun",
     "text.gravwave":"Gravitational wave",
     "text.detections":"Detections",

@@ -1095,7 +1095,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
     gw.loaded=0;
-    gw.toLoad=3;
+    gw.toLoad=4;
     gw.data=[];
     gw.optionsOn=false;
     gw.helpOn=false;
@@ -1110,6 +1110,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         lang=gw.urlVars.lang;
     }else{lang=gw.defaults.lang}
 
+    gw.loadLangDefault()
     gw.loadLang(lang)
     // gw.langdict_default = gw.loadLang(gw.langDefault,true);
 
@@ -1152,7 +1153,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         }
     });
 }
-GWCatalogue.prototype.loadLang = function(lang,nodisplay){
+GWCatalogue.prototype.loadLang = function(lang){
     var gw=this;
     var reload = (gw.lang) ? true:false;
     gw.lang=lang;
@@ -1173,34 +1174,55 @@ GWCatalogue.prototype.loadLang = function(lang,nodisplay){
             }
         }
         if(gw.debug){console.log(gw.fileInLang);}
-        if(!nodisplay){
-            gw.langdict=dataIn;
-            if (reload){
-                if (gw.debug){console.log('reloaded language',gw.lang);}
-                // gw.setLang();
-                gw.replot();
-                d3.select(".lang-cont.current").classed("current",false);
-                d3.select("#lang_"+gw.lang+"_cont").classed("current",true);
-            }else{
-                if (gw.debug){console.log('loaded language',gw.lang,gw.langdict);}
-                gw.loaded++;
-                // gw.setLang();
-                if (gw.loaded==gw.toLoad){
-                    gw.setColumns(gw.datadict);
-                    gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-                    gw.makePlot();
-                    if(gw.debug){console.log('plotted');}
-                }
-            }
+        gw.langdict=dataIn;
+        if (reload){
+            if (gw.debug){console.log('reloaded language',gw.lang);}
+            // gw.setLang();
+            gw.replot();
+            d3.select(".lang-cont.current").classed("current",false);
+            d3.select("#lang_"+gw.lang+"_cont").classed("current",true);
         }else{
-            if (gw.debug){console.log('loaded (but not displayed language',gw.lang);}
-            return dataIn
+            if (gw.debug){console.log('loaded language',gw.lang,gw.langdict);}
+            gw.loaded++;
+            // gw.setLang();
+            if (gw.loaded==gw.toLoad){
+                gw.setColumns(gw.datadict);
+                gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+                gw.makePlot();
+                if(gw.debug){console.log('plotted');}
+            }
+        }
+    });
+}
+GWCatalogue.prototype.loadLangDefault = function(){
+    var gw=this;
+    var reload = (gw.lang) ? true:false;
+    gw.fileInLangDefault="lang/lang_"+gw.defaults.lang+".json";
+    d3.json(gw.fileInLangDefault, function(error, dataIn) {
+        if (error){
+            console.log(error);
+            alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
+        }
+        if(gw.debug){console.log(gw.fileInLangDefault);}
+        gw.langdictDefault=dataIn;
+        gw.loaded++;
+        if (gw.loaded==gw.toLoad){
+            gw.setColumns(gw.datadict);
+            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            gw.makePlot();
+            if(gw.debug){console.log('plotted');}
         }
     });
 }
 GWCatalogue.prototype.setLang = function(){
     // should be run before graph is made
     if (this.debug){console.log('setting',this.lang);}
+    for (k in this.langdictDefault){
+        if (!this.langdict.hasOwnProperty(k)){
+            if (this.debug){console.log('TRANSLATION WARNING: using default for '+k+' ('+this.lang+')');}
+            this.langdict[k]=this.langdictDefault[k];
+        }
+    }
     d3.select("#options-x > .options-title")
         .html(this.tl('%text.horizontal-axis%'))
     d3.select("#options-y > .options-title")
@@ -1214,7 +1236,7 @@ GWCatalogue.prototype.setLang = function(){
     d3.select('#lang-text')
         .html(this.tl('%text.lang.text%'))
     d3.select('#page-title')
-        .html(this.tl('%text.page.title'))
+        .html(this.tl('%text.page.title%'))
 }
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
