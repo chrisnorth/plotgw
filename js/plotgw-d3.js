@@ -2202,6 +2202,7 @@ GWCatalogue.prototype.hideLang = function(d) {
 }
 GWCatalogue.prototype.showShare = function(){
     //show share pot
+    var gw=this;
     d3.select("#share-bg").style("height","100%").style("display","block");
     shareouter=d3.select('#share-outer')
     shareouter.transition()
@@ -2215,6 +2216,8 @@ GWCatalogue.prototype.showShare = function(){
         document.getElementById('share-icon').offsetLeft +
         document.getElementById('share-icon').offsetWidth/2 -
         document.getElementById('share-outer').offsetWidth/2)
+    d3.select("#twitter-share-button")
+        .attr("href",gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=").replace(/\s/g,"%20")+gw.makeUrl().replace("file:///","http%3A%2F%2F").replace(/&/g,'%26').replace(/:/g,'%3A').replace(/\//g,'%2F').replace(/\?/g,'%3F').replace(/=/g,'%3D')+gw.tl("&hashtags=%share.twitter.hashtag%&url="))
 }
 GWCatalogue.prototype.hideShare = function(){
     //show share pot

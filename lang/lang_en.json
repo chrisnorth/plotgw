@@ -62,6 +62,8 @@
     "text.help.errors":"Turn errors on and off, both in the graph and the information panel",
     "text.lang.title":"Language",
     "text.lang.text":"Chose your language from the options below",
+    "share.twitter.text":"Look at this Binary Black Hole catalogue of @LIGO observations",
+    "share.twitter.hashtag":"GravitationalWaves",
     "tooltip.losc":"LIGO Open Science Center",
     "tooltip.switchunits":"Switch units",
     "tooltip.toggleerrors":"Toggle Errors",
