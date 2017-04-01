@@ -7,8 +7,9 @@ function GWCatalogue(){
 GWCatalogue.prototype.init = function(){
     //initialyse common values
     this.flySp=1000;
-    this.xvar = "M1";
-    this.yvar = "M2";
+    this.defaults={xvar:"M1",yvar:"M2",panel:"info",lang:"en"}
+    this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
+    this.yvar = (this.urlVars.y) ? this.urlVars.y : "M2";
     this.setStyles();
     this.sketchName="None";
     this.unitSwitch=false;
@@ -16,9 +17,10 @@ GWCatalogue.prototype.init = function(){
     this.d=null;
     this.debug=true;
     this.langs = {
-        "de":{code:"de",name:"Deutsch (de)"},
-        "en":{code:"en",name:"English (en)"},
-        "fr":{code:"fr",name:"Francais (fr)"},
+        "de":{code:"de",name:"Deutsch"},
+        "en":{code:"en",name:"English"},
+        "fr":{code:"fr",name:"Francais"},
+        "en-GB":{code:"en-GB",name:"English"},
         // "de2":{code:"de",name:"Deutsch (de)"},
         // "en2":{code:"en",name:"English (en)"},
         // "fr2":{code:"fr",name:"Francais (fr)"},
@@ -46,9 +48,15 @@ GWCatalogue.prototype.getUrlVars = function(){
         this.urlVars.lang="en-US";
     }
 }
-GWCatalogue.prototype.makeUrl = function(newKeys){
+GWCatalogue.prototype.makeUrl = function(newKeys,full){
     // construct new URL with replacement queries if necessary
     newUrlVars = this.urlVars;
+    allKeys = {"x":this.xvar,
+        "y":this.yvar,
+        "lang":[this.lang,this.langDefault],
+        "err":[this.showerrors,true],
+        "panel":[this.getPanel(),"info"],
+    }
     for (key in newKeys){
         if (!newKeys[key]){
             delete newUrlVars[key];
@@ -62,6 +70,12 @@ GWCatalogue.prototype.makeUrl = function(newKeys){
     }
     newUrl = newUrl.slice(0,newUrl.length-1);
     return newUrl;
+}
+GWCatalogue.prototype.getPanel = function(){
+    if (this.optionsOn){return "options";}
+    else if(this.helpOn){return "help";}
+    else if(this.langOn){return "lang";}
+    else{return "info"}
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
     // translate text given dict
@@ -90,10 +104,10 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
     }
     if (!plaintext){
         // replace superscripts
-        reSup=/\^(-?[0-9]*)(?=\s|$)/g
+        reSup=/\^(-?[0-9]*)(?=[\s/]|$)/g
         textOut=textOut.replace(reSup,"<sup>$1</sup> ");
         // replace Msun
-        textOut=textOut.replace('Msun','M<sub>&#x2609;</sub>')
+        textOut=textOut.replace(this.tl('%text.Msun.unit%',true),'M<sub>&#x2609;</sub>')
     }
     return(textOut);
 }
@@ -641,8 +655,10 @@ GWCatalogue.prototype.drawSketch = function(){
 
     // add labels
     if (this.redraw){
-        d3.selectAll('.labcont').style('height',this.labcontHeight)
-        d3.selectAll('.lang-cont').style('height',this.langcontHeight)
+        d3.selectAll('.labcont').style('height',this.labcontHeight);
+        d3.selectAll('.lang-cont').style('height',this.langcontHeight);
+        d3.select('#unitswtxt')
+            .html(this.tl('%tooltip.switchunits%'));
     }else{
         if (this.showerrors == null){this.showerrors=true};
         for (lab in this.labels){this.addLab(lab)};
@@ -1068,7 +1084,6 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.lengOn=false;
 
-    gw.langDefault="en";
     gw.fileInDataDict="json/datadict.json";
     gw.fileInEventsDefault="json/events.json";
     if (gw.urlVars.eventsFile){
@@ -1076,9 +1091,10 @@ GWCatalogue.prototype.drawGraphInit = function(){
     }else{gw.fileInEvents=gw.fileInEventsDefault}
     if (gw.urlVars.lang){
         lang=gw.urlVars.lang;
-    }else{lang=gw.langDefault}
+    }else{lang=gw.defaults.lang}
 
-    gw.loadLang(lang);
+    gw.loadLang(lang)
+    // gw.langdict_default = gw.loadLang(gw.langDefault,true);
 
     d3.json(gw.fileInEvents, function(error, dataIn) {
         if (error){
@@ -1119,38 +1135,43 @@ GWCatalogue.prototype.drawGraphInit = function(){
         }
     });
 }
-GWCatalogue.prototype.loadLang = function(lang){
+GWCatalogue.prototype.loadLang = function(lang,nodisplay){
     var gw=this;
     var reload = (gw.lang) ? true:false;
     gw.lang=lang;
     gw.fileInLang="lang/lang_"+lang+".json"
     d3.json(gw.fileInLang, function(error, dataIn) {
         if (error){
-            if (gw.lang==gw.langDefault){
+            if (gw.lang==gw.defaults.lang){
                 console.log(error);
                 alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
             }else{
-                alert('Error loading language '+gw.lang+'. Reverting to '+gw.langDefault+' as default');
-                window.location.replace(gw.makeUrl({'lang':gw.langDefault}));
+                alert('Error loading language '+gw.lang+'. Reverting to '+gw.defaults.lang+' as default');
+                window.location.replace(gw.makeUrl({'lang':gw.defaults.lang}));
             }
         }
         gw.loaded++;
         if(gw.debug){console.log(gw.fileInLang);}
-        gw.langdict=dataIn;
-        if (reload){
-            if (gw.debug){console.log('reload language',gw.lang);}
-            // gw.setLang();
-            gw.replot();
-            d3.select(".lang-cont.current").classed("current",false);
-            d3.select("#lang-"+gw.lang+"-cont").classed("current",true);
-        }else{
-            // gw.setLang();
-            if (gw.loaded==gw.toLoad){
-                gw.setColumns(gw.datadict);
-                gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-                gw.makePlot();
-                if(this.debug){console.log('plotted');}
+        if(!nodisplay){
+            gw.langdict=dataIn;
+            if (reload){
+                if (gw.debug){console.log('reload language',gw.lang);}
+                // gw.setLang();
+                gw.replot();
+                d3.select(".lang-cont.current").classed("current",false);
+                d3.select("#lang-"+gw.lang+"-cont").classed("current",true);
+            }else{
+                // gw.setLang();
+                if (gw.loaded==gw.toLoad){
+                    gw.setColumns(gw.datadict);
+                    gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+                    gw.makePlot();
+                    if(gw.debug){console.log('plotted');}
+                }
             }
+        }else{
+            if (gw.debug){console.log('loaded (but not displayed language',gw.lang);}
+            return dataIn
         }
     });
 
@@ -1171,6 +1192,8 @@ GWCatalogue.prototype.setLang = function(){
         .html(this.tl('%text.lang.title%'))
     d3.select('#lang-text')
         .html(this.tl('%text.lang.text%'))
+    d3.select('#page-title')
+        .html(this.tl('%text.page.title'))
 }
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
@@ -1428,11 +1451,12 @@ GWCatalogue.prototype.drawGraph = function(){
       .text(function(d) { return gw.legenddescs[d];})
 
     //add options icon
+    optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
     this.optionsbg = d3.select('#options-bg');
     this.optionsouter = d3.select('#options-outer')
     d3.select("#svg-container").append("div")
         .attr("id","options-icon")
-        .attr("class","hidden")
+        .attr("class",optionsClass)
         .style({"right":gw.margin.right+gw.margin.top+10,"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
@@ -1460,8 +1484,10 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.hideOptions();});
 
     // add info icon
+    infoClass = ((!this.optionsOn)&(!this.helpOn)&(!this.langOn)) ? "graph-icon" : "graph-icon hidden";
     d3.select("#svg-container").append("div")
         .attr("id","info-icon")
+        .attr("class",infoClass)
         .style({"right":gw.margin.right,"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
@@ -1484,11 +1510,11 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.hideOptions();gw.hideHelp();gw.hideLang();});
 
     //add help icon
-    this.helpbg = d3.select('#help-outer-bg');
+    helpClass = (this.helpOn) ? "graph-icon" : "graph-icon hidden";
     this.helpouter = d3.select('#help-outer')
     d3.select("#svg-container").append("div")
         .attr("id","help-icon")
-        .attr("class","hidden")
+        .attr("class",helpClass)
         .style({"right":gw.margin.right+2*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
@@ -1508,38 +1534,18 @@ GWCatalogue.prototype.drawGraph = function(){
         }).append("img")
         .attr("src","img/help.svg")
         .on("click",function(){gw.showHelp();});
-    this.helpbg.on("click",function(){gw.hideHelp();});
     this.helpouter
         .style("top","200%");
     this.helpouter.select("#help-close")
         .on("click",function(){gw.hideHelp();});
 
-    //add error toggle button
-    d3.select("#svg-container").append("div")
-        .attr("id","errors-icon")
-        .style({"right":gw.margin.right+3*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
-        .on("mouseover",function(){
-            if (gw.showerrors){
-                gw.showTooltipManual("%tooltip.errors.off%");
-            }else{
-                gw.showTooltipManual("%tooltip.errors.on%");
-            }
-        })
-        .on("mouseout",function(){
-            gw.hideTooltipManual();
-        }).append("img")
-        .attr("src","img/errors.svg")
-        .attr("class","errors-show")
-        .attr("id","errors-img")
-        .on("click",function(){gw.toggleErrors();gw.hideTooltipManual();});
-
     // add language button
-    this.langbg = d3.select('#lang-outer-bg');
+    langClass = (this.langOn) ? "graph-icon" : "graph-icon hidden";
     this.langouter = d3.select('#lang-outer')
     d3.select("#svg-container").append("div")
         .attr("id","lang-icon")
-        .attr("class","hidden")
-        .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
+        .attr("class",langClass)
+        .style({"right":gw.margin.right+3*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
                  .duration(200)
@@ -1558,12 +1564,52 @@ GWCatalogue.prototype.drawGraph = function(){
         }).append("img")
         .attr("src","img/lang.svg")
         .on("click",function(){console.log('showing lang');gw.showLang();});
-    this.langbg.on("click",function(){gw.hideLang();});
+    // this.langbg.on("click",function(){gw.hideLang();});
     this.langouter
         .style("top","200%");
     this.langouter.select("#lang-close")
         .on("click",function(){gw.hideLang();});
+
+    //add error toggle button
+    errorClass = (this.showerrors) ? "errors-show" : "errors-hide";
+    d3.select("#svg-container").append("div")
+        .attr("id","errors-icon")
+        .attr("class","graph-icon")
+        .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            if (gw.showerrors){
+                gw.showTooltipManual("%tooltip.errors.off%");
+            }else{
+                gw.showTooltipManual("%tooltip.errors.on%");
+            }
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        }).append("img")
+        .attr("src","img/errors.svg")
+        .attr("class",errorClass)
+        .attr("id","errors-img")
+        .on("click",function(){gw.toggleErrors();gw.hideTooltipManual();});
+
+    //add share button
+    d3.select("#svg-container").append("div")
+        .attr("id","share-icon")
+        .attr("class","graph-icon hidden")
+        .style({"right":gw.margin.right+5*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            gw.showTooltipManual("%tooltip.share%");
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        }).append("img")
+        .attr("src","img/share.svg")
+        .attr("class","hidden")
+        .attr("id","share-img")
+        .on("click",function(){gw.showShare();gw.hideTooltipManual();});
+    d3.select("#share-bg").on("click",function(){gw.hideShare();});
+    d3.select("#share-close").on("click",function(){gw.hideShare();});
 }
+
 GWCatalogue.prototype.moveHighlight = function(d){
     // move highlight circle
     var gw=this;
@@ -1757,7 +1803,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         });
         gw.updateErrors();
     // });
-
+    window.history.pushState({},null,gw.makeUrl({'x':gw.xvar}));
 }
 
 GWCatalogue.prototype.updateYaxis = function(yvarNew) {
@@ -1815,6 +1861,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         });
         gw.updateErrors();
     // });
+    window.history.pushState({},null,gw.makeUrl({'y':gw.yvar}));
 }
 GWCatalogue.prototype.addOptions = function(){
     // add options boxetc.
@@ -2075,13 +2122,13 @@ GWCatalogue.prototype.addLang = function(replot){
             langdiv.classList.add('current')
         }
         langdiv.style.height = gw.langcontHeight;
-        langdiv.setAttribute("id",'lang-'+lang+'-cont');
+        langdiv.setAttribute("id",'lang_'+lang+'_cont');
         langicondiv = document.createElement('div');
         langicondiv.className='panel-cont-icon'
-        langicondiv.setAttribute("id",'lang-'+lang+'-icon');
+        langicondiv.setAttribute("id",'lang_'+lang+'_icon');
         langicondiv.innerHTML =lang;
         langicondiv.addEventListener('click',function(){
-            newlang = this.id.split('-')[1];
+            newlang = this.id.split('_')[1];
             oldlang = gw.lang;
             if (newlang!=oldlang){
                 gw.loadLang(newlang);
@@ -2152,6 +2199,29 @@ GWCatalogue.prototype.hideLang = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("lang-icon").classList.add("hidden");
+}
+GWCatalogue.prototype.showShare = function(){
+    //show share pot
+    d3.select("#share-bg").style("height","100%").style("display","block");
+    shareouter=d3.select('#share-outer')
+    shareouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    shareouter.style("top",
+        document.getElementById('svg-container').offsetTop+
+        document.getElementById('share-icon').offsetTop +
+        document.getElementById('share-icon').offsetHeight + 10)
+    .style("left",
+        document.getElementById('share-icon').offsetLeft +
+        document.getElementById('share-icon').offsetWidth/2 -
+        document.getElementById('share-outer').offsetWidth/2)
+}
+GWCatalogue.prototype.hideShare = function(){
+    //show share pot
+    d3.select("#share-bg").style("height","0").style("display","none");
+    d3.select('#share-outer').transition()
+       .duration(500)
+       .style("opacity",0);
 }
 
 
@@ -2244,9 +2314,9 @@ GWCatalogue.prototype.replot = function(){
 
 //labels to add and keep updated
 var gwcat = new GWCatalogue
+gwcat.getUrlVars();
 gwcat.init();
 if(this.debug){console.log('initialised');}
-gwcat.getUrlVars();
 gwcat.drawGraphInit();
 if(this.debug){console.log('plotted');}
 window.addEventListener("resize",function(){

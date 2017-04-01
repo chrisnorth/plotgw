@@ -34,6 +34,7 @@
     "data.z.name":"Rotverschiebung der Quelle",
     "data.skyArea.name":"Himmelslokalisierung",
     "data.skyArea.unit":"Quadratgrad",
+    "text.Msun.unit":"Msonne",
     "text.gravwave":"Gravitationswelle",
     "text.detections":"Detektionen",
     "text.detection":"Detektion",

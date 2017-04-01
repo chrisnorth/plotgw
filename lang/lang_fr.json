@@ -33,6 +33,7 @@
     "data.z.name":"Redshift de la source",
     "data.skyArea.name":"Position dans le ciel",
     "data.skyArea.unit":"degrés^2",
+    "text.Msun.unit":"Msoleil",
     "text.gravwave":"Onde gravitationnelle",
     "text.detections":"Détections",
     "text.detection":"Détection",
