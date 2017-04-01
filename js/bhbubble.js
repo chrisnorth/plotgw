@@ -788,6 +788,7 @@ BHBubble.prototype.drawBubbles = function(){
 BHBubble.prototype.addLang = function(){
     this.langs={
         "cy":{code:"cy",name:"Cymraeg (cy)"},
+        "de":{code:"de",name:"Deutsch (de)"},
         "en":{code:"en",name:"English (en)"},
         "fr":{code:"fr",name:"Francais (fr)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
