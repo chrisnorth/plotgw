@@ -119,6 +119,7 @@ button.down{
     padding-left:10px;
     /*padding-top:10px;*/
     display:inline-block;
+    max-width:65%;
 }
 .svg-container {
     display: inline-block;

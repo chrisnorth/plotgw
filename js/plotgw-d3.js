@@ -906,6 +906,7 @@ GWCatalogue.prototype.redrawLabels = function(){
                 }
             }
             document.getElementById(lab+"txt").innerHTML = this.tl(labTxt);
+            console.log(this.lang,labTxt,this.tl(labTxt));
         }
     }
     masses=['M1','M2','Mfinal']
@@ -1183,6 +1184,7 @@ GWCatalogue.prototype.loadLang = function(lang){
         if (reload){
             if (gw.debug){console.log('reloaded language',gw.lang);}
             // gw.setLang();
+            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
             gw.replot();
             d3.select(".lang-cont.current").classed("current",false);
             d3.select("#lang_"+gw.lang+"_cont").classed("current",true);
@@ -2360,6 +2362,7 @@ GWCatalogue.prototype.replot = function(){
     this.drawGraph();
     this.drawSketch();
     this.addHelp();
+    // this.redrawLabels();
     if (this.optionsOn){this.showOptions();}
     if (this.helpOn){this.showHelp();}
     if (this.langOn){this.showLang();}
