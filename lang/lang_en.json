@@ -62,6 +62,8 @@
     "text.help.settings":"Change the graph properties, such as the horizontal and vertical axes",
     "text.help.help":"Show this help panel",
     "text.help.errors":"Turn errors on and off, both in the graph and the information panel",
+    "text.help.lang":"Change the language the web-app is displayed in",
+    "text.help.share":"Share the web-app to friends and/or followers",
     "text.lang.title":"Language",
     "text.lang.text":"Chose your language from the options below",
     "share.twitter.text":"Look at this Binary Black Hole catalogue of @LIGO observations",
