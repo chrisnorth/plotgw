@@ -1,6 +1,15 @@
 {
+    "metadata":{
+        "code":{"text":"fr","desc":""},
+        "name":{"text":"French","desc":""},
+        "alignment":{"text":"l2r","desc":""},
+        "alphabet":"Roman",
+        "translator":"Nicolas Arnaud"
+    },
     "data.GPS.name":"Temps GPS",
     "data.UTC.name":"Temps UTC",
+    "data.date.name":"Date de la détection",
+    "data.time.name":"Heure de la détection (UT=GMT+0000)",
     "data.snr.name":"Rapport signal sur bruit",
     "data.FAR.name":"Taux de fausses alarmes",
     "data.FAR.unit":"/an",
@@ -67,8 +76,6 @@
     "tooltip.showoptions":"Afficher le panneau d'options graphiques",
     "tooltip.showinfo":"Afficher le panneau d'informations",
     "tooltip.showhelp":"Afficher le panneau d'aide",
-    "tooltip.detdate":"Date de la détection",
-    "tooltip.dettime":"Heure de la détection (UT=GMT+0000)",
     "domain.losc":"https://losc.ligo.org",
     "domain.losc.events":"https://losc.ligo.org/events",
     "domain.losc.store":"https://losc.ligo.org/s",

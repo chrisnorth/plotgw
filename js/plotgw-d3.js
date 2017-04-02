@@ -328,7 +328,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 year=d['UTC'].best.split('T')[0].split('-')[2];
                 return(day+'<br/>'+month+' '+year);
             },
-            name:'%tooltip.detdate%',
+            name:'%data.date.name%',
             icon:"img/date.svg"},
         time:{
             type:'derived',
@@ -336,7 +336,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 return(d['UTC'].best.split('T')[1]+"<br/>UT")
             },
             icon:"img/time.svg",
-            name:'%tooltip.dettime%'},
+            name:'%data.time.name%'},
         data:{
             type:'derived',
             strfn:function(d){
@@ -1174,6 +1174,11 @@ GWCatalogue.prototype.loadLang = function(lang){
             }
         }
         if(gw.debug){console.log(gw.fileInLang);}
+        for (ld in dataIn){
+            if ((ld!="metadata")&(typeof dataIn[ld]!="string")){
+                dataIn[ld]=dataIn[ld].text;
+            }
+        }
         gw.langdict=dataIn;
         if (reload){
             if (gw.debug){console.log('reloaded language',gw.lang);}
@@ -1204,6 +1209,11 @@ GWCatalogue.prototype.loadLangDefault = function(){
             alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
         }
         if(gw.debug){console.log(gw.fileInLangDefault);}
+        for (ld in dataIn){
+            if ((ld!="metadata")&(typeof dataIn[ld]!="string")){
+                dataIn[ld]=dataIn[ld].text;
+            }
+        }
         gw.langdictDefault=dataIn;
         gw.loaded++;
         if (gw.loaded==gw.toLoad){

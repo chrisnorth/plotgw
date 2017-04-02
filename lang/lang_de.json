@@ -1,6 +1,15 @@
 {
+    "metadata":{
+        "code":{"text":"fr","desc":""},
+        "name":{"text":"German","desc":""},
+        "alignment":{"text":"l2r","desc":""},
+        "alphabet":"Roman",
+        "translator":"Benjamin Knispel"
+    },
     "data.GPS.name":"GPS-Zeit",
     "data.UTC.name":"Uhrzeit (UTC)",
+    "data.date.name":"Detektionsdatum",
+    "data.time.name":"Detektionszeit (UT=GMT+0000)",
     "data.snr.name":"Signal-Rausch-Verhältnis",
     "data.FAR.name":"Falsch-positiv-Rate",
     "data.FAR.unit":"/a",
@@ -68,8 +77,6 @@
     "tooltip.showoptions":"Graphenoptionen zeigen",
     "tooltip.showinfo":"Informationen zeigen",
     "tooltip.showhelp":"Hilfe anzeigen",
-    "tooltip.detdate":"Detektionsdatum",
-    "tooltip.dettime":"Detektionszeit (UT=GMT+0000)",
     "domain.losc":"https://losc.ligo.org",
     "domain.losc.events":"https://losc.ligo.org/events",
     "domain.losc.store":"https://losc.ligo.org/s",
