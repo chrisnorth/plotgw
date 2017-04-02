@@ -2087,6 +2087,10 @@ GWCatalogue.prototype.addHelp = function(){
         .html(this.tl("%text.help.errors%"));
     d3.select("#help-info-text")
         .html(this.tl("%text.help.info%"));
+    d3.select("#help-lang-text")
+        .html(this.tl("%text.help.lang%"));
+    d3.select("#help-share-text")
+        .html(this.tl("%text.help.share%"));
     if (this.portrait){
         d3.select('.help-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -2337,7 +2341,8 @@ GWCatalogue.prototype.makePlot = function(){
     this.addOptions();
     this.addHelp();
     this.addLang(false);
-    this.setPanel(this.getPanel());
+    panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
+    this.setPanel(panel);
     // if (this.optionsOn){
     //     // console.log('showing options')
     //     this.showOptions();
@@ -2363,9 +2368,10 @@ GWCatalogue.prototype.replot = function(){
     this.drawSketch();
     this.addHelp();
     // this.redrawLabels();
-    if (this.optionsOn){this.showOptions();}
-    if (this.helpOn){this.showHelp();}
-    if (this.langOn){this.showLang();}
+    this.setPanel(this.getPanel());
+    // if (this.optionsOn){this.showOptions();}
+    // if (this.helpOn){this.showHelp();}
+    // if (this.langOn){this.showLang();}
     this.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.sketchName){
