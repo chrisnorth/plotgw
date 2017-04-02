@@ -2271,13 +2271,12 @@ GWCatalogue.prototype.showShare = function(){
         document.getElementById('share-outer').offsetWidth/2)
     d3.select("#twitter-share-button")
         .attr("href",
-            gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=").replace(/\s/g,"%20")+
-            gw.makeUrl().replace("file:///","http%3A%2F%2F").replace(/&/g,'%26').replace(/:/g,'%3A').replace(/\//g,'%2F').replace(/\?/g,'%3F').replace(/=/g,'%3D')+
-            gw.tl("&hashtags=%share.twitter.hashtag%"))
-    // d3.select("#twitter-share-button")
-    //     .attr("href",gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%").replace(/\s/g,"%20")+
-    //         "&url=http://www.ligo.org%26hf%3D40"+
-    //         gw.tl("&hashtags=%share.twitter.hashtag%&url="))
+            gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=")+
+                gw.url.replace("file:///Users/chrisnorth/Cardiff/GravWaves/Outreach/","http%3A%2F%2Fchrisnorth.github.io/").replace(/:/g,'%3A').replace(/\//g,'%2F')+
+                gw.tl("&hashtags=%share.twitter.hashtag%"));
+            // gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=").replace(/\s/g,"%20")+
+            // gw.makeUrl().replace("file:///","http%3A%2F%2F").replace(/&/g,'%26').replace(/:/g,'%3A').replace(/\//g,'%2F').replace(/\?/g,'%3F').replace(/=/g,'%3D')+
+            // gw.tl("&hashtags=%share.twitter.hashtag%"));
 }
 GWCatalogue.prototype.hideShare = function(){
     //show share pot
