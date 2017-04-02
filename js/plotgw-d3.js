@@ -124,7 +124,7 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
         reSup=/\^(-?[0-9]*)(?=[\s/]|$)/g
         textOut=textOut.replace(reSup,"<sup>$1</sup> ");
         // replace Msun
-        textOut=textOut.replace(this.tl('%text.Msun.unit%',true),'M<sub>&#x2609;</sub>')
+        textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M<sub>&#x2609;</sub>')
     }
     return(textOut);
 }
@@ -243,7 +243,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 d['M1'].err[1]/2.])},
             sigfig:2,
             err:2,
-            unit:'%data.Mass.unit.kg%',
+            unit:'%data.mass.unit.kg%',
             avail:false},
         M2kg:{type:'derived',
             namefn:function(){return(gw.columns.M2.name)},
@@ -254,7 +254,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 d['M2'].err[1]/2.])},
             sigfig:2,
             err:2,
-            unit:'%data.Mass.unit.kg%',
+            unit:'%data.mass.unit.kg%',
             avail:false},
         Mfinalkg:{type:'derived',
             namefn:function(){return(gw.columns.Mfinal.name)},
@@ -265,7 +265,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 d['Mfinal'].err[1]/2.])},
             sigfig:2,
             err:2,
-            unit:'%data.Mass.unit.kg%',
+            unit:'%data.mass.unit.kg%',
             avail:false},
         Mchirpkg:{type:'derived',
             namefn:function(){return(gw.columns.Mchirp.name)},
@@ -276,7 +276,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 d['Mchirp'].err[1]/2.])},
             sigfig:2,
             err:2,
-            unit:'%data.Mass.unit.kg%',
+            unit:'%data.mass.unit.kg%',
             avail:false},
         Mratio:{type:"src",
             icon:"img/massratio.svg",

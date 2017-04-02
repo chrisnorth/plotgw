@@ -16,7 +16,8 @@ body {
     height:5%;
     margin-bottom:2%;
 }
-#hdr h1{
+h1{
+    font-family: sans-serif;
     /*margin-bottom:3%;*/
 }
 div#options{
