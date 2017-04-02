@@ -1,6 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <title>Gravitational Wave Catalogue</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <!--<link rel="icon" type="image/vnd.microsoft.icon" href="planck_logo.ico" />-->
     <link rel="stylesheet" href="css/style-d3.css" type="text/css" />
     <!-- <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script> -->
@@ -13,7 +14,7 @@
 </head>
 <body>
     <div id="hdr">
-        <h1>LIGO Compact Binary Catalogue</h1>
+        <h1 id="page-title">LIGO Compact Binary Catalogue</h1>
     </div>
     <div id="full">
         <div id="graphcontainer">
@@ -32,47 +33,81 @@
             <div id="sketchcontainer"></div>
             <div id="labcontainer"></div>
         </div>
-        <div id="options-bg"></div>
-        <div id="options-outer">
+        <div id="options-outer" class="panel-outer">
             <div id="options-x" class="options-box">
-                <div class="options-title">Horizontal axis</div>
+                <div class="panel-title">Horizontal axis</div>
                 <div class="options-buttons" id="x-buttons"></div>
             </div>
             <div id="options-y" class="options-box">
-                <div class="options-title">Vertical axis</div>
+                <div class="panel-title">Vertical axis</div>
                 <div class="options-buttons" id="y-buttons"></div>
             </div>
-            <div id="options-close">
+            <div id="options-lang" class="options-box">
+                <div class="panel-title">Language</div>
+                <div class="options-buttons" id="lang-buttons"></div>
+            </div>
+            <div id="options-close" class="panel-close">
                 <img src="img/close.png" title="close">
             </div>
         </div>
-        <div id="help-bg"></div>
-        <div id="help-outer">
-            <div id="help-title" class="help-title">
+        <div id="help-outer" class="panel-outer">
+            <div id="help-title" class="panel-title"></div>
+            <div class="panel-block" id="help-block-text">
+                <div class="panel-text" id="help-text"></div>
+                <div class="panel-text" id="help-about"></div>
             </div>
-            <div class="help-block" id="help-block-text">
-                <div class="help-text" id="help-text"></div>
-                <div class="help-text" id="help-about"></div>
+            <div class="panel-block" id="help-block-icons">
+                <div class="panel-cont" id="help-help-cont">
+                    <img class="panel-cont-img" src="img/help.svg">
+                    <div class="panel-cont-text" id="help-help-text">help</div>
+                </div>
+                <div class="panel-cont" id="help-info-cont">
+                    <img class="panel-img" src="img/info.svg">
+                    <div class="panel-cont-text" id="help-info-text">info</div>
+                </div>
+                <div class="panel-cont" id="help-settings-cont">
+                    <img class="panel-cont-img" src="img/settings.svg">
+                    <div class="panel-cont-text" id="help-settings-text">settings</div>
+                </div>
+                <div class="panel-cont" id="help-lang-cont">
+                    <img class="panel-cont-img" src="img/lang.svg">
+                    <div class="panel-cont-text" id="help-lang-text">language</div>
+                </div>
+                <div class="panel-cont" id="help-errors-cont">
+                    <img class="panel-cont-img" src="img/errors.svg">
+                    <div class="panel-cont-text" id="help-errors-text">errors</div>
+                </div>
+                <div class="panel-cont" id="help-share-cont">
+                    <img class="panel-cont-img" src="img/share.svg">
+                    <div class="panel-cont-text" id="help-share-text">share</div>
+                </div>
             </div>
-            <div class="help-block" id="help-block-icons">
-                <div class="help-cont" id="help-help-cont">
-                    <img class="help-img" src="img/help.svg">
-                    <div class="help-cont-text" id="help-help-text">help</div>
-                </div>
-                <div class="help-cont" id="help-info-cont">
-                    <img class="help-img" src="img/info.svg">
-                    <div class="help-cont-text" id="help-info-text">info</div>
-                </div>
-                <div class="help-cont" id="help-settings-cont">
-                    <img class="help-img" src="img/settings.svg">
-                    <div class="help-cont-text" id="help-settings-text">settings</div>
-                </div>
-                <div class="help-cont" id="help-errors-cont">
-                    <img class="help-img" src="img/errors.svg">
-                    <div class="help-cont-text" id="help-errors-text">errors</div>
-                </div>
+            <div id="help-close" class="panel-close">
+                <img src="img/close.png" title="close">
             </div>
-            <div id="help-close">
+        </div>
+        <div id="lang-outer" class="panel-outer">
+            <div id="lang-title" class="panel-title"></div>
+            <!-- <div class="panel-block" id="lang-block-text">
+                <div class="panel-text" id="lang-text"></div>
+            </div> -->
+            <div class="panel-block" id="lang-block-icons">
+                <div class="panel-text" id="lang-text"></div>
+            </div>
+            <div id="lang-close" class="panel-close">
+                <img src="img/close.png" title="close">
+            </div>
+        </div>
+        <div class="popup-bg" id="share-bg"></div>
+        <div class="popup-outer" id="share-outer">
+            <!-- <div class="popup-title" id="share-title"></div>
+            <div class="popup-block" id="share-block-text">
+                <div class="popup-text" id="lang-text"></div>
+            </div> -->
+            <div class="popup-block" id="share-block-icons">
+                <a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+            </div>
+            <div id="share-close" class="popup-close">
                 <img src="img/close.png" title="close">
             </div>
         </div>

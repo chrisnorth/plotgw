@@ -16,7 +16,8 @@ body {
     height:5%;
     margin-bottom:2%;
 }
-#hdr h1{
+h1{
+    font-family: sans-serif;
     /*margin-bottom:3%;*/
 }
 div#options{
@@ -119,6 +120,7 @@ button.down{
     padding-left:10px;
     /*padding-top:10px;*/
     display:inline-block;
+    max-width:65%;
 }
 .svg-container {
     display: inline-block;
@@ -175,40 +177,28 @@ button.down{
 .tooltip span{
     display:block;
 }
-#options-icon, #errors-icon, #info-icon, #help-icon{
+.graph-icon{
     position:absolute;
     display:inline-block;
 }
-#options-icon, #errors-icon, #info-icon, #help-icon{
+.graph-icon{
     background-color:yellow;
     transition: background-color 750ms ease-in-out;
     -moz-transition: background-color 750ms ease-in-out;
     -webkit-transition: background-color 750ms ease-in-out;
 }
-#options-icon.hidden, #errors-icon.hidden, #info-icon.hidden, #help-icon.hidden{
+.graph-icon.hidden{
     opacity:0.5;
     background-color:gray;
     transition: background-color 750ms ease-in-out;
     -moz-transition: background-color 750ms ease-in-out;
     -webkit-transition: background-color 750ms ease-in-out;
 }
-#options-icon img, #errors-icon img, #info-icon img, #help-icon img{
+.graph-icon img{
     width:100%;
     cursor:pointer;
 }
-/*#errors-img.errors-show{
-    opacity:1;
-    transition: opacity 750ms ease-in-out;
-    -moz-transition: opacity 750ms ease-in-out;
-    -webkit-transition: opacity 750ms ease-in-out;
-}*/
-/*#errors-img.errors-hide{
-    opacity:0.3;
-    transition: opacity 750ms ease-in-out;
-    -moz-transition: opacity 750ms ease-in-out;
-    -webkit-transition: opacity 750ms ease-in-out;
-}*/
-#options-close{
+.panel-close,.popup-close{
     position:absolute;
     width:30px;
     height:30px;
@@ -216,11 +206,11 @@ button.down{
     top:-10px;
     cursor:pointer;
 }
-#infoclose img{
+/*#infoclose img{
     width:100%;
     cursor:pointer;
-}
-#options-bg{
+}*/
+.popup-bg{
     position:fixed;
     width:100%;
     height:10;
@@ -231,7 +221,7 @@ button.down{
     border:solid green 1px;
     display:none;
 }
-#options-outer{
+.panel-outer{
     position: absolute;
     width: 200px;
     height: 28px;
@@ -242,7 +232,16 @@ button.down{
     opacity:0;
     padding-top:20px;
 }
-.options-title{
+.popup-outer{
+    position: absolute;
+    width: 200px;
+    background-color:rgba(255,255,255,1);
+    border:solid rgba(0,0,0,1) 2px;
+    border-radius:10px;
+    /*padding:5px;*/
+    opacity:0;
+}
+.panel-title, .popup-title{
     width:100%;
     text-align:center;
     font-size:2.5em;
@@ -291,43 +290,7 @@ button.down{
     width:40%;
     height:90%;
 }
-#help-close{
-    position:absolute;
-    width:30px;
-    height:30px;
-    right:-15px;
-    top:-10px;
-    cursor:pointer;
-}
-#help-bg{
-    position:fixed;
-    width:100%;
-    height:10;
-    left:0;
-    top:-10;
-    background-color: #fff;
-    opacity:0.5;
-    border:solid green 1px;
-    display:none;
-}
-#help-outer{
-    position: absolute;
-    width: 200px;
-    height: 28px;
-    background-color:rgba(255,255,255,1);
-    border:solid rgba(0,0,0,1) 2px;
-    border-radius:10px;
-    /*padding:5px;*/
-    opacity:0;
-    padding-top:20px;
-}
-.help-title{
-    width:100%;
-    text-align:center;
-    font-size:2.5em;
-    padding-bottom:10px;
-}
-.help-block{
+.panel-block{
     width:90%;
     height:40%;
     text-align:left;
@@ -336,77 +299,108 @@ button.down{
     float:left;
     margin-left:2%;
 }
-.help-block.bottom{
-    width:40%;
-    height:90%;
+.panel-block.bottom{
     text-align:left;
     padding-bottom:10px;
     float:left;
     margin-left:2%;
 }
-.help-text{
+.panel-text{
     width:100%;
     text-align:left;
     padding-bottom:10px;
     display:inline-block;
     margin-left:2%;
 }
-.help-cont{
+.panel-cont{
     display:inline-block;
     margin-left:5%;
     width:95%;
     padding-bottom:10px;
 }
-.help-img{
+.panel-cont-icon{
+    border-radius:10%;
+    border: 1px black solid;
+    width:20%;
+    height:100%;
+    text-align:center;
+    font-weight:bold;
+    display:inline-block;
+    cursor: pointer;
+    font-size:150%;
+}
+.lang-cont.current .panel-cont-icon{
+    background-color:yellow;
+}
+.lang-cont.current .panel-cont-text{
+    font-weight:bold;
+}
+.panel-cont-img{
     width:10%;
     float:left
 }
-.help-cont-text{
+.panel-cont-text{
     display:inline-block;
     margin-left:4%;
-    width:80%;
+    width:75%;
     padding-bottom:10px;
 }
-.help-cont.portrait,.help-cont-text.portrait{
+.panel-cont-text.panel-lang{
+    width:75%;
+}
+.lang-block.bottom .panel-cont-text.panel-lang{
+    width:70%;
+}
+.lang-block.bottom .panel-cont{
+    width:45%;
+}
+.panel-cont.portrait,.panel-cont-text.portrait{
     padding-bottom:0px;
+    width:70%;
+}
+img.share-icon{
+    height:50px;
 }
 @media (max-width:1200px){
-    .options-title.landscape,.help-title.landscape{
+    .panel-title.landscape{
         font-size:2.5em;
     }
-    .help-text.landscape,.help-cont-text-landscape{
+    .panel-text.landscape,.panel-cont-text.landscape{
         font-size:1.0em;
     }
 }
 @media (max-width:1000px){
-    .options-title.landscape,.help-title.landscape{
+    .panel-title.landscape{
         font-size:2.0em;
     }
-    .help-text.landscape,.help-cont-text.landscape{
+    .panel-text.landscape,.panel-cont-text.landscape{
         font-size:1.0em;
+    }
+    .panel-text.portrait,.panel-cont-text.portrait{
+        font-size:0.8em;
     }
 }
 @media (max-width:750px){
-    .options-title.landscape,.help-title.landscape{
+    .panel-title.landscape{
         font-size:1.5em;
     }
-    .options-title.portrait,.help-title.portrait{
+    .panel-title.portrait,{
         font-size:2.0em;
     }
 }
 @media (max-width:550px){
-    .options-title.landscape,.help-title.landscape{
+    .panel-title.landscape{
         font-size:1.2em;
     }
-    .options-title.portrait,.help-title.portrait{
+    .panel-title.portrait{
         font-size:1.5em;
     }
 }
 @media (max-width:350px){
-    .options-title.landscape,.help-title.landscape{
+    .panel-title.landscape{
         font-size:1.0em;
     }
-    .options-title.portrait,.help-title.portrait{
+    .panel-title.portrait{
         font-size:1.2em;
     }
 }
