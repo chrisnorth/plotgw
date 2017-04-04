@@ -144,9 +144,10 @@
 
 				if(m[key]._text && m[key]._type){
 					inp = "";
+					cl= sanitize((p && p[key] ? "" : "blank"))
 					if(m[key]._type=="textarea"){
 						css = (m[key]._height) ? ' style="height:'+m[key]._height+'"' : "";
-						inp = '<textarea name="'+newk+'"'+css+'>'+sanitize((p ? p[key] : ""))+'</textarea>';
+						inp = '<textarea class="'+cl+'" name="'+newk+'"'+css+'>'+sanitize((p && p[key] ? p[key] : ""))+'</textarea>';
 					}else if(m[key]._type=="noedit"){
 						inp = '<input type="hidden" name="'+newk+'" value="'+sanitize((p ? p[key] : ""))+'" />'+sanitize((p ? p[key] : ""));
 					}else if(m[key]._type=="select"){
@@ -157,7 +158,7 @@
 						}
 						inp += '</select>';
 					}else if(m[key]._type=="string"){
-						inp = '<input type="text" name="'+newk+'" value="'+sanitize((p && p[key] ? p[key] : ""))+'" />';
+						inp = '<input type="text" class="'+cl+'" name="'+newk+'" value="'+sanitize((p && p[key] ? p[key] : ""))+'" />';
 					}
 					html += this.row((m[key]._title ? m[key]._title : key),m[key]._text,inp);
 				}else{
@@ -252,8 +253,9 @@
 
 			// First of all we need to get a copy of the original JSON structure
 			// otherwise we loose arrays
-			var objectG = JSON.parse(JSON.stringify(t.phrasebook));
-
+			// var objectG = JSON.parse(JSON.stringify(t.phrasebook));
+			var objectG = {}
+			console.log(objectG)
 			//loop through all of the input/textarea elements of the form
 			var el = this.find('input, textarea, select').each(function(i){
 				//ignore the submit button

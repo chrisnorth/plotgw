@@ -79,6 +79,9 @@ textarea {
 	font-family: inherit;
 	font-size: 1em;
 }
+input.blank, textarea.blank{
+	border:solid 2px red;
+}
 ul i {
 	color: #999;
 }
