@@ -87,10 +87,7 @@ BHBubble.prototype.loadLang = function(lang){
 
         if (_bh.urlVars.debug){console.log('success',data);}
         _bh.langdict=data;
-        _bh.nameCol = (_bh.langdict.hasOwnProperty("nameCol")) ? _bh.langdict.nameCol : "name";
-        _bh.alphabet = (_bh.langdict.hasOwnProperty("alphabet")) ? _bh.langdict.alphabet : "Roman";
-        if (_bh.alphabet=="Roman"){
-            document.title=_bh.tl("%text.bub.page.title%");}
+        document.title=_bh.tl("%text.bub.page.title%");
         _bh.langloaded=true;
         if (_bh.urlVars.debug){console.log('loaded: '+_bh.lang)}
         // update legend
@@ -156,7 +153,7 @@ BHBubble.prototype.tl = function(textIn,plaintext){
         textOut = textOut.replace(reSup,"<sup>$1</sup> ")
         // replace Msun
         // textOut = (textOut) ? textOut.replace(this.tl("%data.mass.unit.msun%",true),'M<sub>&#x2609;</sub>') : "";
-        textOut = textOut.replace(this.tl("%data.mass.unit.msun%",true),'M<sub>&#x2609;</sub>')
+        textOut = textOut.replace(new RegExp(this.tl("%data.mass.unit.msun%",true),'g'),'M<sub>&#x2609;</sub>')
     }
     return(textOut);
 }
@@ -180,10 +177,10 @@ BHBubble.prototype.tN = function(key){
             telugu: 3174, marathi: 2406, malayalam: 3430,
             oriya: 2918, gurmukhi: 2662, nagari: 2534, gujarati: 2790
         };
-    if (!systems.hasOwnProperty(this.langdict["meta.name"].toLowerCase())){return key;}
+    if (!systems.hasOwnProperty(this.langdict["meta.numbersystem"].toLowerCase())){return key;}
     zero = 48; // char code for Arabic zero
     nine = 57; // char code for Arabic nine
-    offset = (systems[this.langdict["meta.name"].toLowerCase()] || zero) - zero;
+    offset = (systems[this.langdict["meta.numbersystem"].toLowerCase()] || zero) - zero;
     output = key.toString().split("");
     l = output.length;
 
@@ -213,9 +210,7 @@ BHBubble.prototype.init = function(){
     d3.select('#hdr h1').html(this.tl("%text.bub.page.title%"));
     this.mergeDuration = 1000;
     //set name column
-    this.nameCol="name";
-    if (this.langdict.hasOwnProperty("nameCol")){this.nameCol=this.langdict.nameCol;}
-    this.alphabet = (this.langdict.hasOwnProperty("alphabet")) ? this.langdict.alphabet : "Roman";
+    this.nameCol = (this.nameCols.hasOwnProperty(this.lang)) ? this.nameCols[this.lang] : "name";
 }
 BHBubble.prototype.makeSvg = function(){
     // make initial elements
@@ -583,12 +578,12 @@ BHBubble.prototype.formatData = function(valueCol){
             d.massBHminus = +errcode;
             d.massBHstr = bh.tl("%data.bub.approx%")+' '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
         }else{if (this.urlVars.debug){console.log('Data format err:',d.massBHerr,d);}}
-        if (bh.langdict.hasOwnProperty('nameCol')&&(d.binType=='%data.bub.type.bbh%')){
+        if ((bh.nameCol!="name")&&(d.binType=='%data.bub.type.bbh%')){
             this.names={"GW":"%data.bub.name.GW%",
                 "LVT":"%data.bub.name.LVT%",
                 "-A":"%data.bub.name.A%",
                 "-B":"%data.bub.name.B%"}
-            nc=bh.langdict.nameCol;
+            nc=bh.nameCol;
             rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
             tr=rename.exec(d.name)
             d[nc]=bh.tl(this.names[tr[1]]+bh.tN(tr[2])+this.names[tr[3]])
@@ -1294,7 +1289,7 @@ BHBubble.prototype.iptext = function(d){
         if (d.refbhmass!='-'){text = text +
             " <sup>["+this.tN(rx)+"]</sup></span>";rbhm=rx;rx++;}
         else{rbhm=false;text = text+"</span>"}
-        text = text+ "<span class='info'><b>"+this.tl("%data.bub.type%")+"</b>: "+d.binType+
+        text = text+ "<span class='info'><b>%data.bub.type%</b>: "+d.binType+
             " ("+d.BHtype+")</span>";
         if (d.compType!="None"){
             text = text+ "<span class='info'><b>%data.bub.comp%</b>: "+
@@ -1421,6 +1416,7 @@ bub.getUrlVars();
 // load language
 bub.langdir='lang/';
 bub.defaults = {"lang":"en"}
+bub.nameCols = {"or":"name-or-unicode"}
 bub.loadLang(bub.urlVars.lang);
 // bub.makePlot();
 // NB: "loadLang" calls makePlot function on first load
