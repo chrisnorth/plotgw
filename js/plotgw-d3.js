@@ -25,8 +25,8 @@ GWCatalogue.prototype.init = function(){
     this.langs = {
         "de":{code:"de",name:"Deutsch"},
         "en":{code:"en",name:"English"},
-        "fr":{code:"fr",name:"Francais"},
-        "en-GB":{code:"en-GB",name:"English"},
+        "fr":{code:"fr",name:"Français"},
+        // "en-GB":{code:"en-GB",name:"English"},
         // "de2":{code:"de",name:"Deutsch (de)"},
         // "en2":{code:"en",name:"English (en)"},
         // "fr2":{code:"fr",name:"Francais (fr)"},
@@ -65,10 +65,13 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
     }
     for (key in allKeys){
         if (this.debug){console.log(key,allKeys[key]);}
-        if (allKeys[key][0]!=allKeys[key][1]){
+        if ((allKeys[key][0]!=allKeys[key][1])){
             newUrlVars[key]=allKeys[key][0]
+        }else{
+            delete newUrlVars[(key)]
         }
     }
+    console.log(newUrlVars);
     for (key in newKeys){
         if (!newKeys[key]){
             delete newUrlVars[key];
@@ -82,6 +85,9 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
     }
     newUrl = newUrl.slice(0,newUrl.length-1);
     return newUrl;
+}
+GWCatalogue.prototype.updateUrl = function(vars){
+    window.history.pushState({},null,this.makeUrl((vars) ? vars : {}));
 }
 GWCatalogue.prototype.getPanel = function(){
     if (this.optionsOn){return "options";}
@@ -418,7 +424,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="20%";
-        this.langcontHeight="40%";
+        this.langcontHeight="20%";
         // info.style.top = "50%";
         // info.style.left = "0%";
     }else{
@@ -439,7 +445,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = 0.5*this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="10%";
-        this.langcontHeight="20%";
+        this.langcontHeight="10%";
         // info.style.top = "";
         // info.style.left = "";
     }
@@ -1794,6 +1800,7 @@ GWCatalogue.prototype.toggleErrors = function(){
     // console.log("toggling errors");
     this.updateErrors();
     this.redrawLabels();
+    this.updateUrl();
 }
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // update x-xais to xvarNew
@@ -2056,6 +2063,7 @@ GWCatalogue.prototype.showOptions = function(){
     }
     document.getElementById("options-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.hideOptions = function(d) {
     // hide options box
@@ -2073,6 +2081,8 @@ GWCatalogue.prototype.hideOptions = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("options-icon").classList.add("hidden");
     document.getElementById("info-icon").classList.remove("hidden");
+    console.log(this.getPanel())
+    this.updateUrl();
 }
 GWCatalogue.prototype.addHelp = function(){
     // add help to panel
@@ -2138,6 +2148,7 @@ GWCatalogue.prototype.showHelp = function(){
     }
     document.getElementById("help-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.hideHelp = function(d) {
     // hide options box
@@ -2155,6 +2166,7 @@ GWCatalogue.prototype.hideHelp = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("help-icon").classList.add("hidden");
+    this.updateUrl();
 }
 
 GWCatalogue.prototype.addLang = function(replot){
@@ -2211,6 +2223,8 @@ GWCatalogue.prototype.addLang = function(replot){
         // labtxtdiv.onmouseout = function(){gw.hideTooltip()};
         langdiv.appendChild(langtxtdiv);
         document.getElementById('lang-block-icons').appendChild(langdiv);
+        // document.getElementById('lang_'+lang+'_icon').style.lineHeight =
+        //     parseInt(document.getElementById('lang_'+lang+'_cont').offsetHeight)+"px";
     }
 }
 
@@ -2242,6 +2256,7 @@ GWCatalogue.prototype.showLang = function(){
     }
     document.getElementById("lang-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.hideLang = function(d) {
     // hide options box
@@ -2259,6 +2274,7 @@ GWCatalogue.prototype.hideLang = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("lang-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.showShare = function(){
     //show share pot

@@ -318,6 +318,9 @@ button.down{
     width:95%;
     padding-bottom:10px;
 }
+.panel-block.bottom .lang-cont{
+    width:45%;
+}
 .panel-cont-icon{
     border-radius:10%;
     border: 1px black solid;
@@ -328,6 +331,13 @@ button.down{
     display:inline-block;
     cursor: pointer;
     font-size:150%;
+}
+.lang-cont{
+    margin-bottom:10%;
+}
+.lang-cont .panel-cont-icon{
+    padding-top:5%;
+    padding-bottom:5%;
 }
 .lang-cont.current .panel-cont-icon{
     background-color:yellow;
