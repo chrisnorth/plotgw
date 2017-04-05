@@ -159,7 +159,7 @@
 						css = (m[key]._height) ? ' style="height:'+m[key]._height+'"' : "";
 
 						inpdef = sanitize((d && d[key] ? d[key] : ""));
-						inp = '<textarea class="'+cl+'" name="'+newk+'"'+css+'>'+sanitize((p && p[key] ? p[key] : inpdef))+'</textarea>';
+						inp = '<textarea class="'+cl+'" name="'+newk+'"'+css+'>'+sanitize((p && p[key] ? p[key] : (m[key]._usedef) ? inpdef : ""))+'</textarea>';
 					}else if(m[key]._type=="noedit"){
 						inp = '<input type="hidden" name="'+newk+'" value="'+sanitize((p ? p[key] : ""))+'" />'+sanitize((p ? p[key] : ""));
 						inpdef : "";
@@ -167,14 +167,14 @@
 						inp = '<select name="'+newk+'">';
 						for(var o = 0; o < m[key]._options.length ; o++){
 							var seldef = (d && m[key]._options[o].value==d[key]) ? ' selected="selected"' : '';
-							var sel = (p && m[key]._options[o].value==p[key]) ? ' selected="selected"' : seldef;
+							var sel = (p && m[key]._options[o].value==p[key]) ? ' selected="selected"' : (m[key]._usedef) ? seldef : '';
 							inp += '<option value="'+m[key]._options[o].value+'"'+sel+'>'+m[key]._options[o].name+'</option>'
 						}
 						inp += '</select>';
 						inpdef = sanitize((d && d[key] ? d[key] : ""));
 					}else if(m[key]._type=="string"){
 						inpdef = sanitize((d && d[key] ? d[key] : ""));
-						inp = '<input type="text" class="'+cl+'" name="'+newk+'" value="'+sanitize((p && p[key] ? p[key] : inpdef))+'" />';
+						inp = '<input type="text" class="'+cl+'" name="'+newk+'" value="'+sanitize((p && p[key] ? p[key] : ((m[key]._usedef) ? inpdef : "")))+'" />';
 					}
 					html += this.row((m[key]._title ? m[key]._title : key),m[key]._text,inp,ldef,inpdef);
 				}else{
