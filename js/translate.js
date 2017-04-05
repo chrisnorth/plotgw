@@ -66,8 +66,12 @@
 				this.phrasebookdefault = (e.data) ? e.data : { 'meta.name':'','meta.code':e.lang };
 				this.rebuildForm();
 				if(e.lang){
-					var href = $('a.langlink').attr('href');
-					$('a.langlink').attr('href',href.substring(0,href.indexOf('?'))+'?lang='+this.lang);
+					var hrefcat = $('a.langlinkcat').attr('href');
+					$('a.langlinkcat').attr('href',
+						hrefcat.substring(0,hrefcat.indexOf('?'))+'?lang='+this.phrasebook['meta.code']);
+					var hrefbub = $('a.langlinkbub').attr('href');
+					$('a.langlinkbub').attr('href',
+						hrefbub.substring(0,hrefbub.indexOf('?'))+'?lang='+this.phrasebook['meta.code']);
 					$('.langname').html(this.phrasebook['meta.name']);
 				}
 			});
