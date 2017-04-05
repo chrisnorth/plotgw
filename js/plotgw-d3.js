@@ -7,7 +7,7 @@ function GWCatalogue(){
 GWCatalogue.prototype.init = function(){
     //initialyse common values
     this.flySp=1000;
-    this.defaults={
+    this.defaults = {
         xvar:"M1",
         yvar:"M2",
         panel:"info",
@@ -25,8 +25,8 @@ GWCatalogue.prototype.init = function(){
     this.langs = {
         "de":{code:"de",name:"Deutsch"},
         "en":{code:"en",name:"English"},
-        "fr":{code:"fr",name:"Francais"},
-        "en-GB":{code:"en-GB",name:"English"},
+        "fr":{code:"fr",name:"Français"},
+        // "en-GB":{code:"en-GB",name:"English"},
         // "de2":{code:"de",name:"Deutsch (de)"},
         // "en2":{code:"en",name:"English (en)"},
         // "fr2":{code:"fr",name:"Francais (fr)"},
@@ -65,10 +65,13 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
     }
     for (key in allKeys){
         if (this.debug){console.log(key,allKeys[key]);}
-        if (allKeys[key][0]!=allKeys[key][1]){
+        if ((allKeys[key][0]!=allKeys[key][1])){
             newUrlVars[key]=allKeys[key][0]
+        }else{
+            delete newUrlVars[(key)]
         }
     }
+    console.log(newUrlVars);
     for (key in newKeys){
         if (!newKeys[key]){
             delete newUrlVars[key];
@@ -82,6 +85,9 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
     }
     newUrl = newUrl.slice(0,newUrl.length-1);
     return newUrl;
+}
+GWCatalogue.prototype.updateUrl = function(vars){
+    window.history.pushState({},null,this.makeUrl((vars) ? vars : {}));
 }
 GWCatalogue.prototype.getPanel = function(){
     if (this.optionsOn){return "options";}
@@ -124,8 +130,11 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
         reSup=/\^(-?[0-9]*)(?=[\s/]|$)/g
         textOut=textOut.replace(reSup,"<sup>$1</sup> ");
         // replace Msun
-        textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M<sub>&#x2609;</sub>')
+        textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M<sub>☉</sub>')
     }
+    // else{
+    //     textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M☉')
+    // }
     return(textOut);
 }
 GWCatalogue.prototype.stdlabel = function(d,src){
@@ -341,9 +350,9 @@ GWCatalogue.prototype.setColumns = function(datadict){
             type:'derived',
             strfn:function(d){
                 return gw.tl("<a href='"+d.link.url+
-                    "' title='"+d.link.text+"'>%text.losc%</a>");
+                    "' title='"+d.link.text+"'>%text.gen.losc%</a>");
             },
-            name:'%tooltip.losc%',
+            name:'%tooltip.plotgw.losc%',
             icon:"img/data.svg"}
     };
     this.columns={}
@@ -415,7 +424,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="20%";
-        this.langcontHeight="40%";
+        this.langcontHeight="20%";
         // info.style.top = "50%";
         // info.style.left = "0%";
     }else{
@@ -436,7 +445,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = 0.5*this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="10%";
-        this.langcontHeight="20%";
+        this.langcontHeight="10%";
         // info.style.top = "";
         // info.style.left = "";
     }
@@ -617,7 +626,7 @@ GWCatalogue.prototype.setScales = function(){
     }
     //tool-top labels
     this.ttlabels = {
-        switch:"%tooltip.switchunits%"
+        switch:"%tooltip.plotgw.switchunits%"
     };
     //text for black labels
     this.labBlank="--";
@@ -675,7 +684,7 @@ GWCatalogue.prototype.drawSketch = function(){
         d3.selectAll('.labcont').style('height',this.labcontHeight);
         d3.selectAll('.lang-cont').style('height',this.langcontHeight);
         d3.select('#unitswtxt')
-            .html(this.tl('%tooltip.switchunits%'));
+            .html(this.tl('%tooltip.plotgw.switchunits%'));
     }else{
         if (this.showerrors == null){this.showerrors=true};
         for (lab in this.labels){this.addLab(lab)};
@@ -699,7 +708,7 @@ GWCatalogue.prototype.drawSketch = function(){
         swtxtdiv.setAttribute("id",'unitswtxt');
         swtxtdiv.style.height = "100%";
         swtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
-        swtxtdiv.innerHTML = this.tl('%tooltip.switchunits%');
+        swtxtdiv.innerHTML = this.tl('%tooltip.plotgw.switchunits%');
         swimgdiv.appendChild(swtxtdiv);
         document.getElementById('labcontainer').appendChild(swimgdiv);
     }
@@ -712,14 +721,14 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("class","sketch-title")
         .attr("text-anchor","middle")
         .style("font-size",fs+"em")
-        .html(this.tl("%text.information.title%"));
+        .html(this.tl("%text.plotgw.information.title%"));
     this.sketchTitleHint = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.2))
         .attr("class","sketch-subtitle")
         .attr("text-anchor","middle")
         .style("font-size",(0.75*fs)+"em")
-        .html(this.tl("%text.information.subtitle%"));
+        .html(this.tl("%text.plotgw.information.subtitle%"));
 
     // this.tooltipSk = document.createElement('div');
     // this.tooltipSk.className = "tooltip";
@@ -937,7 +946,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.flyInMasses(d,"Mfinal","snap");
         // update title
         this.sketchTitle.html(
-            this.tl("%text.information.heading% "+this.sketchName));
+            this.tl("%text.plotgw.information.heading% "+this.sketchName));
         this.sketchTitleHint.html("");
         // update labels
         this.redrawLabels();
@@ -949,8 +958,8 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.d = null;
         // replace title
         this.sketchName="None";
-        this.sketchTitle.html(this.tl("%text.information.title%"));
-        this.sketchTitleHint.html(this.tl("%text.information.subtitle%"));
+        this.sketchTitle.html(this.tl("%text.plotgw.information.title%"));
+        this.sketchTitleHint.html(this.tl("%text.plotgw.information.subtitle%"));
         // replace labels with blank text
         for (lab in this.labels){
             document.getElementById(lab+"txt").innerHTML = this.labBlank;
@@ -1236,19 +1245,17 @@ GWCatalogue.prototype.setLang = function(){
         }
     }
     d3.select("#options-x > .options-title")
-        .html(this.tl('%text.horizontal-axis%'))
+        .html(this.tl('%text.plotgw.horizontal-axis%'))
     d3.select("#options-y > .options-title")
-        .html(this.tl('%text.vertical-axis%'))
-    this.legenddescs = {GW:this.tl('%text.detections%'),
-        LVT:this.tl('%text.candidates%')}
-    this.typedescs = {GW:this.tl('%text.detection%'),
-        LVT:this.tl('%text.candidate%')}
+        .html(this.tl('%text.plotgw.vertical-axis%'))
+    this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
+        LVT:this.tl('%text.plotgw.legend.candidates%')}
     d3.select('#lang-title')
-        .html(this.tl('%text.lang.title%'))
+        .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
-        .html(this.tl('%text.lang.text%'))
+        .html(this.tl('%text.plotgw.lang.text%'))
     d3.select('#page-title')
-        .html(this.tl('%text.page.title%'))
+        .html(this.tl('%text.plotgw.page.title%'))
 }
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
@@ -1517,7 +1524,7 @@ GWCatalogue.prototype.drawGraph = function(){
               gw.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              gw.tooltip.html(gw.tl('%tooltip.showoptions%'))
+              gw.tooltip.html(gw.tl('%tooltip.plotgw.showoptions%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1548,7 +1555,7 @@ GWCatalogue.prototype.drawGraph = function(){
               gw.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              gw.tooltip.html(gw.tl('%tooltip.showinfo%'))
+              gw.tooltip.html(gw.tl('%tooltip.plotgw.showinfo%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1575,7 +1582,7 @@ GWCatalogue.prototype.drawGraph = function(){
               gw.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              gw.tooltip.html(gw.tl('%tooltip.showhelp%'))
+              gw.tooltip.html(gw.tl('%tooltip.plotgw.showhelp%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1605,7 +1612,7 @@ GWCatalogue.prototype.drawGraph = function(){
               gw.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              gw.tooltip.html(gw.tl('%tooltip.showlang%'))
+              gw.tooltip.html(gw.tl('%tooltip.plotgw.showlang%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1633,9 +1640,9 @@ GWCatalogue.prototype.drawGraph = function(){
         .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
             if (gw.showerrors){
-                gw.showTooltipManual("%tooltip.errors.off%");
+                gw.showTooltipManual("%tooltip.plotgw.errors.off%");
             }else{
-                gw.showTooltipManual("%tooltip.errors.on%");
+                gw.showTooltipManual("%tooltip.plotgw.errors.on%");
             }
         })
         .on("mouseout",function(){
@@ -1652,7 +1659,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class","graph-icon hidden")
         .style({"right":gw.margin.right+5*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
-            gw.showTooltipManual("%tooltip.share%");
+            gw.showTooltipManual("%tooltip.plotgw.share%");
         })
         .on("mouseout",function(){
             gw.hideTooltipManual();
@@ -1793,6 +1800,7 @@ GWCatalogue.prototype.toggleErrors = function(){
     // console.log("toggling errors");
     this.updateErrors();
     this.redrawLabels();
+    this.updateUrl();
 }
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // update x-xais to xvarNew
@@ -2055,6 +2063,7 @@ GWCatalogue.prototype.showOptions = function(){
     }
     document.getElementById("options-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.hideOptions = function(d) {
     // hide options box
@@ -2072,25 +2081,27 @@ GWCatalogue.prototype.hideOptions = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("options-icon").classList.add("hidden");
     document.getElementById("info-icon").classList.remove("hidden");
+    console.log(this.getPanel())
+    this.updateUrl();
 }
 GWCatalogue.prototype.addHelp = function(){
     // add help to panel
     d3.select("#help-title")
-        .html(this.tl("%text.help.title%"))
+        .html(this.tl("%text.plotgw.help.title%"))
     d3.select("#help-text")
-        .html(this.tl("%text.help.text%%text.help.about%"));
+        .html(this.tl("%text.plotgw.help.text%%text.plotgw.help.about%"));
     d3.select("#help-help-text")
-        .html(this.tl("%text.help.help%"));
+        .html(this.tl("%text.plotgw.help.help%"));
     d3.select("#help-settings-text")
-        .html(this.tl("%text.help.settings%"));
+        .html(this.tl("%text.plotgw.help.settings%"));
     d3.select("#help-errors-text")
-        .html(this.tl("%text.help.errors%"));
+        .html(this.tl("%text.plotgw.help.errors%"));
     d3.select("#help-info-text")
-        .html(this.tl("%text.help.info%"));
+        .html(this.tl("%text.plotgw.help.info%"));
     d3.select("#help-lang-text")
-        .html(this.tl("%text.help.lang%"));
+        .html(this.tl("%text.plotgw.help.lang%"));
     d3.select("#help-share-text")
-        .html(this.tl("%text.help.share%"));
+        .html(this.tl("%text.plotgw.help.share%"));
     if (this.portrait){
         d3.select('.help-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -2137,6 +2148,7 @@ GWCatalogue.prototype.showHelp = function(){
     }
     document.getElementById("help-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.hideHelp = function(d) {
     // hide options box
@@ -2154,6 +2166,7 @@ GWCatalogue.prototype.hideHelp = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("help-icon").classList.add("hidden");
+    this.updateUrl();
 }
 
 GWCatalogue.prototype.addLang = function(replot){
@@ -2161,9 +2174,9 @@ GWCatalogue.prototype.addLang = function(replot){
     var gw=this;
 
     d3.select("#lang-title")
-        .html(this.tl("%text.lang.title%"))
+        .html(this.tl("%text.plotgw.lang.title%"))
         d3.select("#lang-text")
-            .html(this.tl("%text.lang.text%"));
+            .html(this.tl("%text.plotgw.lang.text%"));
     if (this.portrait){
         d3.select('#lang-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -2210,6 +2223,8 @@ GWCatalogue.prototype.addLang = function(replot){
         // labtxtdiv.onmouseout = function(){gw.hideTooltip()};
         langdiv.appendChild(langtxtdiv);
         document.getElementById('lang-block-icons').appendChild(langdiv);
+        // document.getElementById('lang_'+lang+'_icon').style.lineHeight =
+        //     parseInt(document.getElementById('lang_'+lang+'_cont').offsetHeight)+"px";
     }
 }
 
@@ -2241,6 +2256,7 @@ GWCatalogue.prototype.showLang = function(){
     }
     document.getElementById("lang-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.hideLang = function(d) {
     // hide options box
@@ -2258,6 +2274,7 @@ GWCatalogue.prototype.hideLang = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("lang-icon").classList.add("hidden");
+    this.updateUrl();
 }
 GWCatalogue.prototype.showShare = function(){
     //show share pot
@@ -2277,12 +2294,12 @@ GWCatalogue.prototype.showShare = function(){
         document.getElementById('share-outer').offsetWidth/2)
     d3.select("#twitter-share-button")
         .attr("href",
-            gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=")+
+            gw.tl("https://twitter.com/intent/tweet?text=%share.plotgw.twitter.text%&url=")+
                 gw.url.replace("file:///Users/chrisnorth/Cardiff/GravWaves/Outreach/","http%3A%2F%2Fchrisnorth.github.io/").replace(/:/g,'%3A').replace(/\//g,'%2F')+
-                gw.tl("&hashtags=%share.twitter.hashtag%"));
-            // gw.tl("https://twitter.com/intent/tweet?text=%share.twitter.text%&url=").replace(/\s/g,"%20")+
+                gw.tl("&hashtags=%share.plotgw.twitter.hashtag%"));
+            // gw.tl("https://twitter.com/intent/tweet?text=%share.plotgw.twitter.text%&url=").replace(/\s/g,"%20")+
             // gw.makeUrl().replace("file:///","http%3A%2F%2F").replace(/&/g,'%26').replace(/:/g,'%3A').replace(/\//g,'%2F').replace(/\?/g,'%3F').replace(/=/g,'%3D')+
-            // gw.tl("&hashtags=%share.twitter.hashtag%"));
+            // gw.tl("&hashtags=%share.plotgw.twitter.hashtag%"));
 }
 GWCatalogue.prototype.hideShare = function(){
     //show share pot
