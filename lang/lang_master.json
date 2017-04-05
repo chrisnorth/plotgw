@@ -7,7 +7,7 @@
     "meta.numbersystem":{"_title":"Number system","_text":"The number system used by the language. Note that Non-Arabic numerals are not currently supported in the catalogue plot, but are in the bubble plot.","_type":"string"},
     "meta.translator":{"_title":"Translator","_text":"The name of the translator. Can include a hyperlink","_type":"string"},
 
-    "section.data":{"_title":"Data labels and units","_text":"Don't change the <em>values</em> of the units. Note that parts of the SVG display used in these web-apps don't support HTML code (e.g. <sub>, <sup>), so sub/superscripts should be <a href='https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts'>Unicode characters</a>."},
+    "section.data":{"_title":"Data labels and units","_text":"Don't change the <em>values</em> of the units. Note that parts of the SVG display used in these web-apps don't support HTML code (e.g. &lt;sub&gt;, &lt;sup&gt;), so sub/superscripts should be <a href='https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts'>Unicode characters</a>."},
     "subsection.data.timedate":{"_subtitle":"Times, dates etc."},
     "data.GPS.name":{"_title":"GPS time","_text":"data name","_type":"string"},
     "data.UTC.name":{"_title":"UTC time","_text":"data name","_type":"string"},
