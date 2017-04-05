@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 import json
+import io
 
 fileInOld="../bhbubble-lang/en.json"
 fileInNew="../lang/lang_en.json"
@@ -15,9 +17,9 @@ for o in langOld:
 
 print conv
 
-lang='fr'
+lang='cy'
 fileInLang="../bhbubble-lang/%s.json"%lang
-langIn=json.load(open(fileInLang,'r'))[0]
+langIn=json.load(io.open(fileInLang,'r'))[0]
 langConv={}
 for l in langIn:
     if (conv.has_key(l)):
@@ -27,6 +29,7 @@ for l in langIn:
         print "can't find %s"%l
 
 print langConv
-fileOutLang=open('../lang/lang_%s_2.json'%lang,'w')
-json.dump(langConv,fileOutLang,indent=4)
+fileOutLang=io.open('../lang/lang_%s_2.json'%lang,'w',encoding='utf8')
+data= json.dumps(langConv,indent=4,ensure_ascii=False,encoding='utf8')
+fileOutLang.write(unicode(data))
 fileOutLang.close()

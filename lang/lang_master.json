@@ -4,7 +4,7 @@
     "meta.name":{"_title":"Language","_text":"The name of the language in that language, e.g. English, Français, Español, or मानक हिन्दी. It appears in the language menu.","_type":"string"},
     "meta.alignment":{"_title":"left","_text":"The direction that the language goes. Note that right-to-left text is not currently supported.","_type":"select","_options":[{"name":"left to right","value":"left"},{"name":"right to left","value":"right"}]},
     "meta.alphabet":{"_title":"Alphabet","_text":"The alphabet used by the language","_type":"string"},
-    "meta.numbersystem":{"_title":"Arabic","_text":"The number system used by the language. Note that Non-Arabic numerals are not currently supported.","_type":"string"},
+    "meta.numbersystem":{"_title":"Number system","_text":"The number system used by the language. Note that Non-Arabic numerals are not currently supported.","_type":"string"},
     "meta.translator":{"_title":"Translator","_text":"The name of the translator. Can include a hyperlink","_type":"string"},
 
     "section.data":{"_title":"Data labels and units"},
@@ -53,15 +53,17 @@
     "text.gen.help":{"_title":"Help","_text":"Text for 'Help' buttons/menus","_type":"string"},
     "text.gen.lang":{"_title":"Change Language","_text":"Text for 'Change Language' buttons/menus","_type":"string"},
 
-    "section.plotgw.text":{"_title":"Text shown on calalogue plot"},
+    "section.plotgw.text":{"_title":"Text shown on catalogue plot"},
     "text.plotgw.legend.detections":{"_title":"Detections","_text":"Shown in graph legend","_type":"string"},
     "text.plotgw.legend.candidates":{"_title":"Candidates","_text":"Shown in graph legend","_type":"string"},
     "text.plotgw.page.title":{"_title":"Page title","_text":"Displayed at the top of the page","_type":"string"},
     "text.plotgw.horizontal-axis":{"_title":"Horizontal Axis","_text":"Heading on options pane for changing the horizontal axis variable","_type":"string"},
     "text.plotgw.vertical-axis":{"_title":"Vertical Axis","_text":"Heading on options pane for changing the vertical axis variable","_type":"string"},
+    "subsection.plotgw.info":{"_subtitle":"Information panel"},
     "text.plotgw.information.heading":{"_title":"Information Panel heading (data selected)","_text":"{Information p}anel heading (followed by source name)","_type":"string"},
     "text.plotgw.information.title":{"_title":"Information Panel heading (no data selected)","_text":"Panel heading (with no selection)","_type":"string"},
     "text.plotgw.information.subtitle":{"_title":"Panel sub-heading (no data selected)","_text":"Panel sub-heading (with no selection)","_type":"string"},
+    "subsection.plotgw.help":{"_subtitle":"Help panel"},
     "text.plotgw.help.title":{"_title":"Help panel title","_text":"Panel title","_type":"string"},
     "text.plotgw.help.text":{"_title":"Help text","_text":"Text to explain the web-app, including HTML code","_type":"textarea","_height":"6em"},
     "text.plotgw.help.about":{"_title":"About text","_text":"Credits for the web-app, including HTML code","_type":"textarea","_height":"6em"},
@@ -71,6 +73,7 @@
     "text.plotgw.help.errors":{"_title":"Errors button help text","_text":"Help text for errors button (displayed in help panel)","_type":"textarea","_height":"2em"},
     "text.plotgw.help.lang":{"_title":"Language button help text","_text":"Help text for language button (displayed in help panel)","_type":"textarea","_height":"2em"},
     "text.plotgw.help.share":{"_title":"Share button help text","_text":"Help text for language button (displayed in help panel)","_type":"textarea","_height":"2em"},
+    "subsection.plotgw.lang":{"_subtitle":"Language panel"},
     "text.plotgw.lang.title":{"_title":"Language panel title","_text":"Title of panel for changing the language","_type":"string"},
     "text.plotgw.lang.text":{"_title":"Language panel text","_text":"Displayed in language panel","_type":"textarea","_height":"2em"},
 
@@ -146,5 +149,5 @@
     "domain.losc":{"_title":"LOSC domain","_text":"Top-level domain for LOSC (included in links) [https://losc.ligo.org]","_type":"string"},
     "domain.losc.events":{"_title":"LOSC events page","_text":"Domain for LOSC events page (included in links) [https://losc.ligo.org/events]","_type":"string"},
     "domain.losc.store":{"_title":"LOSC store page","_text":"Domain for LOSC data store [https://losc.ligo.org/s]","_type":"string"},
-    "domain.gracedb.events":{"_title":"GraceDB events page","_text":"Domain for GraceDB events link [https://gracedb.ligo.org/events]"}
+    "domain.gracedb.events":{"_title":"GraceDB events page","_text":"Domain for GraceDB events link [https://gracedb.ligo.org/events]", "_type":"string"}
 }

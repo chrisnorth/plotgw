@@ -41,6 +41,10 @@ div.fourcol {
 	width: 490px;
 	display: inline-block;
 }
+div.fourcol div.default{
+	background-color:#ddd;
+	margin-top:5px;
+}
 fieldset {
 	padding: 0.5em 0;
 	border: 0px;

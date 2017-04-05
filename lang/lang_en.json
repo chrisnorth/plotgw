@@ -55,8 +55,8 @@
  "text.plotgw.information.heading": "Information:",
  "text.plotgw.information.title": "Information Panel",
  "text.plotgw.information.subtitle": "Click on datapoints for more information",
- "text.plotgw.help.title": "",
- "text.plotgw.help.text": "",
+ "text.plotgw.help.title": "Help",
+ "text.plotgw.help.text": "<p>Explore the LIGO compact binary catalogue, which is all the mergers of Black Holes and neutron stars detected by the LIGO detectors.</p><p>Click on the markers on the graph to show information about the various detections</p>",
  "text.plotgw.help.about": "<p>This web-app was written and is maintained by <a href='http://blogs.cardiff.ac.uk/chrisnorth'>Chris North</a> (<a href='http://www.astro.cf.ac.uk/research/gravity'>Cardiff University</a>). Source code is available on <a href='github.com/chrisnorth/plotgw'>GitHub</a>.</p>",
  "text.plotgw.help.info": "Show information about the selected detection",
  "text.plotgw.help.settings": "Change the graph properties, such as the horizontal and vertical axes",
@@ -98,7 +98,7 @@
  "data.bub.comp.k": "K-type star",
  "data.bub.comp.km": "K/M-type star",
  "data.bub.comp.m": "M-type star",
- "data.bub.comp.wr": "Wolf-Rayat star",
+ "data.bub.comp.wr": "Wolf-Rayet star",
  "data.bub.comp.bh": "Black hole",
  "data.bub.comp.none": "None",
  "data.bub.compmass": "Companion mass",
@@ -120,7 +120,7 @@
  "text.bub.scale": "Scale",
  "text.bub.mergers": "Mergers",
  "text.bub.help.scalemass": "Scale circle area by black hole mass",
- "text.bub.help.scalesize": "Scale circle area by black hole radius",
+ "text.bub.help.scalesize": "Scale circle radius by black hole radius",
  "text.bub.help.merge": "Merge binary black holes",
  "text.bub.help.unmerge": "Unmerge binary black holes",
  "text.bub.help.showall": "Show all black holes",
@@ -128,5 +128,6 @@
  "text.bub.footer": "Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>X-ray binary data based on <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
  "domain.losc": "https://losc.ligo.org",
  "domain.losc.events": "https://losc.ligo.org/events",
- "domain.losc.store": "https://losc.ligo.org/s"
+ "domain.losc.store": "https://losc.ligo.org/s",
+ "domain.gracedb.events": "https://gracedb.ligo.org/events"
 }

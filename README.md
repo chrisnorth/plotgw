@@ -21,7 +21,7 @@ BHBubble is also available in:
 * [Hungarian](http://chrisnorth.github.io/plotgw/bhbubble?lang=hu) [translation credit: Szölgyén Ákos, Dálya Gergely, Raffai Péter]
 * [Odia (Oriya)](http://chrisnorth.github.io/plotgw/bhbubble?lang=or) [translation credit: ]
 * [Welsh](http://chrisnorth.github.io/plotgw/bhbubble?lang=cy) [translation credit: Gwen Williams]
-* [Chinese (Hong Kong)](http://chrisnorth.github.io/plotgw/bhbubble?lang=zhhk)
+* [Chinese (Hong Kong)](http://chrisnorth.github.io/plotgw/bhbubble?lang=zhhk) [translation credit: ]
 
 To provide further translations, translate the text on the right side of [bhbubble-lang/en.json](https://github.com/chrisnorth/plotgw/blob/master/bhbubble-lang/en.json). For non-Roman alphabets the contents should use HTML codes.
 

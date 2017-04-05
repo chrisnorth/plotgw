@@ -37,7 +37,7 @@
 
 		this.lang = this.q.lang;
 		if(!this.lang) this.lang = "en";
-
+		this.langdefault="en";
 		this.page = $('#'+this.id);
 
 		html = "<form id=\"langchoice\"><label>Select language (not all are complete):</label><select name=\"lang\">"
@@ -62,12 +62,15 @@
 			}else{
 				this.masterbook = e.data;
 			}
-			this.rebuildForm();
-			if(e.lang){
-				var href = $('a.langlink').attr('href');
-				$('a.langlink').attr('href',href.substring(0,href.indexOf('?'))+'?lang='+this.lang);
-				$('.langname').html(this['meta.name']);
-			}
+			this.loadLanguage(this.langdefault,function(e){
+				this.phrasebookdefault = (e.data) ? e.data : { 'meta.name':'','meta.code':e.lang };
+				this.rebuildForm();
+				if(e.lang){
+					var href = $('a.langlink').attr('href');
+					$('a.langlink').attr('href',href.substring(0,href.indexOf('?'))+'?lang='+this.lang);
+					$('.langname').html(this['meta.name']);
+				}
+			});
 		});
 		return this;
 	}
@@ -100,7 +103,7 @@
 	Translator.prototype.rebuildForm = function(){
 
 		var html = "<form id=\"language\">";
-		html += this.buildForm(this.masterbook,this.phrasebook,"");
+		html += this.buildForm(this.masterbook,this.phrasebook,this.phrasebookdefault,"");
 		html += "</form>";
 
 		$('#translation').html(html);
@@ -123,7 +126,7 @@
 	}
 
 
-	Translator.prototype.buildForm = function(m,p,k){
+	Translator.prototype.buildForm = function(m,p,d,k){
 
 		var html = "";
 		var newk = "";
@@ -131,6 +134,8 @@
 		var arr = false;
 		var n;
 		var css;
+		var ldef = this.phrasebookdefault["meta.name"];
+		var inpdef="";
 
 		if(!k) k = "";
 
@@ -148,8 +153,10 @@
 					if(m[key]._type=="textarea"){
 						css = (m[key]._height) ? ' style="height:'+m[key]._height+'"' : "";
 						inp = '<textarea class="'+cl+'" name="'+newk+'"'+css+'>'+sanitize((p && p[key] ? p[key] : ""))+'</textarea>';
+						inpdef = sanitize((d && d[key] ? d[key] : ""));
 					}else if(m[key]._type=="noedit"){
 						inp = '<input type="hidden" name="'+newk+'" value="'+sanitize((p ? p[key] : ""))+'" />'+sanitize((p ? p[key] : ""));
+						inpdef : "";
 					}else if(m[key]._type=="select"){
 						inp = '<select name="'+newk+'">';
 						for(var o = 0; o < m[key]._options.length ; o++){
@@ -157,17 +164,20 @@
 							inp += '<option value="'+m[key]._options[o].value+'"'+sel+'>'+m[key]._options[o].name+'</option>'
 						}
 						inp += '</select>';
+						inpdef = sanitize((d && d[key] ? d[key] : ""));
 					}else if(m[key]._type=="string"){
 						inp = '<input type="text" class="'+cl+'" name="'+newk+'" value="'+sanitize((p && p[key] ? p[key] : ""))+'" />';
+						inpdef = sanitize((d && d[key] ? d[key] : ""));
 					}
-					html += this.row((m[key]._title ? m[key]._title : key),m[key]._text,inp);
+					html += this.row((m[key]._title ? m[key]._title : key),m[key]._text,inp,ldef,inpdef);
 				}else{
 
 					// If this section has a title
 					if(m[key]._title) html += '<h2>'+m[key]._title+'</h2>';
+					if(m[key]._subtitle) html += '<h3>'+m[key]._subtitle+'</h3>';
 					if(n >= 0) html += '<div class="group">';
 
-					html += this.buildForm(m[key],(p) ? p[key] : {}, newk);
+					html += this.buildForm(m[key],(p) ? p[key] : {}, newk,(d) ? d[key] : {});
 					this.previousgroup = n;
 				}
 			}
@@ -201,7 +211,7 @@
 		$("#complete").html(percent);
 	}
 
-	Translator.prototype.row = function(title,desc,field){
+	Translator.prototype.row = function(title,desc,field,ldef,def){
 		var id = field.indexOf("id=\"");
 		id = field.substr(id+4);
 		id = id.substr(0,id.indexOf("\""));
@@ -213,8 +223,17 @@
 		html += "		</div>";
 		html += "		<div class=\"fourcol\">";
 		html += "			"+field;
+		html += "			<div class=\"default\"><strong>"+ldef+" (default):</strong> "+def+"</div>";
 		html += "		</div>";
 		html += "	</fieldset>";
+		// html = "	<div>";// id=\"fs"+id+"\">";
+		// html += "		<div class=\"twocol\">";
+		// html += "			<p>&nbsp;</p>";
+		// html += "		</div>";
+		// html += "		<div class=\"fourcol default\">";
+		// html += "			"+def;
+		// html += "		</div>";
+		// html += "	</div>";
 		return html;
 	}
 	Translator.prototype.getOutput = function(){
