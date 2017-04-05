@@ -18,13 +18,15 @@ body {
 }
 h1 { font-size: 1.75em; }
 h2 { font-size: 1.5em; }
+h4 { font-size: 1em; }
 h1, h2, h3 {
 	/*font-family: 'SecretTypewriterRegular';*/
 	opacity: 0.7;
-	color: #000;
+	color: blue;
 }
 code { color: #396bad; font-weight: bold; }
 p { margin: 1em 0;}
+span.hl{color:red; font-weight:bold;}
 #fake { display: none; }
 #chooser {
 	margin-bottom: 20px;
@@ -40,6 +42,13 @@ div.twocol {
 div.fourcol {
 	width: 490px;
 	display: inline-block;
+}
+div.subt {
+	width: 770px;
+	display: inline-block;
+}
+div.subt p {
+	margin-top:-1em;
 }
 div.fourcol div.default{
 	background-color:#ddd;

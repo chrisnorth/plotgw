@@ -124,8 +124,11 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
         reSup=/\^(-?[0-9]*)(?=[\s/]|$)/g
         textOut=textOut.replace(reSup,"<sup>$1</sup> ");
         // replace Msun
-        textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M<sub>&#x2609;</sub>')
+        textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M<sub>☉</sub>')
     }
+    // else{
+    //     textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M☉')
+    // }
     return(textOut);
 }
 GWCatalogue.prototype.stdlabel = function(d,src){

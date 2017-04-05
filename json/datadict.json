@@ -17,7 +17,7 @@
          "unit": "%data.mass.unit.msun%", "err": 2},
     "Mtotal":{"name": "%data.Mtotal.name%","priority": 2, "sigfig": 3,
          "unit": "%data.mass.unit.msun%", "err": 2},
-    "spinInitEff":{"name": "Effective inspiral spin", "priority": 4, "sigfig": 2,
+    "spinInitEff":{"name": "%data.spinInitEff.name%", "priority": 4, "sigfig": 2,
         "err": 2},
     "Mfinal":{"name": "%data.Mfinal.name%", "priority": 2, "sigfig": 3,
         "unit": "%data.mass.unit.msun%", "err": 2},

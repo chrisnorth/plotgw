@@ -68,7 +68,7 @@
 				if(e.lang){
 					var href = $('a.langlink').attr('href');
 					$('a.langlink').attr('href',href.substring(0,href.indexOf('?'))+'?lang='+this.lang);
-					$('.langname').html(this['meta.name']);
+					$('.langname').html(this.phrasebook['meta.name']);
 				}
 			});
 		});
@@ -111,6 +111,7 @@
 		$('#translation input, #translation textarea, #translation select').attr('dir',(this.phrasebook && this.phrasebook["meta.alignment"] && this.phrasebook["meta.alignment"]=="right" ? "rtl" : "ltr")).unbind().bind('change',{me:this},function(e){
 			e.data.me.getOutput();
 			e.data.me.percentComplete();
+			console.log(this);
 		});
 
 		// Update the text direction when the appropriate select box changes
@@ -152,29 +153,36 @@
 					cl= sanitize((p && p[key] ? "" : "blank"))
 					if(m[key]._type=="textarea"){
 						css = (m[key]._height) ? ' style="height:'+m[key]._height+'"' : "";
-						inp = '<textarea class="'+cl+'" name="'+newk+'"'+css+'>'+sanitize((p && p[key] ? p[key] : ""))+'</textarea>';
+
 						inpdef = sanitize((d && d[key] ? d[key] : ""));
+						inp = '<textarea class="'+cl+'" name="'+newk+'"'+css+'>'+sanitize((p && p[key] ? p[key] : inpdef))+'</textarea>';
 					}else if(m[key]._type=="noedit"){
 						inp = '<input type="hidden" name="'+newk+'" value="'+sanitize((p ? p[key] : ""))+'" />'+sanitize((p ? p[key] : ""));
 						inpdef : "";
 					}else if(m[key]._type=="select"){
 						inp = '<select name="'+newk+'">';
 						for(var o = 0; o < m[key]._options.length ; o++){
-							var sel = (p && m[key]._options[o].value==p[key]) ? ' selected="selected"' : '';
+							var seldef = (d && m[key]._options[o].value==d[key]) ? ' selected="selected"' : '';
+							var sel = (p && m[key]._options[o].value==p[key]) ? ' selected="selected"' : seldef;
 							inp += '<option value="'+m[key]._options[o].value+'"'+sel+'>'+m[key]._options[o].name+'</option>'
 						}
 						inp += '</select>';
 						inpdef = sanitize((d && d[key] ? d[key] : ""));
 					}else if(m[key]._type=="string"){
-						inp = '<input type="text" class="'+cl+'" name="'+newk+'" value="'+sanitize((p && p[key] ? p[key] : ""))+'" />';
 						inpdef = sanitize((d && d[key] ? d[key] : ""));
+						inp = '<input type="text" class="'+cl+'" name="'+newk+'" value="'+sanitize((p && p[key] ? p[key] : inpdef))+'" />';
 					}
 					html += this.row((m[key]._title ? m[key]._title : key),m[key]._text,inp,ldef,inpdef);
 				}else{
 
 					// If this section has a title
-					if(m[key]._title) html += '<h2>'+m[key]._title+'</h2>';
+					if(m[key]._title){html += '<h2>'+m[key]._title+'</h2>';}
 					if(m[key]._subtitle) html += '<h3>'+m[key]._subtitle+'</h3>';
+					if(m[key]._text){
+						html += "	<div class=\"subt\">";
+						html += "		<p>"+m[key]._text+"</p>";
+						html += "	</div>";
+					}
 					if(n >= 0) html += '<div class="group">';
 
 					html += this.buildForm(m[key],(p) ? p[key] : {}, newk,(d) ? d[key] : {});
