@@ -4,7 +4,7 @@
  "meta.alignment": "left",
  "meta.alphabet": "Roman",
  "meta.numbersystem": "Arabic",
- "meta.translator": "Nicolas Arnaud",
+ "meta.translator": "Nicolas Arnaud (CNRS & EGO), for the Virgo collaboration",
  "data.GPS.name": "Temps GPS",
  "data.UTC.name": "Temps UTC",
  "data.date.name": "Date de la détection",

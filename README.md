@@ -15,8 +15,8 @@ The two scalings (by size and mass) scale the area of the displayed circles.
 * Scale by mass: scale area of circle by mass of black hole.
 
 ### Translations
-BHBubble is also available in:
-* [French](http://chrisnorth.github.io/plotgw/bhbubble?lang=fr) [translation credit: Nicolas Arnaud)]
+One or both of these apps are also available in:
+* [French](http://chrisnorth.github.io/plotgw/bhbubble?lang=fr) [translation credit: Nicolas Arnaud (CNRS & EGO), for the Virgo collaboration]
 * [German](http://chrisnorth.github.io/plotgw/bhbubble?lang=fr) [translation credit: Benjamin Knispel]
 * [Hungarian](http://chrisnorth.github.io/plotgw/bhbubble?lang=hu) [translation credit: Szölgyén Ákos, Dálya Gergely, Raffai Péter]
 * [Odia (Oriya)](http://chrisnorth.github.io/plotgw/bhbubble?lang=or) [translation credit: ]

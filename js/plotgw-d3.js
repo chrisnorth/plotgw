@@ -2219,8 +2219,8 @@ GWCatalogue.prototype.addLang = function(replot){
         langtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
         langtxtdiv.innerHTML = gw.langs[lang].name;
         // langtxtdiv.onmouseover = function(e){
-        //     gw.showTooltip(e,this.id.split("txt")[0])}
-        // labtxtdiv.onmouseout = function(){gw.hideTooltip()};
+        //     gw.showTooltip(e,"%meta.translator%","manual")}
+        // langtxtdiv.onmouseout = function(){gw.hideTooltip()};
         langdiv.appendChild(langtxtdiv);
         document.getElementById('lang-block-icons').appendChild(langdiv);
         // document.getElementById('lang_'+lang+'_icon').style.lineHeight =
@@ -2319,12 +2319,16 @@ GWCatalogue.prototype.showTooltip = function(e,tttxt,type){
     ttSk.style.top = e.pageY - 10 ;
     ttSk.style.width = "auto";
     ttSk.style.height = "auto";
-    if (this.columns[tttxt]){
-        ttSk.innerHTML = this.tl(this.columns[tttxt].name);
-    }else if(this.ttlabels[tttxt]){
-        ttSk.innerHTML = this.tl(this.ttlabels[tttxt]);
-    }else{
+    if (type=="manual"){
         ttSk.innerHTML = this.tl(tttxt);
+    }else{
+        if (this.columns[tttxt]){
+            ttSk.innerHTML = this.tl(this.columns[tttxt].name);
+        }else if(this.ttlabels[tttxt]){
+            ttSk.innerHTML = this.tl(this.ttlabels[tttxt]);
+        }else{
+            ttSk.innerHTML = this.tl(tttxt);
+        }
     }
 }
 GWCatalogue.prototype.hideTooltip = function(){
