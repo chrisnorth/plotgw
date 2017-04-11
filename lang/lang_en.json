@@ -4,6 +4,7 @@
  "meta.alignment": "left",
  "meta.alphabet": "Roman",
  "meta.numbersystem": "Arabic",
+ "meta.credit": "Translation credit",
  "meta.translator": "",
  "data.GPS.name": "GPS time",
  "data.UTC.name": "UTC time",

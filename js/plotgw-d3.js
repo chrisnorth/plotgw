@@ -1256,6 +1256,13 @@ GWCatalogue.prototype.setLang = function(){
         .html(this.tl('%text.plotgw.lang.text%'))
     d3.select('#page-title')
         .html(this.tl('%text.plotgw.page.title%'))
+    if (this.langdict['meta.translator'] && this.langdict['meta.translator']!=''){
+        d3.select('#lang-credit')
+            .html(this.tl('%meta.credit% (%meta.name%): %meta.translator%'));
+    }else{
+        d3.select('#lang-credit')
+            .html('');
+    }
 }
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
