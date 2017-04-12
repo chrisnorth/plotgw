@@ -137,6 +137,13 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
     // }
     return(textOut);
 }
+GWCatalogue.prototype.getBest = function(item){
+    if (item.best){
+        return item.best;
+    }else{
+        return item[0];
+    }
+}
 GWCatalogue.prototype.stdlabel = function(d,src){
     var gw=this;
     if (gw.columns[src].err){
@@ -207,11 +214,11 @@ GWCatalogue.prototype.setColumns = function(datadict){
         M1:{icon:"img/primass.svg",avail:true,type:'src'},
         M2:{icon:"img/secmass.svg",avail:true,type:'src'},
         Mfinal:{icon:"img/finalmass.svg",avail:true,type:'src'},
-        spinInitEff:{avail:true,icon:"img/initspin.svg",
+        chi:{avail:true,icon:"img/initspin.svg",
             border:0.01,type:'src'},
-        spinFinal:{avail:true,icon:"img/finalspin.svg",
+        af:{avail:true,icon:"img/finalspin.svg",
             border:0.01,type:'src'},
-        Ldist:{avail:true, icon:"img/ruler.svg",
+        DL:{avail:true, icon:"img/ruler.svg",
             border:20,type:'src'},
         z:{avail:true,icon:"img/redshift.svg",
             border:0.01,type:'src'},
@@ -239,10 +246,10 @@ GWCatalogue.prototype.setColumns = function(datadict){
         },
         sigma:{avail:false,type:'src'},
         snr:{icon:"img/snr.svg",avail:true,type:'src'},
-        skyArea:{avail:false,type:'src'},
+        deltaOmega:{avail:false,type:'src'},
         Erad:{avail:true,icon:"img/energyrad.svg",
             border:0.1,type:'src'},
-        peakL:{avail:true,icon:"img/peaklum.svg",type:'src'},
+        lpeak:{avail:true,icon:"img/peaklum.svg",type:'src'},
         M1kg:{type:'derived',
             namefn:function(){return(gw.columns.M1.name)},
             bestfn:function(d){
@@ -291,25 +298,25 @@ GWCatalogue.prototype.setColumns = function(datadict){
             icon:"img/massratio.svg",
             avail:true,
             border:0.1},
-        LdistLy:{type:'derived',
-            namefn:function(){return(gw.columns.Ldist.name)},
+        DLly:{type:'derived',
+            namefn:function(){return(gw.columns.DL.name)},
             bestfn:function(d){
-                return(d['Ldist'].best*3.26)},
+                return(d['DL'].best*3.26)},
             errfn:function(d){
-                return([d['Ldist'].err[0]*3.26,
-                d['Ldist'].err[1]*3.26])},
+                return([d['DL'].err[0]*3.26,
+                d['DL'].err[1]*3.26])},
             sigfig:2,
             err:2,
             unit:'%data.Ldist.unit.Mly%',
             avail:false},
-        peakLMsun:{
+        lpeakMsun:{
             type:'derived',
-            name:function(){return(gw.columns.peakL.name)},
+            name:function(){return(gw.columns.lpeak.name)},
             bestfn:function(d){
-                return(d['peakL'].best*55.956)},
+                return(d['lpeak'].best*55.956)},
             errfn:function(d){
-                return([d['peakL'].err[0]*55.956,
-                d['peakL'].err[1]*55.956])},
+                return([d['lpeak'].err[0]*55.956,
+                d['lpeak'].err[1]*55.956])},
             sigfig:2,
             err:2,
             unit:'%data.peakL.unit.Mc2%',
@@ -349,8 +356,12 @@ GWCatalogue.prototype.setColumns = function(datadict){
         data:{
             type:'derived',
             strfn:function(d){
-                return gw.tl("<a href='"+d.link.url+
-                    "' title='"+d.link.text+"'>%text.gen.losc%</a>");
+                if ((d.link)&&d.link.url){
+                    return gw.tl("<a href='"+d.link.url+
+                        "' title='"+d.link.text+"'>%text.gen.losc%</a>");
+                }else{
+                    return(gw.labBlank);
+                }
             },
             name:'%tooltip.plotgw.losc%',
             icon:"img/data.svg"}
@@ -613,15 +624,15 @@ GWCatalogue.prototype.setScales = function(){
         Mchirp:{lab:["Mchirp"],
             labSw:["Mchirpkg"]},
         Mratio:{lab:["Mratio"]},
-        Ldist:{lab:["Ldist"],
-            labSw:["LdistLy"]},
+        DL:{lab:["DL"],
+            labSw:["DLly"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
             // ttlab:"Category of detection"},
         FAR:{lab:["FAR"]},
-        peakL:{lab:["peakLMsun"],labSw:["peakL"]},
+        lpeak:{lab:["lpeakMsun"],labSw:["lpeak"]},
         Erad:{lab:["Erad"],labSw:["EradErg"]},
-        spinInitEff:{lab:["spinInitEff"]},
-        spinFinal:{lab:["spinFinal"]},
+        chi:{lab:["chi"]},
+        af:{lab:["af"]},
         data:{icon:"img/data.svg",lab:["data"]}
     }
     //tool-top labels
@@ -1029,25 +1040,27 @@ GWCatalogue.prototype.formatData = function(d,cols){
         }else{
             // console.log('existing column',col,d[col])
         }
-        if (gw.columns[col].err){
-            if (gw.columns[col].err==2){
-                d[col].errv =
-                    [d[col].best+d[col].err[0],
-                    d[col].best-d[col].err[1]];
+        if (d[col]){
+            if (gw.columns[col].err){
+                if (gw.columns[col].err==2){
+                    d[col].errv =
+                        [d[col].best+d[col].err[0],
+                        d[col].best-d[col].err[1]];
+                }
+            }else if (typeof d[col].best=="number"){
+                d[col].errv =[d[col].best,d[col].best];
             }
-        }else if (typeof d[col].best=="number"){
-            d[col].errv =[d[col].best,d[col].best];
-        }
-        if (gw.columns[col].strfn){
-            d[col].str=gw.columns[col].strfn(d);
-            if (gw.columns[col].strfnnoerr){
-                d[col].strnoerr=gw.columns[col].strfnnoerr(d);
+            if (gw.columns[col].strfn){
+                d[col].str=gw.columns[col].strfn(d);
+                if (gw.columns[col].strfnnoerr){
+                    d[col].strnoerr=gw.columns[col].strfnnoerr(d);
+                }else{
+                    d[col].strnoerr=gw.columns[col].strfn(d);
+                }
             }else{
-                d[col].strnoerr=gw.columns[col].strfn(d);
+                d[col].str=gw.stdlabel(d,col);
+                d[col].strnoerr=gw.stdlabelNoErr(d,col);
             }
-        }else{
-            d[col].str=gw.stdlabel(d,col);
-            d[col].strnoerr=gw.stdlabelNoErr(d,col);
         }
         // console.log(col,d[col])
         // console.log(col,d[col])
@@ -1130,14 +1143,77 @@ GWCatalogue.prototype.drawGraphInit = function(){
             alert("Fatal error loading input file: '"+gw.fileInEvents+"'. Sorry!");
         }
         gw.loaded++;
+        if ((!dataIn.data)&&(dataIn.events)){
+            //uses LOSC format, so need to convert
+            gw.dataFormat='losc';
+            dataIn.data={};
+            if (this.debug){console.log('converting from LOSC format');}
+            for (e in dataIn.events){
+                // convert events to required format
+                ev=dataIn.events[e];
+                dataIn.data[e]={};
+                for (c in ev){
+                    if (typeof ev[c]=="number"){
+                        dataIn.data[e][c]={best:ev[c]}
+                    }else if (typeof ev[c]=="object"){
+                        dataIn.data[e][c]={best:ev[c][0],err:[ev[c][1],ev[c][2]]}
+                    }else{
+                        dataIn.data[e][c]={best:ev[c]}
+                    }
+                }
+                // convert links to required format
+                if (dataIn.links[e]){
+                    linkIn=dataIn.links[e];
+                    dataIn.links[e]={}
+                    for (l in linkIn){
+                        if (linkIn[l].text.search('Paper')){
+                            dataIn.links[e]['DetPaper']={
+                                text:linkIn[l].text,
+                                url:linkIn[l].url,
+                                type:'paper'}
+                        }
+                        if (linkIn[l].text.search('Open Data page')){
+                            dataIn.links[e]['LOSCData']={
+                                text:linkIn[l].text,
+                                url:linkIn[l].url,
+                                type:'web-data'}
+                        }
+                        if (linkIn[l].text.search('GraceDB page')){
+                            dataIn.links[e]['GraceDB']={
+                                text:linkIn[l].text,
+                                url:linkIn[l].url,
+                                type:'web-data'}
+                        }
+                        if (linkIn[l].text.search('Final Skymap')){
+                            dataIn.links[e]['SkyMapFile']={
+                                text:linkIn[l].text,
+                                url:linkIn[l].url,
+                                type:'file'}
+                        }
+                        if (linkIn[l].text.search('Skymap View')){
+                            dataIn.links[e]['SkyMapAladin']={
+                                text:linkIn[l].text,
+                                url:linkIn[l].url,
+                                type:'web'}
+                        }
+                    }
+                }
+            }
+
+        }else{
+            gw.dataFormat='std';
+        }
         for (e in dataIn.data){
             dataIn.data[e].name=e;
-            if (e[0]=='G'){t='GW'};
-            if (e[0]=='L'){t='LVT'};
+            if (e[0]=='G'){t='GW'}
+            else if (e[0]=='L'){t='LVT'}
+            else{t=''}
             dataIn.data[e].type=t;
-            link=dataIn.links[e].LOSCData;
-            link.url=gw.tl(link.url);
-            dataIn.data[e].link=link;
+            if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
+                link=dataIn.links[e].LOSCData;
+                link.url=gw.tl(link.url);
+                dataIn.data[e].link=link;
+            }
             gw.data.push(dataIn.data[e]);
         }
         if(gw.debug){console.log('data pre-format:',gw.data);}

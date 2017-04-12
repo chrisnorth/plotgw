@@ -410,7 +410,11 @@ BHBubble.prototype.loadData = function(){
                 window.location.replace(bh.makeUrl({'eventsFile':null}));
             }
         }
-        dataJson=jsonIn.data;
+        if (jsonIn.data){
+            dataJson=jsonIn.data;
+        }else if(jsonIn.events){
+            dataJson=jsonIn.events;
+        }
         links=jsonIn.links
         data = [];
         nametr={};
@@ -421,44 +425,77 @@ BHBubble.prototype.loadData = function(){
             fin=[]
             pri={
                 name:i+'-A',
-                massBH:dj.M1.best,
-                massBHerr:'e'+parseFloat(dj.M1.err[1])+'-'+
-                    parseFloat(dj.M1.err[0]),
-                compMass:dj.M2.best,
                 compType:'%data.bub.comp.bh%',
                 parentName:i,
                 BHtype:'%data.bub.type.primary%',
             }
             sec={
                 name:i+'-B',
-                massBH:dj.M2.best,
-                massBHerr:'e'+parseFloat(dj.M2.err[1])+'-'+
-                    parseFloat(dj.M2.err[0]),
-                compMass:dj.M1.best,
                 compType:'%data.bub.comp.bh%',
                 parentName:i,
                 BHtype:'%data.bub.type.secondary%',
             }
             fin={
                 name:i,
-                massBH:dj.Mfinal.best,
-                massBHerr:'e'+parseFloat(dj.Mfinal.err[1])+'-'+
-                    parseFloat(dj.Mfinal.err[0]),
                 compMass:'%data.bub.comp.none%',
                 compType:'%data.bub.comp.none%',
                 parentName:'',
                 BHtype:'%data.bub.type.final%',
             }
+            if (dj.M1.best){
+                // use M1.best, M1.err
+                pri.massBH=dj.M1.best;
+                pri.massBHerr='e'+parseFloat(dj.M1.err[1])+'-'+
+                    parseFloat(dj.M1.err[0]);
+                pri.compMass=dj.M2.best;
+                sec.massBH=dj.M2.best;
+                sec.massBHerr='e'+parseFloat(dj.M2.err[1])+'-'+
+                    parseFloat(dj.M2.err[0]);
+                sec.compMass=dj.M1.best;
+                fin.massBH=dj.Mfinal.best;
+                fin.massBHerr='e'+parseFloat(dj.Mfinal.err[1])+'-'+
+                    parseFloat(dj.Mfinal.err[0]);
+                distance=parseInt(3.26*(dj.DL.best-dj.DL.err[0]))+
+                    '-'+parseInt(3.26*(dj.DL.best+dj.DL.err[1]));
+            }else{
+                pri.massBH=dj.M1[0];
+                pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
+                    parseFloat(dj.M1[1]);
+                pri.compMass=dj.M2[0];
+                sec.massBH=dj.M2[0];
+                sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
+                    parseFloat(dj.M2[1]);
+                sec.compMass=dj.M1[0];
+                fin.massBH=dj.Mfinal[0];
+                fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
+                    parseFloat(dj.Mfinal[1]);
+                distance=parseInt(3.26*(dj.DL[0]-dj.DL[1]))+
+                    '-'+parseInt(3.26*(dj.DL[0]+dj.DL[2]));
+            }
             if (i[0]=='G'){method='GW'}
             else if (i[0]=='L'){method='LVT'}
-            paper='<a target="_blank" href="'+
-                links[i].DetPaper.url+'">'+
-                links[i].DetPaper.text+'</a>';
+            paper='-';
+            if (links[i]){
+                if (links[i].DetPaper){
+                    paper='<a target="_blank" href="'+
+                        links[i].DetPaper.url+'">'+
+                        links[i].DetPaper.text+'</a>';
+                }else{
+                    for (p in links[i]){
+                        if ((links[i][p].text) && (links[i][p].url)){
+                            if (links[i][p].text.search("Paper")>=0){
+                                console.log(i,links[i][p].text,links[i][p].text.search("Paper"))
+                                paper='<a target="_blank" href="'+
+                                    links[i][p].url+'">'+
+                                    links[i][p].text+'</a>';
+                            }
+                        }
+                    }
+                }
+            }
             binType='%data.bub.type.bbh%';
             period='';
             loc='%data.bub.loc.extragalactic%'
-            distance=parseInt(3.26*(dj.Ldist.best-dj.Ldist.err[0]))+
-                '-'+parseInt(3.26*(dj.Ldist.best+dj.Ldist.err[1]));
             refcompmass='';
             refcomp='';
             refper='';
