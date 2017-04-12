@@ -15,21 +15,34 @@
 </head>
 <body>
     <div id="hdr" class="right">
+        <h1>Known Stellar Mass Black Holes</h1>
+    </div>
+    <div id="control-bar" class="right">
         <div id="help-button" class="button"><img id="help-icon" src="img/help-wh.svg"></div>
         <div id="lang-button" class="button">
             <div class="lang-button-cont"><img id="lang-icon" src="img/lang-wh.svg"><span class="button-span" id='lang-label'></span></div>
             <div id="lang-list"></div>
         </div>
-        <h1>Known Stellar Mass Black Holes</h1>
+        <div id="share-button" class="button"><img id="share-icon" src="img/share-wh.svg"></div>
     </div>
     <div id="full" class="right">
         <!-- <div id="controls"></div> -->
         <div id="bubble-container" class="right"></div>
     </div>
-    <div id="help-bg"></div>
-    <div id="help-outer">
-        <div id="help-close" class="helpclose"></div>
-        <div id="help-inner">
+    <div id="help-bg" class="popup-bg"></div>
+    <div id="help-outer" class="popup-outer">
+        <div id="help-close" class="popup-close"></div>
+        <div id="help-inner" class="popup-inner">
+        </div>
+    </div>
+    <div id="share-bg" class="popup-bg"></div>
+    <div id="share-outer" class="popup-outer">
+        <div id="share-close" class="popup-close"></div>
+        <div id="share-inner" class="popup-inner">
+            <div class="popup-title">Share</div>
+            <div class="popup-block" id="share-block-icons">
+                <a href="https://twitter.com/intent/tweet" target="_blank" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+            </div>
         </div>
     </div>
     <div id="footer">

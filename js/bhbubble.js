@@ -218,14 +218,14 @@ BHBubble.prototype.makeSvg = function(){
     // .style("opacity", 0);
 
     this.infopanelbg = d3.select("body").append("div")
-        .attr("class","infopanelbg")
+        .attr("class","infopanelbg popup-bg")
         .on("click",function(){bh.hideInfopanel();});
     this.infopanelouter = d3.select("body").append("div")
-        .attr("class","infopanelouter").attr("id","infopanel-outer")
+        .attr("class","infopanelouter pop-outer").attr("id","infopanel-outer")
         .style("top",0.5*this.bubHeight);
     this.infopanel = this.infopanelouter.append("div")
             .attr("class","infopanel");
-    this.infopanelouter.append("div").attr("class","infoclose")
+    this.infopanelouter.append("div").attr("class","infoclose popup-close")
         .html("<img src='img/close.png' title='"+this.tl("%text.gen.close%")+"'>")
         .on("click",function(){bh.hideInfopanel();});
     //replace footer text for language
@@ -898,7 +898,7 @@ BHBubble.prototype.addHelp = function(){
     this.helpouter = d3.select('#help-outer');
     this.helpinner = d3.select('#help-inner');
     // add click actions
-    helpicon = document.getElementById('help-icon')
+    helpicon = document.getElementById('help-icon');
     helpicon.addEventListener("click",function(){bh.showHelp();})
     helpicon.addEventListener("mouseover",function(e){
             bh.showControlTooltip(e,"%text.gen.help%");})
@@ -912,7 +912,7 @@ BHBubble.prototype.addHelp = function(){
         .on("click",function(){bh.hideHelp();});
     // build help text
     this.helpinner.append("div")
-        .attr("class","help-title reloadable")
+        .attr("class","panel-title reloadable")
         .html(this.tl("%text.bub.mergers%"));
     for (cont in this.anim){
         helpcont=this.helpinner.append("div")
@@ -939,6 +939,23 @@ BHBubble.prototype.addHelp = function(){
             .attr("class","help-text")
             .html(this.scales[cont].tt);
     }
+}
+BHBubble.prototype.addShare = function(){
+    // add click actions
+    var bh=this;
+    shareicon = document.getElementById('share-icon');
+    console.log('addShare')
+    shareicon.addEventListener("click",function(){bh.showShare();})
+    shareicon.addEventListener("mouseover",function(e){
+            bh.showControlTooltip(e,"%text.gen.help%");})
+    shareicon.addEventListener("mouseout",function(e){
+            bh.hideControlTooltip();});
+    d3.select('#share-bg').on("click",function(){bh.hideShare();});
+    // d3.select('#share-outer').style("top","200%");
+    d3.selectAll("#share-close")
+        .html("<img src='img/close.png' title='"+this.tl("%text.gen.close%")+"'>")
+        .on("click",function(){bh.hideShare();});
+
 }
 BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
     // set Label fontsize for control panel
@@ -1360,6 +1377,40 @@ BHBubble.prototype.hideHelp = function(d) {
     this.helpbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
 }
+BHBubble.prototype.showShare = function(){
+    // fade in semi-transparent background layer (greys out image)
+    var bh=this;
+    d3.select('#share-bg').transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    d3.select('#share-bg').style("height","100%");
+    //fade in share panel
+    d3.select('#share-outer').transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of share panel
+    d3.select('#share-outer').style("left", "25%").style("top", "25%")
+       .style("width","50%");
+    d3.select("#twitter-share-button")
+        .attr("href",
+            bh.tl("https://twitter.com/intent/tweet?text=%share.bub.twitter.text%&url=")+
+                bh.url.replace("file:///Users/chrisnorth/Cardiff/GravWaves/Outreach/","http%3A%2F%2Fchrisnorth.github.io/").replace(/:/g,'%3A').replace(/\//g,'%2F')+
+                bh.tl("&hashtags=%share.bub.twitter.hashtag%"));
+
+}
+BHBubble.prototype.hideShare = function(d) {
+    // fade out infopanel
+    d3.select('#share-outer').transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    d3.select('#share-outer').style("top","200%");
+    // fade out semi-transparent background
+    d3.select('#share-bg').transition()
+      .duration(500)
+      .style("opacity",0);
+    d3.select('#share-bg').style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
+}
 BHBubble.prototype.makeDownload = function(){
     //make SVG download button
     d3.select("#generate")
@@ -1400,6 +1451,7 @@ BHBubble.prototype.replot = function(valueCol){
 BHBubble.prototype.makePlot = function(){
     this.init();
     this.addHelp();
+    this.addShare();
     this.addLang();
     this.scalePage();
     this.makeSvg();

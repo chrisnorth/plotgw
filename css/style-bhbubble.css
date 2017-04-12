@@ -11,20 +11,18 @@ a{
 .cc_banner{
     text-align:center
 }
-#hdr.bottom{
+#hdr{
     width:100%;
-    text-align:center;
-    max-height:5%;
     color:#fff;
+    background-color: rgba (0,0,0,0.5);
+    text-align:center;
+}
+#hdr.bottom, #control-bar.bottom{
+    max-height:5%;
     position:fixed;
-    background-color: rgba(0,0,0,0.5)
 }
 #hdr.right{
-    width:100%;
-    text-align:center;
     height:5%;
-    color:#fff;
-    background-color: rgba(0,0,0,0.5);
     display:block;
     position:relative;
 }
@@ -32,7 +30,19 @@ a{
     margin-bottom:0;
     font-size:22px;
 }
-#hdr .button {
+#control-bar{
+    width:100%;
+    text-align:right;
+    color:#fff;
+    position:fixed;
+    top:0;
+    margin:0 auto;
+}
+#control-bar.right{
+    height:5%;
+    display:block;
+}
+#control-bar .button {
     float:right;
     right:0;
     margin-right:10px;
@@ -40,13 +50,13 @@ a{
     height:50%;
     width:auto;
 }
-#hdr .button img{
+#control-bar .button img{
     height:100%;
     float:right;
     width:auto;
     cursor: pointer;
 }
-#hdr .button .button-span{
+#control-bar .button .button-span{
     height:100%;
     float:right;
     width:auto;
@@ -339,7 +349,7 @@ input.down{
     text-align:left;
     padding-bottom:0px;
 }
-.infoclose, .helpclose{
+.popup-close{
     position:absolute;
     width:30px;
     height:30px;
@@ -347,11 +357,11 @@ input.down{
     top:-10px;
     cursor:pointer;
 }
-.infoclose img, .helpclose img{
+.popup-close img{
     width:100%;
     cursor:pointer;
 }
-#help-bg{
+.popup-bg{
     position:fixed;
     width:100%;
     height:0;
@@ -360,7 +370,7 @@ input.down{
     background-color: #888;
     opacity:0;
 }
-#help-outer{
+.popup-outer{
     position: fixed;
     width: 200px;
     height: auto;
@@ -370,13 +380,13 @@ input.down{
     padding:5px;
     opacity:0;
 }
-#help-inner{
+.popup-inner{
     width:100%;
     height:auto;
     padding-bottom:10px;
     background-color:#000;
 }
-.help-title{
+.popup-title{
     width:100%;
     text-align:center;
     font-size:2em;
@@ -405,6 +415,12 @@ input.down{
 .help-text{
     color:#fff;
     font-size:1.2em;
+}
+#share-inner{
+    text-align:left;
+}
+.share-icon{
+    height:50px;
 }
 @media (max-width: 500px){
     .tooltip span.name{

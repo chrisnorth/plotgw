@@ -69,6 +69,8 @@
  "text.plotgw.lang.text": "Chose your language from the options below",
  "share.plotgw.twitter.text": "Look at this Binary Black Hole catalogue of @LIGO observations",
  "share.plotgw.twitter.hashtag": "GravitationalWaves",
+ "share.bub.twitter.text": "Look at this Black Hole Bubble Plot showing the  @LIGO observations",
+ "share.bub.twitter.hashtag": "GravitationalWaves",
  "tooltip.plotgw.losc": "LIGO Open Science Center",
  "tooltip.plotgw.switchunits": "Switch units",
  "tooltip.plotgw.toggleerrors": "Toggle Errors",
