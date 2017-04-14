@@ -2,6 +2,7 @@
 function GWCatalogue(inp){
     // set initial axes
     // this.init()
+    var gw=this;
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     console.log('creating plot in #'+this.holderid)
     if ((inp)&&(inp.clearhtml)){
@@ -14,7 +15,7 @@ function GWCatalogue(inp){
     this.drawGraphInit();
     if(this.debug){console.log('plotted');}
     window.addEventListener("resize",function(){
-        this.replot();
+        gw.replot();
     });
     return this;
 }
