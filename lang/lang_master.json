@@ -61,6 +61,7 @@
     "text.gen.close":{"_title":"Close","_text":"Text for close buttons","_type":"string"},
     "text.gen.help":{"_title":"Help","_text":"Text for 'Help' buttons/menus","_type":"string"},
     "text.gen.lang":{"_title":"Change Language","_text":"Text for 'Change Language' buttons/menus","_type":"string"},
+    "text.gen.share":{"_title":"Share","_text":"Text for 'Share' buttons/menus","_type":"string"},
 
     "section.plotgw.text":{"_title":"Text shown on catalogue plot"},
     "text.plotgw.legend.detections":{"_title":"Detections","_text":"Shown in graph legend","_type":"string"},
