@@ -837,8 +837,10 @@ BHBubble.prototype.addLang = function(){
     this.langdiv = d3.select("#lang-button");
     this.langlab = d3.select("#lang-label");
     this.langlab.html(bh.langs[bh.lang].code);
-    this.langdiv.on("click",function(){bh.toggleLangList();});
-    this.langlist=document.getElementById("lang-list")
+    this.langdiv.on("click",function(){bh.showLang();});
+    // this.langlist=document.getElementById("lang-list")
+    this.langblock=document.getElementById("lang-block");
+    d3.select("#lang-title").html(bh.tl("%text.gen.lang%"));
     for(lang in this.langs){
         langspan=document.createElement("span");
         var langtxt="";
@@ -857,7 +859,8 @@ BHBubble.prototype.addLang = function(){
             bh.loadLang(bh.newlang);
             // window.location.href = bh.makeUrl({lang:this.getAttribute("id")});
         })
-        bh.langlist.appendChild(langspan);
+        // bh.langlist.appendChild(langspan);
+        bh.langblock.appendChild(langspan);
     }
     document.getElementById("lang-label").addEventListener("mouseover",function(e){
         bh.showControlTooltip(e,bh.tl("%text.gen.lang%"));
@@ -871,7 +874,10 @@ BHBubble.prototype.addLang = function(){
     document.getElementById("lang-icon").addEventListener("mouseout",function(){
         bh.hideControlTooltip();
     });
-
+    d3.selectAll("#lang-close")
+        .on("click",function(){bh.hideLang();});
+    d3.select("#lang-close > img").attr("title",this.tl("%text.gen.close%"));
+    d3.select("#lang-bg").on("click",function(){bh.hideLang();});
 }
 BHBubble.prototype.toggleLangList = function(){
     $("#lang-button").toggleClass("show");
@@ -908,11 +914,11 @@ BHBubble.prototype.addHelp = function(){
     this.helpouter
         .style("top","200%");
     d3.selectAll("#help-close")
-        .html("<img src='img/close.png' title='"+this.tl("%text.gen.close%")+"'>")
         .on("click",function(){bh.hideHelp();});
+    d3.select("#help-close > img").attr("title",this.tl("%text.gen.close%"));
     // build help text
     this.helpinner.append("div")
-        .attr("class","panel-title reloadable")
+        .attr("class","popup-title reloadable")
         .html(this.tl("%text.bub.mergers%"));
     for (cont in this.anim){
         helpcont=this.helpinner.append("div")
@@ -926,7 +932,7 @@ BHBubble.prototype.addHelp = function(){
             .html(this.anim[cont].tt);
     }
     this.helpinner.append("div")
-        .attr("class","help-title reloadable")
+        .attr("class","popup-title reloadable")
         .html(this.tl("%text.bub.scale%"));
     for (cont in this.scales){
         helpcont=this.helpinner.append("div")
@@ -953,8 +959,10 @@ BHBubble.prototype.addShare = function(){
     d3.select('#share-bg').on("click",function(){bh.hideShare();});
     // d3.select('#share-outer').style("top","200%");
     d3.selectAll("#share-close")
-        .html("<img src='img/close.png' title='"+this.tl("%text.gen.close%")+"'>")
+        // .html("<img src='img/close.png' title='"+this.tl("%text.gen.close%")+"'>")
         .on("click",function(){bh.hideShare();});
+    d3.select("#share-close > img").attr("title",bh.tl("%text.gen.close%"));
+    d3.select("#share-title").html(bh.tl("%text.gen.share%"))
 
 }
 BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
@@ -1361,7 +1369,7 @@ BHBubble.prototype.showHelp = function(){
     // set contents and position of infopanel
     // this.infopanel.html(this.iptext(d));
     this.helpouter.style("left", "25%").style("top", "25%")
-       .style("width","50%").style("height","50%");
+       .style("width","50%");
 
 }
 BHBubble.prototype.hideHelp = function(d) {
@@ -1389,8 +1397,9 @@ BHBubble.prototype.showShare = function(){
        .duration(500)
        .style("opacity",1);
     // set contents and position of share panel
-    d3.select('#share-outer').style("left", "25%").style("top", "25%")
-       .style("width","50%");
+    d3.select('#share-outer')
+        .style("left", (bh.pgWidth - document.getElementById('share-outer').offsetWidth)/2.)
+        .style("top", (bh.pgHeight - document.getElementById('share-outer').offsetHeight)/3.);
     d3.select("#twitter-share-button")
         .attr("href",
             bh.tl("https://twitter.com/intent/tweet?text=%share.bub.twitter.text%&url=")+
@@ -1409,7 +1418,35 @@ BHBubble.prototype.hideShare = function(d) {
       .duration(500)
       .style("opacity",0);
     d3.select('#share-bg').style("height",0);
-    // d3.selectAll(".info").attr("opacity",0);
+}
+BHBubble.prototype.showLang = function(){
+    // fade in semi-transparent background layer (greys out image)
+    var bh=this;
+    d3.select('#lang-bg').transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    d3.select('#lang-bg').style("height","100%");
+    //fade in share panel
+    d3.select('#lang-outer').transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of share panel
+    d3.select('#lang-outer')
+        .style("left", (bh.pgWidth - document.getElementById('lang-outer').offsetWidth)/2.)
+        .style("top", (bh.pgHeight - document.getElementById('lang-outer').offsetHeight)/3.);
+
+}
+BHBubble.prototype.hideLang = function(d) {
+    // fade out infopanel
+    d3.select('#lang-outer').transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    d3.select('#lang-outer').style("top","200%");
+    // fade out semi-transparent background
+    d3.select('#lang-bg').transition()
+      .duration(500)
+      .style("opacity",0);
+    d3.select('#lang-bg').style("height",0);
 }
 BHBubble.prototype.makeDownload = function(){
     //make SVG download button
