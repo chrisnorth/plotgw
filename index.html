@@ -11,23 +11,14 @@
     <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
     <!-- Analytics code -->
     <script type="text/javascript" src="js/analytics.js"></script>
+    <script type="text/javascript" src="js/plotgw-d3.js"></script>
 </head>
 <body>
-    <div id="hdr">
-        <h1 id="page-title">LIGO Compact Binary Catalogue</h1>
-    </div>
-    <div id="full">
+    <div id="plotgw-cont" class="plotgw-container">
+        <div id="hdr">
+            <h1 id="page-title">LIGO Compact Binary Catalogue</h1>
+        </div>
         <div id="graphcontainer">
-            <!-- <div id="options">
-                <div id="xoptions">
-                     X axis:
-                     Buttons will be inserted bere
-                </div>
-                <div id="yoptions">
-                    Y axis:
-                     Buttons will be inserted bere
-                </div>
-            </div> -->
         </div>
         <div id="infoouter">
             <div id="sketchcontainer"></div>
@@ -84,25 +75,18 @@
         </div>
         <div id="lang-outer" class="panel-outer">
             <div id="lang-title" class="panel-title"></div>
-            <!-- <div class="panel-block" id="lang-block-text">
-                <div class="panel-text" id="lang-text"></div>
-            </div> -->
-            <div class="panel-block" id="lang-block-icons">
+            <div class="panel-block panel-block-full" id="lang-block-icons">
                 <div class="panel-text" id="lang-text"></div>
             </div>
             <div id="lang-close" class="panel-close">
                 <img src="img/close.png" title="close">
             </div>
-            <div class="panel-block" id="lang-block-credit">
+            <div class="panel-block panel-block-full" id="lang-block-credit">
                 <div class="panel-text" id="lang-credit"></div>
             </div>
         </div>
         <div class="popup-bg" id="share-bg"></div>
         <div class="popup-outer" id="share-outer">
-            <!-- <div class="popup-title" id="share-title"></div>
-            <div class="popup-block" id="share-block-text">
-                <div class="popup-text" id="lang-text"></div>
-            </div> -->
             <div class="popup-block" id="share-block-icons">
                 <a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
             </div>
@@ -112,6 +96,8 @@
         </div>
         <div class="tooltip" id="tooltipSk"></div>
     </div>
-    <script type="text/javascript" src="js/plotgw-d3.js"></script>
+    <script type="text/javascript">
+    var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':true})
+    </script>
 </body>
 </html>

@@ -1,10 +1,116 @@
 // Define GWCatalogue class
-function GWCatalogue(){
+function GWCatalogue(inp){
     // set initial axes
     // this.init()
+    this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
+    console.log('creating plot in #'+this.holderid)
+    if ((inp)&&(inp.clearhtml)){
+        console.log('clearing current html')
+        d3.select('#'+this.holderid).html()
+    }
+    this.getUrlVars();
+    this.init();
+    if(this.debug){console.log('initialised');}
+    this.drawGraphInit();
+    if(this.debug){console.log('plotted');}
+    window.addEventListener("resize",function(){
+        this.replot();
+    });
     return this;
 }
 GWCatalogue.prototype.init = function(){
+    // created HTML of not included
+    if (d3.select("#hdr").empty()){
+        console.log('adding hdr')
+        d3.select("#"+this.holderid).insert("div",":first-child")
+            .attr("id","hdr")
+            .html('<h1 id="page-title"></h1>')
+    }
+    if (d3.select("#graphcontainer").empty()){
+        console.log('adding graphcontainer')
+        d3.select("#"+this.holderid).insert("div","#hdr + *")
+            .attr("id","graphcontainer")
+    }
+    if (d3.select("#infoouter").empty()){
+        console.log('adding infoouter')
+        d3.select("#"+this.holderid).insert("div","#graphcontainer + *")
+            .attr("id","infoouter")
+            .html('<div id="sketchcontainer"></div><div id="labcontainer"></div>')
+    }
+    if (d3.select("#options-outer").empty()){
+        console.log('adding options-outer')
+        d3.select("#"+this.holderid).insert("div","#infoouter + *")
+            .attr("id","options-outer").attr("class","panel-outer")
+            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="options-close" class="panel-close"><img src="img/close.png" title="close"></div></div>')
+    }
+    if (d3.select("#help-outer").empty()){
+        console.log('adding help-outer')
+        d3.select('#'+this.holderid).insert("div","#options-outer + *")
+            .attr("id","help-outer").attr("class","panel-outer")
+        d3.select("#help-outer").append("div")
+            .attr("id","help-title").attr("class","panel-title")
+        d3.select("#help-outer").append("div")
+            .attr("id","help-block-text").attr("class","panel-text")
+            .html('<div class="panel-text" id="help-text"></div><div class="panel-text" id="help-about"></div>')
+        d3.select("#help-outer").append("div")
+            .attr("id","help-block-icons").attr("class","panel-block")
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-help-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/help.svg"><div class="panel-cont-text" id="help-help-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-info-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/info.svg"><div class="panel-cont-text" id="help-info-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-settings-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/settings.svg"><div class="panel-cont-text" id="help-settings-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-lang-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/lang.svg"><div class="panel-cont-text" id="help-lang-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-errors-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/errors.svg"><div class="panel-cont-text" id="help-errors-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-share-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
+        d3.select("#help-outer").append("div")
+            .attr("id","help-close").attr("class","panel-close")
+            .html('<img src="img/close.png" title="close">')
+    }
+    if (d3.select('#lang-outer').empty()){
+        console.log('adding lang-outer')
+        d3.select('#'+this.holderid).insert("div","#help-outer + *")
+            .attr("id","lang-outer").attr("class","panel-outer")
+        d3.select("#lang-outer").append("div")
+            .attr("id","lang-title").attr("class","panel-title")
+        d3.select("#lang-outer").append("div")
+            .attr("id","lang-block-icons").attr("class","panel-block panel-block-full")
+        d3.select("#lang-outer").append("div")
+            .attr("id","lang-block-credit").attr("class","panel-block panel-block-full")
+        d3.select("#lang-outer").append("div")
+            .attr("id","lang-close").attr("class","panel-close")
+            .html('<img src="img/close.png" title="close">')
+    }
+    if (d3.select('#share-bg').empty()){
+        console.log('adding share-bg')
+        d3.select('#'+this.holderid).insert("div","#lang-outer + *")
+            .attr("id","share-bg").attr("class","popup-bg")
+    }
+    if (d3.select('#share-outer').empty()){
+        console.log('adding share-outer')
+        d3.select('#'+this.holderid).insert("div","#share-bg + *")
+            .attr("id","share-outer").attr("class","popup-outer")
+        d3.select('#share-outer').append("div")
+            .attr("id","share-block-icons").attr("class","popup-block")
+            .html('<a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>')
+        d3.select('#share-outer').append("div")
+            .attr("id","share-close").attr("class","popup-close")
+            .html('<img src="img/close.png" title="close">')
+    }
+    if (d3.select('#tooltip').empty()){
+        console.log('adding tooltip')
+        d3.select('#'+this.holderid).insert("div","#share-outer + *")
+            .attr("id","tooltipSk").attr("class","tooltip")
+    }
     //initialyse common values
     this.flySp=1000;
     this.defaults = {
@@ -409,8 +515,8 @@ GWCatalogue.prototype.getIcon = function(col){
 
 GWCatalogue.prototype.scaleWindow = function(){
     //set window scales (protrait/landscape etc.)
-    this.winFullWidth=document.getElementById("full").offsetWidth;
-    this.winFullHeight=document.getElementById("full").offsetHeight;
+    this.winFullWidth=document.getElementById(this.holderid).offsetWidth;
+    this.winFullHeight=document.getElementById(this.holderid).offsetHeight;
     this.winAspect = this.winFullWidth/this.winFullHeight;
     // console.log(this.winFullWidth,this.winFullHeight,this.winAspect);
 
@@ -485,8 +591,8 @@ GWCatalogue.prototype.setScales = function(){
     this.scaleWindow();
     var gw=this;
     //set scale factor(s)
-    this.xsc = Math.min(1.0,window.innerWidth/1400.)
-    this.ysc = Math.min(1.0,window.innerHeight/900.)
+    this.xsc = Math.min(1.0,document.getElementById(this.holderid).offsetWidth/1400.)
+    this.ysc = Math.min(1.0,document.getElementById(this.holderid).offsetHeight/900.)
     this.scl = Math.min(this.xsc,this.ysc)
     //sketch scale
     if (this.winAspect<1){
@@ -642,6 +748,45 @@ GWCatalogue.prototype.setScales = function(){
     //text for black labels
     this.labBlank="--";
 }
+GWCatalogue.prototype.adjCss = function(){
+    // adjust css of some elements
+    // duplicates content of @media in css file
+    console.log('this.winFullWidth:',this.winFullWidth)
+    css={};
+    if(this.winFullWidth < 1200){
+        css[".panel-title.landscape"]={"font-size":"2.5em"},
+        css[".panel-text.landscape"]={"font-size":"1.0em"},
+        css[".panel-cont-text.landscape"]={"font-size":"1.0em"}
+    }
+    if (this.winFullWidth < 1000){
+        css[".panel-title.landscape"]={"font-size":"2.0em"}
+        css[".panel-text.landscape"]={"font-size":"1.0em"}
+        css[".panel-cont-text.landscape"]={"font-size":"1.0em"}
+        css[".panel-text.potrait"]={"font-size":"0.8em"},
+        css[".panel-cont-text.potrait"]={"font-size":"0.8em"}
+    }
+    if (this.winFullWidth < 750){
+        css[".panel-title.landscape"]={"font-size":"1.5em"}
+        css[".panel-title.portrait"]={"font-size":"2.0em"}
+        css[".panel-text.portrait"]={"font-size":"0.8em"}
+        css[".panel-cont-text.portrait"]={"font-size":"0.8em"}
+    }
+    if (this.winFullWidth < 550){
+        css[".panel-title.landscape"]={"font-size":"1.2em"}
+        css[".panel-title.portrait"]={"font-size":"1.5em"}
+    }
+    if (this.winFullWidth < 350){
+        css[".panel-title.landscape"]={"font-size":"1.0em"}
+        css[".panel-title.portrait"]={"font-size":"1.2em"}
+    }
+    console.log('new css:',css)
+    if (css){
+        for (k in css){
+            console.log(k,d3.selectAll(k),css[k])
+                d3.selectAll(k).style(css[k])
+        }
+    }
+}
 GWCatalogue.prototype.drawSketch = function(){
     // Create sketch panel
     // Add svg to sketch container
@@ -729,14 +874,14 @@ GWCatalogue.prototype.drawSketch = function(){
     this.sketchTitle = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.1))
-        .attr("class","sketch-title")
+        .attr("class","sketch-title panel-title")
         .attr("text-anchor","middle")
         .style("font-size",fs+"em")
         .html(this.tl("%text.plotgw.information.title%"));
     this.sketchTitleHint = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.2))
-        .attr("class","sketch-subtitle")
+        .attr("class","sketch-subtitle pabel-subtitle")
         .attr("text-anchor","middle")
         .style("font-size",(0.75*fs)+"em")
         .html(this.tl("%text.plotgw.information.subtitle%"));
@@ -1090,7 +1235,7 @@ GWCatalogue.prototype.makeGraph = function(){
 
     // add the tooltip area to the webpage
     if (!this.redraw){
-        this.tooltip = d3.select("div#full").append("div")
+        this.tooltip = d3.select("#"+this.holderid).append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
     }
@@ -2447,6 +2592,7 @@ GWCatalogue.prototype.makePlot = function(){
     this.addLang(false);
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
+    this.adjCss();
     // if (this.optionsOn){
     //     // console.log('showing options')
     //     this.showOptions();
@@ -2471,6 +2617,7 @@ GWCatalogue.prototype.replot = function(){
     this.drawGraph();
     this.drawSketch();
     this.addHelp();
+    this.adjCss();
     // this.redrawLabels();
     this.setPanel(this.getPanel());
     // if (this.optionsOn){this.showOptions();}
@@ -2489,13 +2636,3 @@ GWCatalogue.prototype.replot = function(){
 // define fly-in & fly-out
 
 //labels to add and keep updated
-var gwcat = new GWCatalogue
-gwcat.getUrlVars();
-gwcat.init();
-if(this.debug){console.log('initialised');}
-gwcat.drawGraphInit();
-if(this.debug){console.log('plotted');}
-window.addEventListener("resize",function(){
-    gwcat.replot();
-
-});
