@@ -1,9 +1,24 @@
-// var diameter = Math.min(document.getElementById("bubble-container").offsetWidth,document.getElementById("bubble-container").offsetHeight);
+// var diameter = Math.min(document.getElementById("svg-container").offsetWidth,document.getElementById("svg-container").offsetHeight);
 // // document.getElementById("hdr").setAttribute("width",diameter);
-// document.getElementById("bubble-container").setAttribute("width",diameter);
+// document.getElementById("svg-container").setAttribute("width",diameter);
 // console.log(document.getElementById("hdr"));
 
-function BHBubble(){
+function BHBubble(inp){
+    var bh=this;
+    this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "bubble-cont";
+    // parse URL queries
+    this.getUrlVars();
+    // load language
+    this.langdir='lang/';
+    this.defaults = {"lang":"en"}
+    this.nameCols = {"or":"name-or-unicode"}
+    this.loadLang(this.urlVars.lang);
+    // bub.makePlot();
+    // NB: "loadLang" calls makePlot function on first load
+
+    window.addEventListener("resize",function(){
+        bh.replot();
+    });
     return this;
 }
 BHBubble.prototype.getUrlVars = function(){
@@ -241,14 +256,14 @@ BHBubble.prototype.makeSvg = function(){
 }
 BHBubble.prototype.scalePage = function(){
     // Set scale of elements given page size
-    this.pgWidth=window.outerWidth;
-    this.pgHeight=window.outerHeight;
+    this.pgWidth=document.getElementById(this.holderid).offsetWidth;
+    this.pgHeight=document.getElementById(this.holderid).offsetHeight;
     this.pgAspect = this.pgWidth/this.pgHeight;
     if (this.pgAspect>1){this.controlLoc='right'}else{this.controlLoc='bottom'}
     //apply classes accordingly
     footer = document.getElementById("footer");
     this.full = document.getElementById("full");
-    this.bubcont = document.getElementById("bubble-container");
+    this.bubcont = document.getElementById("svg-container");
     if (this.controlLoc=='right'){
         footer.classList.add("right");
         footer.classList.remove("bottom");
@@ -257,7 +272,7 @@ BHBubble.prototype.scalePage = function(){
         // bubcont.style.height = this.svgSize+"px";
         this.full.classList.add("right");
         this.full.classList.remove("bottom");
-        // full.style.height = this.svgSize+"px";
+        // this.holder.style.height = this.svgSize+"px";
     }else{
         footer.classList.add("bottom");
         footer.classList.remove("right");
@@ -266,16 +281,17 @@ BHBubble.prototype.scalePage = function(){
         // bubcont.style.height = this.pgWidth+"px";
         this.full.classList.add("bottom");
         this.full.classList.remove("right");
+        this.full.style.eidth = this.pgWidth+"px";
         // bubcont.style.height = this.pgWidth+"px";
     }
     if (this.controlLoc=='right'){
-        // document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        // this.full.setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         this.bubWidth = this.bubHeight;
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }else{
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
-        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
+        this.bubWidth = document.getElementById("svg-container").offsetWidth;
         // console.log(this.bubWidth,this.bubHeight)
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }
@@ -739,7 +755,7 @@ BHBubble.prototype.getOpacity = function(d){
 }
 BHBubble.prototype.drawBubbles = function(){
     // Add bubbles and legend
-    this.svg = d3.select("div#bubble-container")
+    this.svg = d3.select("div#svg-container")
         .append("svg").attr("class", "bubble")
         .attr("width", this.svgSize).attr("height", this.svgSize);
 
@@ -993,7 +1009,7 @@ BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
 BHBubble.prototype.addButtons = function(width){
     // Add control buttons
     var bh=this;
-    full = document.getElementById('full');
+    full = document.getElementById("full");
     if (this.controlLoc == 'right'){
         this.divcont = document.createElement('div');
         this.divcont.setAttribute("id","controls");
@@ -1140,13 +1156,13 @@ BHBubble.prototype.addButtons = function(width){
     //
     if (this.controlLoc=='right'){
         this.contWidth = document.getElementById("controls").offsetWidth;
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         this.bubWidth = this.bubHeight;
         document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth+30)+"px");
     }else{
-        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+        this.bubWidth = document.getElementById("svg-container").offsetWidth;
         this.contWidth = document.getElementById("controls").offsetWidth;
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         document.getElementById("full").setAttribute("style","width:100%");
     }
 }
@@ -1446,18 +1462,3 @@ BHBubble.prototype.makePlot = function(){
     this.addTooltips();
 }
 
-// create BHBubble object
-bub = new BHBubble
-// parse URL queries
-bub.getUrlVars();
-// load language
-bub.langdir='lang/';
-bub.defaults = {"lang":"en"}
-bub.nameCols = {"or":"name-or-unicode"}
-bub.loadLang(bub.urlVars.lang);
-// bub.makePlot();
-// NB: "loadLang" calls makePlot function on first load
-
-window.addEventListener("resize",function(){
-    bub.replot();
-});

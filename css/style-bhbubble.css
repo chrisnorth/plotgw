@@ -4,9 +4,14 @@ body {
   margin:0;
   background-color:#000;
   text-align:center;
+  overflow:hidden;
 }
 a{
     color:#ff55ff;
+}
+.bubble-container{
+    width:100%;
+    height:100%;
 }
 .cc_banner{
     text-align:center
@@ -121,14 +126,14 @@ span#lang-arrow.show:after{
     position:relative;
     margin:0 auto;
 }
-#bubble-container.right{
+#svg-container.right{
     height:100%;
     width:auto;
     float:left;
     text-align:right;
     margin:0 auto;
 }
-#bubble-container.bottom{
+#svg-container.bottom{
     width:100%;
     height:85%;
     display:block;
