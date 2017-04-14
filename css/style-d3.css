@@ -7,8 +7,9 @@ body {
 .cc_banner{
     text-align:center
 }
-#full{
-    height:90%;
+.plotgw-container{
+    height:100%;
+    width:100%;
 }
 #hdr{
     width:100%;
@@ -304,6 +305,10 @@ button.down{
     padding-bottom:10px;
     float:left;
     margin-left:2%;
+    width:45%;
+}
+.panel-block.panel-block-full.bottom{
+    width:90%;
 }
 .panel-text{
     width:100%;
@@ -318,9 +323,6 @@ button.down{
     width:95%;
     padding-bottom:10px;
 }
-.panel-block.bottom .lang-cont{
-    width:45%;
-}
 .panel-cont-icon{
     border-radius:10%;
     border: 1px black solid;
@@ -332,8 +334,12 @@ button.down{
     cursor: pointer;
     font-size:150%;
 }
-.lang-cont{
+.panel-block .lang-cont{
     margin-bottom:10%;
+}
+.panel-block.bottom .lang-cont{
+    width:45%;
+    margin-bottom:5%;
 }
 .lang-cont .panel-cont-icon{
     padding-top:5%;
