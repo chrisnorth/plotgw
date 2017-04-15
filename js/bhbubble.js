@@ -75,7 +75,7 @@ BHBubble.prototype.loadLang = function(lang){
     //;load language files - then call rest of load procedure
     var _bh = this;
     if (this.urlVars.debug){console.log('lang',_bh.lang);}
-    var reload = (_bh.lang)="" ? true:false;
+    var reload = (!_bh.lang)||(_bh.lang=="") ? false:true;
     if (this.urlVars.debug){console.log('reload',reload);}
     _bh.langloaded=false;
     if (!lang){
@@ -102,8 +102,9 @@ BHBubble.prototype.loadLang = function(lang){
             }else if (_bh.langshort!=_bh.lang){
                 alert('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead');
                 if (_bh.urlVars.lang){
-                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.defaults.lang}));
+                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.langshort}));
                 }
+                _bh.lang=null;
                 _bh.loadLang(_bh.langshort);
             }else{
                 alert('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');
@@ -111,10 +112,9 @@ BHBubble.prototype.loadLang = function(lang){
                 if (_bh.urlVars.lang){
                     window.history.pushState({},null,_bh.makeUrl({'lang':_bh.defaults.lang}));
                 }
-                _bh.lang=null;
                 // window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 // gw.loaded-=1;
-                // gw.lang=null;
+                _bh.lang=null;
                 _bh.loadLang(_bh.defaults.lang);
                 // window.location.replace(_bh.makeUrl({'lang':_bh.defaults.lang}));
             }
