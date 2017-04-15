@@ -262,7 +262,18 @@ GWCatalogue.prototype.getBest = function(item){
 }
 GWCatalogue.prototype.stdlabel = function(d,src){
     var gw=this;
-    if (gw.columns[src].err){
+    if ((!d[src])&&(gw.debug)){
+        console.log("can't find '"+src+"' in event '"+d.name+"'");
+        return(this.labBlank);
+    }
+    if ((!d[src].best)&&(d[src].best!=0)&&(gw.debug)){
+        console.log("can't find 'best' value for '"+src+"' in event '"+d.name+"':");
+        return(gw.labBlank);
+    }
+    if ((gw.columns[src].err)&&(!d[src].err)){
+        console.log("can't find 'err' value for '"+src+"' in event '"+d.name+"'");
+    }
+    if ((gw.columns[src].err)&&(d[src].err)){
         if (gw.columns[src].err==2){
             txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
             '&ndash;'+
@@ -289,6 +300,14 @@ GWCatalogue.prototype.stdlabel = function(d,src){
 
 GWCatalogue.prototype.stdlabelNoErr = function(d,src){
     var gw=this;
+    if ((!d[src])&&(gw.debug)){
+        if (gw.debug){console.log("can't find datapoint '"+src+"' in event '"+d.name+"'");}
+        return(this.labBlank);
+    }
+    if ((!d[src].best)&&(d[src].best!=0)&&(gw.debug)){
+        console.log("can't find 'best' value for '"+src+"' in event '"+d.name+"'");
+        return(this.labBlank);
+    }
     if (typeof d[src].best=="number"){
         txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
     }else{
@@ -1071,17 +1090,20 @@ GWCatalogue.prototype.redrawLabels = function(){
         }
         if (this.d!=null){
             for (i in labs){
-                if (this.showerrors){
-                    labTxt += " "+this.d[labs[i]].str;
-                }else{
-                    labTxt += " "+this.d[labs[i]].strnoerr;
-                }
-                if (i<labs.length-1){
-                    labTxt += "<br>";
-                }
+                if (this.d[labs[i]]){
+                    if (this.showerrors){
+                        labTxt += " "+this.d[labs[i]].str;
+                    }else{
+                        labTxt += " "+this.d[labs[i]].strnoerr;
+                    }
+                    if (i<labs.length-1){
+                        labTxt += "<br>";
+                    }
+                }else if (gw.debug){console.log("can't find '"+labs[i]+"' in event '"+this.d.name+"'");}
             }
+            labTxt = (labTxt=='') ? gw.labBlank : labTxt;
             document.getElementById(lab+"txt").innerHTML = this.tl(labTxt);
-            console.log(this.lang,labTxt,this.tl(labTxt));
+            // console.log(this.lang,labTxt,this.tl(labTxt));
         }
     }
     masses=['M1','M2','Mfinal']
