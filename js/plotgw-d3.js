@@ -127,10 +127,11 @@ GWCatalogue.prototype.init = function(){
         yvar:"M2",
         panel:"info",
         lang:"en",
-        showerrors:true,
+        showerrors:true
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
+    this.showerrors = (this.urlVars.err) ? this.urlVars.err : this.defaults.showerrors;
     this.setStyles();
     this.sketchName="None";
     this.unitSwitch=false;
@@ -1407,14 +1408,18 @@ GWCatalogue.prototype.loadLang = function(lang){
                 console.log(error);
                 alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
             }else if (gw.langshort!=gw.lang){
-                alert('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');
+                if(gw.debug){console.log('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');}
                 if (gw.urlVars.lang){
+                    alert('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');
                     window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 }
                 window.location.replace(gw.makeUrl({'lang':gw.langshort}));
             }else{
-                alert('Error loading language '+gw.lang+'. Reverting to '+gw.defaults.lang+' as default');
-                console.log('error loading',gw.lang,error);
+                if(gw.debug){console.log('Error loading language '+gw.lang+'. Reverting to '+gw.defaults.lang+' as default');}
+                if (gw.urlVars.lang){
+                    alert('Error loading language '+gw.lang+'. Reverting to '+gw.defaults.lang+' as default');
+                }
+                // console.log('error loading',gw.lang,error);
                 // window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 // gw.loaded-=1;
                 // gw.lang=null;

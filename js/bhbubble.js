@@ -21,7 +21,7 @@ function BHBubble(inp){
 
     // set language from urlVars (if present)
     langIn = ((this.urlVars.lang)&&(typeof this.urlVars.lang=="string")) ? this.urlVars.lang : langIn
-
+    if (this.urlVars.debug){console.log('initial language: ',langIn)}
 
     this.loadLang(langIn);
     // bub.makePlot();
@@ -74,7 +74,7 @@ BHBubble.prototype.makeUrl = function(newKeys){
 BHBubble.prototype.loadLang = function(lang){
     //;load language files - then call rest of load procedure
     var _bh = this;
-    if (this.urlVars.debug){console.log('lang',_bh.lang);}
+    if (this.urlVars.debug){console.log('lang',lang);}
     var reload = (!_bh.lang)||(_bh.lang=="") ? false:true;
     if (this.urlVars.debug){console.log('reload',reload);}
     _bh.langloaded=false;
@@ -100,31 +100,36 @@ BHBubble.prototype.loadLang = function(lang){
                 console.log(error);
                 alert("Fatal error loading input file: '"+_bh.fileInLang+"'. Sorry!")
             }else if (_bh.langshort!=_bh.lang){
-                alert('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead');
+                if (_bh.urlVars.debug){console.log('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead')}
                 if (_bh.urlVars.lang){
+                    alert('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead');
                     window.history.pushState({},null,_bh.makeUrl({'lang':_bh.langshort}));
                 }
+                _bh.langold=_bh.lang
                 _bh.lang=null;
                 _bh.loadLang(_bh.langshort);
             }else{
-                alert('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');
-                if (_bh.urlVars.debug){console.log(data);}
+                if (_bh.urlVars.debug){console.log('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');}
                 if (_bh.urlVars.lang){
+                    alert('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');
                     window.history.pushState({},null,_bh.makeUrl({'lang':_bh.defaults.lang}));
                 }
                 // window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 // gw.loaded-=1;
+                _bh.langold=_bh.lang
                 _bh.lang=null;
                 _bh.loadLang(_bh.defaults.lang);
                 // window.location.replace(_bh.makeUrl({'lang':_bh.defaults.lang}));
             }
         }
-
-        if (_bh.urlVars.debug){console.log('success',data);}
+        if (!data){
+            if (_bh.urlVars.debug){console.log('tried loading: ',_bh.langold)}
+            return
+        }
+        if (_bh.urlVars.debug){console.log('successfully loaded: ',_bh.lang,data);}
         _bh.langdict=data;
         document.title=_bh.tl("%text.bub.page.title%");
         _bh.langloaded=true;
-        if (_bh.urlVars.debug){console.log('loaded: '+_bh.lang)}
         // update legend
         _bh.legenddescs = {
             1:_bh.tl("%text.bub.legend.candidate%"),
