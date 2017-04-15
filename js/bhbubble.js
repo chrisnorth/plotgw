@@ -12,7 +12,18 @@ function BHBubble(inp){
     this.langdir='lang/';
     this.defaults = {"lang":"en"}
     this.nameCols = {"or":"name-or-unicode"}
-    this.loadLang(this.urlVars.lang);
+
+    //set default language from browser
+    langIn = (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
+
+    //set lang from query (if present)
+    if((inp)&&(inp.lang)&&(typeof inp.lang=="string")) langIn = inp.lang;
+
+    // set language from urlVars (if present)
+    langIn = ((this.urlVars.lang)&&(typeof this.urlVars.lang=="string")) ? this.urlVars.lang : langIn
+
+
+    this.loadLang(langIn);
     // bub.makePlot();
     // NB: "loadLang" calls makePlot function on first load
 
@@ -39,9 +50,9 @@ BHBubble.prototype.getUrlVars = function(){
     this.urlVars = vars;
     this.url = url;
     //set default language
-    if(!this.urlVars.hasOwnProperty("lang")){
-        this.urlVars.lang="en";
-    }
+    // if(!this.urlVars.hasOwnProperty("lang")){
+    //     this.urlVars.lang="en";
+    // }
 }
 BHBubble.prototype.makeUrl = function(newKeys){
     // construct new URL with replacement queries if necessary
@@ -63,15 +74,16 @@ BHBubble.prototype.makeUrl = function(newKeys){
 BHBubble.prototype.loadLang = function(lang){
     //;load language files - then call rest of load procedure
     var _bh = this;
-    var reload = (_bh.lang) ? true:false;
+    if (this.urlVars.debug){console.log('lang',_bh.lang);}
+    var reload = (_bh.lang)="" ? true:false;
     if (this.urlVars.debug){console.log('reload',reload);}
-    _bh.lang = lang;
     _bh.langloaded=false;
     if (!lang){
         lang="en";
         if(_bh.urlVars.debug){console.log("default to",lang);}
-        _bh.lang = lang;
     }
+    _bh.lang = lang;
+    _bh.langshort = (_bh.lang.indexOf('-') > 0 ? _bh.lang.substring(0,_bh.lang.indexOf('-')) : _bh.lang.substring(0,2));
     _bh.fileInLang=this.langdir+'lang_'+_bh.lang+'.json';
     // console.log(url);
     // Bug fix for reading local JSON file in FF3
@@ -87,16 +99,24 @@ BHBubble.prototype.loadLang = function(lang){
             if (_bh.lang==_bh.defaults.lang){
                 console.log(error);
                 alert("Fatal error loading input file: '"+_bh.fileInLang+"'. Sorry!")
+            }else if (_bh.langshort!=_bh.lang){
+                alert('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead');
+                if (_bh.urlVars.lang){
+                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.defaults.lang}));
+                }
+                _bh.loadLang(_bh.langshort);
             }else{
                 alert('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');
                 if (_bh.urlVars.debug){console.log(data);}
-                window.history.pushState({},null,_bh.makeUrl({'lang':'en'}));
+                if (_bh.urlVars.lang){
+                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.defaults.lang}));
+                }
                 _bh.lang=null;
                 // window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 // gw.loaded-=1;
                 // gw.lang=null;
-                // gw.loadLang(gw.defaults.lang);
-                window.location.replace(_bh.makeUrl({'lang':_bh.defaults.lang}));
+                _bh.loadLang(_bh.defaults.lang);
+                // window.location.replace(_bh.makeUrl({'lang':_bh.defaults.lang}));
             }
         }
 
@@ -111,6 +131,8 @@ BHBubble.prototype.loadLang = function(lang){
             2:_bh.tl("%text.bub.legend.detection%"),
             3:_bh.tl("%text.bub.legend.xray%")};
         if (reload){
+            // replot
+            _bh.replot();
             // change language
             _bh.langlab.html(_bh.langs[_bh.lang].code);
             d3.select(".lang-item.current").classed("current",false);
@@ -122,8 +144,6 @@ BHBubble.prototype.loadLang = function(lang){
             footer.innerHTML = _bh.tl("%text.bub.footer%",footertxt);
             // update title
             d3.select('#hdr h1').html(_bh.tl("%text.bub.page.title%"));
-            // replot
-            _bh.replot();
         }
         else{_bh.makePlot();}
     })
