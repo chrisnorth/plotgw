@@ -1,9 +1,35 @@
-// var diameter = Math.min(document.getElementById("bubble-container").offsetWidth,document.getElementById("bubble-container").offsetHeight);
+// var diameter = Math.min(document.getElementById("svg-container").offsetWidth,document.getElementById("svg-container").offsetHeight);
 // // document.getElementById("hdr").setAttribute("width",diameter);
-// document.getElementById("bubble-container").setAttribute("width",diameter);
+// document.getElementById("svg-container").setAttribute("width",diameter);
 // console.log(document.getElementById("hdr"));
 
-function BHBubble(){
+function BHBubble(inp){
+    var bh=this;
+    this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "bubble-cont";
+    // parse URL queries
+    this.getUrlVars();
+    // load language
+    this.langdir='lang/';
+    this.defaults = {"lang":"en"}
+    this.nameCols = {"or":"name-or-unicode"}
+
+    //set default language from browser
+    langIn = (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
+
+    //set lang from query (if present)
+    if((inp)&&(inp.lang)&&(typeof inp.lang=="string")) langIn = inp.lang;
+
+    // set language from urlVars (if present)
+    langIn = ((this.urlVars.lang)&&(typeof this.urlVars.lang=="string")) ? this.urlVars.lang : langIn
+    if (this.urlVars.debug){console.log('initial language: ',langIn)}
+
+    this.loadLang(langIn);
+    // bub.makePlot();
+    // NB: "loadLang" calls makePlot function on first load
+
+    window.addEventListener("resize",function(){
+        bh.replot();
+    });
     return this;
 }
 BHBubble.prototype.getUrlVars = function(){
@@ -24,9 +50,9 @@ BHBubble.prototype.getUrlVars = function(){
     this.urlVars = vars;
     this.url = url;
     //set default language
-    if(!this.urlVars.hasOwnProperty("lang")){
-        this.urlVars.lang="en";
-    }
+    // if(!this.urlVars.hasOwnProperty("lang")){
+    //     this.urlVars.lang="en";
+    // }
 }
 BHBubble.prototype.makeUrl = function(newKeys){
     // construct new URL with replacement queries if necessary
@@ -48,15 +74,16 @@ BHBubble.prototype.makeUrl = function(newKeys){
 BHBubble.prototype.loadLang = function(lang){
     //;load language files - then call rest of load procedure
     var _bh = this;
-    var reload = (_bh.lang) ? true:false;
+    if (this.urlVars.debug){console.log('lang',lang);}
+    var reload = (!_bh.lang)||(_bh.lang=="") ? false:true;
     if (this.urlVars.debug){console.log('reload',reload);}
-    _bh.lang = lang;
     _bh.langloaded=false;
     if (!lang){
         lang="en";
         if(_bh.urlVars.debug){console.log("default to",lang);}
-        _bh.lang = lang;
     }
+    _bh.lang = lang;
+    _bh.langshort = (_bh.lang.indexOf('-') > 0 ? _bh.lang.substring(0,_bh.lang.indexOf('-')) : _bh.lang.substring(0,2));
     _bh.fileInLang=this.langdir+'lang_'+_bh.lang+'.json';
     // console.log(url);
     // Bug fix for reading local JSON file in FF3
@@ -72,30 +99,45 @@ BHBubble.prototype.loadLang = function(lang){
             if (_bh.lang==_bh.defaults.lang){
                 console.log(error);
                 alert("Fatal error loading input file: '"+_bh.fileInLang+"'. Sorry!")
-            }else{
-                alert('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');
-                if (_bh.urlVars.debug){console.log(data);}
-                window.history.pushState({},null,_bh.makeUrl({'lang':'en'}));
+            }else if (_bh.langshort!=_bh.lang){
+                if (_bh.urlVars.debug){console.log('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead')}
+                if (_bh.urlVars.lang){
+                    alert('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead');
+                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.langshort}));
+                }
+                _bh.langold=_bh.lang
                 _bh.lang=null;
+                _bh.loadLang(_bh.langshort);
+            }else{
+                if (_bh.urlVars.debug){console.log('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');}
+                if (_bh.urlVars.lang){
+                    alert('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');
+                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.defaults.lang}));
+                }
                 // window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 // gw.loaded-=1;
-                // gw.lang=null;
-                // gw.loadLang(gw.defaults.lang);
-                window.location.replace(_bh.makeUrl({'lang':_bh.defaults.lang}));
+                _bh.langold=_bh.lang
+                _bh.lang=null;
+                _bh.loadLang(_bh.defaults.lang);
+                // window.location.replace(_bh.makeUrl({'lang':_bh.defaults.lang}));
             }
         }
-
-        if (_bh.urlVars.debug){console.log('success',data);}
+        if (!data){
+            if (_bh.urlVars.debug){console.log('tried loading: ',_bh.langold)}
+            return
+        }
+        if (_bh.urlVars.debug){console.log('successfully loaded: ',_bh.lang,data);}
         _bh.langdict=data;
         document.title=_bh.tl("%text.bub.page.title%");
         _bh.langloaded=true;
-        if (_bh.urlVars.debug){console.log('loaded: '+_bh.lang)}
         // update legend
         _bh.legenddescs = {
             1:_bh.tl("%text.bub.legend.candidate%"),
             2:_bh.tl("%text.bub.legend.detection%"),
             3:_bh.tl("%text.bub.legend.xray%")};
         if (reload){
+            // replot
+            _bh.replot();
             // change language
             _bh.langlab.html(_bh.langs[_bh.lang].code);
             d3.select(".lang-item.current").classed("current",false);
@@ -107,8 +149,6 @@ BHBubble.prototype.loadLang = function(lang){
             footer.innerHTML = _bh.tl("%text.bub.footer%",footertxt);
             // update title
             d3.select('#hdr h1').html(_bh.tl("%text.bub.page.title%"));
-            // replot
-            _bh.replot();
         }
         else{_bh.makePlot();}
     })
@@ -241,14 +281,14 @@ BHBubble.prototype.makeSvg = function(){
 }
 BHBubble.prototype.scalePage = function(){
     // Set scale of elements given page size
-    this.pgWidth=window.outerWidth;
-    this.pgHeight=window.outerHeight;
+    this.pgWidth=document.getElementById(this.holderid).offsetWidth;
+    this.pgHeight=document.getElementById(this.holderid).offsetHeight;
     this.pgAspect = this.pgWidth/this.pgHeight;
     if (this.pgAspect>1){this.controlLoc='right'}else{this.controlLoc='bottom'}
     //apply classes accordingly
     footer = document.getElementById("footer");
     this.full = document.getElementById("full");
-    this.bubcont = document.getElementById("bubble-container");
+    this.bubcont = document.getElementById("svg-container");
     if (this.controlLoc=='right'){
         footer.classList.add("right");
         footer.classList.remove("bottom");
@@ -257,7 +297,7 @@ BHBubble.prototype.scalePage = function(){
         // bubcont.style.height = this.svgSize+"px";
         this.full.classList.add("right");
         this.full.classList.remove("bottom");
-        // full.style.height = this.svgSize+"px";
+        // this.holder.style.height = this.svgSize+"px";
     }else{
         footer.classList.add("bottom");
         footer.classList.remove("right");
@@ -266,16 +306,17 @@ BHBubble.prototype.scalePage = function(){
         // bubcont.style.height = this.pgWidth+"px";
         this.full.classList.add("bottom");
         this.full.classList.remove("right");
+        this.full.style.eidth = this.pgWidth+"px";
         // bubcont.style.height = this.pgWidth+"px";
     }
     if (this.controlLoc=='right'){
-        // document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        // this.full.setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         this.bubWidth = this.bubHeight;
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }else{
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
-        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
+        this.bubWidth = document.getElementById("svg-container").offsetWidth;
         // console.log(this.bubWidth,this.bubHeight)
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }
@@ -739,7 +780,7 @@ BHBubble.prototype.getOpacity = function(d){
 }
 BHBubble.prototype.drawBubbles = function(){
     // Add bubbles and legend
-    this.svg = d3.select("div#bubble-container")
+    this.svg = d3.select("div#svg-container")
         .append("svg").attr("class", "bubble")
         .attr("width", this.svgSize).attr("height", this.svgSize);
 
@@ -1018,7 +1059,7 @@ BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
 BHBubble.prototype.addButtons = function(width){
     // Add control buttons
     var bh=this;
-    full = document.getElementById('full');
+    full = document.getElementById("full");
     if (this.controlLoc == 'right'){
         this.divcont = document.createElement('div');
         this.divcont.setAttribute("id","controls");
@@ -1165,13 +1206,13 @@ BHBubble.prototype.addButtons = function(width){
     //
     if (this.controlLoc=='right'){
         this.contWidth = document.getElementById("controls").offsetWidth;
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         this.bubWidth = this.bubHeight;
         document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth+30)+"px");
     }else{
-        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+        this.bubWidth = document.getElementById("svg-container").offsetWidth;
         this.contWidth = document.getElementById("controls").offsetWidth;
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         document.getElementById("full").setAttribute("style","width:100%");
     }
 }
@@ -1535,18 +1576,3 @@ BHBubble.prototype.makePlot = function(){
     this.addTooltips();
 }
 
-// create BHBubble object
-bub = new BHBubble
-// parse URL queries
-bub.getUrlVars();
-// load language
-bub.langdir='lang/';
-bub.defaults = {"lang":"en"}
-bub.nameCols = {"or":"name-or-unicode"}
-bub.loadLang(bub.urlVars.lang);
-// bub.makePlot();
-// NB: "loadLang" calls makePlot function on first load
-
-window.addEventListener("resize",function(){
-    bub.replot();
-});
