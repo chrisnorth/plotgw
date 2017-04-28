@@ -227,7 +227,7 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
         matches.push(match[1])
         match=re.exec(textIn)
     }
-    textOut=textIn;
+    textOut=(textIn) ? textIn : "";
     if (matches){
         nmatch=matches.length
         for (n in matches){
@@ -273,15 +273,10 @@ GWCatalogue.prototype.stdlabel = function(d,src){
     if ((gw.columns[src].err)&&(!d[src].err)){
         console.log("can't find 'err' value for '"+src+"' in event '"+d.name+"'");
     }
-    if ((gw.columns[src].err)&&(d[src].err)){
-        if (gw.columns[src].err==2){
-            txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
-            '&ndash;'+
-            parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
-            }
-        else{
-            txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
-        }
+    if ((d[src].err)&&(d[src].err.length==2)){
+        txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
+        '&ndash;'+
+        parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
     }else if (typeof d[src].best=="number"){
         txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
     }else{
@@ -442,7 +437,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 d['DL'].err[1]*3.26])},
             sigfig:2,
             err:2,
-            unit:'%data.Ldist.unit.Mly%',
+            unit:'%data.DL.unit.Mly%',
             avail:false},
         lpeakMsun:{
             type:'derived',
@@ -454,7 +449,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 d['lpeak'].err[1]*55.956])},
             sigfig:2,
             err:2,
-            unit:'%data.peakL.unit.Mc2%',
+            unit:'%data.lpeak.unit.Mc2%',
             avail:false},
         EradErg:{
             type:'derived',
@@ -506,7 +501,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         // console.log(c,colsUpdate[c],datadict)
         if (colsUpdate[c].type=='src'){
             // console.log(c,datadict[c])
-            this.columns[c]=datadict[c]
+            this.columns[c] = (datadict[c]) ? datadict[c] : {};
             for (k in colsUpdate[c]){
                 this.columns[c][k]=colsUpdate[c][k]
             }
@@ -1218,12 +1213,10 @@ GWCatalogue.prototype.formatData = function(d,cols){
             // console.log('existing column',col,d[col])
         }
         if (d[col]){
-            if (gw.columns[col].err){
-                if (gw.columns[col].err==2){
-                    d[col].errv =
-                        [d[col].best+d[col].err[0],
-                        d[col].best-d[col].err[1]];
-                }
+            if ((d[col].err)&&(d[col].err.length==2)){
+                d[col].errv =
+                    [d[col].best+d[col].err[0],
+                    d[col].best-d[col].err[1]];
             }else if (typeof d[col].best=="number"){
                 d[col].errv =[d[col].best,d[col].best];
             }
@@ -1301,11 +1294,10 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.lengOn=false;
 
-    gw.fileInDataDict="json/datadict.json";
+    gw.fileInDataDictDefault="json/datadict.json";
+    gw.fileInDataDict = (gw.urlVars.dictFile) ? gw.urlVars.dictFile : gw.fileInDataDictDefault
     gw.fileInEventsDefault="json/events.json";
-    if (gw.urlVars.eventsFile){
-        gw.fileInEvents=gw.urlVars.eventsFile;
-    }else{gw.fileInEvents=gw.fileInEventsDefault}
+    gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault
 
     // if (gw.urlVars.lang){
     //     lang=gw.urlVars.lang;
@@ -1407,7 +1399,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
             alert("Fatal error loading input file: '"+gw.fileInDataDict+"'. Sorry!")
         }
         gw.loaded++;
-        gw.datadict=dataIn;
+        gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
         if(gw.debug){console.log('data pre-format:',gw.data);}
         if (gw.loaded==gw.toLoad){
             gw.setColumns(gw.datadict);
@@ -2185,7 +2177,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         gw.svg.select(".x-axis.axis-line")
             .transition()
             .duration(750)
-            .attr("y1",-gw.yScale(0)/2).attr("y2",-gw.yScale(0)/2)
+            .attr("y1",-gw.yScale(0)).attr("y2",-gw.yScale(0))
             .attr("opacity",gw.xAxLineOp);
         data.forEach(function(d){
             if (d.name==gw.sketchName){
