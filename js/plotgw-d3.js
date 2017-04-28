@@ -1545,6 +1545,7 @@ GWCatalogue.prototype.drawGraph = function(){
     yMax = d3.max(data, gw.yErrP)+yBorder;
     gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
+    if(this.debug){console.log('xy Ranges',xMin,xMax,yMin,yMax)}
     gw.yScale.domain([yMin, yMax]);
     if (gw.showerrors == null){gw.showerrors=true};
 
@@ -1553,9 +1554,10 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class", "x-axis axis")
         .attr("transform", "translate("+gw.margin.left+"," +
             (gw.margin.top + gw.graphHeight) + ")");
-    gw.svg.select(".x-axis.axis")
-        .append("line")
-        .attr("class","x-axis axis-line")
+    gw.svg.append("line")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("class","x-axis-line axis-line")
         .attr("x1",0).attr("x2",gw.graphWidth)
         .attr("y1",0).attr("y2",0)
         .style("stroke","rgb(100,100,100)").attr("stroke-width",5)
@@ -1581,15 +1583,17 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("src",gw.getIcon(gw.xvar));
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
-        .style("font-size",(0.8*(1+gw.scl))+"em")
+        .style("font-size",(0.8*(1+gw.scl))+"em");
 
     // y-axis
     gw.svg.append("g")
         .attr("class", "y-axis axis")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")");
-    gw.svg.select(".y-axis.axis").append("line")
-        .attr("class","y-axis axis-line")
+    gw.svg.append("line")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("class","y-axis-line axis-line")
         .attr("x1",0).attr("x2",0)
         .attr("y1",0).attr("y2",gw.graphHeight)
         .style("stroke","rgb(100,100,100)").attr("stroke-width",5)
@@ -1616,7 +1620,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("src",gw.getIcon(gw.yvar));
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
-        .style("font-size",(0.8*(1+gw.scl))+"em")
+        .style("font-size",(0.8*(1+gw.scl))+"em");
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
@@ -2115,7 +2119,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .text(gw.getLabelUnit(gw.xvar,true));
         gw.svgcont.select("#x-axis-icon")
             .attr("src",gw.getIcon(gw.xvar));
-        gw.svg.select(".y-axis.axis-line")
+        gw.svg.select(".y-axis-line.axis-line")
             .transition()
             .duration(750)
             .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
@@ -2171,14 +2175,14 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         gw.svg.selectAll(".y-axis.axis-label")
             .transition()
             .duration(750)
-            .text(gw.getLabelUnit(gw.yvar),true);
+            .text(gw.getLabelUnit(gw.yvar,true));
         gw.svgcont.select("#y-axis-icon")
             .attr("src",gw.getIcon(gw.yvar));
-        gw.svg.select(".x-axis.axis-line")
+        gw.svg.select(".x-axis-line.axis-line")
             .transition()
             .duration(750)
-            .attr("y1",-gw.yScale(0)).attr("y2",-gw.yScale(0))
-            .attr("opacity",gw.xAxLineOp);
+            .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
+            .attr("opacity",gw.yAxLineOp);
         data.forEach(function(d){
             if (d.name==gw.sketchName){
                 gw.svg.select("#highlight")
@@ -2622,6 +2626,8 @@ GWCatalogue.prototype.makePlot = function(){
     // make plot (calls other function)
     this.setLang();
     this.drawGraph();
+    this.updateXaxis(this.xvar);
+    this.updateYaxis(this.yvar);
     this.drawSketch();
     // this.addButtons();
     this.addOptions();
