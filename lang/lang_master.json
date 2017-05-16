@@ -14,7 +14,7 @@
     "data.UTC.name":{"_title":"UTC time","_text":"data name","_type":"string"},
     "data.date.name":{"_title":"Date of detection","_text":"data name","_type":"string"},
     "data.time.name":{"_title":"Time of detection","_text":"data name","_type":"string"},
-    "data.snr.name":{"_title":"Signal to Noise Ratio","_text":"data name","_type":"string"},
+    "data.rho.name":{"_title":"Signal to Noise Ratio","_text":"data name","_type":"string"},
     "data.sigma.name":{"_title":"Sigma","_text":"data name","_type":"string"},
 
     "subsection.data.masses":{"_subtitle":"Masses and spins"},

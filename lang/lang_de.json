@@ -9,7 +9,7 @@
  "data.UTC.name": "Uhrzeit (UTC)",
  "data.date.name": "Detektionsdatum",
  "data.time.name": "Detektionszeit (UT=GMT+0000)",
- "data.snr.name": "Signal-Rausch-Verhältnis",
+ "data.rho.name": "Signal-Rausch-Verhältnis",
  "data.sigma.name": "Statistische Signifikanz",
  "data.M1.name": "Primärmasse",
  "data.M2.name": "Sekundärmasse",

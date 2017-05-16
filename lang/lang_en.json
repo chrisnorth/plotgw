@@ -10,7 +10,7 @@
  "data.UTC.name": "UTC time",
  "data.date.name": "Date of detection",
  "data.time.name": "Time of detection (UT=GMT+0000)",
- "data.snr.name": "Signal to Noise Ratio",
+ "data.rho.name": "Signal to Noise Ratio",
  "data.sigma.name": "Significance",
  "data.M1.name": "Primary mass",
  "data.M1.unit": "M☉",
