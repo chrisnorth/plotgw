@@ -132,6 +132,7 @@ GWCatalogue.prototype.init = function(){
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
     this.showerrors = (this.urlVars.err) ? this.urlVars.err : this.defaults.showerrors;
+    this.showerrors = (this.showerrors=="false") ? false : true;
     this.setStyles();
     this.sketchName="None";
     this.unitSwitch=false;
@@ -278,7 +279,7 @@ GWCatalogue.prototype.stdlabel = function(d,src){
         '&ndash;'+
         parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
     }else if (typeof d[src].best=="number"){
-        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig)).toString()
     }else{
         txt=d[src].best
     }
@@ -304,7 +305,7 @@ GWCatalogue.prototype.stdlabelNoErr = function(d,src){
         return(this.labBlank);
     }
     if (typeof d[src].best=="number"){
-        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig))
+        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig)).toString()
     }else{
         txt=d[src].best
     }
@@ -320,7 +321,8 @@ GWCatalogue.prototype.stdlabelNoErr = function(d,src){
 }
 GWCatalogue.prototype.oneline = function(strIn){
     reBr=/\<br\/\>/g;
-    strOut=strIn.replace(reBr,' ');
+    if (gw.debug){console.log('oneline:',strIn)}
+    strOut= (strIn) ? strIn.replace(reBr,' ') : strIn;
     return(strOut)
 }
 
@@ -375,7 +377,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             }
         },
         sigma:{avail:false,type:'src'},
-        snr:{icon:"img/snr.svg",avail:true,type:'src'},
+        rho:{icon:"img/snr.svg",avail:true,type:'src'},
         deltaOmega:{avail:false,type:'src'},
         Erad:{avail:true,icon:"img/energyrad.svg",
             border:0.1,type:'src'},
@@ -1191,6 +1193,7 @@ GWCatalogue.prototype.setStyles = function(){
 }
 GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
+    if (this.debug){console.log(d["name"],this.columns[this.xvar].name,d[this.xvar].strnoerr,this.columns[this.yvar].name,d[this.yvar].strnoerr)}
     return "<span class='ttname'>"+d["name"]+"</span>"+
     "<span class='ttpri'>"+this.tl(this.columns[this.xvar].name)+
         ": "+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
@@ -1696,6 +1699,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
+    // if (!gw.showerrors){gw.toggleErrors();}
 
     // add highlight circle
     gw.svg.append("g")
@@ -1903,9 +1907,10 @@ GWCatalogue.prototype.drawGraph = function(){
 
     //add error toggle button
     errorClass = (this.showerrors) ? "errors-show" : "errors-hide";
+    // errordivClass = (this.showerrors) ? "graph-icon" : "graph-icon hidden";
     d3.select("#svg-container").append("div")
         .attr("id","errors-icon")
-        .attr("class","graph-icon")
+        .attr("class","graph-icon"+((this.showerrors) ? "" : " hidden"))
         .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
             if (gw.showerrors){
