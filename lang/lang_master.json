@@ -5,7 +5,6 @@
     "meta.alignment":{"_title":"left","_text":"The direction that the language goes. Note that right-to-left text is not currently supported.","_type":"select","_options":[{"name":"left to right","value":"left"},{"name":"right to left","value":"right"}]},
     "meta.alphabet":{"_title":"Alphabet","_text":"The alphabet used by the language","_type":"string"},
     "meta.numbersystem":{"_title":"Number system","_text":"The number system used by the language. Note that Non-Arabic numerals are not currently supported in the catalogue plot, but are in the bubble plot.","_type":"string"},
-    "meta.credit":{"_title":"Translation credit","_text":"Label for translation credit.","_type":"string"},
     "meta.translator":{"_title":"Translator","_text":"The name of the translator. Can include a hyperlink","_type":"string"},
 
     "section.data":{"_title":"Data labels and units","_text":"Don't change the <em>values</em> of the units. Note that parts of the SVG display used in these web-apps don't support HTML code (e.g. &lt;sub&gt;, &lt;sup&gt;), so sub/superscripts should be <a href='https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts'>Unicode characters</a>."},
@@ -66,6 +65,7 @@
     "text.gen.close":{"_title":"Close","_text":"Text for close buttons","_type":"string"},
     "text.gen.help":{"_title":"Help","_text":"Text for 'Help' buttons/menus","_type":"string"},
     "text.gen.lang":{"_title":"Change Language","_text":"Text for 'Change Language' buttons/menus","_type":"string"},
+    "text.gen.langcredit":{"_title":"Translation credit","_text":"Label for translation credit.","_type":"string"},
     "text.gen.share":{"_title":"Share","_text":"Text for 'Share' buttons/menus","_type":"string"},
 
     "section.plotgw.text":{"_title":"Text shown on catalogue plot"},
@@ -98,10 +98,6 @@
     "subsection.plotgw.lang":{"_subtitle":"Language panel"},
     "text.plotgw.lang.title":{"_title":"Language panel title","_text":"Title of panel for changing the language","_type":"string"},
     "text.plotgw.lang.text":{"_title":"Language panel text","_text":"Text displayed in language panel","_type":"textarea","_height":"2em"},
-
-    "subsection.plotgw.share":{"_title":"Text etc. for sharing catalogue plot"},
-    "share.plotgw.twitter.text":{"_title":"Tweet text","_text":"Default text to appear in tweet","_type":"textarea","_height":"2em"},
-    "share.plotgw.twitter.hashtag":{"_title":"Tweet hashtag","_text":"Default hashtag to include in tweet","_type":"string"},
 
     "section.plotgw.tooltip":{"_title":"Tootips in catalogue plot"},
     "tooltip.plotgw.losc":{"_title":"Tooltip: LOSC","_text":"Tooltip text for LOSC link","_type":"string"},
@@ -177,6 +173,15 @@
     "text.bub.help.merge":{"_title":"Merge","_text":"Help text for merge button","_type":"string"},
     "text.bub.help.unmerge":{"_title":"Unmerge","_text":"Help text for unmerge button","_type":"string"},
     "text.bub.help.showall":{"_title":"Show All","_text":"Help text for show-all button","_type":"string"},
+
+    "section.bhbubble.text":{"_title":"Text, hastags etc. for sharing"},
+    "subsection.plotgw.share":{"_title":"Text etc. for sharing catalogue plot"},
+    "share.plotgw.twitter.text":{"_title":"Tweet text","_text":"Default text to appear in tweet for catalogue plot. <b>Should be &lt;140 characters when combined with  hashtag</b>","_type":"textarea","_height":"2em"},
+    "share.plotgw.twitter.hashtag":{"_title":"Tweet hashtag","_text":"Default hashtag to include in tweet","_type":"string"},
+
+    "subsection.bub.share":{"_title":"Text etc. for sharing bubble plot"},
+    "share.bub.twitter.text":{"_title":"Tweet text","_text":"Default text to appear in tweet for bubble plot. <b>Should be &lt;140 characters when combined with  hashtag</b>","_type":"textarea","_height":"2em"},
+    "share.bub.twitter.hashtag":{"_title":"Tweet hashtag","_text":"Default hashtag to include in tweet","_type":"string"},
 
     "section.domains":{"_title":"Web domains for building links","_text":"Included in case there are language-specific versions in the future."},
     "domain.losc":{"_title":"LOSC domain","_text":"Top-level domain for LOSC","_type":"string","_usedef":true},

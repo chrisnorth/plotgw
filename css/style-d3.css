@@ -300,6 +300,9 @@ button.down{
     float:left;
     margin-left:2%;
 }
+.panel-block#lang-block-credit{
+    margin-top:10%;
+}
 .panel-block.bottom{
     text-align:left;
     padding-bottom:10px;

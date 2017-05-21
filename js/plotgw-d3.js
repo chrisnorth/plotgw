@@ -93,8 +93,8 @@ GWCatalogue.prototype.init = function(){
             .attr("id","lang-title").attr("class","panel-title")
         d3.select("#lang-outer").append("div")
             .attr("id","lang-block-icons").attr("class","panel-block panel-block-full")
-        d3.select("#lang-outer").append("div")
-            .attr("id","lang-block-credit").attr("class","panel-block panel-block-full")
+        // d3.select("#lang-outer").append("div")
+        //     .attr("id","lang-block-credit").attr("class","panel-block panel-block-full")
         d3.select("#lang-outer").append("div")
             .attr("id","lang-close").attr("class","panel-close")
             .html('<img src="img/close.png" title="close">')
@@ -142,6 +142,7 @@ GWCatalogue.prototype.init = function(){
     this.langs = {
         "de":{code:"de",name:"Deutsch"},
         "en":{code:"en",name:"English"},
+        "es":{code:"es",name:"Español"},
         "fr":{code:"fr",name:"Français"},
         // "en-GB":{code:"en-GB",name:"English"},
         // "de2":{code:"de",name:"Deutsch (de)"},
@@ -1519,7 +1520,7 @@ GWCatalogue.prototype.setLang = function(){
         .html(this.tl('%text.plotgw.page.title%'))
     if (this.langdict['meta.translator'] && this.langdict['meta.translator']!=''){
         d3.select('#lang-credit')
-            .html(this.tl('%meta.credit% (%meta.name%): %meta.translator%'));
+            .html(this.tl('%text.gen.langcredit% (%meta.name%): %meta.translator%'));
     }else{
         d3.select('#lang-credit')
             .html('');
@@ -2500,6 +2501,15 @@ GWCatalogue.prototype.addLang = function(replot){
         // document.getElementById('lang_'+lang+'_icon').style.lineHeight =
         //     parseInt(document.getElementById('lang_'+lang+'_cont').offsetHeight)+"px";
     }
+    langtransdiv = document.createElement('div');
+    langtransdiv.className = 'panel-text';
+    langtransdiv.setAttribute("id",'lang-credit');
+    if (this.langdict['meta.translator'] && this.langdict['meta.translator']!=''){
+        langtransdiv.innerHTML = this.tl('%text.gen.langcredit% (%meta.name%): %meta.translator%');
+    }else{
+        langtransdiv.innerHTML = '';
+    }
+    document.getElementById('lang-block-icons').appendChild(langtransdiv);
 }
 
 GWCatalogue.prototype.showLang = function(){
