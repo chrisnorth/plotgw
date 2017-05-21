@@ -906,6 +906,7 @@ BHBubble.prototype.addLang = function(){
         "cy":{code:"cy",name:"Cymraeg (cy)"},
         "de":{code:"de",name:"Deutsch (de)"},
         "en":{code:"en",name:"English (en)"},
+        "es":{code:"es",name:"Español (es)"},
         "fr":{code:"fr",name:"Francais (fr)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
         "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
@@ -1480,9 +1481,9 @@ BHBubble.prototype.showShare = function(){
         .style("top", (bh.pgHeight - document.getElementById('share-outer').offsetHeight)/3.);
     d3.select("#twitter-share-button")
         .attr("href",
-            bh.tl("https://twitter.com/intent/tweet?text=%share.bub.twitter.text%&url=")+
+            "https://twitter.com/intent/tweet?text="+bh.tl("%share.bub.twitter.text%")+"&url="+
                 bh.url.replace("file:///Users/chrisnorth/Cardiff/GravWaves/Outreach/","http%3A%2F%2Fchrisnorth.github.io/").replace(/:/g,'%3A').replace(/\//g,'%2F')+
-                bh.tl("&hashtags=%share.bub.twitter.hashtag%"));
+                "&hashtags="+bh.tl("%share.bub.twitter.hashtag%"));
 
 }
 BHBubble.prototype.hideShare = function(d) {
