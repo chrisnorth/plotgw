@@ -30,8 +30,8 @@
     "data.mass.unit.msun":{"_title":"Solar mass","_text":"Solar mass unit (somtimes, but not always, converted to subscript where possible i.e. M<sub>☉</sub>)","_type":"string","_usedef":true},
     "data.mass.unit.kg":{"_title":"Alternative mass unit","_text":"10³⁰kg","_type":"string","_usedef":true},
     "data.Mratio.name":{"_title":"Mass ratio","_text":"data name","_type":"string"},
-    "data.spinFinal.name":{"_title":"Final spin name","_text":"data name","_type":"string"},
-    "data.spinInitEff.name":{"_title":"Effective initial spin name","_text":"data name","_type":"string"},
+    "data.af.name":{"_title":"Final spin name","_text":"data name","_type":"string"},
+    "data.chi.name":{"_title":"Effective initial spin name","_text":"data name","_type":"string"},
 
     "subsection.data.far":{"_subtitle":"False alarm rate (FAR)"},
     "data.FAR.name":{"_title":"False alarm rate","_text":"data name","_type":"string"},
