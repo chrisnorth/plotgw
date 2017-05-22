@@ -32,9 +32,11 @@
             <div id="svg-container" class="right"></div>
         </div>
         <div id="help-bg"></div>
-        <div id="help-outer">
-            <div id="help-close" class="helpclose"></div>
-            <div id="help-inner">
+        <div id="help-outer" class="popup-outer">
+            <div id="help-inner" class="popup-inner">
+                <div id="help-close" class="popup-close">
+                    <img src="img/close.png" title="close">
+                </div>
             </div>
         </div>
         <div id="lang-bg" class="popup-bg"></div>
@@ -42,6 +44,7 @@
             <div id="lang-inner" class="popup-inner">
                 <div class="popup-title" id="lang-title">Language</div>
                 <div id="lang-block"></div>
+                <div id="lang-close" class="popup-close"><img src="img/close.png" title="Close"></div>
             </div>
         </div>
         <div id="share-bg" class="popup-bg"></div>
@@ -60,7 +63,6 @@
             <button id="generate">Save as SVG</button>
             <div><span id="footer-txt">Hosted by <a href="http://www.astro.cf.ac.uk">Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href="http://www.ligo.org">LIGO Scientific Collaboration</a>. View the source on <a href="http://www.github.com/chrisnorth/plotgw">GitHub</a>.</br>X-ray binary data based on <a href="http://stellarcollapse.org">stellarcollapse.org</a></span></div>
         </div>
-        <div id="lang-close" class="popup-close"><img src="img/close.png" title="Close"></div>
     </div>
     <script type="text/javascript">
         bub = new BHBubble({'container':'bubble-cont'})
