@@ -16,7 +16,7 @@
             "UTC": {"best":"2015-09-14T09:50:45", "ref":"O1BBH"},
             "deltaOmega": {"best":230, "ref":"O1BBH"},
             "lpeak": {"best":3.6, "err":[0.5, 0.4], "ref":"O1BBH"},
-            "snr": {"best":23.7, "ref":"O1BBH"},
+            "rho": {"best":23.7, "ref":"O1BBH"},
             "Mchirp": {"best":28.1, "err":[1.8, 1.5], "ref":"O1BBH"},
             "DL": {"best":420, "err":[150, 180], "ref":"O1BBH"}
         },
@@ -36,7 +36,7 @@
             "UTC": {"best":"2015-10-12T09:54:43.44","ref":"O1BBH"},
             "deltaOmega": {"best":1600,"ref":"O1BBH"},
             "lpeak": {"best":3.1, "err":[0.8, 1.8],"ref":"O1BBH"},
-            "snr": {"best":9.7,"ref":"O1BBH"},
+            "rho": {"best":9.7,"ref":"O1BBH"},
             "Mchirp": {"best":15.1, "err":[1.4, 1.1],"ref":"O1BBH"},
             "DL": {"best":1000, "err":[500, 500],"ref":"O1BBH"}
         },
@@ -56,7 +56,7 @@
             "UTC": {"best":"2015-12-26T03:38:53.65","ref":"O1BBH"},
             "deltaOmega": {"best":850,"ref":"O1BBH"},
             "lpeak": {"best":3.3, "err":[0.8, 1.6],"ref":"O1BBH"},
-            "snr": {"best":13.0,"ref":"O1BBH"},
+            "rho": {"best":13.0,"ref":"O1BBH"},
             "Mchirp": {"best":8.9, "err":[0.3, 0.3],"ref":"O1BBH"},
             "DL": {"best":440, "err":[180, 190],"ref":"O1BBH"}
         }
