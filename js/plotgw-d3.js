@@ -1506,9 +1506,9 @@ GWCatalogue.prototype.setLang = function(){
             this.langdict[k]=this.langdictDefault[k];
         }
     }
-    d3.select("#options-x > .options-title")
+    d3.select("#options-x > .panel-title")
         .html(this.tl('%text.plotgw.horizontal-axis%'))
-    d3.select("#options-y > .options-title")
+    d3.select("#options-y > .panel-title")
         .html(this.tl('%text.plotgw.vertical-axis%'))
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
         LVT:this.tl('%text.plotgw.legend.candidates%')}
