@@ -38,6 +38,8 @@
 "data.lpeak.name": "Pico de luminosidad",
 "data.lpeak.unit": "10⁵⁶ erg s⁻¹",
 "data.lpeak.unit.Mc2": "M☉ c² s⁻¹",
+"data.Erad.unit.Joule": "10⁴⁷ J",
+"data.lpeak.unit.Watt": "10⁴⁹ W",
 "data.DL.name": "Distancia de luminosidad",
 "data.DL.unit": "Mpc",
 "data.DL.unit.Mly": "Millones de años-luz (Mal)",

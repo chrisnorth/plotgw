@@ -35,6 +35,8 @@
  "data.Erad.name": "Abgestrahlte Energie",
  "data.Erad.unit": "Msonne c^2",
  "data.Erad.unit.erg": "10^54 erg",
+ "data.Erad.unit.Joule": "10⁴⁷ J",
+ "data.lpeak.unit.Watt": "10⁴⁹ W",
  "data.lpeak.name": "Spitzenleuchtkraft",
  "data.lpeak.unit": "10^56 erg/s",
  "data.lpeak.unit.Mc2": "Msonne c^2/s",

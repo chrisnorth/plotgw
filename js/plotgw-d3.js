@@ -454,6 +454,18 @@ GWCatalogue.prototype.setColumns = function(datadict){
             err:2,
             unit:'%data.lpeak.unit.Mc2%',
             avail:false},
+        lpeakWatt:{
+            type:'derived',
+            name:function(){return(gw.columns.lpeak.name)},
+            bestfn:function(d){
+                return(d['lpeak'].best*55.956)},
+            errfn:function(d){
+                return([d['lpeak'].err[0]*55.956,
+                d['lpeak'].err[1]*55.956])},
+            sigfig:2,
+            err:2,
+            unit:'%data.lpeak.unit.Watt%',
+            avail:false},
         EradErg:{
             type:'derived',
             namefn:function(){return(gw.columns.Erad.name)},
@@ -465,6 +477,18 @@ GWCatalogue.prototype.setColumns = function(datadict){
             err:2,
             sigfig:2,
             unit:'%data.Erad.unit.erg%'
+        },
+        EradJoule:{
+            type:'derived',
+            namefn:function(){return(gw.columns.Erad.name)},
+            bestfn:function(d){
+                return(d['Erad'].best*1.787)},
+            errfn:function(d){
+                return([d['Erad'].err[0]*1.787,
+                d['Erad'].err[1]*1.787])},
+            err:2,
+            sigfig:2,
+            unit:'%data.Erad.unit.Joule%'
         },
         date:{
             type:'derived',
@@ -762,8 +786,8 @@ GWCatalogue.prototype.setScales = function(){
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
             // ttlab:"Category of detection"},
         FAR:{lab:["FAR"]},
-        lpeak:{lab:["lpeakMsun"],labSw:["lpeak"]},
-        Erad:{lab:["Erad"],labSw:["EradErg"]},
+        lpeak:{lab:["lpeakMsun"],labSw:["lpeakWatt"]},
+        Erad:{lab:["Erad"],labSw:["EradJoule"]},
         chi:{lab:["chi"]},
         af:{lab:["af"]},
         data:{icon:"img/data.svg",lab:["data"]}
@@ -1313,8 +1337,10 @@ GWCatalogue.prototype.drawGraphInit = function(){
 
     d3.json(gw.fileInEvents, function(error, dataIn) {
         if (error){
-            console.log(error);
+            console.log('events error:',error,dataIn);
             alert("Fatal error loading input file: '"+gw.fileInEvents+"'. Sorry!");
+        }else{
+            if (this.debug){console.log("dataIn (events:)",dataIn)}
         }
         gw.loaded++;
         if ((!dataIn.data)&&(dataIn.events)){
@@ -1403,8 +1429,9 @@ GWCatalogue.prototype.drawGraphInit = function(){
             alert("Fatal error loading input file: '"+gw.fileInDataDict+"'. Sorry!")
         }
         gw.loaded++;
+        // if(gw.debug){console.log((dataIn),(dataIn.datadict))}
         gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
-        if(gw.debug){console.log('data pre-format:',gw.data);}
+        if(gw.debug){console.log('datadict:',gw.datadict,dataIn);}
         if (gw.loaded==gw.toLoad){
             gw.setColumns(gw.datadict);
             gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
@@ -1415,7 +1442,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
 }
 GWCatalogue.prototype.loadLang = function(lang){
     var gw=this;
-    console.log(gw.lang,lang)
+    if (this.debug){console.log('new language:',lang,'; stored language',gw.lang)}
     var reload = (!gw.lang)||(gw.lang=="") ? false:true;
     gw.lang=lang;
     gw.langshort = (gw.lang.indexOf('-') > 0 ? gw.lang.substring(0,gw.lang.indexOf('-')) : gw.lang.substring(0,2));
@@ -1445,7 +1472,7 @@ GWCatalogue.prototype.loadLang = function(lang){
                 window.location.replace(gw.makeUrl({'lang':gw.defaults.lang}));
             }
         }
-        if(gw.debug){console.log(gw.fileInLang);}
+        if(gw.debug){console.log('loaded:',gw.fileInLang);}
         for (ld in dataIn){
             if ((ld!="metadata")&(typeof dataIn[ld]!="string")){
                 dataIn[ld]=dataIn[ld].text;
@@ -1481,7 +1508,7 @@ GWCatalogue.prototype.loadLangDefault = function(){
             console.log(error);
             alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
         }
-        if(gw.debug){console.log(gw.fileInLangDefault);}
+        if(gw.debug){console.log('loaded:',gw.fileInLangDefault);}
         for (ld in dataIn){
             if ((ld!="metadata")&(typeof dataIn[ld]!="string")){
                 dataIn[ld]=dataIn[ld].text;
