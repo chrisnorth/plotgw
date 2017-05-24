@@ -1343,66 +1343,72 @@ GWCatalogue.prototype.drawGraphInit = function(){
             if (this.debug){console.log("dataIn (events:)",dataIn)}
         }
         gw.loaded++;
-        if ((!dataIn.data)&&(dataIn.events)){
-            //uses LOSC format, so need to convert
+        if (gw.debug){console.log('dataIn.links',dataIn.links)}
+        if (dataIn.datadict){
+            //uses LOSC format (has datadict), so need to convert
             gw.dataFormat='losc';
-            dataIn.data={};
             if (this.debug){console.log('converting from LOSC format');}
-            for (e in dataIn.events){
-                // convert events to required format
-                ev=dataIn.events[e];
-                dataIn.data[e]={};
-                for (c in ev){
-                    if (typeof ev[c]=="number"){
-                        dataIn.data[e][c]={best:ev[c]}
-                    }else if (typeof ev[c]=="object"){
-                        dataIn.data[e][c]={best:ev[c][0],err:[ev[c][1],ev[c][2]]}
-                    }else{
-                        dataIn.data[e][c]={best:ev[c]}
-                    }
-                }
+            newlinks={}
+            for (e in dataIn.data){
+                console.log(e,dataIn.data[e])
+                // // convert events to required format
+                // ev=dataIn.events[e];
+                // dataIn.data[e]={};
+                // for (c in ev){
+                //     if (typeof ev[c]=="number"){
+                //         dataIn.data[e][c]={best:ev[c]}
+                //     }else if (typeof ev[c]=="object"){
+                //         dataIn.data[e][c]={best:ev[c][0],err:[ev[c][1],ev[c][2]]}
+                //     }else{
+                //         dataIn.data[e][c]={best:ev[c]}
+                //     }
+                // }
                 // convert links to required format
+                console.log(e,dataIn.links)
                 if (dataIn.links[e]){
                     linkIn=dataIn.links[e];
-                    dataIn.links[e]={}
+                    console.log('linkIn',e,linkIn)
+                    newlinks[e]={}
                     for (l in linkIn){
-                        if (linkIn[l].text.search('Paper')){
-                            dataIn.links[e]['DetPaper']={
+                        if (linkIn[l].text.search('Paper')>=0){
+                            newlinks[e]['DetPaper']={
                                 text:linkIn[l].text,
                                 url:linkIn[l].url,
                                 type:'paper'}
                         }
-                        if (linkIn[l].text.search('Open Data page')){
-                            dataIn.links[e]['LOSCData']={
+                        else if (linkIn[l].text.search('Open Data page')>=0){
+                            newlinks[e]['LOSCData']={
                                 text:linkIn[l].text,
                                 url:linkIn[l].url,
                                 type:'web-data'}
                         }
-                        if (linkIn[l].text.search('GraceDB page')){
-                            dataIn.links[e]['GraceDB']={
+                        else if (linkIn[l].text.search('GraceDB page')>=0){
+                            newlinks[e]['GraceDB']={
                                 text:linkIn[l].text,
                                 url:linkIn[l].url,
                                 type:'web-data'}
                         }
-                        if (linkIn[l].text.search('Final Skymap')){
-                            dataIn.links[e]['SkyMapFile']={
+                        else if (linkIn[l].text.search('Final Skymap')>=0){
+                            newlinks[e]['SkyMapFile']={
                                 text:linkIn[l].text,
                                 url:linkIn[l].url,
                                 type:'file'}
                         }
-                        if (linkIn[l].text.search('Skymap View')){
-                            dataIn.links[e]['SkyMapAladin']={
+                        else if (linkIn[l].text.search('Skymap View')>=0){
+                            newlinks[e]['SkyMapAladin']={
                                 text:linkIn[l].text,
                                 url:linkIn[l].url,
                                 type:'web'}
                         }
                     }
+                    console.log('links',e,newlinks[e])
                 }
             }
-
+            dataIn.links=newlinks;
         }else{
             gw.dataFormat='std';
         }
+        if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
         for (e in dataIn.data){
             dataIn.data[e].name=e;
             if (e[0]=='G'){t='GW'}
