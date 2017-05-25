@@ -127,7 +127,7 @@
  "text.bub.legend.detection": "Onde Gravitationnelle Détectée",
  "text.bub.legend.xray": "Mesures de systèmes binaires X",
  "text.bub.save.svg": "Sauver au format SVG",
- "text.bub.footer": "Hébergé par <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Traduction : Nicolas Arnaud (CNRS, <a href='http://www.virgo-gw.eu' title='collaboration Virgo'>collaboration Virgo</a>)</br>Maintenu par Chris North pour la <a href='http://www.ligo.org'>Collaboration Scientifique LIGO</a>. Code source disponible sur <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Données des systèmes binaires X issues de <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
+ "text.bub.footer": "Hébergé par <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Traduction : Nicolas Arnaud (CNRS, <a href='http://www.virgo-gw.eu' title='collaboration Virgo'>collaboration Virgo</a>)</br>Maintenu par Chris North pour la <a href='http://www.ligo.org'>Collaboration Scientifique LIGO</a>. Code source disponible sur <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Données des systèmes binaires X issues de <a href='https://stellarcollapse.org/bhmasses' title='Source data'>stellarcollapse.org</a>",
  "text.bub.scale": "Echelle",
  "text.bub.mergers": "Fusion",
  "text.bub.help.scalemass": "Echelle de masse",
