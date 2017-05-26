@@ -59,9 +59,6 @@ GWCatalogue.prototype.init = function(){
         d3.select("#help-outer").append("div")
             .attr("id","help-title").attr("class","panel-title")
         d3.select("#help-outer").append("div")
-            .attr("id","help-block-text").attr("class","panel-text")
-            .html('<div class="panel-text" id="help-text"></div><div class="panel-text" id="help-about"></div>')
-        d3.select("#help-outer").append("div")
             .attr("id","help-block-icons").attr("class","panel-block")
         d3.select("#help-block-icons").append("div")
             .attr("id","help-help-cont").attr("class","panel-cont")
@@ -84,6 +81,9 @@ GWCatalogue.prototype.init = function(){
         d3.select("#help-outer").append("div")
             .attr("id","help-close").attr("class","panel-close")
             .html('<img src="img/close.png" title="close">')
+        d3.select("#help-outer").append("div")
+            .attr("id","help-block-text").attr("class","panel-text")
+            .html('<div class="panel-text" id="help-text"></div>')
     }
     if (d3.select('#lang-outer').empty()){
         console.log('adding lang-outer')
@@ -592,7 +592,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="20%";
-        this.langcontHeight="20%";
+        this.langcontHeight="10%";
         // info.style.top = "50%";
         // info.style.left = "0%";
     }else{
@@ -613,7 +613,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         this.labHeight = 0.5*this.sketchFullHight;
         //this.labcontWidth="45%";
         this.labcontHeight="10%";
-        this.langcontHeight="10%";
+        this.langcontHeight="5%";
         // info.style.top = "";
         // info.style.left = "";
     }
@@ -892,6 +892,7 @@ GWCatalogue.prototype.drawSketch = function(){
         d3.selectAll('.lang-cont').style('height',this.langcontHeight);
         d3.select('#unitswtxt')
             .html(this.tl('%tooltip.plotgw.switchunits%'));
+        d3.selectAll('.sketchlab').style("font-size",(1.3*gw.sksc)+"em");
     }else{
         if (this.showerrors == null){this.showerrors=true};
         for (lab in this.labels){this.addLab(lab)};
@@ -2397,7 +2398,9 @@ GWCatalogue.prototype.addHelp = function(){
     d3.select("#help-title")
         .html(this.tl("%text.plotgw.help.title%"))
     d3.select("#help-text")
-        .html(this.tl("%text.plotgw.help.text%%text.plotgw.help.about%"));
+        .html(this.tl("%text.plotgw.help.text%%text.plotgw.help.about%%text.plotgw.help.tech%"));
+    // d3.select("#help-tech")
+    //     .html(this.tl("%text.plotgw.help.about%%text.plotgw.help.tech%"));
     d3.select("#help-help-text")
         .html(this.tl("%text.plotgw.help.help%"));
     d3.select("#help-settings-text")

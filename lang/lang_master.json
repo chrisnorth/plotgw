@@ -90,6 +90,7 @@
     "text.plotgw.help.title":{"_title":"Help panel title","_text":"Panel title","_type":"string"},
     "text.plotgw.help.text":{"_title":"Help text","_text":"Text to explain the web-app. Can include HTML code","_type":"textarea","_height":"6em"},
     "text.plotgw.help.about":{"_title":"About text","_text":"Credits for the web-app. Can include HTML code","_type":"textarea","_height":"6em"},
+    "text.plotgw.help.tech":{"_title":"Technical details","_text":"Technical details of the data in the app. Can include HTML code","_type":"textarea","_height":"6em"},
     "text.plotgw.help.info":{"_title":"Information button help text","_text":"Help text for information button","_type":"textarea","_height":"2em"},
     "text.plotgw.help.settings":{"_title":"Settings button help text","_text":"Help text for settings button","_type":"textarea","_height":"2em"},
     "text.plotgw.help.help":{"_title":"Help button help text","_text":"Help text for help button ","_type":"string"},
