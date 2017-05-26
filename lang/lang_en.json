@@ -138,7 +138,7 @@
  "text.bub.help.unmerge": "Unmerge binary black holes",
  "text.bub.help.showall": "Show all black holes",
  "text.bub.save.svg": "Save as SVG",
- "text.bub.footer": "Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>X-ray binary data based on <a href='https://stellarcollapse.org/bhmasses' title='Source data'>stellarcollapse.org</a>",
+ "text.bub.footer": "Hosted by <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. View the source on <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Gravitiational Wave data from <a href='https://losc.ligo.org' title='LOSC'>LIGO Open Science Center</a>. X-ray binary data based on <a href='https://stellarcollapse.org/bhmasses' title='Source data'>stellarcollapse.org/bhmasses</a>",
  "domain.losc": "https://losc.ligo.org",
  "domain.losc.events": "https://losc.ligo.org/events",
  "domain.losc.store": "https://losc.ligo.org/s",
