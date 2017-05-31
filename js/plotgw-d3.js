@@ -526,7 +526,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             type:'derived',
             strfn:function(d){
                 if ((d.link)&&d.link.url){
-                    return gw.tl("<a href='"+d.link.url+
+                    return gw.tl("<a target='_blank' href='"+d.link.url+
                         "' title='"+d.link.text+"'>%text.gen.losc%</a>");
                 }else{
                     return(gw.labBlank);
@@ -539,7 +539,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             strfn:function(d){
                 if (gw.debug){console.log('PAPER',d.ref)}
                 if ((d.ref)&&(d.ref.url)){
-                    return gw.tl("<a href='"+d.ref.url+
+                    return gw.tl("<a target='_blank' href='"+d.ref.url+
                         "' title='"+d.ref.text+"'>%text.gen.paper%</a>");
                 }else{
                     return(gw.labBlank);
