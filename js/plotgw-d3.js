@@ -459,10 +459,10 @@ GWCatalogue.prototype.setColumns = function(datadict){
             type:'derived',
             name:function(){return(gw.columns.lpeak.name)},
             bestfn:function(d){
-                return(d['lpeak'].best*55.956)},
+                return(d['lpeak'].best)},
             errfn:function(d){
-                return([d['lpeak'].err[0]*55.956,
-                d['lpeak'].err[1]*55.956])},
+                return([d['lpeak'].err[0],
+                d['lpeak'].err[1]])},
             sigfig:2,
             err:2,
             unit:'%data.lpeak.unit.Watt%',
