@@ -240,6 +240,7 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
             }else{
                 textOut=textOut;
                 if(this.debug){console.log('ERROR: "'+mx1+'" not found in dictionary');}
+                if(this.debug){console.log(textOut,typeof(textOut),typeof(textIn));}
             }
         }
     }
@@ -510,6 +511,17 @@ GWCatalogue.prototype.setColumns = function(datadict){
             },
             icon:"img/time.svg",
             name:'%data.time.name%'},
+        datetime:{
+            type:'derived',
+            strfn:function(d){
+                day=d.UTC.best.split('T')[0].split('-')[0];
+                month=d['UTC'].best.split('T')[0].split('-')[1];
+                year=d['UTC'].best.split('T')[0].split('-')[2];
+                time=d['UTC'].best.split('T')[1]
+                return(year+'-'+month+'-'+day+"<br/>"+time+" UT")
+            },
+            icon:"img/time.svg",
+            name:'%data.time.name%'},
         data:{
             type:'derived',
             strfn:function(d){
@@ -521,7 +533,20 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 }
             },
             name:'%tooltip.plotgw.losc%',
-            icon:"img/data.svg"}
+            icon:"img/data.svg"},
+        paper:{
+            type:'derived',
+            strfn:function(d){
+                if (gw.debug){console.log('PAPER',d.ref)}
+                if ((d.ref)&&(d.ref.url)){
+                    return gw.tl("<a href='"+d.ref.url+
+                        "' title='"+d.ref.text+"'>%text.gen.paper%</a>");
+                }else{
+                    return(gw.labBlank);
+                }
+            },
+            name:'%tooltip.plotgw.paper%',
+            icon:"img/paper.svg"}
     };
     this.columns={}
     for (c in colsUpdate){
@@ -776,21 +801,22 @@ GWCatalogue.prototype.setScales = function(){
     // icon: src file, label: label source, tooltip label)
     this.labels ={
 
-        date:{lab:["date"]},
-        time:{lab:["time"]},
+        datetime:{lab:["datetime"]},
+        // time:{lab:["time"]},
+        FAR:{lab:["FAR"]},
         Mchirp:{lab:["Mchirp"],
             labSw:["Mchirpkg"]},
         Mratio:{lab:["Mratio"]},
-        DL:{lab:["DL"],
-            labSw:["DLly"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
             // ttlab:"Category of detection"},
-        FAR:{lab:["FAR"]},
         lpeak:{lab:["lpeakMsun"],labSw:["lpeakWatt"]},
         Erad:{lab:["Erad"],labSw:["EradJoule"]},
         chi:{lab:["chi"]},
         af:{lab:["af"]},
-        data:{icon:"img/data.svg",lab:["data"]}
+        DL:{lab:["DL"],
+            labSw:["DLly"]},
+        data:{icon:"img/data.svg",lab:["data"]},
+        paper:{icon:"img/paper.svg",lab:["paper"]}
     }
     //tool-top labels
     this.ttlabels = {
@@ -1408,6 +1434,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
             dataIn.links=newlinks;
         }else{
             gw.dataFormat='std';
+            newlinks=false;
         }
         if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
         for (e in dataIn.data){
@@ -1420,6 +1447,12 @@ GWCatalogue.prototype.drawGraphInit = function(){
                 link=dataIn.links[e].LOSCData;
                 link.url=gw.tl(link.url);
                 dataIn.data[e].link=link;
+            }
+            if ((dataIn.links[e]) && (dataIn.links[e].DetPaper)){
+                ref=dataIn.links[e].DetPaper;
+                ref.url=gw.tl(ref.url);
+                dataIn.data[e].ref=ref;
+                if(gw.debug){console.log(dataIn.data[e].name,ref)}
             }
             gw.data.push(dataIn.data[e]);
         }
