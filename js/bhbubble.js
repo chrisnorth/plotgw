@@ -526,9 +526,15 @@ BHBubble.prototype.loadData = function(){
                         if ((links[i][p].text) && (links[i][p].url)){
                             if (links[i][p].text.search("Paper")>=0){
                                 console.log(i,links[i][p].text,links[i][p].text.search("Paper"))
-                                paper='<a target="_blank" href="'+
-                                    links[i][p].url+'">'+
-                                    links[i][p].text+'</a>';
+                                if (links[i][p].citation){
+                                    paper='<a target="_blank" href="'+
+                                        links[i][p].url+'">'+
+                                        links[i][p].citation+'</a>';
+                                }else{
+                                    aper='<a target="_blank" href="'+
+                                        links[i][p].url+'">'+
+                                        links[i][p].text+'</a>';
+                                }
                             }
                         }
                     }
