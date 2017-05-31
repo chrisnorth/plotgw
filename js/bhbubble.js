@@ -1364,30 +1364,48 @@ BHBubble.prototype.iptext = function(d){
     text =  "<span class='name'>"+this.getName(d)+"</span>";
     if(d["method"]=='Xray'){
         text=text+"<span class='info'><b>%data.bub.mass%</b>: "+d["massBHstr"]+" %data.mass.unit.msun%";
-        if (d.refbhmass!='-'){text = text +
-            " <sup>["+this.tN(rx)+"]</sup></span>";rbhm=rx;rx++;}
-        else{rhbm=false;text = text+"</span>"}
+        if (d.refbhmass!='-'){
+            rbhm=rx;
+            rx++;
+            rbhmu=true
+            text = text + " <sup>["+this.tN(rbhm)+"]</sup></span>";
+        }else{
+            rbhm=false;
+            text = text+"</span>"
+        }
         text = text + "<span class='info'><b>%data.bub.type%</b>: "+d.binType+"</span>";
         // text = text+ "<span class='info'>X-ray detection</span>";
         //companion
         text = text+ "<span class='info'><b>"+this.tl("%data.bub.comp%")+"</b>: "+
             d.compType+" ("+this.tN(d.compMass)+" %data.mass.unit.msun%) ";
-        if (d.refcomp!="-"){text = text +
-            " <sup>["+this.tN(rx)+"]</sup>";rct=rx;rx++;}else{rct=false;}
-        if (d.refcompmass!="-"){text = text +
-            " <sup>["+this.tN(rx)+"]</sup>";rcm=rx;rx++;}else{rcm=false;}
+        if (d.refcomp!="-"){
+            if (d.refcomp==d.refbhmass){rct=rbhm;rctu=false;}
+            else{rct=rx;rx++;rctu=true;}
+            text = text + " <sup>["+this.tN(rct)+"]</sup>";
+        }else{rct=false;}
+        if (d.refcompmass!="-"){
+            if (d.refcompmass==d.refcomp){rcm=rct;rcmu=false}
+            else if(d.refcompmass==d.refbhmass){rcm=rbhm;rcmu=false}
+            else{rcm=rx;rx++;rcmu=true}
+            if (rcm!=rct){text = text + " <sup>["+this.tN(rcm)+"]</sup>";}
+            console.log(d.refcompmass)
+        }else{rcm=false;}
         text = text+"</span>";
         //period mass
         text = text+ "<span class='info'><b>%data.bub.period%</b>: "+this.tN(d.period)+
         " %data.bub.period.days%</sub>";
-        if (d.refper!="-"){text = text +
-            " <sup>["+this.tN(rx)+"]</sup></span>";rper=rx;rx++;}
-        else{rper=false;text = text+"</span>"}
+        if (d.refper!="-"){
+            if (d.refper==d.refbhmass){rper=rbhm;rperu=false;}
+            else if(d.refper==d.refcomp){rper=rct;rperu=false;}
+            else if(d.refper==d.refcompmass){rper=rcm;rperu=false;}
+            else{rper=rx;rx++;rperu=true}
+            text = text +" <sup>["+this.tN(rper)+"]</sup></span>";
+        }else{rper=false;text = text+"</span>"}
         text = text+ "<span class='info'><b>%data.bub.loc%"+"</b>: "+d.location+"</span>";
-        if (rbhm){text = text + "<span class='ref'>["+this.tN(rbhm)+"] "+d.refbhmass+"</span>"}
-        if (rct){text = text + "<span class='ref'>["+this.tN(rct)+"] "+d.refcomp+"</span>"}
-        if (rcm){text = text + "<span class='ref'>["+this.tN(rcm)+"] "+d.refcompmass+"</span>"}
-        if (rper){text = text + "<span class='ref'>["+this.tN(rper)+"] "+d.refper+"</span>"}
+        if ((rbhm)&&(rbhmu)){text = text + "<span class='ref'>["+this.tN(rbhm)+"] "+d.refbhmass+"</span>"}
+        if ((rct)&&(rctu)){text = text + "<span class='ref'>["+this.tN(rct)+"] "+d.refcomp+"</span>"}
+        if ((rcm)&&(rcmu)){text = text + "<span class='ref'>["+this.tN(rcm)+"] "+d.refcompmass+"</span>"}
+        if ((rper)&&(rperu)){text = text + "<span class='ref'>["+this.tN(rper)+"] "+d.refper+"</span>"}
     }else{
         text = text + "<span class='info'><b>%data.bub.mass%</b>: "+this.tN(d["massBHstr"])+" %data.mass.unit.msun%";
         if (d.refbhmass!='-'){text = text +
