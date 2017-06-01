@@ -404,6 +404,9 @@ input.down{
     color:#fff;
     float:left;
 }
+.popup-button{
+    display:inline-block;
+}
 .help-cont{
     width:90%;
     margin-left:10%;

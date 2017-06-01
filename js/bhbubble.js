@@ -149,8 +149,18 @@ BHBubble.prototype.loadLang = function(lang){
             footer.innerHTML = _bh.tl("%text.bub.footer%",footertxt);
             // update title
             d3.select('#hdr h1').html(_bh.tl("%text.bub.page.title%"));
+            d3.select('#copy-button').attr('title',_bh.tl('%text.gen.share.copylink%'))
+            d3.select('#facebook-share-button').attr('title',_bh.tl('%text.gen.share.fb%'))
+            d3.select('#twitter-share-button').attr('title',_bh.tl('%text.gen.share.twitter%'))
+            d3.select('#copy-button').attr('data-clipboard-text',_bh.makeUrl());
         }
-        else{_bh.makePlot();}
+        else{
+            d3.select('#copy-button').attr('title',_bh.tl('%text.gen.share.copylink%'))
+            d3.select('#facebook-share-button').attr('title',_bh.tl('%text.gen.share.fb%'))
+            d3.select('#twitter-share-button').attr('title',_bh.tl('%text.gen.share.twitter%'))
+            d3.select('#copy-button').attr('data-clipboard-text',_bh.makeUrl());
+            _bh.makePlot();
+        }
     })
 }
 BHBubble.prototype.t = function(key,def){
