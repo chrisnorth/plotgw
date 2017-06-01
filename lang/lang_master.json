@@ -186,7 +186,7 @@
     "share.plotgw.twitter.hashtag":{"_title":"Tweet hashtag","_text":"Default hashtag to include in tweet","_type":"string"},
 
     "subsection.bub.share":{"_title":"Text etc. for sharing bubble plot"},
-    "share.bub.twitter.text":{"_title":"Tweet text","_text":"Default text to appear in tweet for bubble plot. <b>Should be &lt;140 characters when combined with  hashtag</b>","_type":"textarea","_height":"2em"},
+    "share.bub.twitter.text":{"_title":"Tweet text","_text":"Default text to appear in tweet for bubble plot. <b>Should be &lt;140 characters when combined with  hashtag</b>","_type":"textarea","_height":"2em","_highlight":true},
     "share.bub.twitter.hashtag":{"_title":"Tweet hashtag","_text":"Default hashtag to include in tweet","_type":"string"},
 
     "section.domains":{"_title":"Web domains for building links","_text":"Included in case there are language-specific versions in the future."},
