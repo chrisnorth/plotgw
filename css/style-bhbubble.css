@@ -4,27 +4,30 @@ body {
   margin:0;
   background-color:#000;
   text-align:center;
+  overflow:hidden;
 }
 a{
     color:#ff55ff;
 }
+.bubble-container{
+    width:100%;
+    height:100%;
+}
 .cc_banner{
     text-align:center
 }
-#hdr.bottom{
+#hdr{
     width:100%;
-    text-align:center;
-    max-height:5%;
     color:#fff;
+    background-color: rgba (0,0,0,0.5);
+    text-align:center;
+}
+#hdr.bottom, #control-bar.bottom{
+    max-height:5%;
     position:fixed;
-    background-color: rgba(0,0,0,0.5)
 }
 #hdr.right{
-    width:100%;
-    text-align:center;
     height:5%;
-    color:#fff;
-    background-color: rgba(0,0,0,0.5);
     display:block;
     position:relative;
 }
@@ -32,7 +35,19 @@ a{
     margin-bottom:0;
     font-size:22px;
 }
-#hdr .button {
+#control-bar{
+    width:100%;
+    text-align:right;
+    color:#fff;
+    position:fixed;
+    top:0;
+    margin:0 auto;
+}
+#control-bar.right{
+    height:5%;
+    display:block;
+}
+#control-bar .button {
     float:right;
     right:0;
     margin-right:10px;
@@ -40,13 +55,13 @@ a{
     height:50%;
     width:auto;
 }
-#hdr .button img{
+#control-bar .button img{
     height:100%;
     float:right;
     width:auto;
     cursor: pointer;
 }
-#hdr .button .button-span{
+#control-bar .button .button-span{
     height:100%;
     float:right;
     width:auto;
@@ -67,22 +82,24 @@ a{
     padding-right:5px;
     padding-left:5px;
 }*/
-#lang-list{
+/*#lang-list{
     width:auto;
     margin-top:1.5em;
     border:1px solid white;
     border-bottom-left-radius:5px;
     border-bottom-right-radius:5px;
     display:none;
-}
-#lang-list span{
+}*/
+#lang-block span{
     display:block;
     padding:5px;
     text-align:left;
+    color:#fff;
+    cursor:pointer;
 }
 span.lang-item.current{
     font-weight: bold;
-    color:yellow;
+    color:yellow !important;
 }
 span.lang-item.current:before{
     content:"▶ "
@@ -90,12 +107,12 @@ span.lang-item.current:before{
 #lang-button.show #lang-list{
     display:block;
 }
-#lang-label:before{
+/*#lang-label:before{
     content:"▼";
 }
 #lang-label.show:before{
     content:"▲";
-}
+}*/
 /*span#lang-arrow:after{
     content:"▼";
 }
@@ -121,14 +138,14 @@ span#lang-arrow.show:after{
     position:relative;
     margin:0 auto;
 }
-#bubble-container.right{
+#svg-container.right{
     height:100%;
     width:auto;
     float:left;
     text-align:right;
     margin:0 auto;
 }
-#bubble-container.bottom{
+#svg-container.bottom{
     width:100%;
     height:85%;
     display:block;
@@ -339,19 +356,19 @@ input.down{
     text-align:left;
     padding-bottom:0px;
 }
-.infoclose, .helpclose{
+.popup-close{
     position:absolute;
     width:30px;
     height:30px;
     right:-15px;
-    top:-10px;
+    top:-15px;
     cursor:pointer;
 }
-.infoclose img, .helpclose img{
+.popup-close img{
     width:100%;
     cursor:pointer;
 }
-#help-bg{
+.popup-bg{
     position:fixed;
     width:100%;
     height:0;
@@ -360,7 +377,7 @@ input.down{
     background-color: #888;
     opacity:0;
 }
-#help-outer{
+.popup-outer{
     position: fixed;
     width: 200px;
     height: auto;
@@ -369,28 +386,33 @@ input.down{
     border-radius:20px;
     padding:5px;
     opacity:0;
+    max-height:80%;
+    /*overflow-y:scroll;*/
 }
-#help-inner{
+.popup-inner{
     width:100%;
     height:auto;
     padding-bottom:10px;
     background-color:#000;
 }
-.help-title{
+.popup-title{
     width:100%;
     text-align:center;
-    font-size:2em;
-    padding-bottom:2%;
-    padding-top:5%;
+    font-size:1.5em;
+    padding-bottom:5px;
+    padding-top:10px;
     color:#fff;
     float:left;
+}
+.popup-button{
+    display:inline-block;
 }
 .help-cont{
     width:90%;
     margin-left:10%;
     text-align:left;
     padding-bottom:3%;
-    height:6%;
+    height:auto;
     float:left;
 }
 .help-cont img{
@@ -405,6 +427,12 @@ input.down{
 .help-text{
     color:#fff;
     font-size:1.2em;
+}
+#share-inner{
+    text-align:left;
+}
+.share-icon{
+    height:50px;
 }
 @media (max-width: 500px){
     .tooltip span.name{

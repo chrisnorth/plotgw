@@ -1,9 +1,35 @@
-// var diameter = Math.min(document.getElementById("bubble-container").offsetWidth,document.getElementById("bubble-container").offsetHeight);
+// var diameter = Math.min(document.getElementById("svg-container").offsetWidth,document.getElementById("svg-container").offsetHeight);
 // // document.getElementById("hdr").setAttribute("width",diameter);
-// document.getElementById("bubble-container").setAttribute("width",diameter);
+// document.getElementById("svg-container").setAttribute("width",diameter);
 // console.log(document.getElementById("hdr"));
 
-function BHBubble(){
+function BHBubble(inp){
+    var bh=this;
+    this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "bubble-cont";
+    // parse URL queries
+    this.getUrlVars();
+    // load language
+    this.langdir='lang/';
+    this.defaults = {"lang":"en"}
+    this.nameCols = {"or":"name-or-unicode"}
+
+    //set default language from browser
+    langIn = (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
+
+    //set lang from query (if present)
+    if((inp)&&(inp.lang)&&(typeof inp.lang=="string")) langIn = inp.lang;
+
+    // set language from urlVars (if present)
+    langIn = ((this.urlVars.lang)&&(typeof this.urlVars.lang=="string")) ? this.urlVars.lang : langIn
+    if (this.urlVars.debug){console.log('initial language: ',langIn)}
+
+    this.loadLang(langIn);
+    // bub.makePlot();
+    // NB: "loadLang" calls makePlot function on first load
+
+    window.addEventListener("resize",function(){
+        bh.replot();
+    });
     return this;
 }
 BHBubble.prototype.getUrlVars = function(){
@@ -24,9 +50,9 @@ BHBubble.prototype.getUrlVars = function(){
     this.urlVars = vars;
     this.url = url;
     //set default language
-    if(!this.urlVars.hasOwnProperty("lang")){
-        this.urlVars.lang="en";
-    }
+    // if(!this.urlVars.hasOwnProperty("lang")){
+    //     this.urlVars.lang="en";
+    // }
 }
 BHBubble.prototype.makeUrl = function(newKeys){
     // construct new URL with replacement queries if necessary
@@ -48,70 +74,92 @@ BHBubble.prototype.makeUrl = function(newKeys){
 BHBubble.prototype.loadLang = function(lang){
     //;load language files - then call rest of load procedure
     var _bh = this;
-    var reload = (_bh.lang) ? true:false;
+    if (this.urlVars.debug){console.log('lang',lang);}
+    var reload = (!_bh.lang)||(_bh.lang=="") ? false:true;
     if (this.urlVars.debug){console.log('reload',reload);}
-    _bh.lang = lang;
     _bh.langloaded=false;
     if (!lang){
         lang="en";
         if(_bh.urlVars.debug){console.log("default to",lang);}
-        _bh.lang = lang;
-    };
-    var url=this.langdir+lang+'.json';
+    }
+    _bh.lang = lang;
+    _bh.langshort = (_bh.lang.indexOf('-') > 0 ? _bh.lang.substring(0,_bh.lang.indexOf('-')) : _bh.lang.substring(0,2));
+    _bh.fileInLang=this.langdir+'lang_'+_bh.lang+'.json';
     // console.log(url);
     // Bug fix for reading local JSON file in FF3
-    $.ajaxSetup({async:true,'beforeSend': function(xhr){
-        // console.log(this);
-        if (xhr.overrideMimeType) xhr.overrideMimeType("text/plain"); },
-        datatype:'json',
-        success:function(json){}
-    });
+    // $.ajaxSetup({async:true,'beforeSend': function(xhr){
+    //     // console.log(this);
+    //     if (xhr.overrideMimeType) xhr.overrideMimeType("text/plain"); },
+    //     datatype:'json',
+    //     success:function(json){}
+    // });
     // Get the JSON language file amd call "makePlot" on completion
-    $.getJSON({url:url,
-        beforeSend: function(xhr){
-            if (xhr.overrideMimeType){
-                xhr.overrideMimeType("application/json");
+    d3.json(_bh.fileInLang, function(error, data) {
+        if (error){
+            if (_bh.lang==_bh.defaults.lang){
+                console.log(error);
+                alert("Fatal error loading input file: '"+_bh.fileInLang+"'. Sorry!")
+            }else if (_bh.langshort!=_bh.lang){
+                if (_bh.urlVars.debug){console.log('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead')}
+                if (_bh.urlVars.lang){
+                    alert('Error loading language '+_bh.lang+'. Displaying '+_bh.langshort+' instead');
+                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.langshort}));
+                }
+                _bh.langold=_bh.lang
+                _bh.lang=null;
+                _bh.loadLang(_bh.langshort);
+            }else{
+                if (_bh.urlVars.debug){console.log('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');}
+                if (_bh.urlVars.lang){
+                    alert('Error loading language '+_bh.lang+'. Reverting to '+_bh.defaults.lang+' as default');
+                    window.history.pushState({},null,_bh.makeUrl({'lang':_bh.defaults.lang}));
+                }
+                // window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
+                // gw.loaded-=1;
+                _bh.langold=_bh.lang
+                _bh.lang=null;
+                _bh.loadLang(_bh.defaults.lang);
+                // window.location.replace(_bh.makeUrl({'lang':_bh.defaults.lang}));
             }
-        },
-        dataType: 'json',
-        error:function(data){
-            alert('Error loading language '+_bh.lang+'. Reverting to English as default');
-            if (_bh.urlVars.debug){console.log(data);}
-            //navigate to same page, but lang="en"
-            // window.location.replace(_bh.makeUrl({'lang':'en'}));
-            window.history.pushState({},null,_bh.makeUrl({'lang':'en'}));
-            _bh.lang=null;
-            _bh.loadLang('en');
-        },
-        success:function(data){
-            if (_bh.urlVars.debug){console.log('success',data[0]);}
-            _bh.langdict=data[0];
-            _bh.nameCol = (_bh.langdict.hasOwnProperty("nameCol")) ? _bh.langdict.nameCol : "name";
-            _bh.alphabet = (_bh.langdict.hasOwnProperty("alphabet")) ? _bh.langdict.alphabet : "Roman";
-            if (_bh.alphabet=="Roman"){
-                document.title=_bh.t("title",document.title);}
-            _bh.langloaded=true;
-            _bh.legenddescs = {
-                1:_bh.t("Gravitational Wave Candidate"),
-                2:_bh.t("Gravitational Wave Detection"),
-                3:_bh.t("X-ray Binary")};
-            if (_bh.urlVars.debug){console.log('loaded: '+_bh.lang)}
-            if (reload){
-                // change language
-                _bh.langlab.html(_bh.langs[_bh.lang].code);
-                d3.select(".lang-item.current").classed("current",false);
-                d3.select(".lang-item#"+_bh.lang).classed("current",true);
-                // update URL
-                window.history.pushState({},null,_bh.makeUrl({'lang':_bh.lang}));
-                // update footer
-                footer=document.getElementById("footer-txt");
-                footer.innerHTML = _bh.t("footer",footertxt);
-                // update title
-                d3.select('#hdr h1').html(_bh.t("title","Known Stellar-mass Black Holes"));
-                // replot
-                _bh.replot();
-            }
-            else{_bh.makePlot();}
+        }
+        if (!data){
+            if (_bh.urlVars.debug){console.log('tried loading: ',_bh.langold)}
+            return
+        }
+        if (_bh.urlVars.debug){console.log('successfully loaded: ',_bh.lang,data);}
+        _bh.langdict=data;
+        document.title=_bh.tl("%text.bub.page.title%");
+        _bh.langloaded=true;
+        // update legend
+        _bh.legenddescs = {
+            1:_bh.tl("%text.bub.legend.candidate%"),
+            2:_bh.tl("%text.bub.legend.detection%"),
+            3:_bh.tl("%text.bub.legend.xray%")};
+        if (reload){
+            // replot
+            _bh.replot();
+            // change language
+            _bh.langlab.html(_bh.langs[_bh.lang].code);
+            d3.select(".lang-item.current").classed("current",false);
+            d3.select(".lang-item#"+_bh.lang).classed("current",true);
+            // update URL
+            window.history.pushState({},null,_bh.makeUrl({'lang':_bh.lang}));
+            // update footer
+            footer=document.getElementById("footer-txt");
+            footer.innerHTML = _bh.tl("%text.bub.footer%",footertxt);
+            // update title
+            d3.select('#hdr h1').html(_bh.tl("%text.bub.page.title%"));
+            d3.select('#copy-button').attr('title',_bh.tl('%text.gen.share.copylink%'))
+            d3.select('#facebook-share-button').attr('title',_bh.tl('%text.gen.share.fb%'))
+            d3.select('#twitter-share-button').attr('title',_bh.tl('%text.gen.share.twitter%'))
+            d3.select('#copy-button').attr('data-clipboard-text',_bh.makeUrl());
+        }
+        else{
+            d3.select('#copy-button').attr('title',_bh.tl('%text.gen.share.copylink%'))
+            d3.select('#facebook-share-button').attr('title',_bh.tl('%text.gen.share.fb%'))
+            d3.select('#twitter-share-button').attr('title',_bh.tl('%text.gen.share.twitter%'))
+            d3.select('#copy-button').attr('data-clipboard-text',_bh.makeUrl());
+            _bh.makePlot();
         }
     })
 }
@@ -122,6 +170,42 @@ BHBubble.prototype.t = function(key,def){
         if (this.urlVars.debug){console.log("not found: "+key)};
         return (def) ? def : key;
     }
+}
+BHBubble.prototype.tl = function(textIn,plaintext){
+    // translate text given dict
+    // plaintext = plaintext || false;
+    // search textIn for %...%\
+    re=/\%(.+?)\%/g;
+    matches=[]
+    var match=re.exec(textIn);
+    while (match!=null){
+        matches.push(match[1])
+        match=re.exec(textIn)
+    }
+    textOut=textIn;
+    if (matches){
+        nmatch=matches.length
+        for (n in matches){
+            mx0='%'+matches[n]+'%';
+            mx1=matches[n];
+            if (this.langdict[mx1]){
+                textOut=textOut.replace(mx0,this.langdict[mx1]);
+            }else{
+                textOut=textOut;
+                if(this.debug){console.log('ERROR: "'+mx1+'" not found in dictionary');}
+            }
+        }
+    }
+    if (!plaintext){
+        // replace superscripts
+        reSup=/\^(-?[0-9]*)(?=[\s/]|$)/g
+        // textOut = (textOut) ? textOut.replace(reSup,"<sup>$1</sup> ") : "";
+        textOut = textOut.replace(reSup,"<sup>$1</sup> ")
+        // replace Msun
+        // textOut = (textOut) ? textOut.replace(this.tl("%data.mass.unit.msun%",true),'M<sub>&#x2609;</sub>') : "";
+        textOut = textOut.replace(new RegExp(this.tl("%data.mass.unit.msun%",true),'g'),'M<sub>&#x2609;</sub>')
+    }
+    return(textOut);
 }
 BHBubble.prototype.tNold = function(key){
     // translate numbers
@@ -143,10 +227,10 @@ BHBubble.prototype.tN = function(key){
             telugu: 3174, marathi: 2406, malayalam: 3430,
             oriya: 2918, gurmukhi: 2662, nagari: 2534, gujarati: 2790
         };
-    if (!systems.hasOwnProperty(this.langdict.name.toLowerCase())){return key;}
+    if (!systems.hasOwnProperty(this.langdict["meta.numbersystem"].toLowerCase())){return key;}
     zero = 48; // char code for Arabic zero
     nine = 57; // char code for Arabic nine
-    offset = (systems[this.langdict.name.toLowerCase()] || zero) - zero;
+    offset = (systems[this.langdict["meta.numbersystem"].toLowerCase()] || zero) - zero;
     output = key.toString().split("");
     l = output.length;
 
@@ -172,13 +256,11 @@ BHBubble.prototype.init = function(){
     this.valueCol='massBHsq';
     this.filterType="";
     this.displayFilter="nofin";
-    this.langdir = 'bhbubble-lang/';
-    d3.select('#hdr h1').html(this.t("title","Known Stellar-mass Black Holes"));
+    this.langdir = 'lang/';
+    d3.select('#hdr h1').html(this.tl("%text.bub.page.title%"));
     this.mergeDuration = 1000;
     //set name column
-    this.nameCol="name";
-    if (this.langdict.hasOwnProperty("nameCol")){this.nameCol=this.langdict.nameCol;}
-    this.alphabet = (this.langdict.hasOwnProperty("alphabet")) ? this.langdict.alphabet : "Roman";
+    this.nameCol = (this.nameCols.hasOwnProperty(this.lang)) ? this.nameCols[this.lang] : "name";
 }
 BHBubble.prototype.makeSvg = function(){
     // make initial elements
@@ -186,37 +268,37 @@ BHBubble.prototype.makeSvg = function(){
     // .style("opacity", 0);
 
     this.infopanelbg = d3.select("body").append("div")
-        .attr("class","infopanelbg")
+        .attr("class","infopanelbg popup-bg")
         .on("click",function(){bh.hideInfopanel();});
     this.infopanelouter = d3.select("body").append("div")
-        .attr("class","infopanelouter").attr("id","infopanel-outer")
+        .attr("class","infopanelouter pop-outer").attr("id","infopanel-outer")
         .style("top",0.5*this.bubHeight);
     this.infopanel = this.infopanelouter.append("div")
             .attr("class","infopanel");
-    this.infopanelouter.append("div").attr("class","infoclose")
-        .html("<img src='img/close.png' title='"+this.t("Close")+"'>")
+    this.infopanelouter.append("div").attr("class","infoclose popup-close")
+        .html("<img src='img/close.png' title='"+this.tl("%text.gen.close%")+"'>")
         .on("click",function(){bh.hideInfopanel();});
     //replace footer text for language
     footer=document.getElementById("footer-txt");
     footertxt = footer.innerHTML;
-    footer.innerHTML = this.t("footer",footertxt);
+    footer.innerHTML = this.tl("%text.bub.footer%");
     //replace svg button text for language
     if (this.alphabet!="Roman"){
         document.getElementById("generate").style.display = "none";
     }
-    document.getElementById("generate").innerHTML=this.t("Save as SVG");
+    document.getElementById("generate").innerHTML=this.tl("%text.bub.save.svg%");
 
 }
 BHBubble.prototype.scalePage = function(){
     // Set scale of elements given page size
-    this.pgWidth=window.outerWidth;
-    this.pgHeight=window.outerHeight;
+    this.pgWidth=document.getElementById(this.holderid).offsetWidth;
+    this.pgHeight=document.getElementById(this.holderid).offsetHeight;
     this.pgAspect = this.pgWidth/this.pgHeight;
     if (this.pgAspect>1){this.controlLoc='right'}else{this.controlLoc='bottom'}
     //apply classes accordingly
     footer = document.getElementById("footer");
     this.full = document.getElementById("full");
-    this.bubcont = document.getElementById("bubble-container");
+    this.bubcont = document.getElementById("svg-container");
     if (this.controlLoc=='right'){
         footer.classList.add("right");
         footer.classList.remove("bottom");
@@ -225,7 +307,7 @@ BHBubble.prototype.scalePage = function(){
         // bubcont.style.height = this.svgSize+"px";
         this.full.classList.add("right");
         this.full.classList.remove("bottom");
-        // full.style.height = this.svgSize+"px";
+        // this.holder.style.height = this.svgSize+"px";
     }else{
         footer.classList.add("bottom");
         footer.classList.remove("right");
@@ -234,16 +316,17 @@ BHBubble.prototype.scalePage = function(){
         // bubcont.style.height = this.pgWidth+"px";
         this.full.classList.add("bottom");
         this.full.classList.remove("right");
+        this.full.style.eidth = this.pgWidth+"px";
         // bubcont.style.height = this.pgWidth+"px";
     }
     if (this.controlLoc=='right'){
-        // document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        // this.full.setAttribute("style","width:"+(this.bubWidth+this.contWidth)+"px");
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         this.bubWidth = this.bubHeight;
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }else{
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
-        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
+        this.bubWidth = document.getElementById("svg-container").offsetWidth;
         // console.log(this.bubWidth,this.bubHeight)
         this.svgSize=Math.min(this.bubWidth,this.bubHeight);
     }
@@ -287,11 +370,11 @@ BHBubble.prototype.filterFn = function(filterType){
     if (filterType=="nofin"){
         return function(d){
             // console.log(d.name,(d.BHtype!="final"),(!d.children),((d.BHtype!="final")&&(!d.children)));
-            return ((d.BHtype!="final")&&(!d.children));};
+            return ((d.BHtype!="%data.bub.type.final%")&&(!d.children));};
     }else if(filterType=="noinit"){
         return function(d){
             // console.log(d.name,(d.BHtype!="final"),(!d.children),((d.BHtype!="final")&&(!d.children)));
-            return ((d.BHtype!="primary")&&(d.BHtype!='secondary')&&(!d.children));};
+            return ((d.BHtype!="%data.bub.type.primary%")&&(d.BHtype!='%data.bub.type.secondary%')&&(!d.children));};
     }else{
         // console.log('filter',d.name,d.children);
         return function(d){
@@ -305,14 +388,14 @@ BHBubble.prototype.filterData = function(data,filterType){
     var idxRem=[];
     if (filterType=="nofin"){
         data.forEach(function(d){
-            if(d.BHtype=="final"){
+            if(d.BHtype=="%data.bub.type.final%"){
                 // console.log('nofin removing',d.name);
                 idxRem.push(data.indexOf(d));
             }
         });
     }else if (filterType=="noinit"){
         data.forEach(function(d){
-            if((d.BHtype=="primary")||(d.BHtype=="secondary")){
+            if((d.BHtype=="%data.bub.type.primary%")||(d.BHtype=="%data.bub.type.secondary%")){
                 // console.log('noinit removing',d.name,d.BHtype);
                 idxRem.push(data.indexOf(d));
             }
@@ -378,7 +461,11 @@ BHBubble.prototype.loadData = function(){
                 window.location.replace(bh.makeUrl({'eventsFile':null}));
             }
         }
-        dataJson=jsonIn.data;
+        if (jsonIn.data){
+            dataJson=jsonIn.data;
+        }else if(jsonIn.events){
+            dataJson=jsonIn.events;
+        }
         links=jsonIn.links
         data = [];
         nametr={};
@@ -387,47 +474,85 @@ BHBubble.prototype.loadData = function(){
             pri=[]
             sec=[]
             fin=[]
-            console.log(i,dj);
             pri={
                 name:i+'-A',
-                massBH:dj.M1.best,
-                massBHerr:'e'+parseFloat(dj.M1.err[1])+'-'+
-                    parseFloat(dj.M1.err[0]),
-                compMass:dj.M2.best,
-                compType:'Black hole',
+                compType:'%data.bub.comp.bh%',
                 parentName:i,
-                BHtype:'primary',
+                BHtype:'%data.bub.type.primary%',
             }
             sec={
                 name:i+'-B',
-                massBH:dj.M2.best,
-                massBHerr:'e'+parseFloat(dj.M2.err[1])+'-'+
-                    parseFloat(dj.M2.err[0]),
-                compMass:dj.M1.best,
-                compType:'Black hole',
+                compType:'%data.bub.comp.bh%',
                 parentName:i,
-                BHtype:'secondary',
+                BHtype:'%data.bub.type.secondary%',
             }
             fin={
                 name:i,
-                massBH:dj.Mfinal.best,
-                massBHerr:'e'+parseFloat(dj.Mfinal.err[1])+'-'+
-                    parseFloat(dj.Mfinal.err[0]),
-                compMass:'None',
-                compType:'None',
+                compMass:'%data.bub.comp.none%',
+                compType:'%data.bub.comp.none%',
                 parentName:'',
-                BHtype:'final',
+                BHtype:'%data.bub.type.final%',
+            }
+            if (dj.M1.best){
+                // use M1.best, M1.err
+                pri.massBH=dj.M1.best;
+                pri.massBHerr='e'+parseFloat(dj.M1.err[1])+'-'+
+                    parseFloat(dj.M1.err[0]);
+                pri.compMass=dj.M2.best;
+                sec.massBH=dj.M2.best;
+                sec.massBHerr='e'+parseFloat(dj.M2.err[1])+'-'+
+                    parseFloat(dj.M2.err[0]);
+                sec.compMass=dj.M1.best;
+                fin.massBH=dj.Mfinal.best;
+                fin.massBHerr='e'+parseFloat(dj.Mfinal.err[1])+'-'+
+                    parseFloat(dj.Mfinal.err[0]);
+                distance=parseInt(3.26*(dj.DL.best-dj.DL.err[0]))+
+                    '-'+parseInt(3.26*(dj.DL.best+dj.DL.err[1]));
+            }else{
+                pri.massBH=dj.M1[0];
+                pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
+                    parseFloat(dj.M1[1]);
+                pri.compMass=dj.M2[0];
+                sec.massBH=dj.M2[0];
+                sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
+                    parseFloat(dj.M2[1]);
+                sec.compMass=dj.M1[0];
+                fin.massBH=dj.Mfinal[0];
+                fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
+                    parseFloat(dj.Mfinal[1]);
+                distance=parseInt(3.26*(dj.DL[0]-dj.DL[1]))+
+                    '-'+parseInt(3.26*(dj.DL[0]+dj.DL[2]));
             }
             if (i[0]=='G'){method='GW'}
             else if (i[0]=='L'){method='LVT'}
-            paper='<a target="_blank" href="'+
-                links[i].DetPaper.url+'">'+
-                links[i].DetPaper.text+'</a>';
-            binType='Binary black hole';
+            paper='-';
+            if (links[i]){
+                if (links[i].DetPaper){
+                    paper='<a target="_blank" href="'+
+                        links[i].DetPaper.url+'">'+
+                        links[i].DetPaper.text+'</a>';
+                }else{
+                    for (p in links[i]){
+                        if ((links[i][p].text) && (links[i][p].url)){
+                            if (links[i][p].text.search("Paper")>=0){
+                                console.log(i,links[i][p].text,links[i][p].text.search("Paper"))
+                                if (links[i][p].citation){
+                                    paper='<a target="_blank" href="'+
+                                        links[i][p].url+'">'+
+                                        links[i][p].citation+'</a>';
+                                }else{
+                                    aper='<a target="_blank" href="'+
+                                        links[i][p].url+'">'+
+                                        links[i][p].text+'</a>';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            binType='%data.bub.type.bbh%';
             period='';
-            loc='Extragalactic'
-            distance=parseInt(3.26*(dj.Ldist.best-dj.Ldist.err[0]))+
-                '-'+parseInt(3.26*(dj.Ldist.best+dj.Ldist.err[1]));
+            loc='%data.bub.loc.extragalactic%'
             refcompmass='';
             refcomp='';
             refper='';
@@ -464,6 +589,10 @@ BHBubble.prototype.loadData = function(){
     d3.csv(this.inputFileXray, function(error, data){
         if (error){alert("Fatal error loading input file: '"+bh.inputFileXray+"'. Sorry!")}
         data= bh.filterData(data,bh.filterType);
+        for (i in data){
+            dx=data[i]
+
+        }
         bh.dataXray = data;
         bh.nloaded++;
         if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileXray)}
@@ -541,13 +670,17 @@ BHBubble.prototype.formatData = function(valueCol){
             errcode=d.massBHerr.split('~')[1];
             d.massBHplus = +errcode;
             d.massBHminus = +errcode;
-            d.massBHstr = bh.t('approx.')+' '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
+            d.massBHstr = bh.tl("%data.bub.approx%")+' '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
         }else{if (this.urlVars.debug){console.log('Data format err:',d.massBHerr,d);}}
-        if (bh.langdict.hasOwnProperty('nameCol')&&(d.binType=='Binary black hole')){
-            nc=bh.langdict.nameCol;
+        if ((bh.nameCol!="name")&&(d.binType=='%data.bub.type.bbh%')){
+            this.names={"GW":"%data.bub.name.GW%",
+                "LVT":"%data.bub.name.LVT%",
+                "-A":"%data.bub.name.A%",
+                "-B":"%data.bub.name.B%"}
+            nc=bh.nameCol;
             rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
             tr=rename.exec(d.name)
-            d[nc]=bh.t(tr[1])+bh.tN(tr[2])+bh.t(tr[3])
+            d[nc]=bh.tl(this.names[tr[1]]+bh.tN(tr[2])+this.names[tr[3]])
         }
     });
     this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
@@ -573,7 +706,7 @@ BHBubble.prototype.formatData = function(valueCol){
         // if ((d.method=="GW")||(d.method=="LVT")){
         //     bh.arrowpos[d.id]={x:d.x,y:d.y,r:d.r,c:bh.fillcolor2(bh.cValue(d)),type:d.BHtype};
         // }
-        if (d.compType=="Black hole"){
+        if (d.compType=="%data.bub.comp.bh%"){
             bh.arrows[d.id]=[d.id,bh.name2id(d.parentName)];
         }
     });
@@ -584,8 +717,8 @@ BHBubble.prototype.getText = function(d){
     if (d.r<15){
         return "";
     }else if (
-        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
-        ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
+        ((d.BHtype=="%data.bub.type.primary%")||(d.BHtype=="%data.bub.type.secondary%"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
+        ((d.BHtype=="%data.bub.type.final%"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
     ){
         return "";
     }else{
@@ -628,8 +761,8 @@ BHBubble.prototype.getRadius = function(d){
     // get radius of a BH element given a displayFilter
     bh=this;
     if (
-        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
-        ((d.BHtype=="final"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
+        ((d.BHtype=="%data.bub.type.primary%")||(d.BHtype=="%data.bub.type.secondary%"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
+        ((d.BHtype=="%data.bub.type.final%"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
     ){
         return 0;}else{return d.r}
 }
@@ -637,7 +770,7 @@ BHBubble.prototype.getX = function(d){
     // get Y position of a BH element given a displayFilter
     bh=this;
     if (
-        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
+        ((d.BHtype=="%data.bub.type.primary%")||(d.BHtype=="%data.bub.type.secondary%"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
     ){return this.arrowpos[this.arrows[d.id][1]].x;}
     else{return this.arrowpos[d.id].x}
 }
@@ -645,7 +778,7 @@ BHBubble.prototype.getY = function(d){
     // get Y position of a BH element given a displayFilter
     bh=this;
     if (
-        ((d.BHtype=="primary")||(d.BHtype=="secondary"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
+        ((d.BHtype=="%data.bub.type.primary%")||(d.BHtype=="%data.bub.type.secondary%"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))
     ){return this.arrowpos[this.arrows[d.id][1]].y;}
         else{return this.arrowpos[d.id].y}
 }
@@ -654,15 +787,16 @@ BHBubble.prototype.getOpacity = function(d){
     bh=this;
     var BHtype=d.BHtype;
     // console.log(d);
-    if ((this.displayFilter=="nofin")&&(BHtype=="final")){
+    if ((this.displayFilter=="nofin")&&(BHtype=="%data.bub.type.final%")){
+
         return 0;
-    }else if((this.displayFilter=="noinit")&&((BHtype=="primary")||BHtype=="secondary")){
+    }else if((this.displayFilter=="noinit")&&((BHtype=="%data.bub.type.primary%")||BHtype=="%data.bub.type.secondary%")){
         return 0;
     }else{return 1;}
 }
 BHBubble.prototype.drawBubbles = function(){
     // Add bubbles and legend
-    this.svg = d3.select("div#bubble-container")
+    this.svg = d3.select("div#svg-container")
         .append("svg").attr("class", "bubble")
         .attr("width", this.svgSize).attr("height", this.svgSize);
 
@@ -784,21 +918,25 @@ BHBubble.prototype.drawBubbles = function(){
     }
 }
 BHBubble.prototype.addLang = function(){
-    this.langs={
+    this.langs = {
         "cy":{code:"cy",name:"Cymraeg (cy)"},
         "de":{code:"de",name:"Deutsch (de)"},
         "en":{code:"en",name:"English (en)"},
+        "es":{code:"es",name:"Español (es)"},
         "fr":{code:"fr",name:"Francais (fr)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
         "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
+        "pl":{code:"pl",name:"Polski (pl)"},
         "zhhk":{code:"zhhk",name:"繁體中文(香港) (zh-hk)"}
     }
     var bh=this;
     this.langdiv = d3.select("#lang-button");
     this.langlab = d3.select("#lang-label");
     this.langlab.html(bh.langs[bh.lang].code);
-    this.langdiv.on("click",function(){bh.toggleLangList();});
-    this.langlist=document.getElementById("lang-list")
+    this.langdiv.on("click",function(){bh.showLang();});
+    // this.langlist=document.getElementById("lang-list")
+    this.langblock=document.getElementById("lang-block");
+    d3.select("#lang-title").html(bh.tl("%text.gen.lang%"));
     for(lang in this.langs){
         langspan=document.createElement("span");
         var langtxt="";
@@ -817,23 +955,25 @@ BHBubble.prototype.addLang = function(){
             bh.loadLang(bh.newlang);
             // window.location.href = bh.makeUrl({lang:this.getAttribute("id")});
         })
-        bh.langlist.appendChild(langspan);
+        // bh.langlist.appendChild(langspan);
+        bh.langblock.appendChild(langspan);
     }
     document.getElementById("lang-label").addEventListener("mouseover",function(e){
-        console.log("dfd")
-        bh.showControlTooltip(e,bh.t("Change language"));
+        bh.showControlTooltip(e,bh.tl("%text.gen.lang%"));
     });
     document.getElementById("lang-label").addEventListener("mouseout",function(){
         bh.hideControlTooltip();
     });
     document.getElementById("lang-icon").addEventListener("mouseover",function(e){
-        console.log("dfd")
-        bh.showControlTooltip(e,bh.t("Change language"));
+        bh.showControlTooltip(e,bh.tl("%text.gen.lang%"));
     });
     document.getElementById("lang-icon").addEventListener("mouseout",function(){
         bh.hideControlTooltip();
     });
-
+    d3.selectAll("#lang-close")
+        .on("click",function(){bh.hideLang();});
+    d3.select("#lang-close > img").attr("title",this.tl("%text.gen.close%"));
+    d3.select("#lang-bg").on("click",function(){bh.hideLang();});
 }
 BHBubble.prototype.toggleLangList = function(){
     $("#lang-button").toggleClass("show");
@@ -844,38 +984,38 @@ BHBubble.prototype.addHelp = function(){
     var bh=this;
     this.anim={
         merger:{icon:"img/merger.svg",
-            tt:this.t("Merge binary black holes")},
+            tt:this.tl("%text.bub.help.merge%")},
         unmerger:{icon:"img/unmerger.svg",
-            tt:this.t("Unmerge binary black holes")},
+            tt:this.tl("%text.bub.help.unmerge%")},
         showall:{icon:"img/showall.svg",
-            tt:this.t("Show all black holes")}
+            tt:this.tl("%text.bub.help.showall%")}
     }
     this.scales={
         scalesize:{icon:"img/scalesize.svg",
-            tt:this.t("Scale by size")},
+            tt:this.tl("%text.bub.help.scalesize%")},
         scalemass:{icon:"img/scalemass.svg",
-            tt:this.t("Scale by mass")},
+            tt:this.tl("%text.bub.help.scalemass%")},
     }
     this.helpbg = d3.select('#help-bg');
     this.helpouter = d3.select('#help-outer');
     this.helpinner = d3.select('#help-inner');
     // add click actions
-    helpicon = document.getElementById('help-icon')
+    helpicon = document.getElementById('help-icon');
     helpicon.addEventListener("click",function(){bh.showHelp();})
     helpicon.addEventListener("mouseover",function(e){
-            bh.showControlTooltip(e,"Help");})
+            bh.showControlTooltip(e,"%text.gen.help%");})
     helpicon.addEventListener("mouseout",function(e){
             bh.hideControlTooltip();});
     this.helpbg.on("click",function(){bh.hideHelp();});
     this.helpouter
         .style("top","200%");
     d3.selectAll("#help-close")
-        .html("<img src='img/close.png' title='"+this.t("Close")+"'>")
         .on("click",function(){bh.hideHelp();});
+    d3.select("#help-close > img").attr("title",this.tl("%text.gen.close%"));
     // build help text
     this.helpinner.append("div")
-        .attr("class","help-title reloadable")
-        .html(this.t("Mergers"));
+        .attr("class","popup-title reloadable")
+        .html(this.tl("%text.bub.mergers%"));
     for (cont in this.anim){
         helpcont=this.helpinner.append("div")
             .attr("class","help-cont reloadable")
@@ -886,11 +1026,10 @@ BHBubble.prototype.addHelp = function(){
         helpcont.append("div")
             .attr("class","help-text")
             .html(this.anim[cont].tt);
-        console.log('Adding',this.anim[cont].tt)
     }
     this.helpinner.append("div")
-        .attr("class","help-title reloadable")
-        .html(this.t("Scale"));
+        .attr("class","popup-title reloadable")
+        .html(this.tl("%text.bub.scale%"));
     for (cont in this.scales){
         helpcont=this.helpinner.append("div")
             .attr("class","help-cont reloadable")
@@ -901,8 +1040,32 @@ BHBubble.prototype.addHelp = function(){
         helpcont.append("div")
             .attr("class","help-text")
             .html(this.scales[cont].tt);
-        console.log('Adding',this.scales[cont].tt)
     }
+    helptech=this.helpinner.append("div")
+        .attr("class","help-cont reloadable")
+        .attr("id","help-tech");
+    helptech.append("div")
+        .attr("class","help-text reloadable")
+        .html(this.tl("%text.bub.help.tech%"));
+}
+BHBubble.prototype.addShare = function(){
+    // add click actions
+    var bh=this;
+    shareicon = document.getElementById('share-icon');
+    console.log('addShare')
+    shareicon.addEventListener("click",function(){bh.showShare();})
+    shareicon.addEventListener("mouseover",function(e){
+            bh.showControlTooltip(e,"%text.gen.help%");})
+    shareicon.addEventListener("mouseout",function(e){
+            bh.hideControlTooltip();});
+    d3.select('#share-bg').on("click",function(){bh.hideShare();});
+    // d3.select('#share-outer').style("top","200%");
+    d3.selectAll("#share-close")
+        // .html("<img src='img/close.png' title='"+this.tl("%text.gen.close%")+"'>")
+        .on("click",function(){bh.hideShare();});
+    d3.select("#share-close > img").attr("title",bh.tl("%text.gen.close%"));
+    d3.select("#share-title").html(bh.tl("%text.gen.share%"))
+
 }
 BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
     // set Label fontsize for control panel
@@ -920,7 +1083,7 @@ BHBubble.prototype.controlLabFontSize = function(width,txtCorr){
 BHBubble.prototype.addButtons = function(width){
     // Add control buttons
     var bh=this;
-    full = document.getElementById('full');
+    full = document.getElementById("full");
     if (this.controlLoc == 'right'){
         this.divcont = document.createElement('div');
         this.divcont.setAttribute("id","controls");
@@ -938,13 +1101,13 @@ BHBubble.prototype.addButtons = function(width){
     //
     spancont = document.createElement('div');
     spancont.className = "control-lab reloadable "+((this.controlLoc == 'right')?'right':'bottom');
-    spancont.innerHTML = this.t("Mergers");
+    spancont.innerHTML = this.tl("%text.bub.mergers%");
     this.divcont.appendChild(spancont);
     //set font size
     // width=spancont.offsetWidth;
     fontsize=this.controlLabFontSize(spancont.offsetWidth);
     // correct for text length
-    fontscale = Math.sqrt("Mergers".length/this.t("Mergers").length);
+    fontscale = Math.sqrt("Mergers".length/this.tl("%text.bub.mergers%").length);
     if (this.langdict.alphabet!="Roman"){fontscale *= Math.sqrt(7);}
     if (fontscale<1){fontsize *= fontscale;}
     spancont.style.fontSize=fontsize+"px";
@@ -960,9 +1123,9 @@ BHBubble.prototype.addButtons = function(width){
     animimg = document.createElement('img');
     animimg.setAttribute("id","button-merger");
     animimg.setAttribute("src","img/merger.svg");
-    // animimg.setAttribute("title",this.t("Merge binary black holes"));
+    // animimg.setAttribute("title",this.tl("%text.bub.help.merger%"));
     animimg.addEventListener("mouseover",function(e){
-        bh.showControlTooltip(e,"Merge binary black holes");
+        bh.showControlTooltip(e,"%text.bub.help.merge%");
     });
     animimg.addEventListener("mouseout",function(){
         bh.hideControlTooltip();
@@ -981,9 +1144,9 @@ BHBubble.prototype.addButtons = function(width){
     animimgun = document.createElement('img');
     animimgun.setAttribute("id","button-unmerger");
     animimgun.setAttribute("src","img/unmerger.svg");
-    // animimgun.setAttribute("title",this.t("Unmerge binary black holes"));
+    // animimgun.setAttribute("title",this.tl("%text.bub.help.unmerge%"));
     animimgun.addEventListener("mouseover",function(e){
-        bh.showControlTooltip(e,"Unmerge binary black holes");
+        bh.showControlTooltip(e,"%text.bub.help.unmerge%");
     });
     animimgun.addEventListener("mouseout",function(){
         bh.hideControlTooltip();
@@ -1001,8 +1164,8 @@ BHBubble.prototype.addButtons = function(width){
     animimgall = document.createElement('img');
     animimgall.setAttribute("id","button-showall");
     animimgall.setAttribute("src","img/showall.svg");
-    // animimgall.setAttribute("title",this.t("Show all black holes"));
-    animimgall.addEventListener("mouseover",function(e){bh.showControlTooltip(e,"Show all black holes");});
+    // animimgall.setAttribute("title",this.tl("%text.bub.help.showall%"));
+    animimgall.addEventListener("mouseover",function(e){bh.showControlTooltip(e,"%text.bub.help.showall%");});
     animimgall.addEventListener("mouseout",function(){bh.hideControlTooltip();});
     animimgall.addEventListener("click",function(){bh.showAll();});
     this.animcontall.appendChild(animimgall);
@@ -1010,14 +1173,14 @@ BHBubble.prototype.addButtons = function(width){
     //Scale label
     spancontscale = document.createElement('div');
     spancontscale.className = "control-lab reloadable "+((this.controlLoc == 'right')?'right':'bottom');
-    // scaletext = document.createTextNode(this.t("Scale"));
+    // scaletext = document.createTextNode(this.tl("%text.bub.scale%"));
     // spancontscale.appendChild(scaletext);
-    spancontscale.innerHTML = this.t("Scale");
+    spancontscale.innerHTML = this.tl("%text.bub.scale%");
     this.divcont.appendChild(spancontscale);
     //set font size
     fontsize=this.controlLabFontSize(spancontscale.offsetWidth);
     //scale by text length
-    fontscale = Math.sqrt("Scale".length/this.t("Scale").length);
+    fontscale = Math.sqrt("Scale".length/this.tl("%text.bub.scale%").length);
     if (this.langdict.alphabet!="Roman"){fontscale *= Math.sqrt(7);}
     if (fontscale<1){fontsize *= fontscale;}
     spancontscale.style.fontSize=fontsize+"px";
@@ -1032,9 +1195,9 @@ BHBubble.prototype.addButtons = function(width){
     scaleimgsize = document.createElement('img');
     scaleimgsize.setAttribute("id","button-scale-size");
     scaleimgsize.setAttribute("src","img/scalesize.svg");
-    // scaleimgsize.setAttribute("title",this.t("Scale by size"));
+    // scaleimgsize.setAttribute("title",this.tl("%text.bub.help.scalesize%"));
     scaleimgsize.addEventListener("mouseover",function(e){
-        bh.showControlTooltip(e,"Scale by size");
+        bh.showControlTooltip(e,"%text.bub.help.scalesize%");
     });
     scaleimgsize.addEventListener("mouseout",function(){
         bh.hideControlTooltip();
@@ -1053,9 +1216,9 @@ BHBubble.prototype.addButtons = function(width){
     scaleimgmass = document.createElement('img');
     scaleimgmass.setAttribute("id","button-scale-mass");
     scaleimgmass.setAttribute("src","img/scalemass.svg");
-    // scaleimgmass.setAttribute("title",this.t("Scale by mass"));
+    // scaleimgmass.setAttribute("title",this.tl("%text.bub.help.scalemass%"));
     scaleimgmass.addEventListener("mouseover",function(e){
-        bh.showControlTooltip(e,"Scale by mass");
+        bh.showControlTooltip(e,"%text.bub.help.scalemass%");
     });
     scaleimgmass.addEventListener("mouseout",function(){
         bh.hideControlTooltip();
@@ -1067,13 +1230,13 @@ BHBubble.prototype.addButtons = function(width){
     //
     if (this.controlLoc=='right'){
         this.contWidth = document.getElementById("controls").offsetWidth;
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         this.bubWidth = this.bubHeight;
         document.getElementById("full").setAttribute("style","width:"+(this.bubWidth+this.contWidth+30)+"px");
     }else{
-        this.bubWidth = document.getElementById("bubble-container").offsetWidth;
+        this.bubWidth = document.getElementById("svg-container").offsetWidth;
         this.contWidth = document.getElementById("controls").offsetWidth;
-        this.bubHeight = document.getElementById("bubble-container").offsetHeight;
+        this.bubHeight = document.getElementById("svg-container").offsetHeight;
         document.getElementById("full").setAttribute("style","width:100%");
     }
 }
@@ -1147,7 +1310,7 @@ BHBubble.prototype.doAnimation = function(){
 }
 BHBubble.prototype.conttttext = function(text){
     //text of control panel tool-tip
-    text =  this.t(text);
+    text =  this.tl(text);
     return text;
 }
 BHBubble.prototype.showControlTooltip = function(e,text){
@@ -1177,17 +1340,16 @@ BHBubble.prototype.tttext = function(d){
     //create tooltip text
     text =  "<span class='name'>"+this.getName(d)+"</span>";
     //mass already has numbers converted
-    text = text + "<span class='info'>"+this.t("Mass")+": "+d["massBHstr"]+" M<sub>&#x2609;</sub></span>";
+    text = text + "<span class='info'>%data.bub.mass%: "+d["massBHstr"]+" %data.mass.unit.msun%</span>";
     if(d["method"]=='Xray'){
         // text = text+ "<span class='info'>X-ray detection</span>";
-        text = text + "<span class='info'>"+this.t(d.binType)+"</span>";
-        // text = text+ "<span class='info'>"+this.t("Companion")+": "+this.t(d.compType)+"</span>";
+        text = text + "<span class='info'>"+d.binType+"</span>";
+        // text = text+ "<span class='info'>"+this.tl("%data.bub.comp%")+": "+this.tl(this.comps[d.compType])+"</span>";
     }else{
-        text = text+ "<span class='info'>"+this.t(d.binType)+
-            " ("+this.t(d.BHtype)+")</span>";
+        text = text+ "<span class='info'>"+d.binType+" ("+d.BHtype+")</span>";
     }
-    // text = text+ "<span class='info'>"+this.t("Location")+": "+this.t(d.location)+"</span>";
-    return text;
+    // text = text+ "<span class='info'>"+this.tl("%data.bub.info.location%")+": "+this.tl(this.locs[d.location])+"</span>";
+    return this.tl(text);
 }
 //set tooltip functions
 BHBubble.prototype.showTooltip = function(d){
@@ -1224,48 +1386,66 @@ BHBubble.prototype.iptext = function(d){
     rx=1;
     text =  "<span class='name'>"+this.getName(d)+"</span>";
     if(d["method"]=='Xray'){
-        text=text+"<span class='info'><b>"+this.t("Mass")+"</b>: "+d["massBHstr"]+" M<sub>&#x2609;</sub>";
-        if (d.refbhmass!='-'){text = text +
-            " <sup>["+this.tN(rx)+"]</sup></span>";rbhm=rx;rx++;}
-        else{rhbm=false;text = text+"</span>"}
-        text = text + "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+"</span>";
+        text=text+"<span class='info'><b>%data.bub.mass%</b>: "+d["massBHstr"]+" %data.mass.unit.msun%";
+        if (d.refbhmass!='-'){
+            rbhm=rx;
+            rx++;
+            rbhmu=true
+            text = text + " <sup>["+this.tN(rbhm)+"]</sup></span>";
+        }else{
+            rbhm=false;
+            text = text+"</span>"
+        }
+        text = text + "<span class='info'><b>%data.bub.type%</b>: "+d.binType+"</span>";
         // text = text+ "<span class='info'>X-ray detection</span>";
         //companion
-        text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-            this.t(d.compType)+" ("+this.tN(d.compMass)+" M<sub>&#x2609;</sub>) ";
-        if (d.refcomp!="-"){text = text +
-            " <sup>["+this.tN(rx)+"]</sup>";rct=rx;rx++;}else{rct=false;}
-        if (d.refcompmass!="-"){text = text +
-            " <sup>["+this.tN(rx)+"]</sup>";rcm=rx;rx++;}else{rcm=false;}
+        text = text+ "<span class='info'><b>"+this.tl("%data.bub.comp%")+"</b>: "+
+            d.compType+" ("+this.tN(d.compMass)+" %data.mass.unit.msun%) ";
+        if (d.refcomp!="-"){
+            if (d.refcomp==d.refbhmass){rct=rbhm;rctu=false;}
+            else{rct=rx;rx++;rctu=true;}
+            text = text + " <sup>["+this.tN(rct)+"]</sup>";
+        }else{rct=false;}
+        if (d.refcompmass!="-"){
+            if (d.refcompmass==d.refcomp){rcm=rct;rcmu=false}
+            else if(d.refcompmass==d.refbhmass){rcm=rbhm;rcmu=false}
+            else{rcm=rx;rx++;rcmu=true}
+            if (rcm!=rct){text = text + " <sup>["+this.tN(rcm)+"]</sup>";}
+            console.log(d.refcompmass)
+        }else{rcm=false;}
         text = text+"</span>";
         //period mass
-        text = text+ "<span class='info'><b>"+this.t("Orbital period")+"</b>: "+this.tN(d.period)+
-        " "+this.t("days")+"</sub>";
-        if (d.refper!="-"){text = text +
-            " <sup>["+this.tN(rx)+"]</sup></span>";rper=rx;rx++;}
-        else{rper=false;text = text+"</span>"}
-        text = text+ "<span class='info'><b>"+this.t("Location")+"</b>: "+this.t(d.location)+"</span>";
-        if (rbhm){text = text + "<span class='ref'>["+this.tN(rbhm)+"] "+d.refbhmass+"</span>"}
-        if (rct){text = text + "<span class='ref'>["+this.tN(rct)+"] "+d.refcomp+"</span>"}
-        if (rcm){text = text + "<span class='ref'>["+this.tN(rcm)+"] "+d.refcompmass+"</span>"}
-        if (rper){text = text + "<span class='ref'>["+this.tN(rper)+"] "+d.refper+"</span>"}
+        text = text+ "<span class='info'><b>%data.bub.period%</b>: "+this.tN(d.period)+
+        " %data.bub.period.days%</sub>";
+        if (d.refper!="-"){
+            if (d.refper==d.refbhmass){rper=rbhm;rperu=false;}
+            else if(d.refper==d.refcomp){rper=rct;rperu=false;}
+            else if(d.refper==d.refcompmass){rper=rcm;rperu=false;}
+            else{rper=rx;rx++;rperu=true}
+            text = text +" <sup>["+this.tN(rper)+"]</sup></span>";
+        }else{rper=false;text = text+"</span>"}
+        text = text+ "<span class='info'><b>%data.bub.loc%"+"</b>: "+d.location+"</span>";
+        if ((rbhm)&&(rbhmu)){text = text + "<span class='ref'>["+this.tN(rbhm)+"] "+d.refbhmass+"</span>"}
+        if ((rct)&&(rctu)){text = text + "<span class='ref'>["+this.tN(rct)+"] "+d.refcomp+"</span>"}
+        if ((rcm)&&(rcmu)){text = text + "<span class='ref'>["+this.tN(rcm)+"] "+d.refcompmass+"</span>"}
+        if ((rper)&&(rperu)){text = text + "<span class='ref'>["+this.tN(rper)+"] "+d.refper+"</span>"}
     }else{
-        text = text + "<span class='info'><b>"+this.t("Mass")+"</b>: "+this.tN(d["massBHstr"])+" M<sub>&#x2609;</sub>";
+        text = text + "<span class='info'><b>%data.bub.mass%</b>: "+this.tN(d["massBHstr"])+" %data.mass.unit.msun%";
         if (d.refbhmass!='-'){text = text +
             " <sup>["+this.tN(rx)+"]</sup></span>";rbhm=rx;rx++;}
         else{rbhm=false;text = text+"</span>"}
-        text = text+ "<span class='info'><b>"+this.t("Type")+"</b>: "+this.t(d.binType)+
-            " ("+this.t(d.BHtype)+")</span>";
+        text = text+ "<span class='info'><b>%data.bub.type%</b>: "+d.binType+
+            " ("+d.BHtype+")</span>";
         if (d.compType!="None"){
-            text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+
-                this.t(d.compType)+" ("+this.tN(d.compMass)+" M<sub>&#x2609;</sub>) "+"</span>";
-        }else{text = text+ "<span class='info'><b>"+this.t("Companion")+"</b>: "+this.t("None")+"</span>"}
-        text = text+ "<span class='info'><b>"+this.t("Distance")+"</b>: "+this.tN(d.distance)+
-            " "+this.t("million light years")+"</span>";
+            text = text+ "<span class='info'><b>%data.bub.comp%</b>: "+
+                d.compType+" ("+this.tN(d.compMass)+" %data.mass.unit.msun%)</span>";
+        }else{text = text+ "<span class='info'><b>%data.bub.comp%</b>: %data.bub.comp.none%</span>"}
+        text = text+ "<span class='info'><b>%data.bub.distance%</b>: "+this.tN(d.distance)+
+            " %data.bub.distance.mly%</span>";
         if (rbhm){text = text + "<span class='ref'>["+this.tN(rbhm)+"] "+d.refbhmass+"</span>"}
 
     }
-    return text;
+    return this.tl(text);
 }
 BHBubble.prototype.showInfopanel = function(d){
     // fade in semi-transparent background layer (greys out image)
@@ -1309,7 +1489,7 @@ BHBubble.prototype.showHelp = function(){
     // set contents and position of infopanel
     // this.infopanel.html(this.iptext(d));
     this.helpouter.style("left", "25%").style("top", "25%")
-       .style("width","50%").style("height","50%");
+       .style("width","50%");
 
 }
 BHBubble.prototype.hideHelp = function(d) {
@@ -1324,6 +1504,69 @@ BHBubble.prototype.hideHelp = function(d) {
       .style("opacity",0);
     this.helpbg.style("height",0);
     // d3.selectAll(".info").attr("opacity",0);
+}
+BHBubble.prototype.showShare = function(){
+    // fade in semi-transparent background layer (greys out image)
+    var bh=this;
+    d3.select('#share-bg').transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    d3.select('#share-bg').style("height","100%");
+    //fade in share panel
+    d3.select('#share-outer').transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of share panel
+    d3.select('#share-outer')
+        .style("left", (bh.pgWidth - document.getElementById('share-outer').offsetWidth)/2.)
+        .style("top", (bh.pgHeight - document.getElementById('share-outer').offsetHeight)/3.);
+    d3.select("#twitter-share-button")
+        .attr("href",
+            "https://twitter.com/intent/tweet?text="+bh.tl("%share.bub.twitter.text%")+"&url="+
+                bh.url.replace("file:///Users/chrisnorth/Cardiff/GravWaves/Outreach/","http%3A%2F%2Fchrisnorth.github.io/").replace(/:/g,'%3A').replace(/\//g,'%2F')+
+                "&hashtags="+bh.tl("%share.bub.twitter.hashtag%"));
+
+}
+BHBubble.prototype.hideShare = function(d) {
+    // fade out infopanel
+    d3.select('#share-outer').transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    d3.select('#share-outer').style("top","200%");
+    // fade out semi-transparent background
+    d3.select('#share-bg').transition()
+      .duration(500)
+      .style("opacity",0);
+    d3.select('#share-bg').style("height",0);
+}
+BHBubble.prototype.showLang = function(){
+    // fade in semi-transparent background layer (greys out image)
+    var bh=this;
+    d3.select('#lang-bg').transition()
+      .duration(500)
+      .style({"opacity":0.5});
+    d3.select('#lang-bg').style("height","100%");
+    //fade in share panel
+    d3.select('#lang-outer').transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of share panel
+    d3.select('#lang-outer')
+        .style("left", (bh.pgWidth - document.getElementById('lang-outer').offsetWidth)/2.)
+        .style("top", (bh.pgHeight - document.getElementById('lang-outer').offsetHeight)/3.);
+
+}
+BHBubble.prototype.hideLang = function(d) {
+    // fade out infopanel
+    d3.select('#lang-outer').transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    d3.select('#lang-outer').style("top","200%");
+    // fade out semi-transparent background
+    d3.select('#lang-bg').transition()
+      .duration(500)
+      .style("opacity",0);
+    d3.select('#lang-bg').style("height",0);
 }
 BHBubble.prototype.makeDownload = function(){
     //make SVG download button
@@ -1365,6 +1608,7 @@ BHBubble.prototype.replot = function(valueCol){
 BHBubble.prototype.makePlot = function(){
     this.init();
     this.addHelp();
+    this.addShare();
     this.addLang();
     this.scalePage();
     this.makeSvg();
@@ -1374,16 +1618,3 @@ BHBubble.prototype.makePlot = function(){
     this.addTooltips();
 }
 
-// create BHBubble object
-bub = new BHBubble
-// parse URL queries
-bub.getUrlVars();
-// load language
-bub.langdir='bhbubble-lang/';
-bub.loadLang(bub.urlVars.lang);
-// bub.makePlot();
-// NB: "loadLang" calls makePlot function on first load
-
-window.addEventListener("resize",function(){
-    bub.replot();
-});

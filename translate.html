@@ -1,0 +1,51 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Translation | Gravitational Wave Catalogue</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="css/style-d3.css" type="text/css" />
+    <link rel="stylesheet" href="css/translate.css" type="text/css" />
+    <script src="js/jquery-1.12.4.min.js"></script>
+	<script src="js/translate.js"></script>
+    <!-- Analytics code -->
+    <script type="text/javascript" src="js/analytics.js"></script>
+    <!-- Code to setup page -->
+    <script type="text/javascript">
+		$(document).ready(function(){
+			trans = $.translator({
+				'id':'form',
+				'master':'lang/lang_master.json',
+				'json':'lang/lang_%LANG%.json',
+				'langs': {
+                    'cy':'Cymraeg',
+                    'en':'English',
+					'de':'Deutsch',
+                    'es':'Español',
+					'fr':'Fran&#231;ais',
+                    'hu':'Magyar',
+                    'it':'Italian',
+                    'nl':'Nederlands',
+                    'or':'ଓଡ଼ିଆ',
+                    'pl':'Polski',
+                    'zhhk':'繁體中文(香港)',
+				}
+			});
+		});
+	</script>
+</head>
+<body>
+    <div class="holder">
+		<h1>Gravitational Wave Catalogue Translation Page</h1>
+		<div id="page">
+			<p>The form below contains all the language fields used in the <a href="index.html">Gravitational Wave Catalogue</a> and the <a href="bhbubble.html">Black Hole Bubble Plot</a> (view the <a href="index.html?lang=" class="langlinkcat">catalogue</a> and <a href="bhbubble.html?lang=" class="langlinkbub">bubble plot</a> in <span class="langname"></span>).</p>
+			<p>The fields are split into sections. If you'd like to start translating a language that isn't on the drop down list please contact <a href="http://blogs.cardiff.ac.uk/chrisnorth">Chris North</a>.</p>
+			<p style="font-size:1.2em;"><strong>If you want your changes to be applied you'll have to copy/paste the <a href="#output">output</a> from the bottom into an email to Chris. This form does not automatically save!</strong></p>
+			<p>This method of generating translation files is adapted (but only slightly) from the method developed by <a href="http://strudel.org.uk">Stuart Lowe</a> for the <a href="starinabox.lco.global/translate.html">Star in a Box Translation page</a>.</p>
+		</div>
+        <h2>Translation Form</h2>
+		<div id="form"></div>
+		<h2>Output</h2>
+		<p>Here is the output. You should copy and paste this into an email and send it to Chris.</p>
+		<div id="output"></div>
+	</div>
+</body>
+</html>

@@ -8,34 +8,81 @@
     <!-- <script type="application/json" src="json/gwcat.json"></script> -->
     <script type="application/json" src="bhbubble/en.json"></script>
     <script type="text/javascript" src="js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="js/clipboard-1.7.1.min.js"></script>
     <script type="text/javascript" src="js/FileSaver.js"></script>
     <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
     <!-- Analytics code -->
     <script type="text/javascript" src="js/analytics.js"></script>
+    <script type="text/javascript" src="js/bhbubble.js"></script>
 </head>
 <body>
-    <div id="hdr" class="right">
-        <div id="help-button" class="button"><img id="help-icon" src="img/help-wh.svg"></div>
-        <div id="lang-button" class="button">
-            <div class="lang-button-cont"><img id="lang-icon" src="img/lang-wh.svg"><span class="button-span" id='lang-label'></span></div>
-            <div id="lang-list"></div>
+    <div id="bubble-cont" class="bubble-container">
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.9";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
+        <div id="hdr" class="right">
+            <h1>Known Stellar Mass Black Holes</h1>
         </div>
-        <h1>Known Stellar Mass Black Holes</h1>
-    </div>
-    <div id="full" class="right">
-        <!-- <div id="controls"></div> -->
-        <div id="bubble-container" class="right"></div>
-    </div>
-    <div id="help-bg"></div>
-    <div id="help-outer">
-        <div id="help-close" class="helpclose"></div>
-        <div id="help-inner">
+        <div id="control-bar" class="right">
+            <div id="help-button" class="button"><img id="help-icon" src="img/help-wh.svg"></div>
+            <div id="lang-button" class="button">
+                <div class="lang-button-cont"><img id="lang-icon" src="img/lang-wh.svg"><span class="button-span" id='lang-label'></span></div>
+                <div id="lang-list"></div>
+            </div>
+            <div id="share-button" class="button"><img id="share-icon" src="img/share-wh.svg"></div>
+        </div>
+        <div id="full" class="right">
+            <!-- <div id="controls"></div> -->
+            <div id="svg-container" class="right"></div>
+        </div>
+        <div id="help-bg"></div>
+        <div id="help-outer" class="popup-outer">
+            <div id="help-inner" class="popup-inner">
+                <div id="help-close" class="popup-close">
+                    <img src="img/close.png" title="close">
+                </div>
+            </div>
+        </div>
+        <div id="lang-bg" class="popup-bg"></div>
+        <div id="lang-outer" class="popup-outer">
+            <div id="lang-inner" class="popup-inner">
+                <div class="popup-title" id="lang-title">Language</div>
+                <div id="lang-block"></div>
+                <div id="lang-close" class="popup-close"><img src="img/close.png" title="Close"></div>
+            </div>
+        </div>
+        <div id="share-bg" class="popup-bg"></div>
+        <div id="share-outer" class="popup-outer">
+            <div id="share-inner" class="popup-inner">
+                <div class="popup-button" id="share-block-icon-twitter">
+                    <a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a>
+                    <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+                </div>
+                <div class="popup-button" id="share-block-icon-fb">
+                    <div class="fb-share-button" data-href="http://chrisnorth.github.io/plotgw" data-layout="button" data-size="small" data-mobile-iframe="true"><a id="facebook-share-button" class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fchrisnorth.github.io%2Fplotgw%2Fbhbubble.html&amp;src=sdkpreparse">Share</a></div>
+                </div>
+                <div class="popup-button" id="share-block-icon-copy">
+                    <button id="copy-button" data-clipboard-text="URL" title="Copy link to clipboard"><img src="img/copy.svg"></button>
+                </div>
+                <div id="share-close" class="popup-close">
+                    <img src="img/close.png" title="close">
+                </div>
+                <div id="share-block"></div>
+            </div>
+        </div>
+        <div id="footer">
+            <button id="generate">Save as SVG</button>
+            <div><span id="footer-txt">Hosted by <a href="http://www.astro.cf.ac.uk">Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href="http://www.ligo.org">LIGO Scientific Collaboration</a>. View the source on <a href="http://www.github.com/chrisnorth/plotgw">GitHub</a>.</br>X-ray binary data based on <a href="http://stellarcollapse.org">stellarcollapse.org</a></span></div>
         </div>
     </div>
-    <div id="footer">
-        <button id="generate">Save as SVG</button>
-        <div><span id="footer-txt">Hosted by <a href="http://www.astro.cf.ac.uk">Cardiff University School of Physics and Astronomy</a></br>Maintained by Chris North on behalf of the <a href="http://www.ligo.org">LIGO Scientific Collaboration</a>. View the source on <a href="http://www.github.com/chrisnorth/plotgw">GitHub</a>.</br>X-ray binary data based on <a href="http://stellarcollapse.org">stellarcollapse.org</a></span></div>
-    </div>
-    <script type="text/javascript" src="js/bhbubble.js"></script>
+    <script type="text/javascript">
+        bub = new BHBubble({'container':'bubble-cont'})
+        new Clipboard('#copy-button');
+    </script>
 </body>
 </html>
