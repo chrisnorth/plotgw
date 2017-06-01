@@ -154,7 +154,8 @@
 
 				if(m[key]._text && m[key]._type){
 					inp = "";
-					cl= sanitize((p && p[key] ? "" : "blank"))
+					cl= sanitize((m[key]._highlight ? "highlight" : ""))
+					cl= sanitize((p && p[key] ? cl : "blank"))
 					if(m[key]._type=="textarea"){
 						css = (m[key]._height) ? ' style="height:'+m[key]._height+'"' : "";
 

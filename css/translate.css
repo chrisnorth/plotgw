@@ -95,6 +95,9 @@ textarea {
 input.blank, textarea.blank{
 	border:solid 2px red;
 }
+input.highlight, textarea.highlight{
+	border:solid 2px green;
+}
 ul i {
 	color: #999;
 }
