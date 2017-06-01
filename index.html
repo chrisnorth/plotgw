@@ -2,6 +2,11 @@
   <head>
     <title>Gravitational Wave Catalogue</title>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta property="og:url"           content="http://chrisnorth.github.io/plotgw" />
+    <meta property="og:type"          content="website" />
+    <meta property="og:title"         content="Gravitational Wave Catalogue" />
+    <meta property="og:description"   content="Explore the LIGO catalogue of gravitataional wave binary black holes" />
+    <meta property="og:image"         content="http://chrisnorth.github.io/img/screenshot.jpg" />
     <!--<link rel="icon" type="image/vnd.microsoft.icon" href="planck_logo.ico" />-->
     <link rel="stylesheet" href="css/style-d3.css" type="text/css" />
     <!-- <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script> -->
@@ -15,6 +20,14 @@
 </head>
 <body>
     <div id="plotgw-cont" class="plotgw-container">
+        <div id="fb-root"></div>
+        <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.9";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'facebook-jssdk'));</script>
         <div id="hdr">
             <h1 id="page-title">LIGO Compact Binary Catalogue</h1>
         </div>
@@ -92,6 +105,7 @@
         <div class="popup-outer" id="share-outer">
             <div class="popup-block" id="share-block-icons">
                 <a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+                <div class="fb-share-button" data-href="https://developers.facebook.com/docs/plugins/" data-layout="button" data-size="small" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse">Share</a></div>
             </div>
             <div id="share-close" class="popup-close">
                 <img src="img/close.png" title="close">
