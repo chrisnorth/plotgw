@@ -104,8 +104,10 @@
         <div class="popup-bg" id="share-bg"></div>
         <div class="popup-outer" id="share-outer">
             <div class="popup-button" id="share-block-icon-twitter">
-                <a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a>
-                <!-- <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script> -->
+                <div id="twitter-cont">
+                    <a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a>
+                    <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+                </div>
             </div>
             <div class="popup-button" id="share-block-icon-fb">
                 <div class="fb-share-button" data-href="http://chrisnorth.github.io/plotgw" data-layout="button" data-size="small" data-mobile-iframe="true"><a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fchrisnorth.github.io%2Fplotgw&amp;src=sdkpreparse">Share</a></div>
@@ -117,7 +119,7 @@
         <div class="tooltip" id="tooltipSk"></div>
     </div>
     <script type="text/javascript">
-    var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':true})
+    var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
     </script>
 </body>
 </html>
