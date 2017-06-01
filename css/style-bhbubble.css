@@ -409,7 +409,7 @@ input.down{
     margin-left:10%;
     text-align:left;
     padding-bottom:3%;
-    height:20px;
+    height:auto;
     float:left;
 }
 .help-cont img{

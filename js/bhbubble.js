@@ -1030,6 +1030,12 @@ BHBubble.prototype.addHelp = function(){
             .attr("class","help-text")
             .html(this.scales[cont].tt);
     }
+    helptech=this.helpinner.append("div")
+        .attr("class","help-cont reloadable")
+        .attr("id","help-tech");
+    helptech.append("div")
+        .attr("class","help-text reloadable")
+        .html(this.tl("%text.bub.help.tech%"));
 }
 BHBubble.prototype.addShare = function(){
     // add click actions
