@@ -254,6 +254,11 @@ button.down{
 .popup-button{
     display:inline-block;
 }
+#copy-button{
+    padding:5px;
+    background-color: white;
+    border:none;
+}
 .options-buttons{
     padding-bottom:20px;
     margin-left:20px;

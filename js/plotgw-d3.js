@@ -215,6 +215,7 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
 }
 GWCatalogue.prototype.updateUrl = function(vars){
     window.history.pushState({},null,this.makeUrl((vars) ? vars : {}));
+    d3.select('#copy-button').attr('data-clipboard-text',newUrl);
 }
 GWCatalogue.prototype.getPanel = function(){
     if (this.optionsOn){return "options";}
@@ -1612,6 +1613,9 @@ GWCatalogue.prototype.setLang = function(){
         d3.select('#lang-credit')
             .html('');
     }
+    d3.select('#copy-button').attr('title',this.tl('%text.gen.share.copylink%'))
+    d3.select('#facebook-share-button').attr('title',this.tl('%text.gen.share.fb%'))
+    d3.select('#twitter-share-button').attr('title',this.tl('%text.gen.share.twitter%'))
 }
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
@@ -2740,14 +2744,7 @@ GWCatalogue.prototype.makePlot = function(){
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
-    // if (this.optionsOn){
-    //     // console.log('showing options')
-    //     this.showOptions();
-    // }
-    // if (this.helpOn){
-    //     // console.log('showing options')
-    //     this.showHelp();
-    // }
+    d3.select('#copy-button').attr('data-clipboard-text',newUrl);
 }
 GWCatalogue.prototype.replot = function(){
     // remove plots and redraw (e.g. on window resize)
