@@ -2221,7 +2221,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         });
         gw.updateErrors();
     // });
-    window.history.pushState({},null,gw.makeUrl({'x':gw.xvar}));
+    window.history.pushState({},null,gw.makeUrl());
 }
 
 GWCatalogue.prototype.updateYaxis = function(yvarNew) {
@@ -2279,7 +2279,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         });
         gw.updateErrors();
     // });
-    window.history.pushState({},null,gw.makeUrl({'y':gw.yvar}));
+    window.history.pushState({},null,gw.makeUrl());
 }
 GWCatalogue.prototype.addOptions = function(){
     // add options boxetc.
