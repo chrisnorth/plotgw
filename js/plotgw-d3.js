@@ -3,13 +3,13 @@ function GWCatalogue(inp){
     // set initial axes
     // this.init()
     var gw=this;
+    this.getUrlVars();
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
-    console.log('creating plot in #'+this.holderid)
+    if(this.debug){console.log('creating plot in #'+this.holderid)}
     if ((inp)&&(inp.clearhtml)){
-        console.log('clearing current html')
+        if(this.debug){console.log('clearing current html')}
         d3.select('#'+this.holderid).html()
     }
-    this.getUrlVars();
 
     //set default language from browser
     this.langIn = (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
@@ -30,30 +30,30 @@ function GWCatalogue(inp){
 GWCatalogue.prototype.init = function(){
     // created HTML of not included
     if (d3.select("#hdr").empty()){
-        console.log('adding hdr')
+        if(this.debug){console.log('adding hdr')}
         d3.select("#"+this.holderid).insert("div",":first-child")
             .attr("id","hdr")
             .html('<h1 id="page-title"></h1>')
     }
     if (d3.select("#graphcontainer").empty()){
-        console.log('adding graphcontainer')
+        if(this.debug){console.log('adding graphcontainer')}
         d3.select("#"+this.holderid).insert("div","#hdr + *")
             .attr("id","graphcontainer")
     }
     if (d3.select("#infoouter").empty()){
-        console.log('adding infoouter')
+        if(this.debug){console.log('adding infoouter')}
         d3.select("#"+this.holderid).insert("div","#graphcontainer + *")
             .attr("id","infoouter")
             .html('<div id="sketchcontainer"></div><div id="labcontainer"></div>')
     }
     if (d3.select("#options-outer").empty()){
-        console.log('adding options-outer')
+        if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer")
             .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="options-close" class="panel-close"><img src="img/close.png" title="close"></div></div>')
     }
     if (d3.select("#help-outer").empty()){
-        console.log('adding help-outer')
+        if(this.debug){console.log('adding help-outer')}
         d3.select('#'+this.holderid).insert("div","#options-outer + *")
             .attr("id","help-outer").attr("class","panel-outer")
         d3.select("#help-outer").append("div")
@@ -86,7 +86,7 @@ GWCatalogue.prototype.init = function(){
             .html('<div class="panel-text" id="help-text"></div>')
     }
     if (d3.select('#lang-outer').empty()){
-        console.log('adding lang-outer')
+        if(this.debug){console.log('adding lang-outer')}
         d3.select('#'+this.holderid).insert("div","#help-outer + *")
             .attr("id","lang-outer").attr("class","panel-outer")
         d3.select("#lang-outer").append("div")
@@ -100,12 +100,12 @@ GWCatalogue.prototype.init = function(){
             .html('<img src="img/close.png" title="close">')
     }
     if (d3.select('#share-bg').empty()){
-        console.log('adding share-bg')
+        if(this.debug){console.log('adding share-bg')}
         d3.select('#'+this.holderid).insert("div","#lang-outer + *")
             .attr("id","share-bg").attr("class","popup-bg")
     }
     if (d3.select('#share-outer').empty()){
-        console.log('adding share-outer')
+        if(this.debug){console.log('adding share-outer')}
         d3.select('#'+this.holderid).insert("div","#share-bg + *")
             .attr("id","share-outer").attr("class","popup-outer")
         d3.select('#share-outer').append("div")
@@ -116,7 +116,7 @@ GWCatalogue.prototype.init = function(){
             .html('<img src="img/close.png" title="close">')
     }
     if (d3.select('#tooltip').empty()){
-        console.log('adding tooltip')
+        if(this.debug){console.log('adding tooltip')}
         d3.select('#'+this.holderid).insert("div","#share-outer + *")
             .attr("id","tooltipSk").attr("class","tooltip")
     }
@@ -138,7 +138,6 @@ GWCatalogue.prototype.init = function(){
     this.unitSwitch=false;
     this.setScales();
     this.d=null;
-    this.debug=true;
     this.langs = {
         "de":{code:"de",name:"Deutsch"},
         "en":{code:"en",name:"English"},
@@ -168,6 +167,8 @@ GWCatalogue.prototype.getUrlVars = function(){
     // console.log("input:",vars);
     this.urlVars = vars;
     this.url = url;
+    this.debug = (this.urlVars.debug) ? true : false;
+    if(this.debug){console.log('debug',this.debug)}
     //set default language
     // if(!this.urlVars.hasOwnProperty("lang")){
     //     this.urlVars.lang="en-US";
@@ -190,7 +191,7 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
             delete newUrlVars[(key)]
         }
     }
-    console.log(newUrlVars);
+    if(this.debug){console.log('new urlvars',newUrlVars);}
     for (key in newKeys){
         if (!newKeys[key]){
             delete newUrlVars[key];
@@ -829,7 +830,7 @@ GWCatalogue.prototype.setScales = function(){
 GWCatalogue.prototype.adjCss = function(){
     // adjust css of some elements
     // duplicates content of @media in css file
-    console.log('this.winFullWidth:',this.winFullWidth)
+    if(this.debug){console.log('this.winFullWidth:',this.winFullWidth)}
     css={};
     if(this.winFullWidth < 1200){
         css[".panel-title.landscape"]={"font-size":"2.5em"},
@@ -857,10 +858,10 @@ GWCatalogue.prototype.adjCss = function(){
         css[".panel-title.landscape"]={"font-size":"1.0em"}
         css[".panel-title.portrait"]={"font-size":"1.2em"}
     }
-    console.log('new css:',css)
+    if(this.debug){console.log('new css:',css)}
     if (css){
         for (k in css){
-            console.log(k,d3.selectAll(k),css[k])
+            if(this.debug){console.log(k,d3.selectAll(k),css[k])}
                 d3.selectAll(k).style(css[k])
         }
     }
@@ -1321,24 +1322,24 @@ GWCatalogue.prototype.makeGraph = function(){
             .style("opacity", 0);
     }
 }
-GWCatalogue.prototype.getUrlVars = function(){
-    // Get URL and query variables
-    var vars = {},hash;
-    var url = window.location.href;
-    if (window.location.href.indexOf('?')!=-1){
-        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
-        url = window.location.href.slice(0,window.location.href.indexOf('?'));
-        for(var i = 0; i < hashes.length; i++)
-        {
-            hash = hashes[i].split('=');
-            // vars.push(hash[0]);
-            vars[hash[0]] = hash[1];
-        }
-    }
-    // console.log("input:",vars);
-    this.urlVars = vars;
-    this.url = url;
-}
+// GWCatalogue.prototype.getUrlVars = function(){
+//     // Get URL and query variables
+//     var vars = {},hash;
+//     var url = window.location.href;
+//     if (window.location.href.indexOf('?')!=-1){
+//         var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+//         url = window.location.href.slice(0,window.location.href.indexOf('?'));
+//         for(var i = 0; i < hashes.length; i++)
+//         {
+//             hash = hashes[i].split('=');
+//             // vars.push(hash[0]);
+//             vars[hash[0]] = hash[1];
+//         }
+//     }
+//     // console.log("input:",vars);
+//     this.urlVars = vars;
+//     this.url = url;
+// }
 
 GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
@@ -1378,7 +1379,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
             if (this.debug){console.log('converting from LOSC format');}
             newlinks={}
             for (e in dataIn.data){
-                console.log(e,dataIn.data[e])
+                if(this.debug){console.log(e,dataIn.data[e])}
                 // // convert events to required format
                 // ev=dataIn.events[e];
                 // dataIn.data[e]={};
@@ -1392,10 +1393,10 @@ GWCatalogue.prototype.drawGraphInit = function(){
                 //     }
                 // }
                 // convert links to required format
-                console.log(e,dataIn.links)
+                if(this.debug){console.log(e,dataIn.links)}
                 if (dataIn.links[e]){
                     linkIn=dataIn.links[e];
-                    console.log('linkIn',e,linkIn)
+                    if(this.debug){console.log('linkIn',e,linkIn)}
                     newlinks[e]={}
                     for (l in linkIn){
                         if (linkIn[l].text.search('Paper')>=0){
@@ -1429,7 +1430,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
                                 type:'web'}
                         }
                     }
-                    console.log('links',e,newlinks[e])
+                    if(this.debug){console.log('links',e,newlinks[e])}
                 }
             }
             dataIn.links=newlinks;
