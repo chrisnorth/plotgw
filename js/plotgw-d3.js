@@ -144,6 +144,7 @@ GWCatalogue.prototype.init = function(){
         "en":{code:"en",name:"English"},
         "es":{code:"es",name:"Español"},
         "fr":{code:"fr",name:"Français"},
+        "pl":{code:"pl",name:"Polski"},
         // "en-GB":{code:"en-GB",name:"English"},
         // "de2":{code:"de",name:"Deutsch (de)"},
         // "en2":{code:"en",name:"English (en)"},

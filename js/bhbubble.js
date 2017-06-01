@@ -908,7 +908,7 @@ BHBubble.prototype.drawBubbles = function(){
     }
 }
 BHBubble.prototype.addLang = function(){
-    this.langs={
+    this.langs = {
         "cy":{code:"cy",name:"Cymraeg (cy)"},
         "de":{code:"de",name:"Deutsch (de)"},
         "en":{code:"en",name:"English (en)"},
@@ -916,6 +916,7 @@ BHBubble.prototype.addLang = function(){
         "fr":{code:"fr",name:"Francais (fr)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
         "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
+        "pl":{code:"pl",name:"Polski (pl)"},
         "zhhk":{code:"zhhk",name:"繁體中文(香港) (zh-hk)"}
     }
     var bh=this;
