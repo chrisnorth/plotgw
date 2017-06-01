@@ -70,7 +70,9 @@
     "text.gen.lang":{"_title":"Change Language","_text":"Text for 'Change Language' buttons/menus","_type":"string"},
     "text.gen.langcredit":{"_title":"Translation credit","_text":"Label for translation credit.","_type":"string"},
     "text.gen.share":{"_title":"Share","_text":"Text for 'Share' buttons/menus","_type":"string"},
-    "text.gen.copylink":{"_title":"Copy link","_text":"Text for copying link to clipboard","_type":"string"},
+    "text.gen.share.copylink":{"_title":"Copy link","_text":"Tooltip for copying link to clipboard","_type":"string"},
+    "text.gen.share.twitter":{"_title":"Share on Twitter","_text":"Tooltip for copying link to clipboard","_type":"string"},
+    "text.gen.share.fb":{"_title":"Share on Facebook","_text":"Tooltip for copying link to clipboard","_type":"string"},
 
     "section.plotgw.text":{"_title":"Text shown on catalogue plot"},
     "text.plotgw.legend.detections":{"_title":"Detections","_text":"Shown in graph legend","_type":"string"},
