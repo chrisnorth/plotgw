@@ -1446,12 +1446,12 @@ GWCatalogue.prototype.drawGraphInit = function(){
             dataIn.data[e].type=t;
             if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
                 link=dataIn.links[e].LOSCData;
-                link.url=gw.tl(link.url);
+                link.url=link.url;
                 dataIn.data[e].link=link;
             }
             if ((dataIn.links[e]) && (dataIn.links[e].DetPaper)){
                 ref=dataIn.links[e].DetPaper;
-                ref.url=gw.tl(ref.url);
+                ref.url=ref.url;
                 dataIn.data[e].ref=ref;
                 if(gw.debug){console.log(dataIn.data[e].name,ref)}
             }
@@ -1459,10 +1459,11 @@ GWCatalogue.prototype.drawGraphInit = function(){
         }
         if(gw.debug){console.log('data pre-format:',gw.data);}
         if (gw.loaded==gw.toLoad){
-            gw.setColumns(gw.datadict);
-            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-            gw.makePlot();
-            if(gw.debug){console.log('plotted');}
+            gw.whenLoaded();
+            // gw.setColumns(gw.datadict);
+            // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            // gw.makePlot();
+            // if(gw.debug){console.log('plotted');}
         }
     });
     d3.json(gw.fileInDataDict, function(error, dataIn) {
@@ -1474,12 +1475,20 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
         if(gw.debug){console.log('datadict:',gw.datadict,dataIn);}
         if (gw.loaded==gw.toLoad){
-            gw.setColumns(gw.datadict);
-            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-            gw.makePlot();
-            if(gw.debug){console.log('plotted');}
+            gw.whenLoaded();
+            // gw.setColumns(gw.datadict);
+            // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            // gw.makePlot();
+            // if(gw.debug){console.log('plotted');}
         }
     });
+}
+GWCatalogue.prototype.whenLoaded = function(){
+    var gw=this;
+    gw.setColumns(gw.datadict);
+    gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+    gw.makePlot();
+    if(gw.debug){console.log('plotted');}
 }
 GWCatalogue.prototype.loadLang = function(lang){
     var gw=this;
@@ -1532,10 +1541,11 @@ GWCatalogue.prototype.loadLang = function(lang){
             gw.loaded++;
             // gw.setLang();
             if (gw.loaded==gw.toLoad){
-                gw.setColumns(gw.datadict);
-                gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-                gw.makePlot();
-                if(gw.debug){console.log('plotted');}
+                gw.whenLoaded();
+                // gw.setColumns(gw.datadict);
+                // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+                // gw.makePlot();
+                // if(gw.debug){console.log('plotted');}
             }
         }
     });
@@ -1558,10 +1568,11 @@ GWCatalogue.prototype.loadLangDefault = function(){
         gw.langdictDefault=dataIn;
         gw.loaded++;
         if (gw.loaded==gw.toLoad){
-            gw.setColumns(gw.datadict);
-            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-            gw.makePlot();
-            if(gw.debug){console.log('plotted');}
+            gw.whenLoaded();
+            // gw.setColumns(gw.datadict);
+            // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            // gw.makePlot();
+            // if(gw.debug){console.log('plotted');}
         }
     });
 }
