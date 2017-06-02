@@ -1055,7 +1055,7 @@ BHBubble.prototype.addShare = function(){
     console.log('addShare')
     shareicon.addEventListener("click",function(){bh.showShare();})
     shareicon.addEventListener("mouseover",function(e){
-            bh.showControlTooltip(e,"%text.gen.help%");})
+            bh.showControlTooltip(e,"%text.gen.share%");})
     shareicon.addEventListener("mouseout",function(e){
             bh.hideControlTooltip();});
     d3.select('#share-bg').on("click",function(){bh.hideShare();});
