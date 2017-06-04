@@ -17,7 +17,6 @@ function GWCatalogue(inp){
     if((inp)&&(inp.lang)&&(typeof inp.lang=="string")) this.langIn = inp.lang;
     // set language from urlVars (if present)
     this.langIn = ((this.urlVars.lang)&&(typeof this.urlVars.lang=="string")) ? this.urlVars.lang : this.langIn
-
     this.init();
     if(this.debug){console.log('initialised');}
     this.drawGraphInit();
@@ -134,12 +133,14 @@ GWCatalogue.prototype.init = function(){
         yvar:"M2",
         panel:"info",
         lang:"en",
-        showerrors:true
+        showerrors:true,
+        selectedevent:"GW170104"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
     this.showerrors = (this.urlVars.err) ? this.urlVars.err : this.defaults.showerrors;
     this.showerrors = (this.showerrors=="false") ? false : true;
+    this.selectedevent = (this.urlVars.event) ? this.urlVars.event : this.defaults.event;
     this.setStyles();
     this.sketchName="None";
     this.unitSwitch=false;
@@ -189,6 +190,7 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
         "lang":[this.lang,this.defaults.lang],
         "err":[this.showerrors,this.defaults.showerrors],
         "panel":[this.getPanel(),this.defaults.panel],
+        "event":[this.selectedevent,this.defaults.selectedevent],
     }
     for (key in allKeys){
         if (this.debug){console.log(key,allKeys[key]);}
@@ -1498,6 +1500,8 @@ GWCatalogue.prototype.whenLoaded = function(){
     gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
     gw.makePlot();
     if(gw.debug){console.log('plotted');}
+    // select a default event
+    this.selectEvent(gw.selectedevent);
 }
 GWCatalogue.prototype.loadLang = function(lang){
     var gw=this;
@@ -1846,8 +1850,9 @@ GWCatalogue.prototype.drawGraph = function(){
         //   document.getElementById("sketchcontainer").style.opacity=0.;
       })
       .on("click", function(d) {
-          gw.moveHighlight(d);
-          gw.updateSketch(d);
+          gw.selectEvent(d)
+        //   gw.moveHighlight(d);
+        //   gw.updateSketch(d);
         //   add highlight to selected circle
         });
     // draw legend
@@ -2037,6 +2042,23 @@ GWCatalogue.prototype.drawGraph = function(){
     d3.select("#share-bg").on("click",function(){gw.hideShare();});
     d3.select("#share-close").on("click",function(){gw.hideShare();});
 }
+GWCatalogue.prototype.selectEvent = function(evname){
+    var gw=this;
+    if (typeof evname == "string"){
+        // evname is a string
+        for (ev in gw.data){
+            if (gw.data[ev].name==evname){d=gw.data[ev]}
+        }
+    }else{
+        // evname is an event object
+        d=evname;
+    }
+    gw.moveHighlight(d);
+    gw.updateSketch(d);
+    gw.selectedevent=d.name;
+    this.updateUrl();
+}
+
 
 GWCatalogue.prototype.moveHighlight = function(d){
     // move highlight circle
