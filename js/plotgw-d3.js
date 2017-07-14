@@ -140,7 +140,7 @@ GWCatalogue.prototype.init = function(){
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
     this.showerrors = (this.urlVars.err) ? this.urlVars.err : this.defaults.showerrors;
     this.showerrors = (this.showerrors=="false") ? false : true;
-    this.selectedevent = (this.urlVars.event) ? this.urlVars.event : this.defaults.event;
+    this.selectedevent = (this.urlVars.event) ? this.urlVars.event : this.defaults.selectedevent;
     this.setStyles();
     this.sketchName="None";
     this.unitSwitch=false;
