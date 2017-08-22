@@ -283,7 +283,7 @@ BHBubble.prototype.makeSvg = function(){
     footertxt = footer.innerHTML;
     footer.innerHTML = this.tl("%text.bub.footer%");
     //replace svg button text for language
-    if (this.alphabet!="Roman"){
+    if (this.langdict["meta.alphabet"]!="Roman"){
         document.getElementById("generate").style.display = "none";
     }
     document.getElementById("generate").innerHTML=this.tl("%text.bub.save.svg%");
