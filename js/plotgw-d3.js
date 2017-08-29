@@ -1246,6 +1246,7 @@ GWCatalogue.prototype.setStyles = function(){
     this.cValue = function(d) {return d.type;};
     this.color = d3.scale.category10();
     this.linestyles = {GW:"#000",LVT:"#999"}
+    this.linedashes = d3.scale.ordinal().range([0,3]).domain(['GW','LVT'])
     this.colorErr = "#555";
     this.swErr = 2;
     this.opErr = 0.7;
@@ -1451,10 +1452,18 @@ GWCatalogue.prototype.drawGraphInit = function(){
         if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
         for (e in dataIn.data){
             dataIn.data[e].name=e;
-            if (e[0]=='G'){t='GW'}
-            else if (e[0]=='L'){t='LVT'}
-            else{t=''}
-            dataIn.data[e].type=t;
+            if (dataIn.data[e].type){
+                dataIn.data[e].type=dataIn.data[e].type.best
+            }else{
+                if (e[0]=='G'){t='GW'}
+                else if (e[0]=='L'){t='LVT'}
+                else{t=''}
+                dataIn.data[e].type=t;
+            }
+            if (e[0]=='G'){c='GW'}
+            else if (e[0]=='L'){c='LVT'}
+            else{c=''}
+            dataIn.data[e].conf=c;
             if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
                 link=dataIn.links[e].LOSCData;
                 link.url=link.url;
@@ -1832,7 +1841,9 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("cursor","pointer")
     //   .style("fill", function(d) { return color(cValue(d));})
       .style("fill", function(d){return gw.color(gw.cValue(d));})
-      .style("stroke",function(d){return gw.linestyles[d.type];})
+      .style("stroke","#000")
+      .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
+      .style("stroke-width",Math.min(5,2./gw.sksc))
       .on("mouseover", function(d) {
             gw.tooltip.transition()
                .duration(200)
@@ -1855,6 +1866,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //   gw.updateSketch(d);
         //   add highlight to selected circle
         });
+
     // draw legend
     gw.legend = gw.svg.selectAll(".legend")
       .data(gw.color.domain())
@@ -1863,14 +1875,14 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("transform", function(d, i) { return "translate(0," +
         (i * 24) + ")"; });
 
-    // draw legend colored rectangles
-    gw.legend.append("rect")
-      .attr("x", gw.margin.left + 12)
-      .attr("y", gw.margin.top + 12)
-      .attr("width", 18)
-      .attr("height", 18)
+    // draw legend colored circles
+    gw.legend.append("circle")
+      .attr("cx", gw.margin.left+16.5)
+      .attr("cy", gw.margin.top+21)
+      .attr("r", 9)
       .style("fill", gw.color)
-      .style("stroke",function(d){return gw.linestyles[d.type];})
+      .style("stroke-dasharray",function(d){return gw.linedashes(d);})
+      .style("stroke-width",Math.min(5,2./gw.sksc))
       .style("stroke","#000");
 
     // draw legend text
@@ -1880,7 +1892,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("dy", ".35em")
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
-      .text(function(d) { return gw.legenddescs[d];})
+      .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
 
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
