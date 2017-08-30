@@ -1255,7 +1255,7 @@ GWCatalogue.prototype.setStyles = function(){
     this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
     this.getOpacity = function(d) {return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.type) : 0)}
     this.xrayShown = function(d) {
-        if ((gw.xrayCols.hasOwnProperty(gw.xvar))&&(gw.xrayCols.hasOwnProperty(gw.xvar))&&(gw.showxray)){
+        if ((gw.xrayCols.hasOwnProperty(gw.xvar))&&(gw.xrayCols.hasOwnProperty(gw.yvar))&&(gw.showxray)){
             return true
         }else{return false}
     }
@@ -2026,6 +2026,13 @@ GWCatalogue.prototype.drawGraph = function(){
       .style("text-anchor", "start")
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
 
+    // hide/show xray legend dot
+    if(gw.xrayShown()){
+        d3.select('.legend.xray')
+            .transition().duration(750).attr("opacity",1)
+    }else{
+        d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
+    }
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
     this.optionsbg = d3.select('#options-bg');
@@ -2379,11 +2386,8 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         }else{
             d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
         }
-        // gw.svg.select(".dot-hl")
-        //     .transition()
-        //     .duration(750)
-        //     .attr("cx", gw.xMap)
-        gw.svg.select(".x-axis.axis") // change the x axis
+        // change the x axis
+        gw.svg.select(".x-axis.axis")
             .transition()
             .duration(750)
             .call(gw.xAxis);
@@ -2448,14 +2452,15 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .duration(750)
             .attr("cy", gw.yMap)
             .attr("opacity",function(d){return gw.getOpacity(d)})
-        // hide/show xray legend dot
+        // hide/show xray legend dots
         if(gw.xrayShown()){
             d3.select('.legend.xray')
                 .transition().duration(750).attr("opacity",1)
         }else{
             d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
         }
-        gw.svg.select(".y-axis.axis") // change the y axis
+        // change the y axis
+        gw.svg.select(".y-axis.axis")
             .transition()
             .duration(750)
             .call(gw.yAxis);
