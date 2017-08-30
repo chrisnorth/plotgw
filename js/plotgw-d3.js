@@ -43,13 +43,13 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding infoouter')}
         d3.select("#"+this.holderid).insert("div","#graphcontainer + *")
             .attr("id","infoouter")
-            .html('<div id="sketchcontainer"></div><div id="labcontainer"></div>')
+            .html('<div id="sketchcontainer"></div><div id="labcontainer"></div><div id="select-next" class="select-event select-next"></div><div id="select-previous" class="select-event select-previous"></div>')
     }
     if (d3.select("#options-outer").empty()){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer")
-            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="options-close" class="panel-close"><img src="img/close.png" title="close"></div></div>')
+            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="options-close" class="panel-close"></div></div>')
     }
     if (d3.select("#help-outer").empty()){
         if(this.debug){console.log('adding help-outer')}
@@ -79,7 +79,6 @@ GWCatalogue.prototype.init = function(){
             .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
         d3.select("#help-outer").append("div")
             .attr("id","help-close").attr("class","panel-close")
-            .html('<img src="img/close.png" title="close">')
         d3.select("#help-outer").append("div")
             .attr("id","help-block-text").attr("class","panel-text")
             .html('<div class="panel-text" id="help-text"></div>')
@@ -96,7 +95,6 @@ GWCatalogue.prototype.init = function(){
         //     .attr("id","lang-block-credit").attr("class","panel-block panel-block-full")
         d3.select("#lang-outer").append("div")
             .attr("id","lang-close").attr("class","panel-close")
-            .html('<img src="img/close.png" title="close">')
     }
     if (d3.select('#share-bg').empty()){
         if(this.debug){console.log('adding share-bg')}
@@ -119,7 +117,6 @@ GWCatalogue.prototype.init = function(){
             .html('<a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fchrisnorth.github.io%2Fplotgw%2F&amp;src=sdkpreparse">Share</a>')
         d3.select('#share-outer').append("div")
             .attr("id","share-close").attr("class","popup-close")
-            .html('<img src="img/close.png" title="close">')
     }
     if (d3.select('#tooltip').empty()){
         if(this.debug){console.log('adding tooltip')}
@@ -135,14 +132,14 @@ GWCatalogue.prototype.init = function(){
         lang:"en",
         showerrors:true,
         showxray:false,
-        selectedevent:"GW170104"
+        selectedevent:0
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
     this.showerrors = (this.urlVars.err) ? this.urlVars.err : this.defaults.showerrors;
     this.showerrors = (this.showerrors=="false") ? false : true;
     this.showxray = (this.urlVars.xray) ? this.urlVars.xray : this.defaults.showxray;
-    this.selectedevent = (this.urlVars.event) ? this.urlVars.event : this.defaults.event;
+    this.selectedevent = (this.urlVars.event) ? this.urlVars.event : this.defaults.selectedevent;
     this.setStyles();
     this.sketchName="None";
     this.unitSwitch=false;
@@ -978,6 +975,16 @@ GWCatalogue.prototype.drawSketch = function(){
         .style("font-size",(0.75*fs)+"em")
         .html(this.tl("%text.plotgw.information.subtitle%"));
 
+    // add actions to nex/previous
+    d3.select('#select-next')
+        .on('mouseover',function(){gw.showTooltipManual("%tooltip.plotgw.nextevent%");})
+        .on('mouseout',function(){gw.hideTooltipManual();})
+        .on('click',function(){gw.selectNext(+1);})
+    d3.select('#select-previous')
+        .on('mouseover',function(){gw.showTooltipManual("%tooltip.plotgw.prevevent%");})
+        .on('mouseout',function(){gw.hideTooltipManual();})
+        .on('click',function(){gw.selectNext(-1);})
+
     // this.tooltipSk = document.createElement('div');
     // this.tooltipSk.className = "tooltip";
     // this.tooltipSk.setAttribute("id","tooltipSk");
@@ -1283,7 +1290,14 @@ GWCatalogue.prototype.tttextXray = function(d){
     "<span class='ttpri'>"+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
     "<span class='ttsec'>"+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
 }
-
+GWCatalogue.prototype.orderData = function(order='GPS'){
+    this.data=this.data.sort(function(a,b){
+        return b[order].best - a[order].best
+    });
+    var dataOrder=[];
+    this.data.forEach(function(d){dataOrder.push(d.name);});
+    this.dataOrder=dataOrder;
+}
 GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     if (this.debug){console.log('formatData',d.name);}
@@ -1598,6 +1612,8 @@ GWCatalogue.prototype.whenLoaded = function(){
     gw.setColumns(gw.datadict);
     gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
     gw.dataXray.forEach(function(d){gw.formatDataXray(d,gw.columns)});
+    // order Data
+    gw.orderData();
     gw.makePlot();
     if(gw.debug){console.log('plotted');}
     // select a default event
@@ -2192,24 +2208,78 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.showShare();gw.hideTooltipManual();});
     d3.select("#share-bg").on("click",function(){gw.hideShare();});
     d3.select("#share-close").on("click",function(){gw.hideShare();});
-}
-GWCatalogue.prototype.selectEvent = function(evname){
-    var gw=this;
-    if (typeof evname == "string"){
-        // evname is a string
-        for (ev in gw.data){
-            if (gw.data[ev].name==evname){d=gw.data[ev]}
+
+    //add serach button
+    d3.select("#svg-container").append("div")
+        .attr("id","search-icon")
+        .attr("class","graph-icon hidden")
+        .style({"right":gw.margin.right+6*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            gw.showTooltipManual("%tooltip.plotgw.search%");
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        }).append("img")
+        .attr("src","img/search.svg")
+        .attr("class","hidden")
+        .attr("id","search-img")
+        .on("click",function(){gw.showSearch();gw.hideTooltipManual();});
+    gw.data.forEach(function(d){
+        d3.select('#search-outer').append("div")
+            .attr("class","popup-list-item search-list-item")
+            .attr("id","search-list-"+d.name)
+            .html(d.name)
+            .on("click",function(){
+                if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);}gw.hideSearch();})
+        if (gw.selectedevent==d.name){
+            document.getElementById("search-list-"+d.name).classList.add("current")
+        }else{
+            document.getElementById("search-list-"+d.name).classList.remove("current")
         }
+    })
+    d3.select("#search-bg").on("click",function(){gw.hideSearch();});
+    d3.select("#search-close").on("click",function(){gw.hideSearch();});
+}
+GWCatalogue.prototype.selectEvent = function(ev){
+    var gw=this;
+    if (typeof ev == "string"){
+        if(parseInt(ev)==parseInt(ev)){
+            // ev is a string which is a number
+            evnum=parseInt(ev)
+            if (evnum<0){
+                evnum=gw.dataOrder.length + evnum
+            }
+            evnum=evnum % gw.dataOrder.length
+        }else{
+            // ev is a string which is not a number
+            evnum=gw.dataOrder.indexOf(ev)
+        }
+        d=gw.data[evnum]
+    }else if(typeof ev == "number"){
+        // ev is a number
+        evnum=ev
+        if (evnum<0){
+            evnum=gw.dataOrder.length + evnum
+        }
+        evnum=evnum % gw.dataOrder.length
+        d=gw.data[evnum]
     }else{
         // evname is an event object
-        d=evname;
+        evnum=gw.dataOrder.indexOf(ev.name)
+        d=ev;
     }
+    gw.dataIdx=evnum;
     gw.moveHighlight(d);
     gw.updateSketch(d);
+    document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
+    document.getElementById("search-list-"+d.name).classList.add("current")
     gw.selectedevent=d.name;
     this.updateUrl();
 }
-
+GWCatalogue.prototype.selectNext = function(dir=1){
+    this.selectEvent(this.dataIdx+dir)
+    return(this.dataIdx)
+}
 
 GWCatalogue.prototype.moveHighlight = function(d){
     // move highlight circle
@@ -2877,6 +2947,30 @@ GWCatalogue.prototype.hideShare = function(){
     //show share pot
     d3.select("#share-bg").style("height","0").style("display","none");
     d3.select('#share-outer').transition()
+       .duration(500)
+       .style("opacity",0);
+}
+GWCatalogue.prototype.showSearch = function(){
+    //show share pot
+    var gw=this;
+    d3.select("#search-bg").style("height","100%").style("display","block");
+    shareouter=d3.select('#search-outer')
+    shareouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    shareouter.style("top",
+        document.getElementById('svg-container').offsetTop+
+        document.getElementById('search-icon').offsetTop +
+        document.getElementById('search-icon').offsetHeight + 10)
+    .style("left",
+        document.getElementById('search-icon').offsetLeft +
+        document.getElementById('search-icon').offsetWidth/2 -
+        document.getElementById('search-outer').offsetWidth/2)
+}
+GWCatalogue.prototype.hideSearch = function(){
+    //show share pot
+    d3.select("#search-bg").style("height","0").style("display","none");
+    d3.select('#search-outer').transition()
        .duration(500)
        .style("opacity",0);
 }

@@ -45,12 +45,42 @@ button.down{
 }
 #infoouter{
     float:left;
+    position:absolute;
     display:inline-block;
     width:25%;
     height:90%;
     border:2px solid black;
     border-radius: 10px;
     background-color: #eee;
+}
+.select-event{
+    position:absolute;
+    width:30px;
+    height:30px;
+    top:10px;
+    cursor:pointer;
+    background-image:url("../img/arrow-sm-black.svg");
+    background-size:30px 30px;
+    background-repeat:no-repeat;
+}
+#select-next{
+    right:5px;
+    transform:rotate(270deg);
+}
+#select-previous{
+    left:5px;
+    transform:rotate(90deg);
+}
+.search-button{
+    position:absolute;
+    width:30px;
+    height:30px;
+    top:50px;
+    right:5px;
+    cursor:pointer;
+    background-image:url("../img/search-dropdown.svg");
+    background-size:30px 30px;
+    background-repeat:no-repeat;
 }
 #sketchcontainer{
     position:relative;
@@ -206,6 +236,9 @@ button.down{
     right:0;
     top:5px;
     cursor:pointer;
+    background-image:url("../img/close.png");
+    background-size:30px 30px;
+    background-repeat:no-repeat;
 }
 /*#infoclose img{
     width:100%;
@@ -244,6 +277,14 @@ button.down{
     opacity:0;
     overflow:auto;
     padding: 5px 30px 5px 10px;
+}
+.popup-list-item{
+    font-size:large;
+    cursor: pointer;
+    margin-bottom:3px;
+}
+.popup-list-item.current:before{
+    content:"▶ "
 }
 .panel-title, .popup-title{
     width:90%;
