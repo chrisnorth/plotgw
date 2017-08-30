@@ -132,7 +132,7 @@ GWCatalogue.prototype.init = function(){
         lang:"en",
         showerrors:true,
         showxray:false,
-        selectedevent:0
+        selectedevent:"GW170104"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
@@ -1390,7 +1390,8 @@ GWCatalogue.prototype.formatDataXray = function(d,cols){
 GWCatalogue.prototype.makeGraph = function(){
     // create graph
     // console.log('makeGraph');
-    this.svgcont = d3.select("div#graphcontainer").append("div")
+    this.graphcont=d3.select("div#graphcontainer")
+    this.svgcont = this.graphcont.append("div")
         .attr("id","svg-container")
         .attr("width",this.svgWidth)
         .attr("height",this.svgHeight)
@@ -1398,6 +1399,7 @@ GWCatalogue.prototype.makeGraph = function(){
     this.svg = d3.select(".svg-container").append("svg")
         // .attr("preserveAspectRatio", "xMidYMid meet")
         // .attr("viewBox","0 0 "+this.graphWidth+" " +1.2*this.graphHeight)
+        .attr("class","graph")
         .attr("width",this.svgWidth)
         .attr("height",this.svgHeight)
         // .classed("svg-content-responsive",true);
@@ -1577,7 +1579,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.loaded++;
         // if(gw.debug){console.log((dataIn),(dataIn.datadict))}
         gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
-        if(gw.debug){console.log('datadict:',gw.datadict,dataIn);}
+        if((gw.debug)&&(dataIn)){console.log('datadict:',gw.datadict,dataIn);}
         if (gw.loaded==gw.toLoad){
             gw.whenLoaded();
             // gw.setColumns(gw.datadict);
@@ -1598,7 +1600,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
             d.type='xray';
         }
         gw.loaded++;
-        if (gw.debug){console.log('loaded: '+bh.inputFileXray)}
+        if (gw.debug){console.log('loaded: '+gw.inputFileXray)}
         //call next functions
         if (gw.loaded==gw.toLoad){
             gw.whenLoaded();
@@ -1617,7 +1619,6 @@ GWCatalogue.prototype.whenLoaded = function(){
     gw.makePlot();
     if(gw.debug){console.log('plotted');}
     // select a default event
-    this.selectEvent(gw.selectedevent);
 }
 GWCatalogue.prototype.loadLang = function(lang){
     var gw=this;
@@ -1787,7 +1788,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.xvar,true));
-    gw.svgcont.append("div")
+    gw.graphcont.append("div")
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
@@ -1824,7 +1825,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.yvar,true));
-    gw.svgcont.append("div")
+    gw.graphcont.append("div")
         .attr("class", "y-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
@@ -1837,6 +1838,10 @@ GWCatalogue.prototype.drawGraph = function(){
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.scl))+"em");
+
+    d3.selectAll('.tick > line')
+            .style('stroke','#ccc')
+            .style('opacity',1)
 
     // draw x-ray dots
     if (this.showxray){
@@ -2049,11 +2054,12 @@ GWCatalogue.prototype.drawGraph = function(){
     }else{
         d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
     }
+
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
     this.optionsbg = d3.select('#options-bg');
     this.optionsouter = d3.select('#options-outer')
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","options-icon")
         .attr("class",optionsClass)
         .style({"right":gw.margin.right+gw.margin.top+10,"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -2084,7 +2090,7 @@ GWCatalogue.prototype.drawGraph = function(){
 
     // add info icon
     infoClass = ((!this.optionsOn)&(!this.helpOn)&(!this.langOn)) ? "graph-icon" : "graph-icon hidden";
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","info-icon")
         .attr("class",infoClass)
         .style({"right":gw.margin.right,"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -2111,7 +2117,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add help icon
     helpClass = (this.helpOn) ? "graph-icon" : "graph-icon hidden";
     this.helpouter = d3.select('#help-outer')
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","help-icon")
         .attr("class",helpClass)
         .style({"right":gw.margin.right+2*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
@@ -2141,7 +2147,7 @@ GWCatalogue.prototype.drawGraph = function(){
     // add language button
     langClass = (this.langOn) ? "graph-icon" : "graph-icon hidden";
     this.langouter = d3.select('#lang-outer')
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","lang-icon")
         .attr("class",langClass)
         .style({"right":gw.margin.right+3*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
@@ -2172,7 +2178,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add error toggle button
     errorClass = (this.showerrors) ? "errors-show" : "errors-hide";
     // errordivClass = (this.showerrors) ? "graph-icon" : "graph-icon hidden";
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","errors-icon")
         .attr("class","graph-icon"+((this.showerrors) ? "" : " hidden"))
         .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -2192,7 +2198,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.toggleErrors();gw.hideTooltipManual();});
 
     //add share button
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","share-icon")
         .attr("class","graph-icon hidden")
         .style({"right":gw.margin.right+5*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -2209,8 +2215,8 @@ GWCatalogue.prototype.drawGraph = function(){
     d3.select("#share-bg").on("click",function(){gw.hideShare();});
     d3.select("#share-close").on("click",function(){gw.hideShare();});
 
-    //add serach button
-    d3.select("#svg-container").append("div")
+    //add search button
+    this.graphcont.append("div")
         .attr("id","search-icon")
         .attr("class","graph-icon hidden")
         .style({"right":gw.margin.right+6*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -2239,8 +2245,23 @@ GWCatalogue.prototype.drawGraph = function(){
     })
     d3.select("#search-bg").on("click",function(){gw.hideSearch();});
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
+    //add download button
+    this.graphcont.append("div")
+        .attr("id","save-icon")
+        .attr("class","graph-icon hidden")
+        .style({"right":gw.margin.right+7*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            gw.showTooltipManual("%tooltip.plotgw.save%");
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        }).append("img")
+        .attr("src","img/save.svg")
+        .attr("class","hidden")
+        .attr("id","save-img")
+        .on("click",function(){gw.writeDownloadLink()});
 }
-GWCatalogue.prototype.selectEvent = function(ev){
+GWCatalogue.prototype.selectEvent = function(ev,redraw=false){
     var gw=this;
     if (typeof ev == "string"){
         if(parseInt(ev)==parseInt(ev)){
@@ -2254,7 +2275,7 @@ GWCatalogue.prototype.selectEvent = function(ev){
             // ev is a string which is not a number
             evnum=gw.dataOrder.indexOf(ev)
         }
-        d=gw.data[evnum]
+        if (evnum>=0){d=gw.data[evnum]}else{d=null}
     }else if(typeof ev == "number"){
         // ev is a number
         evnum=ev
@@ -2268,12 +2289,36 @@ GWCatalogue.prototype.selectEvent = function(ev){
         evnum=gw.dataOrder.indexOf(ev.name)
         d=ev;
     }
-    gw.dataIdx=evnum;
-    gw.moveHighlight(d);
-    gw.updateSketch(d);
-    document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
-    document.getElementById("search-list-"+d.name).classList.add("current")
-    gw.selectedevent=d.name;
+    if (d){
+        // d exists
+        if((d.name!=gw.selectedevent)||(redraw)){
+            // different to currently selected event
+            gw.dataIdx=evnum;
+            gw.moveHighlight(d);
+            gw.updateSketch(d);
+            if (document.getElementById("search-list-"+gw.selectedevent)){
+                document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
+            }
+            if (gw.selectedevent!=d.name){
+                gw.selectedevent=d.name;
+                if(document.getElementById("search-list-"+d.name)){
+                    document.getElementById("search-list-"+d.name).classList.add("current")
+                }
+            }
+        }else{
+            // selected the same event
+            gw.moveHighlight(d);
+            gw.updateSketch(d);
+            if (document.getElementById("search-list-"+gw.selectedevent)){
+                document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
+            }
+            gw.selectedevent="none";
+            gw.dataIdx=null;
+        }
+    }else{
+        gw.selectedevent="none";
+        gw.dataIdx=null;
+    }
     this.updateUrl();
 }
 GWCatalogue.prototype.selectNext = function(dir=1){
@@ -2925,15 +2970,16 @@ GWCatalogue.prototype.showShare = function(){
     shareouter=d3.select('#share-outer')
     shareouter.transition()
        .duration(500)
-       .style("opacity",1);
+       .style("opacity",1)
+       .style("max-height",document.getElementById('svg-container').offsetHeight);;
     shareouter.style("top",
-        document.getElementById('svg-container').offsetTop+
-        document.getElementById('share-icon').offsetTop +
-        document.getElementById('share-icon').offsetHeight + 10)
-    .style("left",
-        document.getElementById('share-icon').offsetLeft +
-        document.getElementById('share-icon').offsetWidth/2 -
-        document.getElementById('share-outer').offsetWidth/2)
+            document.getElementById('svg-container').offsetTop+
+            document.getElementById('share-icon').offsetTop +
+            document.getElementById('share-icon').offsetHeight + 10)
+        .style("left",
+            document.getElementById('share-icon').offsetLeft +
+            document.getElementById('share-icon').offsetWidth/2 -
+            document.getElementById('share-outer').offsetWidth/2)
     d3.select("#twitter-share-button")
         .attr("href",
             gw.tl("https://twitter.com/intent/tweet?text=%share.plotgw.twitter.text%&url=")+
@@ -2945,34 +2991,38 @@ GWCatalogue.prototype.showShare = function(){
 }
 GWCatalogue.prototype.hideShare = function(){
     //show share pot
-    d3.select("#share-bg").style("height","0").style("display","none");
+    d3.select('#share-bg').style("height",0).style("display","none");
     d3.select('#share-outer').transition()
        .duration(500)
-       .style("opacity",0);
+       .style("opacity",0)
+       .style("max-height",0);
+
 }
 GWCatalogue.prototype.showSearch = function(){
     //show share pot
     var gw=this;
     d3.select("#search-bg").style("height","100%").style("display","block");
-    shareouter=d3.select('#search-outer')
-    shareouter.transition()
+    searchouter=d3.select('#search-outer')
+    searchouter.transition()
        .duration(500)
-       .style("opacity",1);
-    shareouter.style("top",
-        document.getElementById('svg-container').offsetTop+
-        document.getElementById('search-icon').offsetTop +
-        document.getElementById('search-icon').offsetHeight + 10)
-    .style("left",
-        document.getElementById('search-icon').offsetLeft +
-        document.getElementById('search-icon').offsetWidth/2 -
-        document.getElementById('search-outer').offsetWidth/2)
+       .style("opacity",1)
+       .style("max-height",document.getElementById('svg-container').offsetHeight);
+    searchouter.style("top",
+            document.getElementById('svg-container').offsetTop+
+            document.getElementById('search-icon').offsetTop +
+            document.getElementById('search-icon').offsetHeight + 10)
+        .style("left",
+            document.getElementById('search-icon').offsetLeft +
+            document.getElementById('search-icon').offsetWidth/2 -
+            document.getElementById('search-outer').offsetWidth/2)
 }
 GWCatalogue.prototype.hideSearch = function(){
     //show share pot
     d3.select("#search-bg").style("height","0").style("display","none");
     d3.select('#search-outer').transition()
        .duration(500)
-       .style("opacity",0);
+       .style("opacity",0)
+       .style("max-height",0);
 }
 
 
@@ -3019,6 +3069,24 @@ GWCatalogue.prototype.hideTooltipManual = function(){
         .duration(500)
         .style("opacity", 0);
 }
+
+GWCatalogue.prototype.writeDownloadLink = function(){
+    //write download link
+    try {
+        var isFileSaverSupported = !!new Blob();
+    } catch (e) {
+        alert("SVG export not supported. Sorry!");
+    }
+
+    var html = d3.select("svg.graph")
+        .attr("title", "test2")
+        .attr("version", 1.1)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .node().parentNode.innerHTML;
+
+    var blob = new Blob([html], {type: "image/svg+xml"});
+    saveAs(blob, "Catalogue.svg");
+};
 GWCatalogue.prototype.makePlot = function(){
     // make plot (calls other function)
     this.setLang();
@@ -3033,6 +3101,7 @@ GWCatalogue.prototype.makePlot = function(){
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
+    this.selectEvent(this.selectedevent,redraw=true);
     d3.select('#copy-button').attr('data-clipboard-text',newUrl);
 }
 GWCatalogue.prototype.replot = function(){

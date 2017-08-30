@@ -42,6 +42,7 @@ button.down{
     float:left;
     width:70%;
     height:100%;
+    position:relative;
 }
 #infoouter{
     float:left;
@@ -277,6 +278,7 @@ button.down{
     opacity:0;
     overflow:auto;
     padding: 5px 30px 5px 10px;
+    max-height:0;
 }
 .popup-list-item{
     font-size:large;
