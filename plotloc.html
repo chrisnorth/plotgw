@@ -1,0 +1,74 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Gravitational Wave Locations</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta property="og:url"           content="http://chrisnorth.github.io/plotloc" />
+    <meta property="og:type"          content="website" />
+    <meta property="og:title"         content="Gravitational Wave Localisation" />
+    <meta property="og:description"   content="Explore the Gravitational Wave localisation" />
+    <meta property="og:image"         content="http://chrisnorth.github.io/plotgw/img/screenshot.png" />
+    <!--<link rel="icon" type="image/vnd.microsoft.icon" href="planck_logo.ico" />-->
+    <link rel="icon" type="image/vnd.microsoft.icon" href="img/favicon-32x32.png" />
+    <link rel="stylesheet" href="css/plotloc-d3.css" type="text/css" />
+    <script type="text/javascript" src="js/d3.v3.min.js"></script>
+    <!-- Analytics code -->
+    <script type="text/javascript" src="js/analytics.js"></script>
+    <script type="text/javascript" src="js/plotloc-d3.js"></script>
+</head>
+<body>
+    <div id="plotloc-cont" class="plotloc-container">
+        <div id="hdr">
+            <h1 id="page-title">LIGO-Virgo Localisation</h1>
+        </div>
+        <div id="skycontainer">
+        </div>
+        <div id="infoouter">
+            <div id="effcontainer"></div>
+            <div id="wfcontainer"></div>
+        </div>
+        <div id="help-outer" class="panel-outer">
+            <div id="help-title" class="panel-title"></div>
+            <div class="panel-block" id="help-block-icons">
+                <div class="panel-cont" id="help-help-cont">
+                    <img class="panel-cont-img" src="img/help.svg">
+                    <div class="panel-cont-text" id="help-help-text">help</div>
+                </div>
+                <div class="panel-cont" id="help-info-cont">
+                    <img class="panel-cont-img" src="img/info.svg">
+                    <div class="panel-cont-text" id="help-info-text">info</div>
+                </div>
+                <div class="panel-cont" id="help-lang-cont">
+                    <img class="panel-cont-img" src="img/lang.svg">
+                    <div class="panel-cont-text" id="help-lang-text">language</div>
+                </div>
+                <div class="panel-cont" id="help-share-cont">
+                    <img class="panel-cont-img" src="img/share.svg">
+                    <div class="panel-cont-text" id="help-share-text">share</div>
+                </div>
+            </div>
+            <div class="panel-block" id="help-block-text">
+                <div class="panel-text" id="help-text"></div>
+            </div>
+            <!-- <div class="panel-block" id="help-block-tech">
+                <div class="panel-text" id="help-tech"></div>
+            </div> -->
+
+            <div id="help-close" class="panel-close"></div>
+        </div>
+        <div id="lang-outer" class="panel-outer">
+            <div id="lang-title" class="panel-title"></div>
+            <div class="panel-block panel-block-full" id="lang-block-icons">
+                <div class="panel-text" id="lang-text"></div>
+            </div>
+            <div id="lang-close" class="panel-close"></div>
+            <!-- <div class="panel-block panel-block-full" id="lang-block-credit">
+                <div class="panel-text" id="lang-credit"></div>
+            </div> -->
+        </div>
+        <div class="tooltip" id="tooltipSk"></div>
+    </div>
+    <script type="text/javascript">
+    var gwloc = new Localisation({'holderid':'plotloc-cont','clearhtml':false})
+    </script>
+</body>
+</html>
