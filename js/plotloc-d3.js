@@ -1,4 +1,6 @@
 // Define Localisation class
+var d2r = function(deg){return deg*Math.PI/180.;}
+var r2d = function(rad){return rad*180./Math.PI;}
 function Localisation(inp){
     // set initial axes
     // this.init()
@@ -89,13 +91,16 @@ Localisation.prototype.init = function(){
     this.flySp=1000;
     this.defaults = {
         lang:"en",
-        ra:0,
-        dec:0,
-        posang:0,
+        ra:-10,
+        dec:43,
+        posang:19,
+        lst:0,
     }
-    this.ra = (this.urlVars.ra) ? this.urlVars.ra : this.defaults.ra;
-    this.dec = (this.urlVars.dec) ? this.urlVars.dec : this.defaults.dec;
-    this.posang = (this.urlVars.posang) ? this.urlVars.posang : this.defaults.posang;
+    this.src={}
+    this.src.ra = (this.urlVars.ra) ? this.urlVars.ra : this.defaults.ra;
+    this.src.dec = (this.urlVars.dec) ? this.urlVars.dec : this.defaults.dec;
+    this.src.posang = (this.urlVars.posang) ? this.urlVars.posang : this.defaults.posang;
+    this.src.lst = (this.urlVars.lst) ? this.urlVars.lst : this.defaults.lst;
     this.setStyles();
     this.setScales();
     this.langs = {
@@ -133,10 +138,12 @@ Localisation.prototype.getUrlVars = function(){
 Localisation.prototype.makeUrl = function(newKeys,full){
     // construct new URL with replacement queries if necessary
     newUrlVars = this.urlVars;
-    allKeys = {"ra":[this.ra,this.defaults.ra],
-        "y":[this.dec,this.defaults.dec],
-        "lang":[this.lang,this.defaults.lang],
-        "err":[this.showerrors,this.defaults.showerrors],
+    allKeys = {"ra":[this.src.ra,this.defaults.ra],
+        "dec":[this.src.dec,this.defaults.dec],
+        "lst":[this.src.lst,this.defaults.lst],
+        "posang":[this.src.posang,this.defaults.posang],
+        "lang":[this.src.lang,this.defaults.lang],
+
     }
     for (key in allKeys){
         if (this.debug){console.log(key,allKeys[key]);}
@@ -234,7 +241,7 @@ Localisation.prototype.scaleWindow = function(){
             0.8*(this.winFullHeight-this.effFullHeight);
         info.style["margin-left"]="5%";
         this.effWidth = 0.45*this.effFullWidth;
-        this.effhHeight = this.effFullHeight;
+        this.effHeight = this.effFullHeight;
         if(this.debug){console.log('portrait:',this.effHeight,this.effFullHeight);}
         this.wfWidth = 0.5*this.effFullWidth;
         this.wfHeight = this.effFullHight;
@@ -256,7 +263,7 @@ Localisation.prototype.scaleWindow = function(){
         this.wfHeight = 0.5*this.effFullHight;
     }
     info.style.width = this.effFullWidth;
-    info.style.height = this.effhFullHeight;
+    info.style.height = this.effFullHeight;
     sky.style.width = this.fullSkyWidth;
     sky.style.height = this.fullSkyHeight;
 
@@ -311,12 +318,21 @@ Localisation.prototype.setScales = function(){
     // set axis scales
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
+    this.raMod = function(ra){
+        if(ra>180.){
+            return(ra-360.)
+        }else if(ra<-180.){
+            return(ra+360.)
+        }else{
+            return(ra)
+        }
+    }
     this.raValue = function(d) {return d.ra;} // data -> value
     // value -> display
     this.raScale = d3.scale.linear().domain([180,-180])
         .range([0, this.skyWidth])
         // data -> display
-    this.raMap = function(d) {return loc.raScale(loc.raValue(d));}
+    this.raMap = function(d) {return loc.raScale(loc.raMod(loc.raValue(d)));}
 
     // RA axis
     this.raAxis = d3.svg.axis()
@@ -359,12 +375,13 @@ Localisation.prototype.setScales = function(){
     // console.log('effcont',this.effHeight,this.effWidth);
 
     // set scaleing functions for eff
-    this.scaleRadius = function(hEff,ref){
-        return(0.2*this.effWidth*(mass/100.))}
-    this.xScaleEff = function(hx){return(hx*this.effWidth)}
+    this.rScaleEff = function(r){
+        return(r*this.effWidth/2.)}
+    this.xScaleEff = function(hx){
+        return((0.5+hx/2.)*this.effWidth)}
     this.xScaleEffAspect = function(x){
         return(x*this.effWidth*this.aspectEff)}
-    this.yScaleEff = function(hy){return(hy*this.effHeight)}
+    this.yScaleEff = function(hy){return((0.5+hy/2.)*this.effHeight)}
 
 }
 Localisation.prototype.adjCss = function(){
@@ -417,7 +434,36 @@ Localisation.prototype.drawEff = function(){
         .attr("height", (this.effHeight + this.marginEff.top + this.marginEff.bottom))
         .append("g")
         .attr("transform", "translate(" + this.marginEff.left + "," + this.marginEff.top + ")");
-
+    this.angs={}
+    for (d in this.dataDet){
+        this.angs[this.dataDet[d].id]=this.dataDet[d].ang
+    }
+    this.svgEff.append("circle")
+        .attr("class","outer-circle")
+        .attr("r",loc.rScaleEff(Math.sqrt(0.5)))
+        .attr("cx",loc.xScaleEff(0))
+        .attr("cy",loc.yScaleEff(0))
+        .style("fill-opacity",0)
+        .style("stroke","black")
+        .style("stroke-width",1)
+    this.svgEff.append("line")
+        .attr("class","ref-x")
+        .attr("x1",loc.xScaleEff(-Math.sqrt(0.5)))
+        .attr("x2",loc.xScaleEff(Math.sqrt(0.5)))
+        .attr("y1",loc.yScaleEff(0))
+        .attr("y2",loc.yScaleEff(0))
+        .style("stroke","black")
+        .style("stroke-width",1)
+        .style("stroke-dasharray","1,3")
+    this.svgEff.append("line")
+        .attr("class","ref-x")
+        .attr("x1",loc.xScaleEff(0))
+        .attr("x2",loc.xScaleEff(0))
+        .attr("y1",loc.yScaleEff(-Math.sqrt(0.5)))
+        .attr("y2",loc.yScaleEff(Math.sqrt(0.5)))
+        .style("stroke","black")
+        .style("stroke-width",1)
+        .style("stroke-dasharray","1,3")
     if (this.redraw){
         // console.log('redrawing masses');
         this.addEffLines("L",true);
@@ -435,22 +481,31 @@ Localisation.prototype.addEffLines = function(det,redraw){
     loc=this;
     var redraw;
     detCols={"H":"#f00","L":"#0f0","V":"#00f"}
-    svgEffGroup=this.svgEff.append("g")
-        .attr("class","heff heff-"+det)
+
+    svgEffGroup=this.svgEff.selectAll('.heff-g')
+        .data(loc.dataDet)
+    .enter().append("g")
+        .attr("class",function(d){return("heff-g heff-"+d.id);})
     svgEffGroup.append("line")
-        .attr("class","heff heff-x-"+det)
-        .attr("x1",0)
-        .attr("y1",0)
-        .attr("x2",0)
-        .attr("y2",0)
-        .attr("stroke",detCols[det]);
+        .attr("class","heff-line heff-x-"+d.id)
+        .attr("x1",function(d){return loc.xScaleEff(-d.r*Math.cos(d2r(d.psi)));})
+        .attr("y1",function(d){return loc.yScaleEff(-d.r*Math.sin(d2r(d.psi)));})
+        .attr("x2",function(d){return loc.xScaleEff(d.r*Math.cos(d2r(d.psi)));})
+        .attr("y2",function(d){return loc.yScaleEff(d.r*Math.sin(d2r(d.psi)));})
+        .attr("stroke",function(d){return(detCols[d.id]);})
+        .attr("stroke-width","3px")
+        .attr("stroke-opacity",0.7);
     svgEffGroup.append("line")
-        .attr("class","heff heff-y-"+det)
-        .attr("x1",0)
-        .attr("y1",0)
-        .attr("x2",0)
-        .attr("y2",0)
-        .attr("stroke",detCols[det]);
+        .attr("class",function(d){return("heff-line heff-y-"+d.id);})
+        .attr("x1",function(d){return loc.xScaleEff(d.r*Math.sin(d2r(d.psi)));})
+        .attr("y1",function(d){return loc.yScaleEff(-d.r*Math.cos(d2r(d.psi)));})
+        .attr("x2",function(d){return loc.xScaleEff(-d.r*Math.sin(d2r(d.psi)));})
+        .attr("y2",function(d){return loc.yScaleEff(d.r*Math.cos(d2r(d.psi)));})
+        .attr("stroke",function(d){return(detCols[d.id]);})
+        .attr("stroke-width","3px")
+        .attr("stroke-dasharray",5)
+        .attr("stroke-opacity",0.7);
+
 }
 Localisation.prototype.addWaveform = function(lab){
     // add waveforms as html elements
@@ -615,8 +670,13 @@ Localisation.prototype.drawSkyInit = function(){
     d3.json(loc.fileInDet, function(error, dataIn){
         if (error){alert("Fatal error loading input file: '"+loc.fileInDet+"'. Sorry!")}
         loc.dataDet = [];
+        loc.di={};
+        i=0;
         for (d in dataIn){
+            loc.processDet(dataIn[d])
             loc.dataDet.push(dataIn[d])
+            loc.di[dataIn[d].id]=i;
+            i++;
         }
         loc.loaded++;
         if (loc.debug){console.log('loaded: '+loc.fileInDet)}
@@ -628,9 +688,503 @@ Localisation.prototype.drawSkyInit = function(){
         }
     })
 }
+Localisation.prototype.drawSky = function(){
+    // draw graph
+    var loc = this;
+    // loc.setSvgScales();
+    loc.makeSky();
+    data = loc.dataDet;
+    // x-axis
+    loc.svg.append("g")
+        .attr("class", "ra-axis axis")
+        .attr("transform", "translate("+loc.margin.left+"," +
+            (loc.margin.top + loc.skyHeight) + ")");
+    loc.svg.select(".ra-axis.axis").call(loc.raAxis)
+    loc.svg.select(".ra-axis.axis").append("text")
+        .attr("class", "ra-axis axis-label")
+        // .attr("x", (loc.relw[0]+loc.relw[1])*loc.graphWidth/2)
+        .attr("x", loc.skyWidth/2)
+        .attr("y", 1.2*(1+loc.scl)+"em")
+        .style("text-anchor", "middle")
+        .style("font-size",(1+loc.scl)+"em")
+        .text(loc.tl('%text.plotloc.rightasc%'));
+
+    //scale tick font-size
+    d3.selectAll(".x-axis > .tick > text")
+        .style("font-size",(0.8*(1+loc.scl))+"em");
+
+    // y-axis
+    loc.svg.append("g")
+        .attr("class", "dec-axis axis")
+        .attr("transform", "translate("+loc.margin.left+","+
+            loc.margin.top+")");
+    loc.svg.select(".dec-axis.axis").call(loc.decAxis)
+    loc.svg.select(".dec-axis.axis").append("text")
+        .attr("class", "dec-axis axis-label")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("x",-loc.skyHeight/2)
+        .attr("dy", (-30*(1+loc.scl))+"px")
+        .style("text-anchor", "middle")
+        .style("font-size",(1+loc.scl)+"em")
+        .text(loc.tl('%text.plotloc.declination%'));
+
+    d3.selectAll('.tick > line')
+            .style('stroke','#ccc')
+            .style('opacity',1)
+
+    // draw x-ray dots
+    detGroup = loc.svg.append("g").attr("class","g-dets")
+    loc.detMarkers=detGroup.selectAll(".detmarker")
+        .data(loc.dataDet)
+    .enter().append("g")
+        .attr("class", "detmarker")
+        .attr("id", function(d){return "detmarker-"+d.id;})
+        .attr("transform", function(d){return "translate("+(loc.margin.left+loc.raScale(loc.raMod(d.lon)))+","+
+            (loc.margin.top+loc.decScale(d.lat))+") rotate("+d.ang+")";})
+        // .attr("transform", "translate("+loc.margin.left+","+
+            // loc.margin.top+")")
+        // .on("mouseover", function(d) {
+        //     loc.tooltip.transition()
+        //        .duration(200)
+        //        .style("opacity", .9);
+        //     loc.tooltip.html(loc.tttextDet(d))
+        //        .style("left", (d3.event.pageX + 10) + "px")
+        //        .style("top", (d3.event.pageY-10) + "px")
+        //        .style("width","auto")
+        //        .style("height","auto");
+        // })
+        // .on("mouseout", function(d) {
+        //     loc.tooltip.transition()
+        //        .duration(500)
+        //        .style("opacity", 0);
+        // })
+    loc.detMarkers.append("line")
+        .attr("class","detline detline-x")
+        .attr("id", function(d){return "detline detline-x-"+d.id;})
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", -10)
+        .attr("y2", 0)
+        .attr("cursor","default")
+        .style("opacity",1)
+        .style("stroke", function(d){return loc.color(d.id)})
+        .style("stroke-width",Math.min(5,2./loc.sksc))
+    loc.detMarkers.append("line")
+        .attr("class","detline detline-y")
+        .attr("id",function(d){return "detline detline-y-"+d.id;})
+        .attr("x1", 0)
+        .attr("y1", 0)
+        .attr("x2", 0)
+        .attr("y2", -10)
+        .attr("cursor","default")
+        .attr("opacity",1)
+        .style("stroke", function(d){return loc.color(d.id)})
+        .style("stroke-width",Math.min(5,2./loc.sksc))
+
+    detGroupTest = loc.svg.append("g").attr("class","g-dets-test")
+    loc.detMarkers=detGroupTest.selectAll(".detmarker-test")
+        .data(loc.dataDet)
+    .enter().append("g")
+        .attr("class", "detmarker-test")
+        .attr("id", function(d){return "detmarker-test-"+d.id;})
+        .attr("transform", function(d){return "translate("+(loc.margin.left)+","+
+            (loc.margin.top)+")";})
+    loc.detMarkers.append("line")
+        .attr("class","detline-test detline-test-x")
+        .attr("id", function(d){return "detline-test detline-test-x-"+d.id;})
+        .attr("x1", function(d){return loc.raScale(loc.raMod(d.xarmlb[0][0]));})
+        .attr("y1", function(d){return loc.decScale(d.xarmlb[0][1]);})
+        .attr("x2", function(d){return loc.raScale(loc.raMod(d.xarmlb[1][0]));})
+        .attr("y2", function(d){return loc.decScale(d.xarmlb[1][1]);})
+        .attr("cursor","default")
+        .style("opacity",1)
+        .style("stroke", function(d){return loc.color(d.id)})
+        .style("stroke-width",1)
+        .style("stroke-dasharray",1)
+    loc.detMarkers.append("line")
+        .attr("class","detline-test detline-test-y")
+        .attr("id", function(d){return "detline-test detline-test-y-"+d.id;})
+        .attr("x1", function(d){return loc.raScale(loc.raMod(d.yarmlb[0][0]));})
+        .attr("y1", function(d){return loc.decScale(d.yarmlb[0][1]);})
+        .attr("x2", function(d){return loc.raScale(loc.raMod(d.yarmlb[1][0]));})
+        .attr("y2", function(d){return loc.decScale(d.yarmlb[1][1]);})
+        .attr("cursor","default")
+        .style("opacity",1)
+        .style("stroke", function(d){return loc.color(d.id)})
+        .style("stroke-width",1)
+        .style("stroke-dasharray",1)
+
+
+    // add source circle
+    loc.srcMarker=loc.svg.append("g")
+        .attr("class","g-source")
+        .attr("transform", "translate("+loc.margin.left+","+
+            loc.margin.top+")")
+    loc.srcMarker.append("circle")
+        .attr("id","dot-src")
+        .attr("class","dot-src")
+        .attr("opacity",1)
+        .attr("cx",loc.raScale(loc.raMod(loc.src.ra)))
+        .attr("cy",loc.decScale(loc.src.dec))
+        .attr("r",5)
+        .style("fill","white")
+        .style("fill-opacity",0)
+        .style("stroke","black")
+        .style("stroke-width",3)
+    loc.srcMarker.append("line")
+        .attr("id","line-x-src")
+        .attr("class",'line-src')
+        .attr("opacity","1")
+        .style("stroke","black")
+        .style("stroke-width",1)
+        .attr("x1",function(){return loc.raScale(loc.raMod(loc.src.larmlb[0][0]));})
+        .attr("y1",function(){return loc.decScale(loc.src.larmlb[0][1]);})
+        .attr("x2",function(){return loc.raScale(loc.raMod(loc.src.larmlb[1][0]));})
+        .attr("y2",function(){return loc.decScale(loc.src.larmlb[1][1]);})
+    loc.srcMarker.append("line")
+        .attr("id","line-y-src")
+        .attr("class",'line-src')
+        .attr("opacity","1")
+        .style("stroke","black")
+        .style("stroke-width",1)
+        .attr("x1",function(){return loc.raScale(loc.raMod(loc.src.marmlb[0][0]));})
+        .attr("y1",function(){return loc.decScale(loc.src.marmlb[0][1]);})
+        .attr("x2",function(){return loc.raScale(loc.raMod(loc.src.marmlb[1][0]));})
+        .attr("y2",function(){return loc.decScale(loc.src.marmlb[1][1]);})
+
+
+    // draw legend
+    loc.legend = loc.svg.selectAll(".legend")
+      .data(loc.color.domain())
+    .enter().append("g")
+      .attr("class", function(d,i){return "legend "+d;})
+      .attr("transform", function(d, i) { return "translate(0," +
+        (i * 24) + ")"; });
+
+    // draw legend colored circles
+    loc.legend.append("line")
+        .attr("x1", loc.margin.left+12)
+        .attr("y1", loc.margin.top+24)
+        .attr("x2", loc.margin.left+24)
+        .attr("y2", loc.margin.top+24)
+        .style("stroke-width",Math.min(5,2./loc.sksc))
+        .style("stroke",function(d){return loc.color(d);})
+        .attr("opacity",1);
+    loc.legend.append("line")
+        .attr("x1", loc.margin.left+12)
+        .attr("y1", loc.margin.top+24)
+        .attr("x2", loc.margin.left+12)
+        .attr("y2", loc.margin.top+12)
+        .style("stroke-width",Math.min(5,2./loc.sksc))
+        .style("stroke",function(d){return loc.color(d);})
+        .attr("opacity",1);
+
+    // draw legend text
+    loc.legend.append("text")
+      .attr("x", loc.margin.left + 36)
+      .attr("y", loc.margin.top + 21)
+      .attr("dy", ".35em")
+      .attr("font-size","1.2em")
+      .style("text-anchor", "start")
+      .text(function(d) { if (loc.legenddescs[d]){return loc.legenddescs[d];}else{return d}})
+
+    // add info icon
+    infoClass = ((!this.optionsOn)&(!this.helpOn)&(!this.langOn)) ? "graph-icon" : "graph-icon hidden";
+    this.skycont.append("div")
+        .attr("id","info-icon")
+        .attr("class",infoClass)
+        .style({"right":loc.margin.right,"top":0,"width":loc.margin.top,"height":loc.margin.top})
+        .on("mouseover", function(d) {
+              loc.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              loc.tooltip.html(loc.tl('%tooltip.plotloc.showinfo%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("effcontainer").style.opacity=0.;
+        })
+    .append("img")
+        .attr("src","img/info.svg")
+        .on("click",function(){loc.hideHelp();loc.hideLang();});
+
+    //add help icon
+    helpClass = (this.helpOn) ? "graph-icon" : "graph-icon hidden";
+    this.helpouter = d3.select('#help-outer')
+    this.skycont.append("div")
+        .attr("id","help-icon")
+        .attr("class",helpClass)
+        .style({"right":loc.margin.right+1*(loc.margin.top+10),"top":0,"width":40*loc.ysc,"height":40*loc.ysc})
+        .on("mouseover", function(d) {
+              loc.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              loc.tooltip.html(loc.tl('%tooltip.plotloc.showhelp%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("effcontainer").style.opacity=0.;
+        }).append("img")
+        .attr("src","img/help.svg")
+        .on("click",function(){loc.showHelp();});
+    this.helpouter
+        .style("top","200%");
+    this.helpouter.select("#help-close")
+        .on("click",function(){loc.hideHelp();});
+
+    // add language button
+    langClass = (this.langOn) ? "graph-icon" : "graph-icon hidden";
+    this.langouter = d3.select('#lang-outer')
+    this.skycont.append("div")
+        .attr("id","lang-icon")
+        .attr("class",langClass)
+        .style({"right":loc.margin.right+2*(loc.margin.top+10),"top":0,"width":40*loc.ysc,"height":40*loc.ysc})
+        .on("mouseover", function(d) {
+              loc.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              loc.tooltip.html(loc.tl('%tooltip.plotloc.showlang%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("effcontainer").style.opacity=0.;
+        }).append("img")
+        .attr("src","img/lang.svg")
+        .on("click",function(){console.log('showing lang panel');loc.showLang();});
+    // this.langbg.on("click",function(){loc.hideLang();});
+    this.langouter
+        .style("top","200%");
+    this.langouter.select("#lang-close")
+        .on("click",function(){loc.hideLang();});
+
+}
+
+Localisation.prototype.moveHighlight = function(ra,dec){
+    // move highlight circle
+    var loc=this;
+    loc.svg.select("#source")
+        .transition().duration(500)
+        .attr("cx",loc.raScale(loc.raMod(ra))).attr("cy",loc.decScale(dec))
+        .style("opacity",1);
+}
+
+var outer = function(a,b){
+    if(a.length!=b.length){
+        console.log('ERROR:arrays of different lengths:',a,b);
+        return null;
+    }else{
+        mata=$M(a);
+        matb=$M(b);
+        prod=mata.multiply(matb.transpose());
+        return prod;
+    }
+
+}
+// calculations from https://dcc.ligo.org/public/0068/T1100431/002/projectedTensor.pdf
+var lb2vec = function(lon,lat){
+    vec=$M([Math.cos(d2r(lon))*Math.cos(d2r(lat)),Math.sin(d2r(lon))*Math.cos(d2r(lat)),math.sin(d2r(lat))]);
+    return(vec);
+}
+var vec2lb = function(vec){
+    if (vec.elements){
+        v=vec.elements
+    }else{
+        v=vec
+    }
+    lon=Math.atan2(v[1],v[0])
+    lat=Math.atan2(v[2],Math.sqrt(v[0]*v[0] + v[1]*v[1]))
+    return([r2d(lon),r2d(lat)]);
+}
+var rotate = function (lon,lat,ang) {
+    // rotate around x axis by ang
+    angrot=$M([[1,0,0],[0,Math.cos(d2r(ang)),-Math.sin(d2r(ang))],[0,Math.sin(d2r(ang)),Math.cos(d2r(ang))]]);
+    // rotate around z axis by lon
+    lonrot=$M([[Math.cos(d2r(lon)),-Math.sin(d2r(lon)),0],[Math.sin(d2r(lon)),Math.cos(d2r(lon)),0],[0,0,1]]);
+    // rotate around y axis by lat
+    latrot=$M([[Math.cos(d2r(-lat)),0,Math.sin(d2r(-lat))],[0,1,0],[-Math.sin(d2r(-lat)),0,Math.cos(d2r(-lat))]]);
+    // multiply together and return
+    return (lonrot.multiply(latrot).multiply(angrot));
+};
+var uv2dd = function(u,v){
+    return outer(u,u).add(outer(v,v).multiply(-1)).multiply(0.5)
+}
+var ij2eps = function(i,j,pol='+'){
+    if (pol=='x'){
+        return outer(i,j).add(outer(j,i))
+    }else{
+        return outer(i,i).add(outer(j,j).multiply(-1))
+    }
+}
+var eps2e = function(eps,posang,pol='+'){
+    if (pol=='x'){
+        return eps['+'].multiply(-Math.sin(2.*d2r(posang))).add(eps['x'].multiply(Math.cos(2.*d2r(posang))))
+    }else{
+        return eps['+'].multiply(Math.cos(2.*d2r(posang))).add(eps['x'].multiply(Math.sin(2.*d2r(posang))))
+    }
+}
+var ab2F = function(a,b,posang,pol='+'){
+    if (pol=='x'){
+        return -a*Math.sin(2.*d2r(posang)) + b*Math.cos(2.*d2r(posang))
+    }else{
+        return a*Math.cos(2.*d2r(posang)) + b*Math.sin(2.*d2r(posang))
+    }
+}
+var ab2r = function(a,b){
+    return(Math.sqrt(0.5)*Math.pow((a*a + b*b),0.25))
+}
+var ab2psi = function(a,b){
+    return(Math.atan2(b,a)/2.)
+}
+var dotprod = function(aIn,bIn){
+    // dot product
+    if (aIn.hasOwnProperty('elements')){
+        a=aIn.elements;
+    }else{a=aIn}
+    if (bIn.hasOwnProperty('elements')){
+        b=bIn.elements;
+    }else{b=bIn}
+    dot=0;
+    for (i in a){
+        for (j in a[0]){
+            dot = dot + a[i][j]*b[i][j];
+        }
+    }
+    return(dot)
+}
+Localisation.prototype.processDet = function(det){
+    // process detectors
+    // get vector of detector position
+    console.log('processing ',det.id,det)
+    det.vec=rotate(det.lon,det.lat,0).multiply(lb2vec(0,0));
+    //convert to latlon
+    det.lb=vec2lb(det.vec);
+    // construct rotation matrix
+    det.rotmat=rotate(det.lon,det.lat,det.ang);
+    // get initial arm vectors
+    det.uvec=$M([0,1,0])
+    det.vvec=$M([0,0,1]);;
+    // rotate arms to sky position
+    det.uvec=det.rotmat.multiply(det.uvec);
+    det.vvec=det.rotmat.multiply(det.vvec);
+    // compute vectors of ends of arms
+    det.xarmvec=[det.vec,det.vec.add(det.uvec.multiply(0.1))];
+    det.yarmvec=[det.vec,det.vec.add(det.vvec.multiply(0.1))];
+    // convert to lat-lon
+    det.xarmlb=[vec2lb(det.xarmvec[0]),vec2lb(det.xarmvec[1])];
+    det.yarmlb=[vec2lb(det.yarmvec[0]),vec2lb(det.yarmvec[1])];
+
+    // do outer products
+    // det.dd=outer(det.uvec,det.uvec).add(outer(det.vvec,det.vvec).multiply(-1)).multiply(0.5);
+    det.dd=uv2dd(det.uvec,det.vvec);
+    return
+    // det.detxyz=math.cross();
+}
+Localisation.prototype.processNetwork = function(){
+    // calculate parameters relating to full network
+    loc=this;
+    loc.net={'pairs':{},'sigma':0};
+    for (i in loc.di){
+        deti=loc.dataDet[loc.di[i]]
+        loc.net.sigma += 1./(deti.sigma*deti.sigma)
+        for (j in loc.di){
+            dij={};
+            detj=loc.dataDet[loc.di[j]];
+            // get difference vector
+            dij.d=deti.vec.add(detj.vec.multiply(-1));
+            // calculate contribution to M
+            dij.DD=dij.d.multiply(dij.d.transpose()).multiply(2*deti.sigma*deti.sigma*detj.sigma*detj.sigma);
+            if (!loc.net.hasOwnProperty('M')){
+                loc.net.M=dij.DD;
+            }else{
+                loc.net.M=loc.net.M.add(dij.DD)
+            }
+        }
+    }
+    loc.net.M=loc.net.M.multiply(1./loc.net.sigma)
+    return
+}
+Localisation.prototype.processSrc = function(){
+    loc=this;
+    src=this.src
+    console.log('processing src',src)
+    // construct rotation matrix
+    src.rotmat=rotate(src.ra,src.dec,0);
+    src.rotmatpos=rotate(src.ra,src.dec,src.posang);
+    // get vector of source position
+    src.vec=src.rotmatpos.multiply(lb2vec(0,0));
+    // initial vectors
+    src.ivecIn=$M([0,1,0]);
+    src.jvecIn=$M([0,0,1]);
+    // rotate to sky position
+    src.ivec=src.rotmat.multiply(src.ivecIn);
+    src.jvec=src.rotmat.multiply(src.jvecIn);
+    src.lvec=src.rotmatpos.multiply(src.ivecIn);
+    src.mvec=src.rotmatpos.multiply(src.jvecIn);
+    // compute vectors of polarisation
+    src.larmvec=[src.vec.add(src.lvec.multiply(-0.1)),src.vec.add(src.lvec.multiply(0.1))];
+    src.marmvec=[src.vec.add(src.mvec.multiply(-0.1)),src.vec.add(src.mvec.multiply(0.1))];
+    // convert to lat-lon
+    src.larmlb=[vec2lb(src.larmvec[0]),vec2lb(src.larmvec[1])];
+    src.marmlb=[vec2lb(src.marmvec[0]),vec2lb(src.marmvec[1])];
+
+    // do outer products
+    if (!src.hasOwnProperty('eps')){
+        src.eps={};
+    }
+    src.eps['+']=ij2eps(src.lvec,src.mvec,'+');
+    src.eps['x']=ij2eps(src.lvec,src.mvec,'x');
+    // account for polarisation
+    if (!src.hasOwnProperty('e')){
+        src.e={};
+    }
+    src.e['+']=eps2e(src.eps,src.posang,'+');
+    src.e['x']=eps2e(src.eps,src.posang,'x');
+}
+Localisation.prototype.calcAntFacs = function(){
+    for (d in this.dataDet){
+        det=this.dataDet[d];
+        det.a = dotprod(det.dd,this.src.eps['+']);
+        det.b = dotprod(det.dd,this.src.eps['x']);
+        det['F+']=ab2F(det.a,det.b,src.posang,'+');
+        det['Fx']=ab2F(det.a,det.b,src.posang,'x');
+        det['F+2']=dotprod(det.dd,this.src.e['+']);
+        det['Fx2']=dotprod(det.dd,this.src.e['x']);
+        det.r=ab2r(det.a,det.b);
+        det.psi=r2d(ab2psi(det.a,det.b));
+    }
+}
 Localisation.prototype.whenLoaded = function(){
     var loc=this;
     // order Data
+    loc.processSrc();
+    loc.calcAntFacs();
+    loc.processNetwork();
+    for (d in loc.di){
+        det=loc.dataDet[loc.di[d]];
+        // console.log(d,det['F+']/Math.sqrt(0.5),det['Fx']/Math.sqrt(0.5));
+        // console.log(d,det.r/Math.sqrt(0.5),det.psi);
+        console.log(d,det.r*Math.cos(d2r(2*det.psi))/Math.sqrt(0.5));
+
+    }
     loc.makePlot();
     if(loc.debug){console.log('plotted');}
     // select a default event
@@ -749,251 +1303,6 @@ Localisation.prototype.setLang = function(){
     d3.select('#copy-button').attr('title',this.tl('%text.gen.share.copylink%'))
     d3.select('#facebook-share-button').attr('title',this.tl('%text.gen.share.fb%'))
     d3.select('#twitter-share-button').attr('title',this.tl('%text.gen.share.twitter%'))
-}
-Localisation.prototype.drawSky = function(){
-    // draw graph
-    var loc = this;
-    // loc.setSvgScales();
-    loc.makeSky();
-    data = loc.dataDet;
-    // x-axis
-    loc.svg.append("g")
-        .attr("class", "ra-axis axis")
-        .attr("transform", "translate("+loc.margin.left+"," +
-            (loc.margin.top + loc.skyHeight) + ")");
-    loc.svg.select(".ra-axis.axis").call(loc.raAxis)
-    loc.svg.select(".ra-axis.axis").append("text")
-        .attr("class", "ra-axis axis-label")
-        // .attr("x", (loc.relw[0]+loc.relw[1])*loc.graphWidth/2)
-        .attr("x", loc.skyWidth/2)
-        .attr("y", 1.2*(1+loc.scl)+"em")
-        .style("text-anchor", "middle")
-        .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.plotloc.rightasc%'));
-
-    //scale tick font-size
-    d3.selectAll(".x-axis > .tick > text")
-        .style("font-size",(0.8*(1+loc.scl))+"em");
-
-    // y-axis
-    loc.svg.append("g")
-        .attr("class", "dec-axis axis")
-        .attr("transform", "translate("+loc.margin.left+","+
-            loc.margin.top+")");
-    loc.svg.select(".dec-axis.axis").call(loc.decAxis)
-    loc.svg.select(".dec-axis.axis").append("text")
-        .attr("class", "dec-axis axis-label")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("x",-loc.skyHeight/2)
-        .attr("dy", (-30*(1+loc.scl))+"px")
-        .style("text-anchor", "middle")
-        .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.plotloc.declination%'));
-
-    d3.selectAll('.tick > line')
-            .style('stroke','#ccc')
-            .style('opacity',1)
-
-    // draw x-ray dots
-    detGroup = loc.svg.append("g").attr("class","g-dets")
-    loc.detMarkers=detGroup.selectAll(".detline")
-        .data(loc.dataDet)
-    .enter().append("g")
-        .attr("class", "detmarker")
-        .attr("id", function(d){return "detmarker-"+d.id;})
-        .attr("transform", function(d){return "translate("+(loc.margin.left+loc.raScale(d.lon))+","+
-            (loc.margin.top+loc.decScale(d.lat))+") rotate("+d.ang+")";})
-        // .attr("transform", "translate("+loc.margin.left+","+
-            // loc.margin.top+")")
-
-
-            // .on("mouseover", function(d) {
-        //     loc.tooltip.transition()
-        //        .duration(200)
-        //        .style("opacity", .9);
-        //     loc.tooltip.html(loc.tttextDet(d))
-        //        .style("left", (d3.event.pageX + 10) + "px")
-        //        .style("top", (d3.event.pageY-10) + "px")
-        //        .style("width","auto")
-        //        .style("height","auto");
-        // })
-        // .on("mouseout", function(d) {
-        //     loc.tooltip.transition()
-        //        .duration(500)
-        //        .style("opacity", 0);
-        // })
-    loc.detMarkers.append("line")
-        .attr("class","detline detline-x")
-        .attr("id", function(d){return "detline detline-x-"+d.id;})
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", -10)
-        .attr("y2", 0)
-        .attr("cursor","default")
-        .style("opacity",1)
-        .style("stroke", function(d){return loc.color(d.id)})
-        .style("stroke-width",Math.min(5,2./loc.sksc))
-    loc.detMarkers.append("line")
-        .attr("class","detline detline-y")
-        .attr("id",function(d){return "detline detline-y-"+d.id;})
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", 0)
-        .attr("y2", -10)
-        .attr("cursor","default")
-        .attr("opacity",1)
-        .style("stroke", function(d){return loc.color(d.id)})
-        .style("stroke-width",Math.min(5,2./loc.sksc))
-
-    // add source circle
-    loc.svg.append("g")
-        .attr("class","g-source")
-        .attr("transform", "translate("+loc.margin.left+","+
-            loc.margin.top+")")
-        .style("fill","white")
-        .style("fill-opacity",0)
-        .style("stroke","red")
-        .style("stroke-width",3)
-    .append("circle")
-        .attr("id","source")
-        .attr("class","dot-src")
-        .attr("opacity",1)
-        .attr("cx",loc.raScale(0))
-        .attr("cy",loc.decScale(0))
-        .attr("r",5)
-
-    // draw legend
-    loc.legend = loc.svg.selectAll(".legend")
-      .data(loc.color.domain())
-    .enter().append("g")
-      .attr("class", function(d,i){return "legend "+d;})
-      .attr("transform", function(d, i) { return "translate(0," +
-        (i * 24) + ")"; });
-
-    // draw legend colored circles
-    loc.legend.append("line")
-        .attr("x1", loc.margin.left+12)
-        .attr("y1", loc.margin.top+24)
-        .attr("x2", loc.margin.left+24)
-        .attr("y2", loc.margin.top+24)
-        .style("stroke-width",Math.min(5,2./loc.sksc))
-        .style("stroke",function(d){return loc.color(d);})
-        .attr("opacity",1);
-    loc.legend.append("line")
-        .attr("x1", loc.margin.left+12)
-        .attr("y1", loc.margin.top+24)
-        .attr("x2", loc.margin.left+12)
-        .attr("y2", loc.margin.top+12)
-        .style("stroke-width",Math.min(5,2./loc.sksc))
-        .style("stroke",function(d){return loc.color(d);})
-        .attr("opacity",1);
-
-    // draw legend text
-    loc.legend.append("text")
-      .attr("x", loc.margin.left + 36)
-      .attr("y", loc.margin.top + 21)
-      .attr("dy", ".35em")
-      .attr("font-size","1.2em")
-      .style("text-anchor", "start")
-      .text(function(d) { if (loc.legenddescs[d]){return loc.legenddescs[d];}else{return d}})
-
-    // add info icon
-    infoClass = ((!this.optionsOn)&(!this.helpOn)&(!this.langOn)) ? "graph-icon" : "graph-icon hidden";
-    this.skycont.append("div")
-        .attr("id","info-icon")
-        .attr("class",infoClass)
-        .style({"right":loc.margin.right,"top":0,"width":loc.margin.top,"height":loc.margin.top})
-        .on("mouseover", function(d) {
-              loc.tooltip.transition()
-                 .duration(200)
-                 .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.showinfo%'))
-                 .style("left", (d3.event.pageX + 10) + "px")
-                 .style("top", (d3.event.pageY-10) + "px")
-                 .style("width","auto")
-                 .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            loc.tooltip.transition()
-                 .duration(500)
-                 .style("opacity", 0);
-          //   document.getElementById("effcontainer").style.opacity=0.;
-        })
-    .append("img")
-        .attr("src","img/info.svg")
-        .on("click",function(){loc.hideOptions();loc.hideHelp();loc.hideLang();});
-
-    //add help icon
-    helpClass = (this.helpOn) ? "graph-icon" : "graph-icon hidden";
-    this.helpouter = d3.select('#help-outer')
-    this.skycont.append("div")
-        .attr("id","help-icon")
-        .attr("class",helpClass)
-        .style({"right":loc.margin.right+2*(loc.margin.top+10),"top":0,"width":40*loc.ysc,"height":40*loc.ysc})
-        .on("mouseover", function(d) {
-              loc.tooltip.transition()
-                 .duration(200)
-                 .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.showhelp%'))
-                 .style("left", (d3.event.pageX + 10) + "px")
-                 .style("top", (d3.event.pageY-10) + "px")
-                 .style("width","auto")
-                 .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            loc.tooltip.transition()
-                 .duration(500)
-                 .style("opacity", 0);
-          //   document.getElementById("effcontainer").style.opacity=0.;
-        }).append("img")
-        .attr("src","img/help.svg")
-        .on("click",function(){loc.showHelp();});
-    this.helpouter
-        .style("top","200%");
-    this.helpouter.select("#help-close")
-        .on("click",function(){loc.hideHelp();});
-
-    // add language button
-    langClass = (this.langOn) ? "graph-icon" : "graph-icon hidden";
-    this.langouter = d3.select('#lang-outer')
-    this.skycont.append("div")
-        .attr("id","lang-icon")
-        .attr("class",langClass)
-        .style({"right":loc.margin.right+3*(loc.margin.top+10),"top":0,"width":40*loc.ysc,"height":40*loc.ysc})
-        .on("mouseover", function(d) {
-              loc.tooltip.transition()
-                 .duration(200)
-                 .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.showlang%'))
-                 .style("left", (d3.event.pageX + 10) + "px")
-                 .style("top", (d3.event.pageY-10) + "px")
-                 .style("width","auto")
-                 .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            loc.tooltip.transition()
-                 .duration(500)
-                 .style("opacity", 0);
-          //   document.getElementById("effcontainer").style.opacity=0.;
-        }).append("img")
-        .attr("src","img/lang.svg")
-        .on("click",function(){console.log('showing lang panel');loc.showLang();});
-    // this.langbg.on("click",function(){loc.hideLang();});
-    this.langouter
-        .style("top","200%");
-    this.langouter.select("#lang-close")
-        .on("click",function(){loc.hideLang();});
-
-}
-
-Localisation.prototype.moveHighlight = function(ra,dec){
-    // move highlight circle
-    var loc=this;
-    loc.svg.select("#source")
-        .transition().duration(500)
-        .attr("cx",loc.raScale(ra)).attr("cy",loc.decScale(dec))
-        .style("opacity",1);
 }
 Localisation.prototype.addHelp = function(){
     // add help to panel
