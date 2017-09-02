@@ -229,7 +229,7 @@ Localisation.prototype.scaleWindow = function(){
     info=document.getElementById("infoouter");
     effcont=document.getElementById("effcontainer");
     wfcont=document.getElementById("wfcontainer");
-    sky=document.getElementById("skycontainer");
+    this.sky=document.getElementById("skycontainer");
     if (this.winAspect<1){
         // portrait
         // console.log('portrait');
@@ -245,6 +245,8 @@ Localisation.prototype.scaleWindow = function(){
         if(this.debug){console.log('portrait:',this.effHeight,this.effFullHeight);}
         this.wfWidth = 0.5*this.effFullWidth;
         this.wfHeight = this.effFullHight;
+        this.labcontHeight="20%";
+        this.langcontHeight="10%";
     }else{
         // landscape window
         // console.log('landscape')
@@ -261,11 +263,13 @@ Localisation.prototype.scaleWindow = function(){
         this.effAspect = this.effFullWidth/this.effFullHeight;
         this.wfWidth = this.effFullWidth;
         this.wfHeight = 0.5*this.effFullHight;
+        this.labcontHeight="10%";
+        this.langcontHeight="5%";
     }
     info.style.width = this.effFullWidth;
     info.style.height = this.effFullHeight;
-    sky.style.width = this.fullSkyWidth;
-    sky.style.height = this.fullSkyHeight;
+    this.sky.style.width = this.fullSkyWidth;
+    this.sky.style.height = this.fullSkyHeight;
 
     effcont.style.height = this.effHeight;
     effcont.style.width = this.effWidth;
@@ -311,8 +315,9 @@ Localisation.prototype.setScales = function(){
     this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left:45*(1+this.xsc)}
     this.skyWidth =
         this.fullSkyWidth - this.margin.left - this.margin.right;
-    this.skyHeight =
-        0.9*this.fullSkyHeight - this.margin.top - this.margin.bottom;
+    this.skyHeight = this.skyWidth/2.
+    this.fullSkyHeight=1.1*(this.skyHeight+this.margin.top+this.margin.bottom)
+        // 0.9*this.fullSkyHeight - this.margin.top - this.margin.bottom;
     this.xyAspect = this.skyWidth/this.skyHeight;
 
     // set axis scales
@@ -333,7 +338,10 @@ Localisation.prototype.setScales = function(){
         .range([0, this.skyWidth])
         // data -> display
     this.raMap = function(d) {return loc.raScale(loc.raMod(loc.raValue(d)));}
-
+    sky=document.getElementById("skycontainer");
+    this.x2raScale = d3.scale.linear()
+        .domain([this.sky.offsetLeft+this.margin.left,this.sky.offsetLeft+this.margin.left+this.skyWidth])
+        .range([180,-180])
     // RA axis
     this.raAxis = d3.svg.axis()
             .scale(this.raScale)
@@ -346,6 +354,9 @@ Localisation.prototype.setScales = function(){
     this.decValue = function(d) {return d.dec;}
     // value -> display
     this.decScale = d3.scale.linear().domain([-90,90]).range([this.skyHeight,0])
+    this.y2decScale = d3.scale.linear()
+        .domain([this.sky.offsetTop+this.margin.top+this.skyHeight,this.sky.offsetTop+this.margin.top])
+        .range([-90,90])
     // data -> display
     this.decMap = function(d) { return loc.decScale(loc.decValue(d));}
 
@@ -375,13 +386,13 @@ Localisation.prototype.setScales = function(){
     // console.log('effcont',this.effHeight,this.effWidth);
 
     // set scaleing functions for eff
-    this.rScaleEff = function(r){
-        return(r*this.effWidth/2.)}
-    this.xScaleEff = function(hx){
-        return((0.5+hx/2.)*this.effWidth)}
+    this.rScaleEff = function(r){return(r*this.effWidth/2.)}
+    this.rpsi2xEff = function(r,psi){return(loc.xScaleEff(r*Math.cos(d2r(psi))))}
+    this.rpsi2yEff = function(r,psi){return(loc.yScaleEff(-r*Math.sin(d2r(psi))))}
+    this.xScaleEff = d3.scale.linear().domain([-1,1]).range([0,this.effWidth])
     this.xScaleEffAspect = function(x){
         return(x*this.effWidth*this.aspectEff)}
-    this.yScaleEff = function(hy){return((0.5+hy/2.)*this.effHeight)}
+    this.yScaleEff = d3.scale.linear().domain([-1,1]).range([0,this.effHeight])
 
 }
 Localisation.prototype.adjCss = function(){
@@ -466,116 +477,194 @@ Localisation.prototype.drawEff = function(){
         .style("stroke-dasharray","1,3")
     if (this.redraw){
         // console.log('redrawing masses');
-        this.addEffLines("L",true);
-        this.addEffLines("H",true);
-        this.addEffLines("V",true);
+        for (d in this.di){
+            this.addEffLines();
+        }
+        d3.selectAll('.labcont').style('height',this.labcontHeight);
+        d3.selectAll('.lang-cont').style('height',this.langcontHeight);
     }else{
-        this.addEffLines("L",false);
-        this.addEffLines("H",false);
-        this.addEffLines("V",false);
+        for (d in this.di){
+            this.addEffLines();
+        }
+        for (lab in this.labels){
+            if ((this.labels[lab].type)&&this.labels[lab].type=="det"){
+                for (d in loc.di){this.addLabel(lab,d);}
+            }else{
+                this.addLabel(lab);
+            }
+        }
     }
 
 }
-Localisation.prototype.addEffLines = function(det,redraw){
+Localisation.prototype.addEffLines = function(){
     // add ellipse for shadow
     loc=this;
     var redraw;
-    detCols={"H":"#f00","L":"#0f0","V":"#00f"}
-
-    svgEffGroup=this.svgEff.selectAll('.heff-g')
-        .data(loc.dataDet)
-    .enter().append("g")
-        .attr("class",function(d){return("heff-g heff-"+d.id);})
-    svgEffGroup.append("line")
-        .attr("class","heff-line heff-x-"+d.id)
-        .attr("x1",function(d){return loc.xScaleEff(-d.r*Math.cos(d2r(d.psi)));})
-        .attr("y1",function(d){return loc.yScaleEff(-d.r*Math.sin(d2r(d.psi)));})
-        .attr("x2",function(d){return loc.xScaleEff(d.r*Math.cos(d2r(d.psi)));})
-        .attr("y2",function(d){return loc.yScaleEff(d.r*Math.sin(d2r(d.psi)));})
-        .attr("stroke",function(d){return(detCols[d.id]);})
+    var det=this.dataDet[this.di[d]]
+    // console.log('adding lines for',d,det);
+    // svgEffGroup=this.svgEff.selectAll('.heff-g')
+    //     .data(loc.dataDet)
+    // .enter().append("g")
+    //     .attr("class",function(d){return "heff-g heff-"+d.id})
+    //     .attr("transform",function(d){
+    //         return("translate("+(loc.effWidth/2)+","+(loc.effWidth/2)+") rotate("+d.psi+")")})
+    // add x-line
+    linesX=this.svgEff.selectAll('.heff-line-x')
+        .data(loc.dataDet).enter()
+    linesX.append("line")
+        // .attr("transform",function(d){
+        //     return("translate("+(loc.effWidth/2)+","+(loc.effWidth/2)+") rotate("+d.psi+")")})
+        .attr("class",function(d){return "heff-line heff-line-x heff-x-"+d.id})
+        .attr("x1",function(d){return loc.rpsi2xEff(-d.r,d.psi)})
+        .attr("y1",function(d){return loc.rpsi2yEff(-d.r,d.psi)})
+        .attr("x2",function(d){return loc.rpsi2xEff(d.r,d.psi)})
+        .attr("y2",function(d){return loc.rpsi2yEff(d.r,d.psi)})
+        .attr("stroke",function(d){return loc.detCols[d.id]})
         .attr("stroke-width","3px")
         .attr("stroke-opacity",0.7);
-    svgEffGroup.append("line")
-        .attr("class",function(d){return("heff-line heff-y-"+d.id);})
-        .attr("x1",function(d){return loc.xScaleEff(d.r*Math.sin(d2r(d.psi)));})
-        .attr("y1",function(d){return loc.yScaleEff(-d.r*Math.cos(d2r(d.psi)));})
-        .attr("x2",function(d){return loc.xScaleEff(-d.r*Math.sin(d2r(d.psi)));})
-        .attr("y2",function(d){return loc.yScaleEff(d.r*Math.cos(d2r(d.psi)));})
-        .attr("stroke",function(d){return(detCols[d.id]);})
+    // add y-line
+    linesY=this.svgEff.selectAll('.heff-line-y')
+        .data(loc.dataDet).enter()
+    linesY.append("line")
+        // .attr("transform",function(d){
+        //     return("translate("+(loc.effWidth/2)+","+(loc.effWidth/2)+") rotate("+d.psi+")")})
+        .attr("class",function(d){return "heff-line heff-line-y heff-y-"+d.id})
+        .attr("x1",function(d){return loc.rpsi2xEff(-d.r,d.psi+90)})
+        .attr("y1",function(d){return loc.rpsi2yEff(-d.r,d.psi+90)})
+        .attr("x2",function(d){return loc.rpsi2xEff(d.r,d.psi+90)})
+        .attr("y2",function(d){return loc.rpsi2yEff(d.r,d.psi+90)})
+        .attr("stroke",function(d){return loc.detCols[d.id]})
         .attr("stroke-width","3px")
         .attr("stroke-dasharray",5)
         .attr("stroke-opacity",0.7);
 
 }
+Localisation.prototype.addLabel = function (lab,det='') {
+    labimgdiv = document.createElement('div');
+    labimgdiv.className = 'icon labcont';
+    // labimgdiv.style.width = this.labcontWidth;
+    labimgdiv.style.height = this.labcontHeight;
+    labimgdiv.style.display = "inline-block";
+    if (this.labels[lab].hasOwnProperty('icon')){
+        if ((loc.labels.type)&&(loc.labels.type=="det")){
+            labimgdiv.setAttribute("id",lab+det+'icon');
+            labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon(det)+"'>"
+        }else{
+            labimgdiv.setAttribute("id",lab+'icon');
+            labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon+"'>"
+        }
+    }
+    labtxtdiv = document.createElement('div');
+    labtxtdiv.className='label info';
+    labtxtdiv.style.height = "100%";
+    labtxtdiv.style["font-size"] = (1.3*loc.sksc)+"em";
+    if ((loc.labels[lab].type)&&(loc.labels[lab].type=="det")){
+        // console.log(lab,loc.labels[lab].labstrdet(det));
+        labtxtdiv.setAttribute('id',lab+det+'txt');
+        labtxtdiv.innerHTML = this.tl(loc.labels[lab].labstrdet(det));
+    }else{
+        // console.log(lab,loc.labels[lab].labstr());
+        labtxtdiv.setAttribute('id',lab+'txt');
+        labtxtdiv.innerHTML = this.tl(loc.labels[lab].labstr());
+    }
+    labimgdiv.appendChild(labtxtdiv);
+    document.getElementById('wfcontainer').appendChild(labimgdiv);
+};
 Localisation.prototype.addWaveform = function(lab){
     // add waveforms as html elements
     return
 }
-Localisation.prototype.fadeOutLines = function(det){
-    // fly out mass (set by "bh")
-    this.svgEff.select('g.heff-'+det)
-        .transition().duration(this.fadeSp)
-        .attr("opacity",0);
-};
-Localisation.prototype.fadeInLines = function(d,det,resize){
-    // fly in mass
-    // bh = BH to fly in
-    // resize= type of resizing animation
-    if (resize=="smooth"){
-        // rotate lines to new position
-        this.svgEff.select('g.heff-'+det)
-            .transition().duration(this.fadeSp)
-            .attr("transform","rotate("+d.angeff[det]+")")
-        this.svgEff.select('g.heff-x-'+det)
-            .transition().duration(this.fadeSp)
-            .attr("x1",this.xScaleEff(-1*d.heff[det]))
-            .attr("x2",this.xScaleEff(1*d.heff[det]));
-        this.svgEff.select('g.heff-y-'+det)
-            .transition().duration(this.fadeSp)
-            .attr("y1",this.yScaleEff(-1*d.heff[det]))
-            .attr("y2",this.yScaleEff(1*d.heff[det]))
-    }else if(resize=="fly"){
-        // resize & fly in
-        this.svgEff.select('g.heff-'+det)
-            .transition().duration(this.fadeSp).ease("bounce")
-            .attr("transform","rotate("+d.angeff[det]+")")
-        this.svgEff.select('g.heff-x-'+det)
-            .transition().duration(this.fadeSp)
-            .attr("x1",this.xScaleEff(-1*d.heff[det]))
-            .attr("x2",this.xScaleEff(1*d.heff[det]))
-        this.svgEff.select('g.heff-y-'+det)
-            .transition().duration(this.fadeSp)
-            .attr("y1",this.yScaleEff(-1*d.heff[det]))
-            .attr("y2",this.yScaleEff(1*d.heff[det]))
-    }else if(resize=="snap"){
-        // snap resize (when redrawing eff)
-        this.svgEff.select('g.heff-'+det)
-            .attr("transform","rotate("+d.angeff[det]+")")
-        this.svgEff.select('g.heff-x-'+det)
-            .attr("x1",this.xScaleEff(-1*d.heff[det]))
-            .attr("x2",this.xScaleEff(1*d.heff[det]))
-        this.svgEff.select('g.heff-y-'+det)
-            .attr("y1",this.yScaleEff(-1*d.heff[det]))
-            .attr("y2",this.yScaleEff(1*d.heff[det]))
-    };
+Localisation.prototype.updateLines = function(){
+    // rotate lines to new position
+    var loc=this;
+    // this.svgEff.selectAll('.heff-g')
+    //     .transition().duration(this.fadeSp)
+    //     .attr("transform",function(d){
+    //         return("translate("+(loc.effWidth/2)+","+(loc.effWidth/2)+") rotate("+d.psi+")")})
+    loc.svgEff.selectAll('line.heff-line-x')
+        // .attr("transform",function(d){
+        //     return("translate("+(loc.effWidth/2)+","+(loc.effWidth/2)+") rotate("+d.psi+")")})
+        .transition().duration(loc.flySp)
+        .attr("x1",function(d){return loc.rpsi2xEff(-d.r,d.psi)})
+        .attr("y1",function(d){return loc.rpsi2yEff(-d.r,d.psi)})
+        .attr("x2",function(d){return loc.rpsi2xEff(d.r,d.psi)})
+        .attr("y2",function(d){return loc.rpsi2yEff(d.r,d.psi)})
+    // loc.svgEff.selectAll('line.heff-line-y')
+    //     .attr("transform",function(d){
+    //         return("translate("+(loc.effWidth/2)+","+(loc.effWidth/2)+") rotate("+d.psi+")")})
+    loc.svgEff.selectAll('line.heff-line-y')
+        .transition().duration(loc.flySp)
+        .attr("x1",function(d){return loc.rpsi2xEff(-d.r,d.psi+90)})
+        .attr("y1",function(d){return loc.rpsi2yEff(-d.r,d.psi+90)})
+        .attr("x2",function(d){return loc.rpsi2xEff(d.r,d.psi+90)})
+        .attr("y2",function(d){return loc.rpsi2yEff(d.r,d.psi+90)})
+    // }else if(resize=="fly"){
+    //     // resize & fly in
+    //     this.svgEff.select('g.heff-'+d)
+    //         .transition().duration(this.fadeSp).ease("bounce")
+    //         .attr("transform","rotate("+det.psi+")")
+    //     this.svgEff.select('g.heff-x-'+d)
+    //         .transition().duration(this.fadeSp)
+    //         .attr("x1",this.xScaleEff(-det.r))
+    //         .attr("x2",this.xScaleEff(det.r));
+    //     this.svgEff.select('g.heff-y-'+d)
+    //         .transition().duration(this.fadeSp)
+    //         .attr("y1",this.yScaleEff(det.r))
+    //         .attr("y2",this.yScaleEff(det.r))
+    // }else if(resize=="snap"){
+    //     // snap resize (when redrawing eff)
+    //     this.svgEff.select('g.heff-'+d)
+    //         .attr("transform","rotate("+det.psi+")")
+    //     this.svgEff.select('g.heff-x-'+d)
+    //         .attr("x1",this.xScaleEff(-det.r))
+    //         .attr("x2",this.xScaleEff(det.r));
+    //     this.svgEff.select('g.heff-y-'+d)
+    //         .attr("y1",this.yScaleEff(det.r))
+    //         .attr("y2",this.yScaleEff(det.r))
+    // };
 
 };
-Localisation.prototype.updateEff = function(d){
+Localisation.prototype.updateEff = function(){
     // update eff based on data clicks or resize
     if (this.redraw){
         // resize eff
-        this.fadeInLines(d,"H","snap");
-        this.fadeInLines(d,"L","snap");
-        this.fadeInLines(d,"V","snap");
+        this.fadeInLines("H","snap");
+        this.fadeInLines("L","snap");
+        this.fadeInLines("V","snap");
 
     }else{
         // clicked on un-selelected datapoint
-        this.fadeInLines(d,"H","smooth");
-        this.fadeInLines(d,"L","smooth");
-        this.fadeInLines(d,"V","smooth");
+        this.fadeInLines("H","smooth");
+        this.fadeInLines("L","smooth");
+        this.fadeInLines("V","smooth");
     }
 }
-
+Localisation.prototype.redrawLabels = function(){
+    for (lab in this.labels){
+        if ((this.labels[lab].type)&&this.labels[lab].type=="det"){
+            for (d in this.di){
+                labTxt=this.tl(this.labels[lab].labstrdet(d));
+                // console.log(lab,d,labTxt);
+                document.getElementById(lab+d+"txt").innerHTML = this.tl(labTxt);
+            }
+        }else{
+            labTxt=this.tl(this.labels[lab].labstr());
+            // console.log(lab,labTxt)
+            document.getElementById(lab+"txt").innerHTML = this.tl(labTxt);
+        }
+    }
+    return
+}
+Localisation.prototype.moveSrc = function(ra,dec){
+    this.src.ra=ra;
+    this.src.dec=dec;
+    this.processSrc();
+    this.calcAntFacs();
+    this.moveHighlight();
+    this.redrawLabels();
+    this.updateLines();
+    return
+}
 // ****************************************************************************
 // ****************************************************************************
 // ****************************************************************************
@@ -588,7 +677,22 @@ Localisation.prototype.setStyles = function(){
     this.color = d3.scale.ordinal().range(["#ff0000", "#009600","#0000ff"]).domain(this.styleDomains);
     this.getOpacity = function(d) {return 1}
 
-
+    this.labels = {
+        'ra':{'labstr':function(){return(loc.tl('%text.loc.ra%')+': '+
+            parseInt(loc.src.ra)+'<sup>o</sup>')}},
+        'dec':{'labstr':function(){return(loc.tl('%text.loc.dec%')+': '+
+            parseInt(loc.src.dec)+'<sup>o</sup>')}},
+        'posang':{'labstr':function(){return(loc.tl('%text.loc.posang%')+': '+
+            parseInt(loc.src.posang)+'<sup>o</sup>')}},
+        'lst':{'labstr':function(){return(loc.tl('%text.loc.lst%')+': '+
+            parseInt(   loc.src.lst))},
+            "icon":"img/time.svg"},
+        'detr':{'type':'det','labstrdet':function(det){return det+' %text.loc.sensitivity%: '+loc.dataDet[loc.di[det]]['r+'].toPrecision(2)}}
+    }
+    this.detCols={"H":"#e00","L":"#4ba6ff","V":"#9b59b6"};
+    this.legenddescs = {H:'%text.loc.legend.Hanford%',
+        L:'%text.loc.legend.Livingston%',
+        V:'%text.loc.legend.Virgo%'};
 }
 Localisation.prototype.tttext = function(d){
     // graph tooltip text
@@ -617,6 +721,7 @@ Localisation.prototype.orderData = function(order='GPS'){
 Localisation.prototype.makeSky = function(){
     // create graph
     // console.log('makeSky');
+    var loc=this;
     this.skycont=d3.select("div#skycontainer")
     this.svgcont = this.skycont.append("div")
         .attr("id","svg-container")
@@ -629,6 +734,13 @@ Localisation.prototype.makeSky = function(){
         .attr("class","graph")
         .attr("width",this.svgWidth)
         .attr("height",this.svgHeight)
+        .on("click",function(){
+            raClick=loc.x2raScale(d3.event.pageX);
+            decClick=loc.y2decScale(d3.event.pageY);
+            loc.moveSrc(raClick,decClick);
+            // console.log((d3.event.pageX)+"px",loc.x2raScale(d3.event.pageX));
+            // console.log((d3.event.pageY)+"px",loc.y2decScale(d3.event.pageY));
+        })
         // .classed("svg-content-responsive",true);
         // .attr("width", width + margin.left + margin.right)
         // .attr("height", height + margin.top + margin.bottom);
@@ -676,6 +788,7 @@ Localisation.prototype.drawSkyInit = function(){
             loc.processDet(dataIn[d])
             loc.dataDet.push(dataIn[d])
             loc.di[dataIn[d].id]=i;
+            loc.legenddescs[dataIn[d].id]=dataIn[d].name;
             i++;
         }
         loc.loaded++;
@@ -707,7 +820,7 @@ Localisation.prototype.drawSky = function(){
         .attr("y", 1.2*(1+loc.scl)+"em")
         .style("text-anchor", "middle")
         .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.plotloc.rightasc%'));
+        .text(loc.tl('%text.loc.rightasc%'));
 
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
@@ -727,7 +840,7 @@ Localisation.prototype.drawSky = function(){
         .attr("dy", (-30*(1+loc.scl))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.plotloc.declination%'));
+        .text(loc.tl('%text.loc.declination%'));
 
     d3.selectAll('.tick > line')
             .style('stroke','#ccc')
@@ -738,7 +851,7 @@ Localisation.prototype.drawSky = function(){
     loc.detMarkers=detGroup.selectAll(".detmarker")
         .data(loc.dataDet)
     .enter().append("g")
-        .attr("class", "detmarker")
+        .attr("class", "detmarker marker")
         .attr("id", function(d){return "detmarker-"+d.id;})
         .attr("transform", function(d){return "translate("+(loc.margin.left+loc.raScale(loc.raMod(d.lon)))+","+
             (loc.margin.top+loc.decScale(d.lat))+") rotate("+d.ang+")";})
@@ -764,11 +877,11 @@ Localisation.prototype.drawSky = function(){
         .attr("id", function(d){return "detline detline-x-"+d.id;})
         .attr("x1", 0)
         .attr("y1", 0)
-        .attr("x2", -10)
+        .attr("x2", -20)
         .attr("y2", 0)
         .attr("cursor","default")
         .style("opacity",1)
-        .style("stroke", function(d){return loc.color(d.id)})
+        .style("stroke", function(d){return loc.detCols[d.id]})
         .style("stroke-width",Math.min(5,2./loc.sksc))
     loc.detMarkers.append("line")
         .attr("class","detline detline-y")
@@ -776,57 +889,25 @@ Localisation.prototype.drawSky = function(){
         .attr("x1", 0)
         .attr("y1", 0)
         .attr("x2", 0)
-        .attr("y2", -10)
+        .attr("y2", -20)
         .attr("cursor","default")
         .attr("opacity",1)
-        .style("stroke", function(d){return loc.color(d.id)})
+        .style("stroke", function(d){return loc.detCols[d.id]})
         .style("stroke-width",Math.min(5,2./loc.sksc))
-
-    detGroupTest = loc.svg.append("g").attr("class","g-dets-test")
-    loc.detMarkers=detGroupTest.selectAll(".detmarker-test")
-        .data(loc.dataDet)
-    .enter().append("g")
-        .attr("class", "detmarker-test")
-        .attr("id", function(d){return "detmarker-test-"+d.id;})
-        .attr("transform", function(d){return "translate("+(loc.margin.left)+","+
-            (loc.margin.top)+")";})
-    loc.detMarkers.append("line")
-        .attr("class","detline-test detline-test-x")
-        .attr("id", function(d){return "detline-test detline-test-x-"+d.id;})
-        .attr("x1", function(d){return loc.raScale(loc.raMod(d.xarmlb[0][0]));})
-        .attr("y1", function(d){return loc.decScale(d.xarmlb[0][1]);})
-        .attr("x2", function(d){return loc.raScale(loc.raMod(d.xarmlb[1][0]));})
-        .attr("y2", function(d){return loc.decScale(d.xarmlb[1][1]);})
-        .attr("cursor","default")
-        .style("opacity",1)
-        .style("stroke", function(d){return loc.color(d.id)})
-        .style("stroke-width",1)
-        .style("stroke-dasharray",1)
-    loc.detMarkers.append("line")
-        .attr("class","detline-test detline-test-y")
-        .attr("id", function(d){return "detline-test detline-test-y-"+d.id;})
-        .attr("x1", function(d){return loc.raScale(loc.raMod(d.yarmlb[0][0]));})
-        .attr("y1", function(d){return loc.decScale(d.yarmlb[0][1]);})
-        .attr("x2", function(d){return loc.raScale(loc.raMod(d.yarmlb[1][0]));})
-        .attr("y2", function(d){return loc.decScale(d.yarmlb[1][1]);})
-        .attr("cursor","default")
-        .style("opacity",1)
-        .style("stroke", function(d){return loc.color(d.id)})
-        .style("stroke-width",1)
-        .style("stroke-dasharray",1)
-
 
     // add source circle
     loc.srcMarker=loc.svg.append("g")
-        .attr("class","g-source")
-        .attr("transform", "translate("+loc.margin.left+","+
-            loc.margin.top+")")
+        .attr("id","g-source")
+        .attr("class","marker srcmarker")
+        .attr("transform","translate("+(loc.margin.left+loc.raScale(loc.raMod(loc.src.ra)))+","+
+            (loc.margin.top+loc.decScale(loc.src.dec))+") rotate("+loc.src.posang+")")
+            // "transform", "translate("+loc.margin.left+","+loc.margin.top+")")
     loc.srcMarker.append("circle")
         .attr("id","dot-src")
         .attr("class","dot-src")
         .attr("opacity",1)
-        .attr("cx",loc.raScale(loc.raMod(loc.src.ra)))
-        .attr("cy",loc.decScale(loc.src.dec))
+        .attr("cx",0)
+        .attr("cy",0)
         .attr("r",5)
         .style("fill","white")
         .style("fill-opacity",0)
@@ -838,20 +919,20 @@ Localisation.prototype.drawSky = function(){
         .attr("opacity","1")
         .style("stroke","black")
         .style("stroke-width",1)
-        .attr("x1",function(){return loc.raScale(loc.raMod(loc.src.larmlb[0][0]));})
-        .attr("y1",function(){return loc.decScale(loc.src.larmlb[0][1]);})
-        .attr("x2",function(){return loc.raScale(loc.raMod(loc.src.larmlb[1][0]));})
-        .attr("y2",function(){return loc.decScale(loc.src.larmlb[1][1]);})
+        .attr("x1",-10)
+        .attr("y1",0)
+        .attr("x2",10)
+        .attr("y2",0)
     loc.srcMarker.append("line")
         .attr("id","line-y-src")
         .attr("class",'line-src')
         .attr("opacity","1")
         .style("stroke","black")
         .style("stroke-width",1)
-        .attr("x1",function(){return loc.raScale(loc.raMod(loc.src.marmlb[0][0]));})
-        .attr("y1",function(){return loc.decScale(loc.src.marmlb[0][1]);})
-        .attr("x2",function(){return loc.raScale(loc.raMod(loc.src.marmlb[1][0]));})
-        .attr("y2",function(){return loc.decScale(loc.src.marmlb[1][1]);})
+        .attr("x1",0)
+        .attr("y1",-10)
+        .attr("x2",0)
+        .attr("y2",10)
 
 
     // draw legend
@@ -869,7 +950,7 @@ Localisation.prototype.drawSky = function(){
         .attr("x2", loc.margin.left+24)
         .attr("y2", loc.margin.top+24)
         .style("stroke-width",Math.min(5,2./loc.sksc))
-        .style("stroke",function(d){return loc.color(d);})
+        .style("stroke",function(d){return loc.detCols[d];})
         .attr("opacity",1);
     loc.legend.append("line")
         .attr("x1", loc.margin.left+12)
@@ -877,7 +958,7 @@ Localisation.prototype.drawSky = function(){
         .attr("x2", loc.margin.left+12)
         .attr("y2", loc.margin.top+12)
         .style("stroke-width",Math.min(5,2./loc.sksc))
-        .style("stroke",function(d){return loc.color(d);})
+        .style("stroke",function(d){return loc.detCols[d];})
         .attr("opacity",1);
 
     // draw legend text
@@ -887,7 +968,7 @@ Localisation.prototype.drawSky = function(){
       .attr("dy", ".35em")
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
-      .text(function(d) { if (loc.legenddescs[d]){return loc.legenddescs[d];}else{return d}})
+      .text(function(d) { if (loc.legenddescs[d]){return loc.tl(loc.legenddescs[d]);}else{return loc.tl(d)}})
 
     // add info icon
     infoClass = ((!this.optionsOn)&(!this.helpOn)&(!this.langOn)) ? "graph-icon" : "graph-icon hidden";
@@ -978,13 +1059,13 @@ Localisation.prototype.drawSky = function(){
 
 }
 
-Localisation.prototype.moveHighlight = function(ra,dec){
+Localisation.prototype.moveHighlight = function(){
     // move highlight circle
     var loc=this;
-    loc.svg.select("#source")
+    this.svg.select("#g-source")
         .transition().duration(500)
-        .attr("cx",loc.raScale(loc.raMod(ra))).attr("cy",loc.decScale(dec))
-        .style("opacity",1);
+        .attr("transform","translate("+(loc.margin.left+loc.raScale(loc.raMod(loc.src.ra)))+","+
+            (loc.margin.top+loc.decScale(loc.src.dec))+") rotate("+loc.src.posang+")")
 }
 
 var outer = function(a,b){
@@ -1073,7 +1154,7 @@ var dotprod = function(aIn,bIn){
 Localisation.prototype.processDet = function(det){
     // process detectors
     // get vector of detector position
-    console.log('processing ',det.id,det)
+    // console.log('processing ',det.id,det)
     det.vec=rotate(det.lon,det.lat,0).multiply(lb2vec(0,0));
     //convert to latlon
     det.lb=vec2lb(det.vec);
@@ -1095,6 +1176,7 @@ Localisation.prototype.processDet = function(det){
     // do outer products
     // det.dd=outer(det.uvec,det.uvec).add(outer(det.vvec,det.vvec).multiply(-1)).multiply(0.5);
     det.dd=uv2dd(det.uvec,det.vvec);
+
     return
     // det.detxyz=math.cross();
 }
@@ -1125,7 +1207,7 @@ Localisation.prototype.processNetwork = function(){
 Localisation.prototype.processSrc = function(){
     loc=this;
     src=this.src
-    console.log('processing src',src)
+    // console.log('processing src',src)
     // construct rotation matrix
     src.rotmat=rotate(src.ra,src.dec,0);
     src.rotmatpos=rotate(src.ra,src.dec,src.posang);
@@ -1170,6 +1252,7 @@ Localisation.prototype.calcAntFacs = function(){
         det['Fx2']=dotprod(det.dd,this.src.e['x']);
         det.r=ab2r(det.a,det.b);
         det.psi=r2d(ab2psi(det.a,det.b));
+        det['r+']=Math.abs(det.r*Math.cos(2*d2r(det.psi))*Math.sqrt(2.));
     }
 }
 Localisation.prototype.whenLoaded = function(){
@@ -1182,7 +1265,7 @@ Localisation.prototype.whenLoaded = function(){
         det=loc.dataDet[loc.di[d]];
         // console.log(d,det['F+']/Math.sqrt(0.5),det['Fx']/Math.sqrt(0.5));
         // console.log(d,det.r/Math.sqrt(0.5),det.psi);
-        console.log(d,det.r*Math.cos(d2r(2*det.psi))/Math.sqrt(0.5));
+        // console.log(d,det.r*Math.cos(d2r(2*det.psi))/Math.sqrt(0.5));
 
     }
     loc.makePlot();
@@ -1284,15 +1367,12 @@ Localisation.prototype.setLang = function(){
             this.langdict[k]=this.langdictDefault[k];
         }
     }
-    this.legenddescs = {H:this.tl('%text.plotloc.legend.Hanford%'),
-        L:this.tl('%text.plotloc.legend.Livingston%'),
-        V:this.tl('%text.plotlov.legend.Virgo%')}
     // d3.select('#lang-title')
     //     .html(this.tl('%text.plotloc.lang.title%'))
     // d3.select('#lang-text')
     //     .html(this.tl('%text.plotloc.lang.text%'))
     d3.select('#page-title')
-        .html(this.tl('%text.plotloc.page.title%'))
+        .html(this.tl('%text.loc.page.title%'))
     if (this.langdict['meta.translator'] && this.langdict['meta.translator']!=''){
         d3.select('#lang-credit')
             .html(this.tl('%text.gen.langcredit% (%meta.name%): %meta.translator%'));
@@ -1591,6 +1671,7 @@ Localisation.prototype.replot = function(){
     // remove elements
     d3.select("svg#svgEff").remove()
     d3.select("div#svg-container").remove()
+    d3.select(".graph-icon").remove()
     // d3.selectAll("div.labcont").remove()
     // redraw graph and eff
     this.redraw=true;
