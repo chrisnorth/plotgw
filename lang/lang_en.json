@@ -151,5 +151,13 @@
  "domain.losc": "https://losc.ligo.org",
  "domain.losc.events": "https://losc.ligo.org/events",
  "domain.losc.store": "https://losc.ligo.org/s",
- "domain.gracedb.events": "https://gracedb.ligo.org/events"
+ "domain.gracedb.events": "https://gracedb.ligo.org/events",
+ "text.loc.ra":"RA",
+ "text.loc.rightasc":"RA",
+ "text.loc.dec":"Dec",
+ "text.loc.declination":"Declination",
+ "text.loc.pa":"PA",
+ "text.loc.posang":"Position Angle",
+ "text.loc.lst":"LST",
+ "text.loc.sensitivity":"Sensitivity"
 }

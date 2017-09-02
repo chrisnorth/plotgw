@@ -1,0 +1,26 @@
+{
+    "H":{
+        "id":"H",
+        "name":"Hanford",
+        "lat":"46",
+        "lon":"119",
+        "ang":"-36",
+        "sigma":"1"
+    },
+    "L":{
+        "id":"L",
+        "name":"Livingston",
+        "lat":"30",
+        "lon":"90",
+        "ang":"-108",
+        "sigma":"1"
+    },
+    "V":{
+        "id":"V",
+        "name":"Virgo",
+        "lat":"43",
+        "lon":"-10",
+        "ang":"19",
+        "sigma":"0.75"
+    }
+}
