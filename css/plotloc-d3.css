@@ -303,6 +303,15 @@ h1{
 img.share-icon{
     height:50px;
 }
+.labcont{
+    margin-left:2%;
+    width:42%;
+    margin-top:5%;
+}
+.labcont img, .labcont div{
+    height: 100%;
+    float:left;
+}
 @media (max-width:1200px){
     .panel-title.landscape{
         font-size:2.5em;
