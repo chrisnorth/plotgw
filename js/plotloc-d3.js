@@ -1671,7 +1671,7 @@ Localisation.prototype.replot = function(){
     // remove elements
     d3.select("svg#svgEff").remove()
     d3.select("div#svg-container").remove()
-    d3.select(".graph-icon").remove()
+    d3.selectAll(".graph-icon").remove()
     // d3.selectAll("div.labcont").remove()
     // redraw graph and eff
     this.redraw=true;
