@@ -332,6 +332,7 @@ Localisation.prototype.setScales = function(){
             return(ra)
         }
     }
+    this.latMod=this.raMod
     this.raValue = function(d) {return d.ra;} // data -> value
     // value -> display
     this.raScale = d3.scale.linear().domain([180,-180])
@@ -349,6 +350,9 @@ Localisation.prototype.setScales = function(){
             .innerTickSize(-this.skyHeight)
             .tickValues(d3.range(-180,180+30,30))
             .tickFormat(function(d){if (d<0){return -d+"E"}else if(d>0){return d+"W"}else{return d}});
+
+    this.lonScale = d3.scale.linear().domain([-180,180)]).range([0,this.skyWidth])
+    this.lonMap = function(d) {return loc.lonScale(loc.lonMod(loc.lonValue(d)}
 
     //data -> value
     this.decValue = function(d) {return d.dec;}
@@ -853,7 +857,7 @@ Localisation.prototype.drawSky = function(){
     .enter().append("g")
         .attr("class", "detmarker marker")
         .attr("id", function(d){return "detmarker-"+d.id;})
-        .attr("transform", function(d){return "translate("+(loc.margin.left+loc.raScale(loc.raMod(d.lon)))+","+
+        .attr("transform", function(d){return "translate("+(loc.margin.left+loc.lonScale(loc.lonMod(d.lon)))+","+
             (loc.margin.top+loc.decScale(d.lat))+") rotate("+d.ang+")";})
         // .attr("transform", "translate("+loc.margin.left+","+
             // loc.margin.top+")")
@@ -875,10 +879,10 @@ Localisation.prototype.drawSky = function(){
     loc.detMarkers.append("line")
         .attr("class","detline detline-x")
         .attr("id", function(d){return "detline detline-x-"+d.id;})
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", -20)
-        .attr("y2", 0)
+        .attr("x1", loc.lonMap)
+        .attr("y1", loc.latMap)
+        .attr("x2", function(d){return loc.lonMap(d) + 20*Math.cos(d2r(d.ang))})
+        .attr("y2", function(d){return loc.latMap(d) + 20*Math.sin(d2r(d.ang))})
         .attr("cursor","default")
         .style("opacity",1)
         .style("stroke", function(d){return loc.detCols[d.id]})
@@ -886,14 +890,15 @@ Localisation.prototype.drawSky = function(){
     loc.detMarkers.append("line")
         .attr("class","detline detline-y")
         .attr("id",function(d){return "detline detline-y-"+d.id;})
-        .attr("x1", 0)
-        .attr("y1", 0)
-        .attr("x2", 0)
-        .attr("y2", -20)
+        .attr("x1", loc.lonMap)
+        .attr("y1", loc.latMap)
+        .attr("x2", function(d){return loc.lonMap(d) - 20*Math.sin(d2r(d.ang))})
+        .attr("y2", function(d){return loc.latMap(d) + 20*Math.cos(d2r(d.ang))})
         .attr("cursor","default")
         .attr("opacity",1)
         .style("stroke", function(d){return loc.detCols[d.id]})
         .style("stroke-width",Math.min(5,2./loc.sksc))
+        .style("stroke-dasharray",3)
 
     // add source circle
     loc.srcMarker=loc.svg.append("g")
@@ -1671,7 +1676,7 @@ Localisation.prototype.replot = function(){
     // remove elements
     d3.select("svg#svgEff").remove()
     d3.select("div#svg-container").remove()
-    d3.select(".graph-icon").remove()
+    d3.selectAll(".graph-icon").remove()
     // d3.selectAll("div.labcont").remove()
     // redraw graph and eff
     this.redraw=true;
