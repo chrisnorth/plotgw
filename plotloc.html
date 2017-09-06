@@ -10,12 +10,13 @@
     <!--<link rel="icon" type="image/vnd.microsoft.icon" href="planck_logo.ico" />-->
     <link rel="icon" type="image/vnd.microsoft.icon" href="img/favicon-32x32.png" />
     <link rel="stylesheet" href="css/plotloc-d3.css" type="text/css" />
-    <script type="text/javascript" src="js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="js/d3.v4.min.js"></script>
+    <script type="text/javascript" src="js/d3-contour.v1.min.js"></script>
     <script type="text/javascript" src="js/math.min.js"></script>
     <script type="text/javascript" src="js/sylvester.js"></script>
     <!-- Analytics code -->
     <script type="text/javascript" src="js/analytics.js"></script>
-    <script type="text/javascript" src="js/plotloc-d3.js"></script>
+    <script type="text/javascript" src="js/plotloc-d4.js"></script>
 </head>
 <body>
     <div id="plotloc-cont" class="plotloc-container">
@@ -70,7 +71,7 @@
         <div class="tooltip" id="tooltipSk"></div>
     </div>
     <script type="text/javascript">
-    var $L = new Localisation({'holderid':'plotloc-cont','clearhtml':false})
+    var $GL = new Localisation({'holderid':'plotloc-cont','clearhtml':false})
     </script>
 </body>
 </html>
