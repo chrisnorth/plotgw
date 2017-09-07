@@ -708,7 +708,8 @@ Localisation.prototype.updateLines = function(){
         .attr("x1",function(d){return loc.rpsi2xEff(-d.r,d.psi)})
         .attr("y1",function(d){return loc.rpsi2yEff(-d.r,d.psi)})
         .attr("x2",function(d){return loc.rpsi2xEff(d.r,d.psi)})
-        .attr("y2",function(d){return loc.rpsi2yEff(d.r,d.psi)});
+        .attr("y2",function(d){return loc.rpsi2yEff(d.r,d.psi)})
+        .attr("stroke-opacity",function(d){return 0.7*loc.dStatus[d.id]});
     linesX.enter().append("line")
         .attr("class",function(d){return "heff-line heff-line-x heff-x-"+d.id})
         .attr("x1",function(d){return loc.rpsi2xEff(-d.r,d.psi)})
@@ -718,7 +719,7 @@ Localisation.prototype.updateLines = function(){
         .attr("stroke",function(d){return loc.detCols[d.id]})
         .attr("stroke-width","3px")
         .transition().duration(loc.flySp)
-        .attr("stroke-opacity",0.7);
+        .attr("stroke-opacity",function(d){return 0.7*loc.dStatus[d.id]});
     // loc.svgEff.selectAll('line.heff-line-y')
     //     .attr("transform",function(d){
     //         return("translate("+(loc.effWidth/2)+","+(loc.effWidth/2)+") rotate("+d.psi+")")})
@@ -730,6 +731,7 @@ Localisation.prototype.updateLines = function(){
         .attr("y1",function(d){return loc.rpsi2yEff(-d.r,d.psi+90)})
         .attr("x2",function(d){return loc.rpsi2xEff(d.r,d.psi+90)})
         .attr("y2",function(d){return loc.rpsi2yEff(d.r,d.psi+90)})
+        .attr("stroke-opacity",function(d){return 0.7*loc.dStatus[d.id]});
     linesY.enter().append("line")
         .attr("class",function(d){return "heff-line heff-line-y heff-y-"+d.id})
         .attr("x1",function(d){return loc.rpsi2xEff(-d.r,d.psi+90)})
@@ -740,7 +742,7 @@ Localisation.prototype.updateLines = function(){
         .attr("stroke-width","3px")
         .attr("stroke-dasharray",5)
         .transition().duration(loc.flySp)
-        .attr("stroke-opacity",0.7);
+        .attr("stroke-opacity",function(d){return 0.7*loc.dStatus[d.id]});
     // }else if(resize=="fly"){
     //     // resize & fly in
     //     this.svgEff.select('g.heff-'+d)
