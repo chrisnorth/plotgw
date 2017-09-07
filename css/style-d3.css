@@ -46,7 +46,6 @@ button.down{
 }
 #infoouter{
     float:left;
-    position:absolute;
     display:inline-block;
     width:25%;
     height:90%;

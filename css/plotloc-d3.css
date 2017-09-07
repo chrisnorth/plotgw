@@ -30,7 +30,7 @@ h1{
 }
 #infoouter{
     float:left;
-    position:absolute;
+    /*position:absolute;*/
     display:inline-block;
     width:25%;
     height:90%;
