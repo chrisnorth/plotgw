@@ -152,6 +152,7 @@
  "domain.losc.events": "https://losc.ligo.org/events",
  "domain.losc.store": "https://losc.ligo.org/s",
  "domain.gracedb.events": "https://gracedb.ligo.org/events",
+ "text.loc.page.title":"Gravitational Wave Localisation",
  "text.loc.ra":"RA",
  "text.loc.rightasc":"RA",
  "text.loc.dec":"Dec",
