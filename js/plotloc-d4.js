@@ -92,8 +92,8 @@ Localisation.prototype.init = function(){
     this.flySp=1000;
     this.defaults = {
         lang:"en",
-        ra:-10,
-        dec:43,
+        ra:0,
+        dec:0,
         posang:19,
         lst:0,
     }
@@ -685,7 +685,7 @@ Localisation.prototype.addLabelDet = function (det) {
     if (this.dStatus[det]==1){
         labtxtdiv.innerHTML = this.tl('ON');
     }else{
-        labtxtdiv.innerHTML = this.tl('ON');
+        labtxtdiv.innerHTML = this.tl('OFF');
     }
     labimgdiv.appendChild(labtxtdiv);
     document.getElementById('wfcontainer').appendChild(labimgdiv);
@@ -849,8 +849,8 @@ Localisation.prototype.setStyles = function(){
     // setup colours and linestyles
     var loc=this
     this.cValue = function(d) {return d.id;};
-    this.styleDomains = ['H','L','V'];
-    this.color = d3.scaleOrdinal().range(["#ff0000", "#009600","#0000ff"]).domain(this.styleDomains);
+    this.styleDomains = ['H','L','V','K','I','G'];
+    this.color = d3.scaleOrdinal().range(["#ff0000", "#009600","#0000ff","#ffb200","#b0dd8b","#222222"]).domain(this.styleDomains);
     this.getOpacity = function(d) {return 1}
 
     this.labels = {
@@ -865,10 +865,11 @@ Localisation.prototype.setStyles = function(){
             "icon":"img/time.svg"},
         // 'detr':{'type':'det','labstrdet':function(det){return det+' %text.loc.sensitivity%: '+loc.dataDet[loc.di[det]]['r+'].toPrecision(2)}}
     }
-    this.detCols={"H":"#e00","L":"#4ba6ff","V":"#9b59b6"};
+    this.detCols={"H":"#e00","L":"#4ba6ff","V":"#9b59b6","K":"#ffb200"};
     this.legenddescs = {H:'%text.loc.legend.Hanford%',
         L:'%text.loc.legend.Livingston%',
-        V:'%text.loc.legend.Virgo%'};
+        V:'%text.loc.legend.Virgo%',
+        K:'%text.loc.legend.KAGRA%'};
 }
 Localisation.prototype.tttext = function(d){
     // graph tooltip text
@@ -1382,11 +1383,27 @@ Localisation.prototype.editContours = function(cont,edit,dd){
             coordOut=[]
             for (j in d3.range(coordIn.length)){
                 // console.log('j in ',j,coordIn[j].length,coordIn[j][0])
-                newCoords=coordIn[j].filter(function(d){
-                    isVal= (!((d[0]<=0)|(d[0]==loc.skyarr.nRA)|(d[1]==0)|(d[1]==loc.skyarr.nDec)));
-                    // if (!isVal){console.log(d[0],d[1])};
-                    return(isVal)
-                });
+                idxCoords=[]
+                newCoords=[]
+                edgeh=''
+                edgev=''
+                for (p in coordIn[j]){
+                    d=coordIn[j][p]
+                    if (coordIn[j][p+1]){d1=coordIn[j][p+1]}else{d1=[null,null]}
+                    // if(d[0]==0){edgeh=-1}
+                    if(!((d[0]<=0)|(d[0]==loc.skyarr.nRA)|(d[1]==0)|(d[1]==loc.skyarr.nDec))){
+                        // not at edge
+                        idxCoords.push(p)
+                    }
+                }
+                for (p in idxCoords){
+                    newCoords.push(coordIn[j][idxCoords[p]])
+                }
+                // newCoords=coordIn[j].filter(function(d){
+                //     isVal= (!((d[0]<=0)|(d[0]==loc.skyarr.nRA)|(d[1]==0)|(d[1]==loc.skyarr.nDec)));
+                //     // if (!isVal){console.log(d[0],d[1])};
+                //     return(isVal)
+                // });
                 if (newCoords.length>0){
                     coordOut.push(newCoords)
                 }else{
@@ -1655,7 +1672,7 @@ Localisation.prototype.calcAntFacsSky = function(){
 Localisation.prototype.calcDetTimes = function(){
     // calculate arrival times at detectors from all sky pixels
     if (!this.skyarr.arr.hasOwnProperty('Ti')){this.skyarr.arr.Ti={};}
-    for (i in this.dOn){
+    for (i in this.di){
         console.log(i)
         det=this.dataDet[this.di[i]]
         this.skyarr.arr.Ti[det.id]=[];

@@ -28,5 +28,15 @@
         "length":"3",
         "sigmat":"0.2",
         "on":"1"
+    },
+    "K":{
+        "id":"K",
+        "name":"KAGRA",
+        "lat":"36",
+        "lon":"-137",
+        "ang":"72",
+        "length":"3",
+        "sigmat":"0.2",
+        "on":"0"
     }
 }
