@@ -1069,6 +1069,13 @@ Localisation.prototype.drawSky = function(){
         .style('stroke','#ccc')
         .style('opacity',1)
 
+
+    loc.overlays = {
+        'contoursT':{'gid':"g-contoursT"},
+        'contoursPr':{'gid':"g-contoursPr"},
+        'heatmap-Pr':{'gid':"g-heatmap-Pr"},
+        'heatmap-pNet':{'gid':"g-heatmap-pNet"},
+    }
     // draw contours (dt)
     loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
     loc.skyarr.projEq=d3.geoEquirectangular()
@@ -1076,25 +1083,30 @@ Localisation.prototype.drawSky = function(){
     loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
     // loc.skyarr.projEq([0,0])
     loc.gContourT=loc.svg.append("g")
-        .attr("id","g-contourT")
+        .attr("id",function(){return loc.overlays.contoursT.gid})
         .attr("class","contoursT")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
     loc.updateContoursT();
 
     // draw contours (Pr)
     loc.gContourPr=loc.svg.append("g")
-        .attr("id","g-contourPr")
+        .attr("id",function(){return loc.overlays.contoursPr.gid})
         .attr("class","contoursPr")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
     loc.updateContoursPr();
+    loc.showOverlay('contoursPr')
 
     // draw Heatmap
     // loc.skyarr[this.hmap]={}
     loc.skyarr[this.hmap].gHeatmap=loc.svg.append("g")
-        .attr("id","g-heatmap-"+this.hmap)
+        .attr("id",function(){return loc.overlays['heatmap-'+loc.hmap].gid})
         .attr("class","heatmap")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
     loc.updateHeatmap(this.hmap)
+    // loc.showOverlay('heatmap-'+this.hmap)
 
     // draw detectors
     detGroup = loc.svg.append("g").attr("class","g-dets")
@@ -1214,7 +1226,7 @@ Localisation.prototype.drawSky = function(){
         })
     d3.select("div#skycontainer > #info-icon").append("img")
         .attr("src","img/info.svg")
-        .on("click",function(){loc.hideHelp();loc.hideLang();});
+        .on("click",function(){loc.showInfo()});
 
     //add help icon
     helpClass = (this.panels.help.status) ? "graph-icon" : "graph-icon hidden";
@@ -1536,19 +1548,27 @@ Localisation.prototype.updateContoursPr = function(){
     loc.skyarr.Pr.Prcontours.select("path")
         .attr("d",function(d){console.log(this);})
 }
-Localisation.prototype.hideContoursT = function(){
-    d3.selectAll('.contourT')
-        .transition().duration(500).ease(d3.easeExp)
-        .style("stroke-opacity",0)
-}
 Localisation.prototype.showContoursT = function(){
-    var loc=this;
-    for (dd in loc.src.dt){
-        opMult=loc.dStatus[dd[0]]*loc.dStatus[dd[1]]
-        d3.selectAll('.contourT-'+dd)
-            .transition().duration(500).ease(d3.easeExp)
-            .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
-    }
+    d3.select('#g-contoursT')
+        .transition().duration(500)
+        .style("opacity",1)
+}
+Localisation.prototype.hideContoursT = function(){
+    d3.select('#g-contoursT')
+        .transition().duration(500)
+        .style("opacity",0)
+}
+Localisation.prototype.showOverlay = function(olName){
+    gid=this.overlays[olName].gid;
+    d3.select('#'+gid)
+        .transition().duration(500)
+        .style("opacity",1)
+}
+Localisation.prototype.hideOverlay = function(olName){
+    gid=this.overlays[olName].gid;
+    d3.select('#'+gid)
+        .transition().duration(500)
+        .style("opacity",0)
 }
 Localisation.prototype.editContours = function(cont,edit,dd){
     // console.log('edit contour ',dd,cont)
@@ -1944,8 +1964,6 @@ Localisation.prototype.calcSrcTimes = function(){
         this.skyarr.arr.vec_src.push($M(this.src.vec).add($M(this.skyarr.arr.vec[p]).multiply(-1)))
         this.skyarr.arr.vec_srcT.push($M(this.skyarr.arr.vec_src[p]).transpose())
         this.skyarr.arr.logP.push(this.skyarr.arr.vec_srcT[p].multiply(this.net.M).multiply(this.skyarr.arr.vec_src[p]).elements[0])
-        // this.skyarr.arr.Pr.push((this.skyarr.arr.pNet[p] / this.skyarr.maxpNet) *
-        //     Math.exp(-0.5*this.skyarr.arr.expP[p]))
         this.skyarr.arr.Pr.push(Math.exp(-0.5*this.skyarr.arr.logP[p]))
         PrTot+=Math.exp(-0.5*this.skyarr.arr.logP[p])
     }
@@ -2161,9 +2179,11 @@ Localisation.prototype.addHelp = function(){
 }
 Localisation.prototype.showHelp = function(){
     //show options
-    if (this.optionsOn){this.hideOptions();}
-    if (this.langOn){this.hideLang();}
-    this.helpOn=true;
+    for (panel in this.panels){
+        console.log(panel)
+        if (panel!='help'){this.panels[panel].hide()}
+    }
+    this.panels.help.status=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
     //   .duration(500)
@@ -2193,7 +2213,8 @@ Localisation.prototype.showHelp = function(){
 }
 Localisation.prototype.hideHelp = function(d) {
     // hide options box
-    this.helpOn=false;
+    this.panels.help.status=false;
+    this.panels.info.status=true;
     // fade out infopanel
     this.helpouter.transition()
         .duration(500).style("opacity", 0);
@@ -2379,7 +2400,8 @@ Localisation.prototype.showNetwork = function(){
     // this.panels.network.show=this.showNetwork()
     // this.panels.network.hide=this.hideNetwork()
     for (panel in this.panels){
-        if ((panel!='lang')&(this.panels[panel].status)){this.panels[panel].hide()}
+        console.log(panel)
+        if (panel!='network'){this.panels[panel].hide()}
     }
     this.panels['network'].status=true;
     // fade in semi-transparent background layer (greys out image)
@@ -2444,8 +2466,10 @@ Localisation.prototype.addSource = function(){
 }
 Localisation.prototype.showSource = function(){
     //show options
+    console.log(this,this.panels);
     for (panel in this.panels){
-        if ((panel!='source')&(this.panels[panel].status)){this.panels[panel].hide()}
+        console.log(panel)
+        if (panel!='source'){this.panels[panel].hide()}
     }
     // this.panels['lang'].status=true;
     // if (this.optionsOn){this.hideOptions();}
