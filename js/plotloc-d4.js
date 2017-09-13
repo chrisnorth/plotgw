@@ -210,7 +210,7 @@ Localisation.prototype.makeUrl = function(newKeys,full){
         "dec":[this.src.dec,this.defaults.dec],
         "lst":[this.src.lst,this.defaults.lst],
         "posang":[this.src.posang,this.defaults.posang],
-        "lang":[this.src.lang,this.defaults.lang],
+        "lang":[this.lang,this.defaults.lang],
 
     }
     for (key in allKeys){
