@@ -125,17 +125,26 @@ Localisation.prototype.init = function(){
         lang:"en",
         ra:0,
         dec:0,
+        inc:0,
+        dist:1,
+        phase:0,
         posang:0,
         lst:0,
         srcamp:1e-22,
-        hmap:'Pr'
+        hmap:'Pr',
+        res:5
     }
     this.src={}
+    this.skyarr={}
     this.src.ra = (this.urlVars.ra) ? this.urlVars.ra : this.defaults.ra;
     this.src.dec = (this.urlVars.dec) ? this.urlVars.dec : this.defaults.dec;
     this.src.posang = (this.urlVars.posang) ? this.urlVars.posang : this.defaults.posang;
     this.src.lst = (this.urlVars.lst) ? this.urlVars.lst : this.defaults.lst;
     this.src.amp = (this.urlVars.srcamp) ? this.urlVars.srcamp : this.defaults.srcamp;
+    this.src.inc = (this.urlVars.inc) ? this.urlVars.inc : this.defaults.inc;
+    this.src.dist = (this.urlVars.dist) ? this.urlVars.dist : this.defaults.dist;
+    this.src.phase = (this.urlVars.phase) ? this.urlVars.phase : this.defaults.phase;
+    this.skyarr.res=(this.urlVars.res) ? this.urlVars.res : this.defaults.res;
     this.hmap = (this.urlVars.hmap) ? this.urlVars.hmap : this.defaults.hmap;
     // set values for styles
     this.setStyles();
@@ -155,7 +164,8 @@ Localisation.prototype.init = function(){
     // set arrays for sky
     this.rE = 6.3716e6;
     this.c = 3.e8
-    this.skyarr={"dDec":5.,"dRA":5.}
+    this.skyarr.dDec=this.skyarr.res;
+    this.skyarr.dRA=this.skyarr.res;
     this.skyarr.nRA=Math.floor(360./this.skyarr.dRA);
     this.skyarr.nDec=Math.floor(180./this.skyarr.dDec);
     this.skyarr.nPix=this.skyarr.nRA*this.skyarr.nDec;
@@ -170,6 +180,7 @@ Localisation.prototype.init = function(){
         console.log(ira,idec)
         return idec*loc.skyarr.nRA + ira
     }
+    this.src.pix = this.skyarr.radec2p(this.src.ra,this.src.dec);
     this.skyarr.arr={'ra':[],'dec':[],'vec':[],'pix':[]};
     p=0;
     for (j in d3.range(0,this.skyarr.nDec)){
@@ -832,11 +843,12 @@ Localisation.prototype.moveSrc = function(ra,dec){
     }else{
         this.src.ra=ra;
         this.src.dec=dec;
-        this.processSrc();
+        this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);
+        this.processSrcAmp();
         this.calcAntFacs();
         this.redrawLabels();
         this.updateLines();
-        this.calcSrcTimes();
+        this.calcProbSky();
         this.moveHighlight();
         this.updateHeatmap(this.hmap);
         this.updateContoursT();
@@ -866,10 +878,12 @@ Localisation.prototype.detectorToggle = function(det){
     if (this.dStatus[det]==0){
         console.log('turning '+det+' ON')
         this.dStatus[det]=1;
+        this.Ndet+=1;
         document.getElementById('det-toggle-lab-'+det).innerHTML=this.tl("ON")
     }else{
         console.log('turning '+det+' OFF')
         this.dStatus[det]=0;
+        this.Ndet-=1;
         document.getElementById('det-toggle-lab-'+det).innerHTML=this.tl("OFF")
     }
     this.updateDet();
@@ -886,16 +900,16 @@ Localisation.prototype.updateDet = function(){
     console.log(this.dOn);
     this.updateDetMarkers();
     this.processNetwork();
-    this.processSrc();
+    this.processSrcAmp();
     this.calcDetTimes();
     this.calcAntFacs();
     this.calcAntFacsSky();
     this.redrawLabels();
     this.updateLines();
-    this.calcSrcTimes();
+    this.calcProbSky();
     this.moveHighlight();
     this.updateHeatmap(this.hmap);
-    this.updateContoursT();
+    this.updateContoursT()
     this.updateContoursPr();
     return
 }
@@ -929,14 +943,12 @@ Localisation.prototype.setStyles = function(){
         V:'%text.loc.legend.Virgo%',
         K:'%text.loc.legend.KAGRA%'};
 }
-Localisation.prototype.tttext = function(d){
-    // graph tooltip text
-    if (this.debug){console.log(d["name"],this.columns[this.xvar].name,d[this.xvar].strnoerr,this.columns[this.yvar].name,d[this.yvar].strnoerr)}
-    return "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='ttpri'>"+this.tl(this.columns[this.xvar].name)+
-        ": "+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
-    "<span class='ttsec'>"+this.tl(this.columns[this.yvar].name) +
-        ": "+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
+Localisation.prototype.tttextHmap = function(d){
+    // var loc=this;// graph tooltip text
+    if (this.debug){console.log(d)}
+    return "<span class='ttCoord'>"+this.skyarr.arr.ra[d]+","+this.skyarr.arr.dec[d]+"</span>"+
+    "<span class='ttPr'>Pr: "+this.skyarr.arr.Pr[d]+"</span>"+
+    "<span class='ttpNet'>pNet: "+this.skyarr.arr.pNet[d]+"</span>";
 }
 Localisation.prototype.makeSky = function(){
     // create graph
@@ -1005,12 +1017,14 @@ Localisation.prototype.drawSkyInit = function(){
         loc.di={};
         loc.dStatus={};
         loc.dOn={};
+        loc.Ndet=0;
         i=0;
         for (d in dataIn){
             loc.processDet(dataIn[d])
             loc.dataDet.push(dataIn[d])
             loc.di[dataIn[d].id]=i;
             loc.dStatus[dataIn[d].id]=parseFloat(dataIn[d].on);
+            if (loc.dStatus[dataIn[d].id]==1){loc.Ndet+=1}
             loc.legenddescs[dataIn[d].id]=dataIn[d].name;
             i++;
         }
@@ -1068,50 +1082,6 @@ Localisation.prototype.drawSky = function(){
     d3.selectAll('.tick > line')
         .style('stroke','#ccc')
         .style('opacity',1)
-
-
-    loc.overlays = {
-        'contoursT':{'gid':"g-contoursT"},
-        'contoursPr':{'gid':"g-contoursPr"},
-        'heatmap-Pr':{'gid':"g-heatmap-Pr"},
-        'heatmap-pNet':{'gid':"g-heatmap-pNet"},
-    }
-    // draw contours (dt)
-    loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
-    loc.skyarr.projEq=d3.geoEquirectangular()
-        .translate([0,loc.svgHeight/2]).rotate([d2r(180),0,0])
-    loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
-    // loc.skyarr.projEq([0,0])
-    loc.gContourT=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays.contoursT.gid})
-        .attr("class","contoursT")
-        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .style("opacity",0)
-    loc.updateContoursT();
-
-    // draw contours (Pr)
-    loc.gContourPr=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays.contoursPr.gid})
-        .attr("class","contoursPr")
-        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .style("opacity",0)
-    loc.updateContoursPr();
-    loc.showOverlay('contoursPr')
-
-    // draw Heatmap
-    // loc.skyarr[this.hmap]={}
-    loc.skyarr[this.hmap].gHeatmap=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays['heatmap-'+loc.hmap].gid})
-        .attr("class","heatmap")
-        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .style("opacity",0)
-    loc.updateHeatmap(this.hmap)
-    // loc.showOverlay('heatmap-'+this.hmap)
-
-    // draw detectors
-    detGroup = loc.svg.append("g").attr("class","g-dets")
-    loc.updateDetMarkers();
-    loc.updateDetMarkers();
 
     // add source circle
     loc.srcMarker=loc.svg.append("g")
@@ -1198,6 +1168,51 @@ Localisation.prototype.drawSky = function(){
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
       .text(function(d) { return loc.tl(d.name);})
+
+
+    loc.overlays = {
+        'contoursT':{'gid':"g-contoursT"},
+        'contoursPr':{'gid':"g-contoursPr"},
+        'heatmap-Pr':{'gid':"g-heatmap-Pr"},
+        'heatmap-pNet':{'gid':"g-heatmap-pNet"},
+    }
+    // draw contours (dt)
+    loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
+    loc.skyarr.projEq=d3.geoEquirectangular()
+        .translate([0,loc.svgHeight/2]).rotate([d2r(180),0,0])
+    loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
+    // loc.skyarr.projEq([0,0])
+    loc.gContourT=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays.contoursT.gid})
+        .attr("class","contoursT")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateContoursT();
+    loc.showOverlay('contoursT');
+
+    // draw contours (Pr)
+    loc.gContourPr=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays.contoursPr.gid})
+        .attr("class","contoursPr")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateContoursPr();
+    // loc.showOverlay('contoursPr')
+
+    // draw Heatmap
+    // loc.skyarr[this.hmap]={}
+    loc.skyarr[this.hmap].gHeatmap=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['heatmap-'+loc.hmap].gid})
+        .attr("class","heatmap")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateHeatmap(this.hmap)
+    loc.showOverlay('heatmap-'+this.hmap)
+
+    // draw detectors
+    detGroup = loc.svg.append("g").attr("class","g-dets")
+    loc.updateDetMarkers();
+    loc.updateDetMarkers();
 
     // add info icon
     infoClass = (this.panels.info.status) ? "graph-icon" : "graph-icon hidden";
@@ -1439,25 +1454,48 @@ Localisation.prototype.updateHeatmap = function(dataIn){
     // update heatmap
     if (!data){data='Pr'}
     var data = (dataIn) ? dataIn : 'Pr';
+    nearVals=[];
+    nearValsRows=[]
     if (data=="Pr"){
-        loc.skyarr.Pr.threshold=0.2;
+        for (i=-1;i<=1;i++){
+            row=[];
+            for (j=-1;j<=1;j++){
+                row.push(loc.skyarr.arr.PrCumul[loc.skyarr.radec2p(loc.src.ra+i*loc.skyarr.dRA,loc.src.dec+j*loc.skyarr.dDec)]);
+            }
+            nearVals.push(row);
+            nearValsRows.push(Math.max.apply(Math,row))
+        }
+        this.skyarr.Pr.srcThresh=Math.max.apply(Math,nearValsRows);
+        loc.skyarr.Pr.hmapthreshold=Math.max(0.1,this.skyarr.Pr.srcThresh);
     }else if (data=="pNet"){
-        loc.skyarr.pNet.threshold=5;
+        loc.skyarr.pNet.hmapthreshold=5;
     }
-    loc.skyarr[data].filtPix=loc.filterSky(data,loc.skyarr[data].threshold);
+    loc.skyarr[data].hmapfiltPix=loc.filterSky(data,'hmap',loc.skyarr[data].hmapthreshold);
     loc.skyarr[data].opHeat=d3.scaleLinear().range([0,0.7])
-        .domain([(loc.skyarr[data].filtPix.length>1)?loc.skyarr[data].minFilt:0,loc.skyarr[data].maxFilt])
+        .domain([(loc.skyarr[data].hmapfiltPix.length>1)?loc.skyarr[data].hmapminFilt:0,loc.skyarr[data].hmapmaxFilt])
     console.log('opHeat',loc.skyarr[data].opHeat.domain())
 
     console.log(data,loc.skyarr[data],loc.skyarr[data].heatmap)
     loc.skyarr[data].heatmap = loc.skyarr[data].gHeatmap.selectAll(".hm-rect")
-        .data(loc.skyarr[data].filtPix)
+        .data(loc.skyarr[data].hmapfiltPix)
     loc.skyarr[data].heatmap.exit()
         .attr("class","hm-rect old")
         .transition().duration(500)
         .style("fill-opacity",0).remove()
     loc.skyarr[data].heatmap.enter().append("rect")
         .attr("class","hm-rect new")
+        .on("mouseover",function(d){
+            loc.tooltip
+               .style("opacity", .9);
+            loc.tooltip.html(loc.tttextHmap(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY-10) + "px")
+               .style("width","auto")
+               .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.style("opacity", 0);
+        })
     .merge(loc.skyarr[data].heatmap)
         .transition().duration(500)
         .attr("x",function(d){return loc.rect2xy(d)[0];})
@@ -1481,7 +1519,7 @@ Localisation.prototype.updateContoursT = function(){
             loc.src.dt[dd],
             Math.min(loc.src.dt[dd]+5e-4,loc.skyarr.maxdt[dd]-5.e-6)]
         loc.skyarr.colCont = d3.scaleOrdinal().range([loc.dataDet[loc.di[dd[0]]].color,'#000',loc.dataDet[loc.di[dd[1]]].color])
-        loc.skyarr.opCont = d3.scaleOrdinal().range([1,0,1])
+        loc.skyarr.opCont = d3.scaleOrdinal().range([0.7,0,0.7])
         opMult=loc.dStatus[dd[0]]*loc.dStatus[dd[1]]
         // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
 
@@ -1515,7 +1553,7 @@ Localisation.prototype.updateContoursT = function(){
 Localisation.prototype.updateContoursPr = function(){
     var loc=this;
     console.log(loc.src.Pr,loc.skyarr.arr.Pr);
-    loc.skyarr['Pr'].filtPix=loc.filterSky('Pr',0.2);
+    loc.skyarr['Pr'].filtPix=loc.filterSky('Pr','cont',0.2);
 
     loc.skyarr.PrCumulCont=[0.1]
     loc.skyarr.PrCumulColCont = d3.scaleOrdinal().range(['#000'])
@@ -1527,7 +1565,7 @@ Localisation.prototype.updateContoursPr = function(){
         .data(loc.editContours(d3.contours()
             .size([loc.skyarr.nRA,loc.skyarr.nDec])
             .thresholds(loc.skyarr.PrCumulCont)
-            (loc.skyarr.arr.PrCumul),true,'PrCumul'))
+            (loc.skyarr.arr.PrCumul),true,'Pr'))
     loc.skyarr.Pr.Prcontours.exit()
         .transition().duration(500)
         .style("opacity",0).remove()
@@ -1735,6 +1773,9 @@ var dotprod = function(aIn,bIn){
     }
     return(dot)
 }
+var innerprod = function(aIn,bIn,noise){
+    return math.re(math.multiply(math.conj(aIn),bIn,(1./noise)))
+}
 Localisation.prototype.processDet = function(det){
     // process detectors
     // get vector of detector position
@@ -1769,36 +1810,41 @@ Localisation.prototype.processNetwork = function(){
     loc=this;
     loc.net={'d':{},'dij':{},'sigma':0};
     loc.net.dij={};
-    for (i in loc.dOn){
-        deti=loc.dataDet[loc.dOn[i]]
-        loc.net.d[i]={'sigmaT':deti.sigmaT7*(loc.src.amp/deti.noise100)/7}
-        sigmaTi=loc.net.d[i].sigmaT;
-        loc.net.sigma += sigmaTi*sigmaTi
-        for (j in loc.dOn){
-            if (j>i){
-                detj=loc.dataDet[loc.dOn[j]];
-                loc.net.d[j]={'sigmaT':detj.sigmaT7*(loc.src.amp/detj.noise100)/7}
-                sigmaTj=loc.net.d[j].sigmaT;
-                // console.log(deti,detj)
-                loc.net.dij[deti.id+detj.id]={}
-                dij=loc.net.dij[deti.id+detj.id]
-                // get difference vector (in m)
-                dij.d=deti.vec.add(detj.vec.multiply(-1))
-                // calculate contribution to M from that pair
-                dij.DD=dij.d.multiply(dij.d.transpose())
-                    .multiply(1./(2*sigmaTi*sigmaTi*sigmaTj*sigmaTj));
-                if (!loc.net.hasOwnProperty('M')){
-                    loc.net.M=dij.DD;
-                }else{
-                    loc.net.M=loc.net.M.add(dij.DD)
+    if(loc.Ndet<2){
+        return
+    }else{
+        for (i in loc.dOn){
+            deti=loc.dataDet[loc.dOn[i]]
+            loc.net.d[i]={'sigmaT':deti.sigmaT7*(loc.src.amp/deti.noise100)/7}
+            sigmaTi=loc.net.d[i].sigmaT;
+            loc.net.sigma += sigmaTi*sigmaTi
+            for (j in loc.dOn){
+                if (j>i){
+                    detj=loc.dataDet[loc.dOn[j]];
+                    loc.net.d[j]={'sigmaT':detj.sigmaT7*(loc.src.amp/detj.noise100)/7}
+                    sigmaTj=loc.net.d[j].sigmaT;
+                    // console.log(deti,detj)
+                    loc.net.dij[deti.id+detj.id]={}
+                    dij=loc.net.dij[deti.id+detj.id]
+                    // get difference vector (in m)
+                    dij.d=deti.vec.add(detj.vec.multiply(-1))
+                    // calculate contribution to M from that pair
+                    dij.DD=dij.d.multiply(dij.d.transpose())
+                        .multiply(1./(2*sigmaTi*sigmaTi*sigmaTj*sigmaTj));
+                    if (!loc.net.hasOwnProperty('M')){
+                        loc.net.M=dij.DD;
+                    }else{
+                        loc.net.M=loc.net.M.add(dij.DD)
+                    }
                 }
             }
         }
+        loc.net.M=loc.net.M.multiply(1./loc.net.sigma)
+        return
     }
-    loc.net.M=loc.net.M.multiply(1./loc.net.sigma)
-    return
 }
-Localisation.prototype.processSrc = function(){
+Localisation.prototype.processSrcAmp = function(){
+    // calculate source amplitude and phase
     loc=this;
     src=this.src
     // console.log('processing src',src)
@@ -1845,7 +1891,23 @@ Localisation.prototype.processSrc = function(){
         // compute time differences
         src.Ti[det.id]=src.vec.dot(det.vec.multiply(this.rE/this.c));
     }
-    // calculate time differences
+    // calculate source amplitudes and phase
+    src.h0=src.amp;
+    src.h2=src.amp;
+    src['A+']=src.dist*(1 + Math.cos(d2r(src.inc))*Math.cos(d2r(src.inc)))/2;
+    src['Ax']=src.dist*Math.cos(d2r(src.inc));
+    src.A1=src['A+']*Math.cos(d2r(2*src.phase))*Math.cos(d2r(2*src.posang)) -
+        src['Ax']*Math.sin(d2r(2*src.phase))*Math.sin(d2r(2*src.posang));
+    src.A2=src['A+']*Math.cos(d2r(2*src.phase))*Math.sin(d2r(2*src.posang)) +
+        src['Ax']*Math.sin(d2r(2*src.phase))*Math.cos(d2r(2*src.posang));
+    src.A3=-src['A+']*Math.sin(d2r(2*src.phase))*Math.cos(d2r(2*src.posang)) -
+        src['Ax']*Math.cos(d2r(2*src.phase))*Math.sin(d2r(2*src.posang));
+    src.A4=-src['A+']*Math.sin(d2r(2*src.phase))*Math.sin(d2r(2*src.posang)) +
+        src['Ax']*Math.cos(d2r(2*src.phase))*Math.cos(d2r(2*src.posang));
+    src['h+']=math.complex(src.A1*src.h0 , src.A3*src.h2);
+    src['hx']=math.complex(src.A2*src.h0 , src.A4*src.h2);
+
+    // calculate time differences for detectors
     src.dt={}
     for (i in this.di){
         deti=this.dataDet[this.di[i]].id
@@ -1860,6 +1922,7 @@ Localisation.prototype.processSrc = function(){
     }
 }
 Localisation.prototype.calcAntFacs = function(){
+    // calculate antenna factor for source
     this.src.det=[]
     FpSq=0;
     FcSq=0;
@@ -1874,8 +1937,17 @@ Localisation.prototype.calcAntFacs = function(){
         // srcdet['Fx2']=dotprod(det.dd,this.src.e['x']);
         srcdet.r=ab2r(srcdet.a,srcdet.b);
         srcdet.psi=r2d(ab2psi(srcdet.a,srcdet.b));
+        //
+        // include source phase
+        srcdet.h=math.add(math.multiply(this.src['h+'],srcdet['F+']),math.multiply(this.src['hx'],srcdet['Fx']))
+        srcdet.Z=math.divide(math.complex(innerprod(srcdet.h,this.src.h0,det.noise100) ,
+            innerprod(srcdet.h,this.src.h2,det.noise100)),
+            Math.sqrt(innerprod(this.src.h0,this.src.h0,det.noise100)))
+        //
         det['r+']=Math.abs(srcdet.r*Math.cos(2*d2r(srcdet.psi))*Math.sqrt(2.));
+        //
         this.src.det.push(srcdet)
+        //
         FpSq+=srcdet['F+']*srcdet['F+']*(loc.src.amp / det.noise100);
         FcSq+=srcdet['Fx']*srcdet['Fx']*(loc.src.amp / det.noise100);
     }
@@ -1883,6 +1955,7 @@ Localisation.prototype.calcAntFacs = function(){
     this.src.aNet=Math.sqrt(FpSq)/Math.sqrt(FcSq)
 }
 Localisation.prototype.calcAntFacsSky = function(){
+    // calculate antenna response factors for whole sky
     this.skyarr.arr.pNet=[];
     this.skyarr.arr.aNet=[];
     for (p in this.skyarr.arr.pix){
@@ -1892,12 +1965,42 @@ Localisation.prototype.calcAntFacsSky = function(){
         eps={'+':ij2eps(ivec,jvec,'+'),'x':ij2eps(ivec,jvec,'x')};
         FpSq=0;
         FcSq=0;
-        for (d in this.dOn){
+        for (d in this.di){
             det=this.dataDet[this.di[d]];
             Fp=ab2F(dotprod(det.dd,eps['+']),dotprod(det.dd,eps['+']),0,['+']);
             Fc=ab2F(dotprod(det.dd,eps['x']),dotprod(det.dd,eps['x']),0,['x']);
             FpSq+=Fp*Fp * (loc.src.amp / det.noise100);
             FcSq+=Fc*Fc * (loc.src.amp / det.noise100);
+        }
+        this.skyarr.arr.pNet.push(Math.sqrt(FpSq+FcSq));
+        this.skyarr.arr.aNet.push(Math.sqrt(FpSq)/Math.sqrt(FcSq))
+    }
+    if (!this.skyarr.hasOwnProperty('pNet')){this.skyarr.pNet={}}
+    this.skyarr.pNet.min=Math.min.apply(Math,this.skyarr.arr.pNet);
+    this.skyarr.pNet.max=Math.max.apply(Math,this.skyarr.arr.pNet);
+    if (!this.skyarr.hasOwnProperty('aNet')){this.skyarr.aNet={}}
+    this.skyarr.aNet.min=Math.min.apply(Math,this.skyarr.arr.aNet);
+    this.skyarr.aNet.max=Math.max.apply(Math,this.skyarr.arr.aNet);
+    console.log('min/max pNet',this.skyarr.aNet.min,this.skyarr.aNet.max);
+};
+Localisation.prototype.calcAntFacsSkyAmpPhase = function(){
+    // calculate antenna response factors for whole sky, including amp & phase
+    this.skyarr.arr.pNet=[];
+    this.skyarr.arr.aNet=[];
+    for (p in this.skyarr.arr.pix){
+        rotmat=rotate(this.skyarr.arr.ra[p],this.skyarr.arr.dec[p],0);
+        ivec=rotmat.multiply($M([0,1,0]));
+        jvec=rotmat.multiply($M([0,0,1]));
+        eps={'+':ij2eps(ivec,jvec,'+'),'x':ij2eps(ivec,jvec,'x')};
+        FpSq=0;
+        FcSq=0;
+        for (d in this.di){
+            det=this.dataDet[this.di[d]];
+            Fp=ab2F(dotprod(det.dd,eps['+']),dotprod(det.dd,eps['+']),0,['+']);
+            Fc=ab2F(dotprod(det.dd,eps['x']),dotprod(det.dd,eps['x']),0,['x']);
+            FpSq+=Fp*Fp * (loc.src.amp / det.noise100);
+            FcSq+=Fc*Fc * (loc.src.amp / det.noise100);
+            hdet=math.add(math.multiply(this.src['h+'],Fp),math.multiply(this.src['hx'],Fc))
         }
         this.skyarr.arr.pNet.push(Math.sqrt(FpSq+FcSq));
         this.skyarr.arr.aNet.push(Math.sqrt(FpSq)/Math.sqrt(FcSq))
@@ -1934,6 +2037,9 @@ Localisation.prototype.calcDetTimes = function(){
     this.skyarr.arr.dt={};
     this.skyarr.mindt={};
     this.skyarr.maxdt={};
+    if (this.Ndet<2){
+        return
+    }
     for (i in this.di){
         deti=this.dataDet[this.di[i]].id
         for (j in this.di){
@@ -1950,8 +2056,10 @@ Localisation.prototype.calcDetTimes = function(){
             this.skyarr.maxdt[detij]=Math.max.apply(Math,this.skyarr.arr.dt[detij])
         }
     }
+    return
 }
-Localisation.prototype.calcSrcTimes = function(){
+Localisation.prototype.calcProbSky = function(){
+    // calculate probability all over sky
     // var loc=this;
     this.skyarr.arr.vec_src=[]
     this.skyarr.arr.vec_srcT=[]
@@ -1987,48 +2095,54 @@ Localisation.prototype.calcSrcTimes = function(){
     console.log('min/max Pr',this.skyarr.Pr.max,this.skyarr.Pr.max)
 
 }
-Localisation.prototype.filterSky = function (filtVal,threshold) {
+Localisation.prototype.filterSky = function (filtVal,type,threshold) {
     var loc=this;
     if (!loc.skyarr.hasOwnProperty(filtVal)){loc.skyarr[filtVal]={}}
-    if (threshold){loc.skyarr[filtVal].threshold=threshold;}
-    if (filtVal=='T'){
-        // set default
-        if (!loc.skyarr.T.threshold) {loc.skyarr.T.threshold=1.e-3}
+    if (!threshold){threshold=loc.skyarr[filtVal]['hmap'+threshold];}
+    // if (filtVal=='T'){
+    //     // set default
+    //     if (!loc.skyarr.T.threshold) {loc.skyarr.T.threshold=1.e-3}
+    //     filtPix=this.skyarr.arr.pix.filter(function(d){
+    //         return(Math.abs(loc.skyarr.arr.dt['HL'][d]-loc.src.dt['HL'])<loc.skyarr.T.threshold)
+    //     })
+    // }else
+    if (filtVal=='Pr'){
+        // if(!loc.skyarr.Pr.threshold){loc.skyarr.Pr.threshold=0.5};
+        console.log('Pr threshold',threshold,loc.skyarr.Pr.min,loc.skyarr.Pr.max)
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(Math.abs(loc.skyarr.arr.dt['HL'][d]-loc.src.dt['HL'])<loc.skyarr.T.threshold)
+            return(loc.skyarr.arr.PrCumul[d]<threshold)
         })
-    }else if (filtVal=='Pr'){
-        if(!loc.skyarr.Pr.threshold){loc.skyarr.Pr.threshold=0.5};
-        console.log('Pr threshold',loc.skyarr.Pr.threshold,loc.skyarr.Pr.min,loc.skyarr.Pr.max)
-        filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(loc.skyarr.arr.PrCumul[d]<loc.skyarr.Pr.threshold)
-        })
+        if (filtPix.indexOf(this.src.pix)>=0){
+            // valSrc
+            // pixel containing source not in filter
+        }
     }else if(filtVal=='pNet'){
-        if(!loc.skyarr.pNet.threshold){loc.skyarr.pNet.threshold=0.1}
+        // if(!loc.skyarr.pNet.threshold){loc.skyarr.pNet.threshold=0.1}
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(Math.abs(loc.skyarr.arr.pNet[d]-loc.src.pNet)<loc.skyarr.pNet.threshold)
+            return(Math.abs(loc.skyarr.arr.pNet[d]-loc.src.pNet)<threshold)
         })
     }
     // get limits of filtered Data
-    this.skyarr[filtVal].filtData=[]
+    this.skyarr[filtVal][type+'filtData']=[]
     for (p=0;p<filtPix.length;p++){
-        this.skyarr[filtVal].filtData.push(this.skyarr.arr[filtVal][filtPix[p]])
+        this.skyarr[filtVal][type+'filtData'].push(this.skyarr.arr[filtVal][filtPix[p]])
     }
-    this.skyarr[filtVal].minFilt=Math.min.apply(Math,this.skyarr[filtVal].filtData);
-    this.skyarr[filtVal].maxFilt=Math.max.apply(Math,this.skyarr[filtVal].filtData);
-    loc.skyarr[filtVal].filtPix=filtPix;
+    this.skyarr[filtVal][type+'minFilt']=Math.min.apply(Math,this.skyarr[filtVal][type+'filtData']);
+    this.skyarr[filtVal][type+'maxFilt']=Math.max.apply(Math,this.skyarr[filtVal][type+'filtData']);
+    loc.skyarr[filtVal][type+'filtPix']=filtPix;
     return(filtPix)
 };
 Localisation.prototype.whenLoaded = function(){
     var loc=this;
     // order Data
     loc.setDetOn();
-    loc.processSrc();
+    loc.processSrcAmp();
     loc.calcAntFacs();
+    // loc.processSrcAmpPhase();
     loc.calcAntFacsSky();
     loc.processNetwork();
     loc.calcDetTimes();
-    loc.calcSrcTimes();
+    loc.calcProbSky();
     loc.makePlot();
     if(loc.debug){console.log('plotted');}
     // select a default event
