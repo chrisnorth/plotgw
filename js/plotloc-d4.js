@@ -1059,10 +1059,7 @@ Localisation.prototype.setStyles = function(){
         // 'detr':{'type':'det','labstrdet':function(det){return det+' %text.loc.sensitivity%: '+loc.dataDet[loc.di[det]]['r+'].toPrecision(2)}}
     }
     // this.detCols={"H":"#e00","L":"#4ba6ff","V":"#9b59b6","K":"#ffb200"};
-    this.legenddescs = {H:'%text.loc.legend.Hanford%',
-        L:'%text.loc.legend.Livingston%',
-        V:'%text.loc.legend.Virgo%',
-        K:'%text.loc.legend.KAGRA%'};
+    this.legenddescs = {};
 }
 Localisation.prototype.tttextHmap = function(d){
     // var loc=this;// graph tooltip text
