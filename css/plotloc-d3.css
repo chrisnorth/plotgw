@@ -143,6 +143,21 @@ h1{
     width:100%;
     cursor:pointer;
 }
+.loading-icon{
+    position:absolute;
+    display:none;
+}
+.loading-icon div{
+    display:inline-block;
+}
+.loading-icon img{
+    display:inline-block;
+    margin-top:5%;
+    height:80%;
+}
+.loading-icon.isLoading{
+    display:inline-block;
+}
 .panel-close,.popup-close{
     position:absolute;
     width:30px;
@@ -206,6 +221,17 @@ h1{
 }
 .popup-button{
     display:inline-block;
+}
+.loading{
+    text-align:center;
+    transition: opacity 500ms;
+    opacity:0;
+    max-height:0
+}
+.loading.isLoading{
+    transition: opacity 500ms;
+    opacity:1;
+    max-height: 100%;
 }
 #copy-button{
     padding:5px;
@@ -319,13 +345,71 @@ img.share-icon{
     font-size:2em;
     cursor:pointer;
 }
+.det-stat{
+    margin-bottom:5%;
+    position: relative;
+    height:15%;
+    width:90%;
+    left:5%;
+    border:dashed 1px #555;
+}
+.det-icon{
+    width:20px;
+    height:20px;
+    display:inline-block;
+    margin-right:10px;
+    border-bottom-width:3px;
+    border-left-width:3px;
+    border-bottom-style:solid;
+    border-left-style:solid;
+}
+.det-name{
+    display:inline-block;
+    font-size:large;
+    margin-right:10px;
+}
+.det-bar-outer{
+    position: absolute;
+    height:20%;
+    border:solid 2px black;
+}
+.det-mag-bar-outer{
+    width:80%;
+    left:10%;
+}
+.det-pol-bar-outer{
+    left:10%;
+    width:80%;
+    top:70%;
+}
+.det-mag-bar,.det-pol-bar{
+    height:100%;
+    position:absolute;
+}
+.det-pol-bar-plus{
+    border-right:solid white 2px;
+}
+.bar-label{
+    width:10%;
+    font-weight: bold;
+    position:absolute;
+    font-size:2em;
+}
+.bar-label-plus{
+    left:-10%;
+}
+.bar-label-cross{
+    left:100%;
+    text-align:right;
+}
+/* Detector switches */
 .det-switch {
   position: relative;
   display: inline-block;
   width: 20px;
   height: 14px;
+  margin-right: 20px;
 }
-
 .det-switch input {display:none;}
 
 .det-slider {
