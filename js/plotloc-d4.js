@@ -1544,7 +1544,7 @@ Localisation.prototype.drawSky = function(){
           //   document.getElementById("effcontainer").style.opacity=0.;
         })
     d3.select("div#skycontainer > #network-icon").append("img")
-        .attr("src","img/settings.svg")
+        .attr("src","img/detector.svg")
         .on("click",function(){loc.showNetwork();});
     this.networkouter
         .style("top","200%");
@@ -1578,7 +1578,7 @@ Localisation.prototype.drawSky = function(){
           //   document.getElementById("effcontainer").style.opacity=0.;
         })
     d3.select("div#skycontainer > #source-icon").append("img")
-        .attr("src","img/settings.svg")
+        .attr("src","img/source.svg")
         .on("click",function(){loc.showSource();});
     this.sourceouter
         .style("top","200%");
@@ -2371,17 +2371,18 @@ Localisation.prototype.calcAntFacs = function(){
             Math.sqrt(innerprod(this.src.h0,this.src.h0,det.noise100)))
         //
         // det['r+']=Math.abs(srcdet.r*Math.cos(2*d2r(srcdet.psi))*Math.sqrt(2.));
-        srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*this.src['h+'].re/det.noise100,2) +
-            Math.pow(srcdet['Fx']*this.src['hx'].re/det.noise100,2));
+        srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*Math.abs(this.src['h+'].abs())/det.noise100,2))
+        // srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*Math.abs(this.src['h+'].abs())/det.noise100,2) +
+            // Math.pow(srcdet['Fx']*Math.abs(this.src['hx'].abs())/det.noise100,2));
         //
         this.src.det.push(srcdet)
         //
-        FpSq+=Math.pow(srcdet['F+']*det.on*loc.src['h+'].re / det.noise100,2);
-        FcSq+=Math.pow(srcdet['Fx']*det.on*loc.src['hx'].re / det.noise100,2);
+        FpSq+=Math.pow(srcdet['F+']*det.on*Math.abs(loc.src['h+'].abs()) / det.noise100,2);
+        FcSq+=Math.pow(srcdet['Fx']*det.on*Math.abs(loc.src['hx'].abs()) / det.noise100,2);
         Nnet+=srcdet['F+']*srcdet['F+']*det.on/(det.noise100*det.noise100) +
             srcdet['Fx']*srcdet['Fx']*det.on/(det.noise100*det.noise100);
     }
-    this.src.pNet=Math.sqrt(FpSq+FcSq);
+    this.src.pNet=Math.sqrt(FpSq);
     this.src.NNet=Nnet;
     // note that NNet & Snet are defined as inverse of what Fairhust calculates
     this.src.FNet=Math.sqrt(this.src.NNet / this.net.Snet);
