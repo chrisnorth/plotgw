@@ -28,12 +28,23 @@ h1{
     height:100%;
     position:relative;
 }
+#resultouter{
+    float:left;
+    /*position:absolute;*/
+    display:inline-block;
+    width:25%;
+    height:30%;
+    border:2px solid black;
+    border-radius: 10px;
+    background-color: #eee;
+    overflow: auto;
+}
 #infoouter{
     float:left;
     /*position:absolute;*/
     display:inline-block;
     width:25%;
-    height:90%;
+    height:60%;
     border:2px solid black;
     border-radius: 10px;
     background-color: #eee;
@@ -41,7 +52,8 @@ h1{
 }
 #effcontainer{
     position:relative;
-    display:inline-block;
+    /*display:inline-block;*/
+    display:none;
     /*width:100%;
     height:50%;*/
     float:left;
@@ -339,6 +351,10 @@ img.share-icon{
     margin-left:2%;
     width:42%;
     margin-top:5%;
+    display:inline-block;
+}
+.labcont.labcont-full{
+    width:85%;
 }
 .labcont img, .labcont div{
     height: 100%;
@@ -358,6 +374,9 @@ img.share-icon{
     width:90%;
     left:5%;
     border:dashed 1px #555;
+}
+.det-stat.full{
+    height:60%;
 }
 .det-icon{
     width:20px;
@@ -427,7 +446,7 @@ img.share-icon{
 }
 .det-switch input {display:none;}
 
-.det-slider {
+.det-slider{
   position:absolute;
   cursor: pointer;
   top: 0;
@@ -438,8 +457,17 @@ img.share-icon{
   -webkit-transition: .4s;
   transition: .4s;
 }
-
-.det-slider:before {
+.ang-slider {
+  display:inline-block;
+  cursor: pointer;
+  left:10%;
+  height:10%;
+  width:80%;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+.det-slider:before{
   position: absolute;
   content: "";
   height: 10px;
@@ -464,14 +492,38 @@ input:checked + .det-slider:before {
   -ms-transform: translateX(10px);
   transform: translateX(10px);
 }
-
 /* Rounded sliders */
-.det-slider.round {
+.det-slider.round, .ang-slider.round {
   border-radius: 10px;
 }
 
-.det-slider.round:before {
+.det-slider.round:before{
   border-radius: 50%;
+}
+.slider {
+    -webkit-appearance: none;  /* Override default CSS styles */
+    appearance: none;
+    width: 50%; /* Full-width */
+    height: 25px; /* Specified height */
+    background: #d3d3d3; /* Grey background */
+    outline: none; /* Remove outline */
+    -webkit-transition: .2s; /* 0.2 seconds transition on hover */
+    transition: opacity .2s;
+}
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
+}
+
+.slider::-moz-range-thumb {
+    width: 25px; /* Set a specific slider handle width */
+    height: 25px; /* Slider handle height */
+    background: #4CAF50; /* Green background */
+    cursor: pointer; /* Cursor on hover */
 }
 @media (max-width:1200px){
     .panel-title.landscape{
