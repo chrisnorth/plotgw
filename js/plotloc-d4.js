@@ -125,21 +125,39 @@ Localisation.prototype.init = function(){
         lang:"en",
         ra:0,
         dec:0,
+        inc:0,
+        dist:1,
+        phase:0,
         posang:0,
         lst:0,
         srcamp:1e-22,
-        hmap:'Pr'
+        hmap:'FNet',
+        res:5
     }
     this.src={}
-    this.src.ra = (this.urlVars.ra) ? this.urlVars.ra : this.defaults.ra;
-    this.src.dec = (this.urlVars.dec) ? this.urlVars.dec : this.defaults.dec;
-    this.src.posang = (this.urlVars.posang) ? this.urlVars.posang : this.defaults.posang;
-    this.src.lst = (this.urlVars.lst) ? this.urlVars.lst : this.defaults.lst;
-    this.src.amp = (this.urlVars.srcamp) ? this.urlVars.srcamp : this.defaults.srcamp;
+    this.skyarr={}
+    this.src.ra = (this.urlVars.ra) ? parseFloat(this.urlVars.ra) : this.defaults.ra;
+    this.src.dec = (this.urlVars.dec) ? parseFloat(this.urlVars.dec) : this.defaults.dec;
+    this.src.posang = (this.urlVars.posang) ? parseFloat(this.urlVars.posang) : this.defaults.posang;
+    this.src.lst = (this.urlVars.lst) ? parseFloat(this.urlVars.lst) : this.defaults.lst;
+    this.src.amp = (this.urlVars.srcamp) ? parseFloat(this.urlVars.srcamp) : this.defaults.srcamp;
+    this.src.inc = (this.urlVars.inc) ? parseFloat(this.urlVars.inc) : this.defaults.inc;
+    this.src.dist = (this.urlVars.dist) ? parseFloat(this.urlVars.dist) : this.defaults.dist;
+    this.src.phase = (this.urlVars.phase) ? parseFloat(this.urlVars.phase) : this.defaults.phase;
+    this.skyarr.res=(this.urlVars.res) ? parseFloat(this.urlVars.res) : this.defaults.res;
     this.hmap = (this.urlVars.hmap) ? this.urlVars.hmap : this.defaults.hmap;
     // set values for styles
     this.setStyles();
     this.setScales();
+    console.log(this.fullSkyWidth,getComputedStyle(document.getElementById("loading")).width,(this.fullSkyWidth -
+        getComputedStyle(document.getElementById("loading")).width.split('px')[0])/2);
+    console.log(this.fullSkyHeight,getComputedStyle(document.getElementById("loading")).height,(this.fullSkyHeight -
+        getComputedStyle(document.getElementById("loading")).height.split('px')[0])/2);
+    document.getElementById("loading").style.left = (this.fullSkyWidth -
+        getComputedStyle(document.getElementById("loading")).width.split('px')[0])/2;
+    document.getElementById("loading").style.top = (this.fullSkyHeight -
+        getComputedStyle(document.getElementById("loading")).height.split('px')[0])/2;
+    loc.showLoading();
     // languages
     this.langs = {
         // "de":{code:"de",name:"Deutsch"},
@@ -155,7 +173,8 @@ Localisation.prototype.init = function(){
     // set arrays for sky
     this.rE = 6.3716e6;
     this.c = 3.e8
-    this.skyarr={"dDec":5.,"dRA":5.}
+    this.skyarr.dDec=this.skyarr.res;
+    this.skyarr.dRA=this.skyarr.res;
     this.skyarr.nRA=Math.floor(360./this.skyarr.dRA);
     this.skyarr.nDec=Math.floor(180./this.skyarr.dDec);
     this.skyarr.nPix=this.skyarr.nRA*this.skyarr.nDec;
@@ -170,6 +189,7 @@ Localisation.prototype.init = function(){
         console.log(ira,idec)
         return idec*loc.skyarr.nRA + ira
     }
+    this.src.pix = this.skyarr.radec2p(this.src.ra,this.src.dec);
     this.skyarr.arr={'ra':[],'dec':[],'vec':[],'pix':[]};
     p=0;
     for (j in d3.range(0,this.skyarr.nDec)){
@@ -350,8 +370,8 @@ Localisation.prototype.scaleWindow = function(){
     effcont.style.height = this.effHeight;
     effcont.style.width = this.effWidth;
 
-    wfcont.style.height = this.wfHeight;
-    wfcont.style.width = this.wfWidth;
+    // wfcont.style.height = this.wfHeight;
+    // wfcont.style.width = this.wfWidth;
     this.svgHeight = this.fullSkyHeight;
     this.svgWidth = this.fullSkyWidth;
 
@@ -466,6 +486,14 @@ Localisation.prototype.setScales = function(){
         }else if(pt=='yarm'){
             x = loc.lonMap(d) + loc.lenScale(Math.max(d.length,2))*Math.sin(d2r(d.ang));
             y = loc.latMap(d) - loc.lenScale(Math.max(d.length,2))*Math.cos(d2r(d.ang));
+        }else if(pt='middle'){
+            x = loc.lonMap(d) + Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
+                (-Math.cos(d2r(d.ang))+Math.sin(d2r(d.ang)));
+            y = loc.latMap(d) + Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
+                (-Math.sin(d2r(d.ang))-Math.cos(d2r(d.ang)));
+        }else if(pt=='radius'){
+            x = loc.lenScale(Math.max(d.length,2));
+            y = loc.lenScale(Math.max(d.length,2));
         }
         return([x,y]);
     }
@@ -615,20 +643,23 @@ Localisation.prototype.drawEff = function(){
         .style("stroke","black")
         .style("stroke-width",1)
         .style("stroke-dasharray","1,3")
+
+    this.updateLines();
+
+    // add labels
     if (this.redraw){
-        // console.log('redrawing masses');
-        this.updateLines();
         d3.selectAll('.labcont').style('height',this.labcontHeight);
         d3.selectAll('.lang-cont').style('height',this.langcontHeight);
-    }else{
-        this.updateLines();
-        for (lab in this.labels){
-            this.addLabel(lab,'wfcontainer');
-        }
-        for (det in this.di){
-            this.addLabelDet(det,'wfcontainer');
-        }
     }
+    // else{
+    //     for (lab in this.labels){
+    //         this.addLabel(lab,'wfcontainer');
+    //     }
+    //
+    //     // for (det in this.di){
+        //     this.addLabelDet(det,'wfcontainer');
+        // }
+    // }
 
 }
 Localisation.prototype.addEffLines = function(){
@@ -670,6 +701,171 @@ Localisation.prototype.addEffLines = function(){
         .attr("stroke-width","3px")
         .attr("stroke-dasharray",5)
         .attr("stroke-opacity",0.7);
+
+}
+Localisation.prototype.updateDetResults = function(){
+    console.log("UPDATING STATUS")
+    var loc=this;
+
+    netStatus=d3.select("#net-stat")
+    if (netStatus.empty()){
+        // add bars etc.
+        netStatus=d3.select('#network-stats-cont').append("div")
+            .attr("class","det-stat")
+            .attr("id","net-stat")
+        netStatus.append("div")
+            .attr("class","det-name")
+            .html(function(d){return loc.net.name});
+        netStatus.append("div")
+            .attr("class","det-bar-outer det-snr-bar-outer")
+        .append("div").attr("class","det-snr-bar")
+        netStatus.append("div")
+            .attr("class","det-bar-outer det-mag-bar-outer")
+        .append("div").attr("class","det-mag-bar")
+            .style("background-color","#0a0")
+        netbarpolouter=netStatus.append("div")
+            .attr("class","det-bar-outer det-pol-bar-outer")
+        netbarpolouter.append("div").attr("class","det-pol-bar det-pol-bar-plus")
+            .style("background-color","#00f")
+        netbarpolouter.append("div").attr("class","det-pol-bar det-pol-bar-cross")
+            .style("background-color","#f00")
+    }
+    netStatus.select(".det-snr-bar")
+        .style("background-color","#a0a")
+        .transition().duration(500)
+        .style("width",function(){return loc.snrRange(Math.log10(loc.src.pNet))+'%'})
+        .style("opacity","1");;
+    netStatus.select(".det-mag-bar")
+        .transition().duration(500)
+        .style("width",function(){return parseInt(100.*loc.src.rNet)+"%"})
+        .style("opacity","1");
+    netStatus.selectAll(".det-pol-bar-plus")
+        .transition().duration(500)
+        .style("margin-left",function(){return parseInt(50.*(1-loc.src['r+Net']))+"%"})
+        .style("width",function(){return parseInt(50.*loc.src['r+Net'])+"%"})
+        .style("opacity","1");
+    netStatus.selectAll(".det-pol-bar-cross")
+        .style("background-color","#f00")
+        .transition().duration(500)
+        .style("margin-left","50%")
+        .style("width",function(){return parseInt(50.*loc.src['rxNet'])+"%"})
+        .style("opacity","1");
+
+    detStatuses=d3.select("#detector-stats-cont").selectAll(".det-stat")
+        .data(loc.dataDet)
+    detStatuses.selectAll(".det-icon")
+        .style("border-color",function(d){console.log(d.id);return d.color});
+    detStatuses.selectAll(".det-name")
+        .html(function(d){return d.name});
+
+    // detector SNR bar
+    detStatuses.selectAll(".det-snr-bar")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#a0a":"ccc"})
+        .transition().duration(500)
+        .style("width",function(d){return loc.snrRange(Math.log10(loc.src.det[loc.di[d.id]].snr))+'%'})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"});;
+        // .html(function(d){return d.id});
+
+    // detector magnitude bar
+    detStatuses.selectAll(".det-mag-bar")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#0a0":"ccc"})
+        .transition().duration(500)
+        .style("width",function(d){return parseInt(100.*loc.src.det[loc.di[d.id]].r*Math.sqrt(2))+"%"})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"});;
+        // .html(function(d){return d.id});
+
+    // detector polarisation bar
+    detStatuses.selectAll(".det-pol-bar-plus")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#00f":"ccf"})
+        .transition().duration(500)
+        .style("margin-left",function(d){return parseInt(50.*(1-loc.src.det[loc.di[d.id]]['r+']))+"%"})
+        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['r+'])+"%"})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"});
+    detStatuses.selectAll(".det-pol-bar-cross")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#f00":"fcc"})
+        .transition().duration(500)
+        .style("margin-left","50%")
+        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['rx'])+"%"})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"});;
+
+    // add new elements
+    detStatusEnter=detStatuses.enter()
+    detStatusDiv=detStatusEnter.append("div")
+        .attr("id",function(d){return "det-stat-"+d.id})
+        .attr("class","det-stat")
+    detStatusDiv.append("label")
+        .attr("class","det-switch")
+        .attr("id",function(d){return "det-switch-"+d.id})
+        .html(function(d){
+                return "<input type='checkbox' "+((loc.dStatus[d.id]==true)?"checked":"")+">"+"<span class='det-slider round'></span>"})
+        .on("mousedown",function(){
+            console.log('toggling',this,this.id.split('-')[2],loc.dStatus);
+            loc.detectorToggle(this.id.split('-')[2])
+        });
+    // icon & name
+    detStatusDiv.append("div")
+        .attr("class","det-icon")
+        .style("border-color",function(d){console.log(d.id);return d.color});
+    detStatusDiv.append("div")
+        .attr("class","det-name")
+        .html(function(d){return d.name});
+
+    // SNR bar
+    detStatusDiv.append("div")
+        .attr("class","det-snr-label")
+        .html(this.tl('%text.plotloc.label.SNR%'))
+    detStatusDiv.append("div")
+        .attr("class","det-bar-outer det-snr-bar-outer")
+    .append("div").attr("class","det-snr-bar")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#a0a":"ccc"})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"})
+        .style("width",function(d){return loc.snrRange(Math.log10(loc.src.det[loc.di[d.id]].snr))+'%';});
+
+    // magnitude bar
+    detStatusDiv.append("div")
+        .attr("class","det-bar-outer det-mag-bar-outer")
+    .append("div").attr("class","det-mag-bar")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#0a0":"ccc"})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"})
+        .style("width",function(d){return parseInt(100.*loc.src.det[loc.di[d.id]].r*Math.sqrt(2))+"%"});
+    // polarisation bar
+    barpolouter=detStatusDiv.append("div")
+        .attr("class","det-bar-outer det-bar-outer det-pol-bar-outer");
+    barpolouter.append("div").attr("class","bar-label bar-label-plus").html('+');
+    barpolouter.append("div").attr("class","bar-label bar-label-cross").html('x');
+    barpolouter.append("div").attr("class","det-pol-bar det-pol-bar-plus")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#00f":"ccf"})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"})
+        .style("margin-left",function(d){return parseInt(50.*(1-loc.src.det[loc.di[d.id]]['r+']))+"%"})
+        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['r+'])+"%"});
+    barpolouter.append("div").attr("class","det-pol-bar det-pol-bar-cross")
+        .style("background-color",function(d){
+            return (loc.dStatus[d.id]==true)?"#f00":"fcc"})
+        .style("opacity",function(d){
+            return (loc.dStatus[d.id]==true)?"1":"0"})
+        .style("margin-left","50%")
+        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['rx'])+"%"});
+    console.log(detStatuses,detStatusEnter)
+    detStatusEnter.merge(detStatuses);
+    console.log(detStatuses,detStatusEnter)
+    // update values
+    detStatusEnter=detStatuses.enter()
+    console.log(detStatuses,detStatusEnter)
+
 
 }
 Localisation.prototype.addLabel = function (lab,container) {
@@ -794,22 +990,7 @@ Localisation.prototype.updateLines = function(){
     // };
 
 };
-Localisation.prototype.updateEff = function(){
-    // update eff based on data clicks or resize
-    if (this.redraw){
-        // resize eff
-        this.fadeInLines("H","snap");
-        this.fadeInLines("L","snap");
-        this.fadeInLines("V","snap");
-
-    }else{
-        // clicked on un-selelected datapoint
-        this.fadeInLines("H","smooth");
-        this.fadeInLines("L","smooth");
-        this.fadeInLines("V","smooth");
-    }
-}
-Localisation.prototype.redrawLabels = function(){
+Localisation.prototype.redrawSourceLabels = function(){
     for (lab in this.labels){
         if ((this.labels[lab].type)&&this.labels[lab].type=="det"){
             for (d in this.di){
@@ -825,22 +1006,59 @@ Localisation.prototype.redrawLabels = function(){
     }
     return
 }
+Localisation.prototype.updateCalcs = function(newSrc,newDet){
+    // update calculations and show results
+    this.setDetOn();
+    this.showLoading();
+    console.log('calc args:',newSrc,newDet);
+    if (newDet==true){
+        // recalculate
+        console.log('recalculating detectors');
+        console.log(this.dStatus);
+        this.processNetwork();
+        this.updateDetMarkers();
+        this.calcDetTimes();
+        this.calcAntFacsSky();
+    }if (newSrc==true){
+        // move source
+        this.moveHighlight();
+        // calculate results for source
+        this.processSrcAmp();
+        this.redrawSourceLabels();
+    }
+    this.calcAntFacs();
+    //  update results
+    this.calcProbSky();
+    this.updateContoursT();
+    this.updateContoursPr();
+    this.updateDetResults();
+    this.updateLines();
+    if ((newDet==true)|(this.hmap!='FNet')){
+        this.updateHeatmap(this.hmap);
+    }
+    this.hideLoading();
+    // this.uncloseContours();
+}
 Localisation.prototype.moveSrc = function(ra,dec){
     if ((ra>180)|(ra<-180)|(dec>90)|(dec<-90)){
         // out of limits; do nothing
         return
     }else{
+        this.showLoading();
         this.src.ra=ra;
         this.src.dec=dec;
-        this.processSrc();
-        this.calcAntFacs();
-        this.redrawLabels();
-        this.updateLines();
-        this.calcSrcTimes();
-        this.moveHighlight();
-        this.updateHeatmap(this.hmap);
-        this.updateContoursT();
-        this.updateContoursPr();
+        this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);
+        this.updateCalcs(true,false);
+        // this.processSrcAmp();
+        // this.calcAntFacs();
+        // this.redrawSourceLabels();
+        // this.updateLines();
+        // this.calcProbSky();
+        // this.moveHighlight();
+        // this.updateHeatmap(this.hmap);
+        // this.updateContoursT();
+        // this.updateContoursPr();
+        // this.updateDetResults();
         return
     }
 }
@@ -862,43 +1080,52 @@ Localisation.prototype.detectorOff = function(det){
 }
 Localisation.prototype.detectorToggle = function(det){
     // this.dStatus[det]=1-this.dStatus[det];
+    this.showLoading();
     console.log(this.dStatus,det,this.dStatus[det])
     if (this.dStatus[det]==0){
         console.log('turning '+det+' ON')
         this.dStatus[det]=1;
-        document.getElementById('det-toggle-lab-'+det).innerHTML=this.tl("ON")
+        this.Ndet+=1;
+        // document.getElementById('det-toggle-lab-'+det).innerHTML=this.tl("ON")
     }else{
         console.log('turning '+det+' OFF')
         this.dStatus[det]=0;
-        document.getElementById('det-toggle-lab-'+det).innerHTML=this.tl("OFF")
+        this.Ndet-=1;
+        // document.getElementById('det-toggle-lab-'+det).innerHTML=this.tl("OFF")
     }
-    this.updateDet();
+    this.updateCalcs(false,true);
+    // this.updateDet();
 }
 Localisation.prototype.setDetOn = function(){
     this.dOn={}
     for (d in this.di){
-        if (this.dStatus[d]==1){this.dOn[d]=this.di[d]}
+        console.log(d,this.dStatus[d]);
+        this.dataDet[this.di[d]].on=this.dStatus[d]
+        if (this.dStatus[d]==1){
+            this.dOn[d]=this.di[d]
+        }
     }
+    console.log(this.dStatus,this.dOn);
 }
-Localisation.prototype.updateDet = function(){
-    console.log(this.dStatus);
-    this.setDetOn();
-    console.log(this.dOn);
-    this.updateDetMarkers();
-    this.processNetwork();
-    this.processSrc();
-    this.calcDetTimes();
-    this.calcAntFacs();
-    this.calcAntFacsSky();
-    this.redrawLabels();
-    this.updateLines();
-    this.calcSrcTimes();
-    this.moveHighlight();
-    this.updateHeatmap(this.hmap);
-    this.updateContoursT();
-    this.updateContoursPr();
-    return
-}
+// Localisation.prototype.updateDet = function(){
+//     console.log(this.dStatus);
+//     this.setDetOn();
+//     console.log(this.dOn);
+//     this.updateDetMarkers();
+//     this.processNetwork();
+//     this.processSrcAmp();
+//     this.calcDetTimes();
+//     this.calcAntFacs();
+//     this.calcAntFacsSky();
+//     this.redrawSourceLabels();
+//     this.updateLines();
+//     this.calcProbSky();
+//     this.moveHighlight();
+//     this.updateHeatmap(this.hmap);
+//     this.updateContoursT()
+//     this.updateContoursPr();
+//     return
+// }
 // ****************************************************************************
 // ****************************************************************************
 // ****************************************************************************
@@ -924,19 +1151,15 @@ Localisation.prototype.setStyles = function(){
         // 'detr':{'type':'det','labstrdet':function(det){return det+' %text.loc.sensitivity%: '+loc.dataDet[loc.di[det]]['r+'].toPrecision(2)}}
     }
     // this.detCols={"H":"#e00","L":"#4ba6ff","V":"#9b59b6","K":"#ffb200"};
-    this.legenddescs = {H:'%text.loc.legend.Hanford%',
-        L:'%text.loc.legend.Livingston%',
-        V:'%text.loc.legend.Virgo%',
-        K:'%text.loc.legend.KAGRA%'};
+    this.legenddescs = {};
 }
-Localisation.prototype.tttext = function(d){
-    // graph tooltip text
-    if (this.debug){console.log(d["name"],this.columns[this.xvar].name,d[this.xvar].strnoerr,this.columns[this.yvar].name,d[this.yvar].strnoerr)}
-    return "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='ttpri'>"+this.tl(this.columns[this.xvar].name)+
-        ": "+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
-    "<span class='ttsec'>"+this.tl(this.columns[this.yvar].name) +
-        ": "+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
+Localisation.prototype.tttextHmap = function(d){
+    // var loc=this;// graph tooltip text
+    if (this.debug){console.log(d)}
+    return "<span class='ttCoord'>"+this.skyarr.arr.ra[d]+","+this.skyarr.arr.dec[d]+"</span>"+
+    "<span class='ttPr'>Pr: "+this.skyarr.arr.Pr[d]+"</span>"+
+    "<span class='ttpNet'>pNet: "+this.skyarr.arr.pNet[d]+"</span>"+
+    "<span class='ttpNet'>FNet: "+this.skyarr.arr.FNet[d]+"</span>";
 }
 Localisation.prototype.makeSky = function(){
     // create graph
@@ -1005,12 +1228,14 @@ Localisation.prototype.drawSkyInit = function(){
         loc.di={};
         loc.dStatus={};
         loc.dOn={};
+        loc.Ndet=0;
         i=0;
         for (d in dataIn){
             loc.processDet(dataIn[d])
             loc.dataDet.push(dataIn[d])
             loc.di[dataIn[d].id]=i;
             loc.dStatus[dataIn[d].id]=parseFloat(dataIn[d].on);
+            if (loc.dStatus[dataIn[d].id]==1){loc.Ndet+=1}
             loc.legenddescs[dataIn[d].id]=dataIn[d].name;
             i++;
         }
@@ -1069,13 +1294,60 @@ Localisation.prototype.drawSky = function(){
         .style('stroke','#ccc')
         .style('opacity',1)
 
+    // draw legend
+    loc.legend = loc.svg.selectAll(".legend")
+      .data(loc.dataDet)
+    .enter().append("g")
+      .attr("class", function(d,i){return "legend "+d.id;})
+      .attr("transform", function(d, i) { return "translate(0," +
+        (i * 24) + ")"; });
+
+    // draw legend colored circles
+    loc.legend.append("line")
+        .attr("x1", loc.margin.left+12)
+        .attr("y1", loc.margin.top+24)
+        .attr("x2", loc.margin.left+24)
+        .attr("y2", loc.margin.top+24)
+        .style("stroke-width",Math.min(5,2./loc.sksc))
+        .style("stroke",function(d){return d.color;})
+        .attr("opacity",1);
+    loc.legend.append("line")
+        .attr("x1", loc.margin.left+12)
+        .attr("y1", loc.margin.top+24)
+        .attr("x2", loc.margin.left+12)
+        .attr("y2", loc.margin.top+12)
+        .style("stroke-width",Math.min(5,2./loc.sksc))
+        .style("stroke",function(d){return d.color;})
+        .attr("opacity",1);
+
+    // draw legend text
+    loc.legend.append("text")
+      .attr("x", loc.margin.left + 36)
+      .attr("y", loc.margin.top + 21)
+      .attr("dy", ".35em")
+      .attr("font-size","1.2em")
+      .style("text-anchor", "start")
+      .text(function(d) { return loc.tl(d.name);})
+
 
     loc.overlays = {
         'contoursT':{'gid':"g-contoursT"},
         'contoursPr':{'gid':"g-contoursPr"},
         'heatmap-Pr':{'gid':"g-heatmap-Pr"},
         'heatmap-pNet':{'gid':"g-heatmap-pNet"},
+        'heatmap-FNet':{'gid':"g-heatmap-FNet"},
+        'overlay':{'gid':"g-overlay"},
     }
+    // draw Heatmap
+    loc.skyarr[this.hmap]={}
+    loc.skyarr[this.hmap].gHeatmap=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['heatmap-'+loc.hmap].gid})
+        .attr("class","heatmap")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateHeatmap(this.hmap)
+    loc.showOverlay('heatmap-'+this.hmap)
+
     // draw contours (dt)
     loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
     loc.skyarr.projEq=d3.geoEquirectangular()
@@ -1088,6 +1360,7 @@ Localisation.prototype.drawSky = function(){
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
         .style("opacity",0)
     loc.updateContoursT();
+    loc.showOverlay('contoursT');
 
     // draw contours (Pr)
     loc.gContourPr=loc.svg.append("g")
@@ -1096,21 +1369,18 @@ Localisation.prototype.drawSky = function(){
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
         .style("opacity",0)
     loc.updateContoursPr();
-    loc.showOverlay('contoursPr')
+    // loc.showOverlay('contoursPr')
 
-    // draw Heatmap
-    // loc.skyarr[this.hmap]={}
-    loc.skyarr[this.hmap].gHeatmap=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays['heatmap-'+loc.hmap].gid})
+    loc.skyarr.overlay={};
+    loc.skyarr.overlay.gHeatmap=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['overlay'].gid})
         .attr("class","heatmap")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
         .style("opacity",0)
-    loc.updateHeatmap(this.hmap)
-    // loc.showOverlay('heatmap-'+this.hmap)
-
+    loc.updateHeatmap("overlay")
+    // loc.showOverlay("heatmap-overlay")
     // draw detectors
     detGroup = loc.svg.append("g").attr("class","g-dets")
-    loc.updateDetMarkers();
     loc.updateDetMarkers();
 
     // add source circle
@@ -1163,41 +1433,14 @@ Localisation.prototype.drawSky = function(){
         .attr("x2",function(){return loc.src2xy('y+')[0]})
         .attr("y2",function(){return loc.src2xy('y+')[1]})
 
+    // add Detector status
+    this.snrRange=d3.scaleLinear().range([0,100]).domain([-2,2]).clamp(true)
+    d3.select("#info-network-title")
+        .html(this.tl("%text.plotloc.info.network-title%"))
+    d3.select("#info-det-title")
+        .html(this.tl("%text.plotloc.info.detectors-title%"))
 
-    // draw legend
-    loc.legend = loc.svg.selectAll(".legend")
-      .data(loc.dataDet)
-    .enter().append("g")
-      .attr("class", function(d,i){return "legend "+d.id;})
-      .attr("transform", function(d, i) { return "translate(0," +
-        (i * 24) + ")"; });
-
-    // draw legend colored circles
-    loc.legend.append("line")
-        .attr("x1", loc.margin.left+12)
-        .attr("y1", loc.margin.top+24)
-        .attr("x2", loc.margin.left+24)
-        .attr("y2", loc.margin.top+24)
-        .style("stroke-width",Math.min(5,2./loc.sksc))
-        .style("stroke",function(d){return d.color;})
-        .attr("opacity",1);
-    loc.legend.append("line")
-        .attr("x1", loc.margin.left+12)
-        .attr("y1", loc.margin.top+24)
-        .attr("x2", loc.margin.left+12)
-        .attr("y2", loc.margin.top+12)
-        .style("stroke-width",Math.min(5,2./loc.sksc))
-        .style("stroke",function(d){return d.color;})
-        .attr("opacity",1);
-
-    // draw legend text
-    loc.legend.append("text")
-      .attr("x", loc.margin.left + 36)
-      .attr("y", loc.margin.top + 21)
-      .attr("dy", ".35em")
-      .attr("font-size","1.2em")
-      .style("text-anchor", "start")
-      .text(function(d) { return loc.tl(d.name);})
+    loc.updateDetResults();
 
     // add info icon
     infoClass = (this.panels.info.status) ? "graph-icon" : "graph-icon hidden";
@@ -1365,28 +1608,59 @@ Localisation.prototype.drawSky = function(){
         .style("top","200%");
     this.langouter.select("#lang-close")
         .on("click",function(){loc.hideLang();});
+    //
+    // // add loading icon
+    // this.langouter = d3.select('#loading-outer')
+    // d3.select("div#skycontainer").append("div")
+    //     .attr("id","loading-icon")
+    //     .attr("class","loading-icon isloading")
+    //     .style("right",loc.margin.right+5*(loc.margin.top+10))
+    //     .style("top",0)
+    //     .style("height",40*loc.ysc);
+    // d3.select("div#skycontainer > #loading-icon").append("div")
+    //     .html(loc.tl("%text.plotloc.loading%"));
+    // d3.select("div#skycontainer > #loading-icon").append("img")
+    //     .attr("src","img/loading.gif");
+    // this.langbg.on("click",function(){loc.hideLang();});
 
+    // loc.uncloseContours();
+
+}
+Localisation.prototype.showLoading = function(){
+    var loc=this;
+    this.isLoading=true;
+    document.getElementById("loading").classList.add("isLoading")
+    document.getElementById("loading").classList.remove("notLoading")
+    // d3.select("#loading").className
+    //     .style("max-height","100%")
+    //     .style("left",function(){return ((loc.fullSkyWidth - this.offsetWidth)/2)})
+    //     .style("top",function(){return ((loc.fullSkyHeight - this.offsetHeight)/2)})
+    //     .transition().duration(500)
+    //         .style("opacity",1);
+
+    // d3.select("#svg-container")
+    //     .transition().duration(500)
+    //     .style("opacity",0.25);
+
+}
+Localisation.prototype.hideLoading = function(){
+    this.isLoading=false;
+    document.getElementById("loading").classList.remove("isLoading")
+    document.getElementById("loading").classList.add("notLoading")
+    // d3.select("#loading")
+    //     .transition().duration(500)
+    //     .style("opacity",0)
+    //     .style("max-height",0);
+
+    // d3.select("#svg-container")
+    //     .transition().duration(500)
+    //     .style("opacity",1);
 }
 Localisation.prototype.updateDetMarkers = function(){
     var loc=this;
     this.detMarkers=detGroup.selectAll(".detmarker")
         .data(loc.dataDet)
-    this.detGroups=this.detMarkers.enter().append("g")
-        .attr("class", "detmarker marker")
-        .attr("id", function(d){return "detmarker-"+d.id;})
-        // .attr("transform", function(d){return "translate("+(loc.margin.left+loc.lonScale(loc.lonMod(d.lon)))+","+
-        //     (loc.margin.top+loc.decScale(d.lat))+") rotate("+d.ang+")";})
-        .attr("transform", "translate("+loc.margin.left+","+
-            loc.margin.top+")")
-    loc.detGroups.append("line")
-        .attr("class","detline detline-x")
-        .attr("id", function(d){return "detline detline-x-"+d.id;})
-    loc.detGroups.append("line")
-        .attr("class","detline detline-y")
-        .attr("id",function(d){return "detline detline-y-"+d.id;})
-    loc.detGroups.merge(loc.detMarkers);
-    // loc.detGroups=this.detMarkers.enter()
-    loc.detMarkers.select("line.detline-x")
+    loc.detMarkers.selectAll("line.detline-x")
         .attr("x1", function(d){return loc.det2xy(d,'ctr')[0]})
         .attr("y1", function(d){return loc.det2xy(d,'ctr')[1]})
         .attr("x2", function(d){return loc.det2xy(d,'xarm')[0]})
@@ -1396,7 +1670,7 @@ Localisation.prototype.updateDetMarkers = function(){
         .attr("stroke-dasharray",function(d){console.log('updating '+d.id+':'+loc.dStatus[d.id]+' '+this);return ((loc.dStatus[d.id]==1)? 0 :1)})
         .style("stroke", function(d){return d.color})
         .style("stroke-width",Math.min(5,2./loc.sksc));
-    loc.detMarkers.select("line.detline-y")
+    loc.detMarkers.selectAll("line.detline-y")
         .attr("x1", function(d){return loc.det2xy(d,'ctr')[0]})
         .attr("y1", function(d){return loc.det2xy(d,'ctr')[1]})
         .attr("x2", function(d){return loc.det2xy(d,'yarm')[0]})
@@ -1406,8 +1680,57 @@ Localisation.prototype.updateDetMarkers = function(){
         .attr("stroke-dasharray",function(d){return ((loc.dStatus[d.id]==1)? 0 :1)})
         .style("stroke", function(d){return d.color})
         .style("stroke-width",Math.min(5,2./loc.sksc));
-        // .style("stroke-dasharray",1)
-    console.log('det groups: ',loc.detGroups,loc.detGroups.select('.detline-x'));
+    loc.detMarkers.selectAll("circle.detcircle")
+        .attr("cx", function(d){return loc.det2xy(d,'middle')[0]})
+        .attr("cy", function(d){return loc.det2xy(d,'middle')[1]})
+        .attr("r", function(d){return loc.lenScale(Math.max(d.length,2))})
+        .attr("cursor","default")
+        .attr("opacity",function(d){return ((loc.dStatus[d.id]==1)? 1 :0.5)})
+        .attr("stroke-opacity",0)
+        .style("fill", "#fff");
+    this.detGroups=this.detMarkers.enter().append("g")
+        .attr("class", "detmarker marker")
+        .attr("id", function(d){return "detmarker-"+d.id;})
+        // .attr("transform", function(d){return "translate("+(loc.margin.left+loc.lonScale(loc.lonMod(d.lon)))+","+
+        //     (loc.margin.top+loc.decScale(d.lat))+") rotate("+d.ang+")";})
+        .attr("transform", "translate("+loc.margin.left+","+
+            loc.margin.top+")")
+    loc.detGroups.append("circle")
+        .attr("class","detcircle")
+        .attr("id",function(d){return "detcircle detcircle-"+d.id;})
+        .attr("cx", function(d){return loc.det2xy(d,'middle')[0]})
+        .attr("cy", function(d){return loc.det2xy(d,'middle')[1]})
+        .attr("r", function(d){return loc.lenScale(Math.max(d.length,2))})
+        .attr("cursor","default")
+        .attr("opacity",function(d){return ((loc.dStatus[d.id]==1)? 1 :0.5)})
+        .attr("stroke-opacity",0)
+        .style("fill", "#fff");
+    loc.detGroups.append("line")
+        .attr("class","detline detline-x")
+        .attr("id", function(d){return "detline detline-x-"+d.id;})
+        .attr("x1", function(d){return loc.det2xy(d,'ctr')[0]})
+        .attr("y1", function(d){return loc.det2xy(d,'ctr')[1]})
+        .attr("x2", function(d){return loc.det2xy(d,'xarm')[0]})
+        .attr("y2", function(d){return loc.det2xy(d,'xarm')[1]})
+        .attr("cursor","default")
+        .style("opacity",function(d){return ((loc.dStatus[d.id]==1)? 1 :0.5)})
+        .attr("stroke-dasharray",function(d){console.log('updating '+d.id+':'+loc.dStatus[d.id]+' '+this);return ((loc.dStatus[d.id]==1)? 0 :1)})
+        .style("stroke", function(d){return d.color})
+        .style("stroke-width",Math.min(5,2./loc.sksc));
+    loc.detGroups.append("line")
+        .attr("class","detline detline-y")
+        .attr("id",function(d){return "detline detline-y-"+d.id;})
+        .attr("x1", function(d){return loc.det2xy(d,'ctr')[0]})
+        .attr("y1", function(d){return loc.det2xy(d,'ctr')[1]})
+        .attr("x2", function(d){return loc.det2xy(d,'yarm')[0]})
+        .attr("y2", function(d){return loc.det2xy(d,'yarm')[1]})
+        .attr("cursor","default")
+        .attr("opacity",function(d){return ((loc.dStatus[d.id]==1)? 1 :0.5)})
+        .attr("stroke-dasharray",function(d){return ((loc.dStatus[d.id]==1)? 0 :1)})
+        .style("stroke", function(d){return d.color})
+        .style("stroke-width",Math.min(5,2./loc.sksc));
+    // loc.detGroups.merge(loc.detMarkers);
+    // loc.detGroups=this.detMarkers.enter()
 }
 
 Localisation.prototype.moveHighlight = function(){
@@ -1439,34 +1762,85 @@ Localisation.prototype.updateHeatmap = function(dataIn){
     // update heatmap
     if (!data){data='Pr'}
     var data = (dataIn) ? dataIn : 'Pr';
+    nearVals=[];
+    nearValsRows=[]
     if (data=="Pr"){
-        loc.skyarr.Pr.threshold=0.2;
+        for (i=-1;i<=1;i++){
+            row=[];
+            for (j=-1;j<=1;j++){
+                row.push(loc.skyarr.arr.PrCumul[loc.skyarr.radec2p(loc.src.ra+i*loc.skyarr.dRA,loc.src.dec+j*loc.skyarr.dDec)]);
+            }
+            nearVals.push(row);
+            nearValsRows.push(Math.max.apply(Math,row))
+        }
+        this.skyarr.Pr.srcThresh=Math.max.apply(Math,nearValsRows);
+        loc.skyarr.Pr.hmapthreshold=Math.max(0.1,this.skyarr.Pr.srcThresh);
     }else if (data=="pNet"){
-        loc.skyarr.pNet.threshold=5;
+        loc.skyarr.pNet.hmapthreshold=5;
+        loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1])
+            .domain([0,1])
+    }else if (data=="FNet"){
+        loc.skyarr.FNet.hmapthreshold=5;
+        loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1])
+            .domain([0,1])
+    }else if (data="overlay"){
+        loc.skyarr[data].opHeat=function(d){return 0;};
     }
-    loc.skyarr[data].filtPix=loc.filterSky(data,loc.skyarr[data].threshold);
-    loc.skyarr[data].opHeat=d3.scaleLinear().range([0,0.7])
-        .domain([(loc.skyarr[data].filtPix.length>1)?loc.skyarr[data].minFilt:0,loc.skyarr[data].maxFilt])
-    console.log('opHeat',loc.skyarr[data].opHeat.domain())
-
+    if (data=="overlay"){
+        loc.skyarr[data].hmapfiltPix=loc.skyarr.arr.pix;
+    }else{
+        loc.skyarr[data].hmapfiltPix=loc.filterSky(data,'hmap',loc.skyarr[data].hmapthreshold);
+        if (data=='Pr'){
+            loc.skyarr.Pr.opHeat=d3.scaleLinear().range([0,0.7])
+                    .domain([(loc.skyarr.Pr.hmapfiltPix.length>1)?loc.skyarr.Pr.hmapminFilt:0,loc.skyarr.Pr.hmapmaxFilt])
+        }
+    }
+    // if (data=='Pr'){
+    //     loc.skyarr.Pr.opHeat=d3.scaleLinear().range([0,0.7])
+    //         .domain([(loc.skyarr.Pr.hmapfiltPix.length>1)?loc.skyarr.Pr.hmapminFilt:0,loc.skyarr.Pr.hmapmaxFilt])
+    // }else{
+    //     loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1])
+    //         .domain([0,1])
+    // }
+    if (data!="overlay"){
+        console.log(data)
+        console.log('opHeat',data,loc.skyarr[data].opHeat.domain())
+    }
     console.log(data,loc.skyarr[data],loc.skyarr[data].heatmap)
     loc.skyarr[data].heatmap = loc.skyarr[data].gHeatmap.selectAll(".hm-rect")
-        .data(loc.skyarr[data].filtPix)
+        .data(loc.skyarr[data].hmapfiltPix)
     loc.skyarr[data].heatmap.exit()
         .attr("class","hm-rect old")
         .transition().duration(500)
         .style("fill-opacity",0).remove()
     loc.skyarr[data].heatmap.enter().append("rect")
         .attr("class","hm-rect new")
+        .on("mouseover",function(d){
+            loc.tooltip
+               .style("opacity", .9);
+            loc.tooltip.html(loc.tttextHmap(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY-10) + "px")
+               .style("width","auto")
+               .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.style("opacity", 0);
+        })
     .merge(loc.skyarr[data].heatmap)
         .transition().duration(500)
         .attr("x",function(d){return loc.rect2xy(d)[0];})
         .attr("y",function(d){return loc.rect2xy(d)[1];})
         .attr("width",function(d){return loc.rect2xy(d)[2];})
         .attr("height",function(d){return loc.rect2xy(d)[3];})
-        .style("fill","#555")
+        .style("fill","#ccf")
         .style("fill-opacity",function(d){
-            return (loc.skyarr[data].opHeat(loc.skyarr.arr[data][d]));})
+            if (data=="overlay"){
+                return 0
+            }else{
+                return (loc.skyarr[data].opHeat(loc.skyarr.arr[data][d]));
+            }
+        })
 }
 Localisation.prototype.updateContoursT = function(){
     console.log(loc.src.dt,loc.skyarr.arr.dt);
@@ -1481,41 +1855,65 @@ Localisation.prototype.updateContoursT = function(){
             loc.src.dt[dd],
             Math.min(loc.src.dt[dd]+5e-4,loc.skyarr.maxdt[dd]-5.e-6)]
         loc.skyarr.colCont = d3.scaleOrdinal().range([loc.dataDet[loc.di[dd[0]]].color,'#000',loc.dataDet[loc.di[dd[1]]].color])
-        loc.skyarr.opCont = d3.scaleOrdinal().range([1,0,1])
+        loc.skyarr.opCont = d3.scaleOrdinal().range([0.7,0,0.7])
         opMult=loc.dStatus[dd[0]]*loc.dStatus[dd[1]]
         // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
 
         // loc.gContour.selectAll(".contour-"+dd).remove()
+        loc.skyarr.contoursdt=loc.editContours(d3.contours()
+            .size([loc.skyarr.nRA,loc.skyarr.nDec])
+            .thresholds(loc.skyarr.dtCont)
+            (loc.skyarr.arr.dt[dd]),true,dd)
+        for (c=0;c<loc.skyarr.contoursdt.length;c++){
+            path=d3.geoPath().projection(loc.skyarr.projI)(loc.skyarr.contoursdt[c]);
+            if (loc.skyarr.contoursdt[c].hasEdge){
+                loc.skyarr.contoursdt[c].path=path.replace('Z','');
+            }else{
+                loc.skyarr.contoursdt[c].path=path;
+            }
+        }
         loc.skyarr[dd].dtcontours = loc.gContourT.selectAll(".contourT-"+dd)
-            .data(loc.editContours(d3.contours()
-                .size([loc.skyarr.nRA,loc.skyarr.nDec])
-                .thresholds(loc.skyarr.dtCont)
-                (loc.skyarr.arr.dt[dd]),true,dd))
+            .data(loc.skyarr.contoursdt)
         loc.skyarr[dd].dtcontours.exit()
             .transition().duration(500)
             .style("opacity",0).remove()
         loc.skyarr[dd].dtcontours
             .transition().duration(500).ease(d3.easeExp)
-            .attr("d", d3.geoPath(loc.skyarr.projI))
+            .attr("d", function(d){return d.path})
             .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
         loc.skyarr[dd].dtcontours.enter().append("path")
-                // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
-                .style("fill-opacity",0)
-                .style("stroke",function(d){return loc.skyarr.colCont(d.value)})
-                .style("stroke-width","3")
-                .attr("class","contourT contourT-"+dd)
-                .attr("d", d3.geoPath(loc.skyarr.projI))
-                .transition().duration(500).ease(d3.easeExp)
-                .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
-            // .merge(loc.skyarr[dd].dtcontours)
-        loc.skyarr[dd].dtcontours.select("path")
-            .attr("d",function(d){console.log(this);})
+            // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
+            .style("fill-opacity",0)
+            .style("stroke",function(d){return loc.skyarr.colCont(d.value)})
+            .style("stroke-width","3")
+            .attr("class","contourT contourT-"+dd)
+            .attr("d", function(d){return d.path})
+            .on("mouseover",function(d){
+                loc.tooltip
+                   .style("opacity", .9);
+                loc.tooltip.html(loc.tttextHmap(d))
+                   .style("left", (d3.event.pageX + 10) + "px")
+                   .style("top", (d3.event.pageY-10) + "px")
+                   .style("width","auto")
+                   .style("height","auto");
+            })
+            .on("mouseout", function(d) {
+                loc.tooltip.style("opacity", 0);
+            })
+            .transition().duration(500).ease(d3.easeExp)
+            .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
+
+
+        // .merge(loc.skyarr[dd].dtcontours)
+        // loc.skyarr[dd].dtcontours.select("path")
+        //     .attr("d",function(d){console.log(this);})
+        // }
     }
 }
 Localisation.prototype.updateContoursPr = function(){
     var loc=this;
     console.log(loc.src.Pr,loc.skyarr.arr.Pr);
-    loc.skyarr['Pr'].filtPix=loc.filterSky('Pr',0.2);
+    loc.skyarr['Pr'].filtPix=loc.filterSky('Pr','cont',0.2);
 
     loc.skyarr.PrCumulCont=[0.1]
     loc.skyarr.PrCumulColCont = d3.scaleOrdinal().range(['#000'])
@@ -1523,30 +1921,49 @@ Localisation.prototype.updateContoursPr = function(){
     // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
 
     // loc.gContour.selectAll(".contour-"+dd).remove()
+    contoursPr=loc.editContours(d3.contours()
+        .size([loc.skyarr.nRA,loc.skyarr.nDec])
+        .thresholds(loc.skyarr.PrCumulCont)
+        (loc.skyarr.arr.PrCumul),true,'Pr')
+    for (c=0;c<contoursPr.length;c++){
+        path=d3.geoPath().projection(loc.skyarr.projI)(contoursPr[c]);
+        if (contoursPr[c].hasEdge){
+            contoursPr[c].path=path.replace('Z','');
+        }else{
+            contoursPr[c].path=path;
+        }
+    }
     loc.skyarr.Pr.Prcontours = loc.gContourPr.selectAll(".contour-Pr")
-        .data(loc.editContours(d3.contours()
-            .size([loc.skyarr.nRA,loc.skyarr.nDec])
-            .thresholds(loc.skyarr.PrCumulCont)
-            (loc.skyarr.arr.PrCumul),true,'PrCumul'))
+        .data(contoursPr)
     loc.skyarr.Pr.Prcontours.exit()
         .transition().duration(500)
         .style("opacity",0).remove()
     loc.skyarr.Pr.Prcontours
         .transition().duration(500).ease(d3.easeExp)
-        .attr("d", d3.geoPath(loc.skyarr.projI))
+        .attr("d", function(d){return d.path})
         .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
     loc.skyarr.Pr.Prcontours.enter().append("path")
-            // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
-            .style("fill-opacity",0)
-            .style("stroke",function(d){return loc.skyarr.PrCumulColCont(d.value)})
-            .style("stroke-width","3")
-            .attr("class","contourPr contour-Pr")
-            .attr("d", d3.geoPath(loc.skyarr.projI))
-            .transition().duration(500).ease(d3.easeExp)
-            .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
+        // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
+        .style("fill-opacity",0)
+        .style("stroke",function(d){return loc.skyarr.PrCumulColCont(d.value)})
+        .style("stroke-width","3")
+        .attr("class","contourPr contour-Pr")
+        .attr("d", d3.geoPath(loc.skyarr.projI))
+        .on("mouseover",function(d){
+            loc.tooltip
+               .style("opacity", .9);
+            loc.tooltip.html(loc.tttextHmap(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY-10) + "px")
+               .style("width","auto")
+               .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.style("opacity", 0);
+        })
+        .transition().duration(500).ease(d3.easeExp)
+        .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
         // .merge(loc.skyarr[dd].dtcontours)
-    loc.skyarr.Pr.Prcontours.select("path")
-        .attr("d",function(d){console.log(this);})
 }
 Localisation.prototype.showContoursT = function(){
     d3.select('#g-contoursT')
@@ -1571,10 +1988,10 @@ Localisation.prototype.hideOverlay = function(olName){
         .style("opacity",0)
 }
 Localisation.prototype.editContours = function(cont,edit,dd){
-    // console.log('edit contour ',dd,cont)
+    console.log('edit contour ',dd,cont)
     if (edit){
         for (i in cont){
-            console.log('edit contour ',dd,' ',i,cont[i])
+            // console.log('edit contour ',dd,' ',i,cont[i])
             coordIn=cont[i].coordinates[0]
             // cont[i].type="MultiLineString"
             // console.log('i in ',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
@@ -1616,18 +2033,23 @@ Localisation.prototype.editContours = function(cont,edit,dd){
                     newCoords.push(coordIn[j][idxCoords[p]])
                 }
                 idx0=[]
-                for (p=0; p<newCoords.length-1;p++){
-                    if((Math.abs(newCoords[p][0]-newCoords[p+1][0])>lim[0]/2.)|
-                        (Math.abs(newCoords[p][1]-newCoords[p+1][1])>lim[1]/2.)){
+                console.log('finding edges...',newCoords)
+                for (p=1; p<newCoords.length-1;p++){
+                    // console.log(newCoords[p],newCoords[p+1])
+                    if((Math.abs(newCoords[p][0]-newCoords[p+1][0])>loc.skyarr.nRA/4.)|
+                        (Math.abs(newCoords[p][1]-newCoords[p+1][1])>loc.skyarr.nDec/4.)){
                         idx0.push(p+1);
+                        console.log('edge at '+(p+1),newCoords[p-1],newCoords[p],newCoords[p+1])
                     }
+                    // asasfd;
                 }
                 if(idx0.length>0){
                     // console.log(idx0,newCoords);
                     newCoords=newCoords.slice(idx0,newCoords.length)
-                        .concat(newCoords.slice(0,idx0))
+                        .concat(newCoords.slice(0,idx0));
+                    cont[i].hasEdge=true;
                     // console.log(idx0,newCoords);
-                }
+                }else{cont[i].hasEdge=false;}
                 // newCoords=coordIn[j].filter(function(d){
                 //     isVal= (!((d[0]<=0)|(d[0]==loc.skyarr.nRA)|(d[1]==0)|(d[1]==loc.skyarr.nDec)));
                 //     // if (!isVal){console.log(d[0],d[1])};
@@ -1642,12 +2064,16 @@ Localisation.prototype.editContours = function(cont,edit,dd){
                 // console.log('j out',j,newCoords.length,newCoords[0])
                 // console.log('i',i,'j',j,coordOut)
             }
-            cont[i].coordinates[0]=coordOut
+            cont[i].coordinates[0]=coordOut;
             // console.log('i out',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
         }
     }
+    cont.type="MultiLineString"
     // console.log('edit contour ',dd,cont)
     return cont;
+}
+Localisation.prototype.contourTop = function(){
+
 }
 // matrix functions
 var outer = function(a,b){
@@ -1735,6 +2161,9 @@ var dotprod = function(aIn,bIn){
     }
     return(dot)
 }
+var innerprod = function(aIn,bIn,noise){
+    return math.re(math.multiply(math.conj(aIn),bIn,(1./noise)))
+}
 Localisation.prototype.processDet = function(det){
     // process detectors
     // get vector of detector position
@@ -1769,36 +2198,52 @@ Localisation.prototype.processNetwork = function(){
     loc=this;
     loc.net={'d':{},'dij':{},'sigma':0};
     loc.net.dij={};
-    for (i in loc.dOn){
-        deti=loc.dataDet[loc.dOn[i]]
-        loc.net.d[i]={'sigmaT':deti.sigmaT7*(loc.src.amp/deti.noise100)/7}
-        sigmaTi=loc.net.d[i].sigmaT;
-        loc.net.sigma += sigmaTi*sigmaTi
-        for (j in loc.dOn){
-            if (j>i){
-                detj=loc.dataDet[loc.dOn[j]];
-                loc.net.d[j]={'sigmaT':detj.sigmaT7*(loc.src.amp/detj.noise100)/7}
-                sigmaTj=loc.net.d[j].sigmaT;
-                // console.log(deti,detj)
-                loc.net.dij[deti.id+detj.id]={}
-                dij=loc.net.dij[deti.id+detj.id]
-                // get difference vector (in m)
-                dij.d=deti.vec.add(detj.vec.multiply(-1))
-                // calculate contribution to M from that pair
-                dij.DD=dij.d.multiply(dij.d.transpose())
-                    .multiply(1./(2*sigmaTi*sigmaTi*sigmaTj*sigmaTj));
-                if (!loc.net.hasOwnProperty('M')){
-                    loc.net.M=dij.DD;
-                }else{
-                    loc.net.M=loc.net.M.add(dij.DD)
+    loc.net.Snet=0;
+    if(loc.Ndet<2){
+        for (i in loc.dOn){
+            deti=loc.dataDet[loc.dOn[i]]
+            loc.net.d[i]={'sigmaT':deti.sigmaT7*(loc.src.amp/deti.noise100)/7}
+            sigmaTi=loc.net.d[i].sigmaT;
+            loc.net.sigma += deti.on/(sigmaTi*sigmaTi);
+            loc.net.Snet += deti.on/(deti.noise100*deti.noise100);
+        }
+        // loc.net.Snet=1./loc.net.Snet;
+        return
+    }else{
+        for (i in loc.dOn){
+            deti=loc.dataDet[loc.dOn[i]]
+            loc.net.d[i]={'sigmaT':deti.sigmaT7*(loc.src.amp/deti.noise100)/7}
+            sigmaTi=loc.net.d[i].sigmaT;
+            loc.net.sigma += deti.on/(sigmaTi*sigmaTi);
+            loc.net.Snet += deti.on/(deti.noise100*deti.noise100);
+            for (j in loc.dOn){
+                if (j>i){
+                    detj=loc.dataDet[loc.dOn[j]];
+                    loc.net.d[j]={'sigmaT':detj.sigmaT7*(loc.src.amp/detj.noise100)/7}
+                    sigmaTj=loc.net.d[j].sigmaT;
+                    // console.log(deti,detj)
+                    loc.net.dij[deti.id+detj.id]={}
+                    dij=loc.net.dij[deti.id+detj.id]
+                    // get difference vector (in m)
+                    dij.d=deti.vec.add(detj.vec.multiply(-1))
+                    // calculate contribution to M from that pair
+                    dij.DD=dij.d.multiply(dij.d.transpose())
+                        .multiply(1./(2*sigmaTi*sigmaTi*sigmaTj*sigmaTj));
+                    if (!loc.net.hasOwnProperty('M')){
+                        loc.net.M=dij.DD;
+                    }else{
+                        loc.net.M=loc.net.M.add(dij.DD)
+                    }
                 }
             }
         }
+        loc.net.M=loc.net.M.multiply(1./loc.net.sigma)
+        // loc.net.Snet=1./loc.net.Snet;
+        return
     }
-    loc.net.M=loc.net.M.multiply(1./loc.net.sigma)
-    return
 }
-Localisation.prototype.processSrc = function(){
+Localisation.prototype.processSrcAmp = function(){
+    // calculate source amplitude and phase
     loc=this;
     src=this.src
     // console.log('processing src',src)
@@ -1845,24 +2290,52 @@ Localisation.prototype.processSrc = function(){
         // compute time differences
         src.Ti[det.id]=src.vec.dot(det.vec.multiply(this.rE/this.c));
     }
-    // calculate time differences
+    // calculate source amplitudes and phase
+    src.h0=src.amp;
+    src.h2=src.amp;
+    src['A+']=src.dist*(1 + Math.cos(d2r(src.inc))*Math.cos(d2r(src.inc)))/2;
+    src['Ax']=src.dist*Math.cos(d2r(src.inc));
+    src.A1=src['A+']*Math.cos(d2r(2*src.phase))*Math.cos(d2r(2*src.posang)) -
+        src['Ax']*Math.sin(d2r(2*src.phase))*Math.sin(d2r(2*src.posang));
+    src.A2=src['A+']*Math.cos(d2r(2*src.phase))*Math.sin(d2r(2*src.posang)) +
+        src['Ax']*Math.sin(d2r(2*src.phase))*Math.cos(d2r(2*src.posang));
+    src.A3=-src['A+']*Math.sin(d2r(2*src.phase))*Math.cos(d2r(2*src.posang)) -
+        src['Ax']*Math.cos(d2r(2*src.phase))*Math.sin(d2r(2*src.posang));
+    src.A4=-src['A+']*Math.sin(d2r(2*src.phase))*Math.sin(d2r(2*src.posang)) +
+        src['Ax']*Math.cos(d2r(2*src.phase))*Math.cos(d2r(2*src.posang));
+    src['h+']=math.complex(src.A1*src.h0 , src.A3*src.h2);
+    src['hx']=math.complex(src.A2*src.h0 , src.A4*src.h2);
+
+    // calculate time differences for detectors
     src.dt={}
-    for (i in this.di){
-        deti=this.dataDet[this.di[i]].id
-        for (j in this.di){
-            if (j>i){
-                detj=this.dataDet[loc.di[j]].id
-                detij=deti+detj
-                src.dt[detij]=src.Ti[deti]-src.Ti[detj]
-                console.log('dt '+detij+': '+(src.dt[detij]*1e3).toPrecision(3)+'ms')
+    if (loc.Ndet<2){
+        return
+    }else{
+        for (i in this.di){
+            deti=this.dataDet[this.di[i]].id
+            for (j in this.di){
+                if (j>i){
+                    detj=this.dataDet[loc.di[j]].id
+                    detij=deti+detj
+                    src.dt[detij]=src.Ti[deti]-src.Ti[detj]
+                    console.log('dt '+detij+': '+(src.dt[detij]*1e3).toPrecision(3)+'ms')
+                }
             }
         }
+        return
     }
 }
 Localisation.prototype.calcAntFacs = function(){
+    // calculate antenna factor for source
     this.src.det=[]
     FpSq=0;
     FcSq=0;
+    RpSq=0;
+    RcSq=0;
+    Nnet=0;
+    Snet=0;
+    Fnet=0;
+    // Fnet=0;
     for (d in this.dataDet){
         det=this.dataDet[d];
         srcdet={'id':det.id,'color':det.color}
@@ -1874,15 +2347,82 @@ Localisation.prototype.calcAntFacs = function(){
         // srcdet['Fx2']=dotprod(det.dd,this.src.e['x']);
         srcdet.r=ab2r(srcdet.a,srcdet.b);
         srcdet.psi=r2d(ab2psi(srcdet.a,srcdet.b));
-        det['r+']=Math.abs(srcdet.r*Math.cos(2*d2r(srcdet.psi))*Math.sqrt(2.));
+        srcdet['r+']=Math.abs(srcdet.r*Math.cos(2*d2r(srcdet.psi))*Math.sqrt(2.));
+        srcdet['rx']=Math.abs(srcdet.r*Math.sin(2*d2r(srcdet.psi))*Math.sqrt(2.));
+        RpSq+=Math.pow(srcdet['r+']*det.on/det.noise100,2);
+        RcSq+=Math.pow(srcdet['rx']*det.on/det.noise100,2);
+        //
+        // include source phase
+        srcdet.h=math.add(math.multiply(this.src['h+'],srcdet['F+']),math.multiply(this.src['hx'],srcdet['Fx']))
+        srcdet.Z=math.divide(math.complex(innerprod(srcdet.h,this.src.h0,det.noise100) ,
+            innerprod(srcdet.h,this.src.h2,det.noise100)),
+            Math.sqrt(innerprod(this.src.h0,this.src.h0,det.noise100)))
+        //
+        // det['r+']=Math.abs(srcdet.r*Math.cos(2*d2r(srcdet.psi))*Math.sqrt(2.));
+        srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*this.src['h+'].abs()/det.noise100,2) +
+            Math.pow(srcdet['Fx']*this.src['hx'].abs()/det.noise100,2));
+        //
         this.src.det.push(srcdet)
-        FpSq+=srcdet['F+']*srcdet['F+']*(loc.src.amp / det.noise100);
-        FcSq+=srcdet['Fx']*srcdet['Fx']*(loc.src.amp / det.noise100);
+        //
+        FpSq+=Math.pow(srcdet['F+']*det.on*loc.src['h+'].abs() / det.noise100,2);
+        FcSq+=Math.pow(srcdet['Fx']*det.on*loc.src['hx'].abs() / det.noise100,2);
+        Nnet+=srcdet['F+']*srcdet['F+']*det.on/(det.noise100*det.noise100) +
+            srcdet['Fx']*srcdet['Fx']*det.on/(det.noise100*det.noise100);
     }
     this.src.pNet=Math.sqrt(FpSq+FcSq);
-    this.src.aNet=Math.sqrt(FpSq)/Math.sqrt(FcSq)
+    this.src.NNet=Nnet;
+    // note that NNet & Snet are defined as inverse of what Fairhust calculates
+    this.src.FNet=Math.sqrt(this.src.NNet / this.net.Snet)
+    this.src.rNet=Math.sqrt((RpSq + RcSq)/this.net.Snet);
+    this.src['r+Net']=Math.sqrt(RpSq/this.net.Snet);
+    this.src['rxNet']=Math.sqrt(RcSq/this.net.Snet);
+    this.src.aNet=Math.sqrt(FpSq)/Math.sqrt(FcSq);
 }
 Localisation.prototype.calcAntFacsSky = function(){
+    // calculate antenna response factors for whole sky
+    this.skyarr.arr.pNet=[];
+    this.skyarr.arr.FNet=[];
+    this.skyarr.arr.NNet=[];
+    this.skyarr.arr.aNet=[];
+    for (p in this.skyarr.arr.pix){
+        rotmat=rotate(this.skyarr.arr.ra[p],this.skyarr.arr.dec[p],0);
+        ivec=rotmat.multiply($M([0,1,0]));
+        jvec=rotmat.multiply($M([0,0,1]));
+        eps={'+':ij2eps(ivec,jvec,'+'),'x':ij2eps(ivec,jvec,'x')};
+        FpSq=0;
+        FcSq=0;
+        NNet=0;
+        for (d in this.di){
+            det=this.dataDet[this.di[d]];
+            Fp=ab2F(dotprod(det.dd,eps['+']),dotprod(det.dd,eps['+']),0,['+']);
+            Fc=ab2F(dotprod(det.dd,eps['x']),dotprod(det.dd,eps['x']),0,['x']);
+            // console.log(det.id,det.on);
+            FpSq+=Fp*Fp * det.on * (loc.src.amp / det.noise100);
+            FcSq+=Fc*Fc * det.on * (loc.src.amp / det.noise100);
+            NNet += Fp*Fp*det.on/ (det.noise100*det.noise100) +
+                Fc*Fc*det.on/(det.noise100*det.noise100);
+        }
+        this.skyarr.arr.pNet.push(Math.sqrt(FpSq+FcSq));
+        this.skyarr.arr.NNet.push(NNet);
+        this.skyarr.arr.FNet.push(Math.sqrt(NNet/this.net.Snet));
+        this.skyarr.arr.aNet.push(Math.sqrt(FpSq)/Math.sqrt(FcSq))
+    }
+    if (!this.skyarr.hasOwnProperty('pNet')){this.skyarr.pNet={}}
+    this.skyarr.pNet.min=Math.min.apply(Math,this.skyarr.arr.pNet);
+    this.skyarr.pNet.max=Math.max.apply(Math,this.skyarr.arr.pNet);
+    if (!this.skyarr.hasOwnProperty('FNet')){this.skyarr.FNet={}}
+    this.skyarr.FNet.min=Math.min.apply(Math,this.skyarr.arr.FNet);
+    this.skyarr.FNet.max=Math.max.apply(Math,this.skyarr.arr.FNet);
+    if (!this.skyarr.hasOwnProperty('NNet')){this.skyarr.NNet={}}
+    this.skyarr.NNet.min=Math.min.apply(Math,this.skyarr.arr.NNet);
+    this.skyarr.NNet.max=Math.max.apply(Math,this.skyarr.arr.NNet);
+    if (!this.skyarr.hasOwnProperty('aNet')){this.skyarr.aNet={}}
+    this.skyarr.aNet.min=Math.min.apply(Math,this.skyarr.arr.aNet);
+    this.skyarr.aNet.max=Math.max.apply(Math,this.skyarr.arr.aNet);
+    console.log('min/max pNet',this.skyarr.aNet.min,this.skyarr.aNet.max);
+};
+Localisation.prototype.calcAntFacsSkyAmpPhase = function(){
+    // calculate antenna response factors for whole sky, including amp & phase
     this.skyarr.arr.pNet=[];
     this.skyarr.arr.aNet=[];
     for (p in this.skyarr.arr.pix){
@@ -1892,12 +2432,13 @@ Localisation.prototype.calcAntFacsSky = function(){
         eps={'+':ij2eps(ivec,jvec,'+'),'x':ij2eps(ivec,jvec,'x')};
         FpSq=0;
         FcSq=0;
-        for (d in this.dOn){
+        for (d in this.di){
             det=this.dataDet[this.di[d]];
             Fp=ab2F(dotprod(det.dd,eps['+']),dotprod(det.dd,eps['+']),0,['+']);
             Fc=ab2F(dotprod(det.dd,eps['x']),dotprod(det.dd,eps['x']),0,['x']);
             FpSq+=Fp*Fp * (loc.src.amp / det.noise100);
             FcSq+=Fc*Fc * (loc.src.amp / det.noise100);
+            hdet=math.add(math.multiply(this.src['h+'],Fp),math.multiply(this.src['hx'],Fc))
         }
         this.skyarr.arr.pNet.push(Math.sqrt(FpSq+FcSq));
         this.skyarr.arr.aNet.push(Math.sqrt(FpSq)/Math.sqrt(FcSq))
@@ -1908,13 +2449,13 @@ Localisation.prototype.calcAntFacsSky = function(){
     if (!this.skyarr.hasOwnProperty('aNet')){this.skyarr.aNet={}}
     this.skyarr.aNet.min=Math.min.apply(Math,this.skyarr.arr.aNet);
     this.skyarr.aNet.max=Math.max.apply(Math,this.skyarr.arr.aNet);
-    console.log('min/max pNet',this.skyarr.aNet.min,this.skyarr.aNet.max);
+    // console.log('min/max pNet',this.skyarr.aNet.min,this.skyarr.aNet.max);
 };
 Localisation.prototype.calcDetTimes = function(){
     // calculate arrival times at detectors from all sky pixels
     if (!this.skyarr.arr.hasOwnProperty('Ti')){this.skyarr.arr.Ti={};}
     for (i in this.di){
-        console.log(i)
+        // console.log(i)
         det=this.dataDet[this.di[i]]
         this.skyarr.arr.Ti[det.id]=[];
 
@@ -1941,7 +2482,7 @@ Localisation.prototype.calcDetTimes = function(){
                 detj=this.dataDet[loc.di[j]].id
                 detij=deti+detj
                 this.skyarr.arr.dt[detij]=[];
-                console.log(deti,detj,detij)
+                // console.log(deti,detj,detij)
                 for (p in this.skyarr.arr.pix){
                     this.skyarr.arr.dt[detij].push(this.skyarr.arr.Ti[deti][p] - this.skyarr.arr.Ti[detj][p])
                 }
@@ -1950,87 +2491,118 @@ Localisation.prototype.calcDetTimes = function(){
             this.skyarr.maxdt[detij]=Math.max.apply(Math,this.skyarr.arr.dt[detij])
         }
     }
+    return
 }
-Localisation.prototype.calcSrcTimes = function(){
+Localisation.prototype.calcProbSky = function(){
+    // calculate probability all over sky
     // var loc=this;
+    // *** storing for debugging purposes *** //
     this.skyarr.arr.vec_src=[]
     this.skyarr.arr.vec_srcT=[]
     this.skyarr.arr.logP=[]
+    // *** end of debugging purpuses *** //
     this.skyarr.arr.Pr=[]
     this.skyarr.arr.PrCumul=[]
-    console.log('maxpNet',this.skyarr.maxpNet,this.skyarr.arr.pNet);
+    // console.log('maxpNet',this.skyarr.maxpNet,this.skyarr.arr.pNet);
     PrTot=0
+
     for (p=0;p<this.skyarr.nPix;p++){
-        this.skyarr.arr.vec_src.push($M(this.src.vec).add($M(this.skyarr.arr.vec[p]).multiply(-1)))
-        this.skyarr.arr.vec_srcT.push($M(this.skyarr.arr.vec_src[p]).transpose())
-        this.skyarr.arr.logP.push(this.skyarr.arr.vec_srcT[p].multiply(this.net.M).multiply(this.skyarr.arr.vec_src[p]).elements[0])
-        this.skyarr.arr.Pr.push(Math.exp(-0.5*this.skyarr.arr.logP[p]))
-        PrTot+=Math.exp(-0.5*this.skyarr.arr.logP[p])
+        vec_src=$M(this.src.vec).add($M(this.skyarr.arr.vec[p]).multiply(-1));
+        vec_srcT=$M(vec_src).transpose();
+        if (this.Ndet>=2){
+            logP=vec_srcT.multiply(this.net.M).multiply(vec_src).elements[0];
+        }else{
+            logP=0.1;
+        }
+        Pr=Math.exp(-0.5*logP);
+        // *** storing for debugging purposes *** //
+        this.skyarr.arr.vec_src.push(vec_src)
+        this.skyarr.arr.vec_srcT.push(vec_srcT)
+        this.skyarr.arr.logP.push(logP)
+        // *** end of debugging purpuses *** //
+        this.skyarr.arr.Pr.push(Pr)
+        PrTot+=Pr;
     }
     // normalise Pr
-    PrTotNew=0
+    PrTotNew=0;
     for (p=0;p<this.skyarr.nPix;p++){
-        this.skyarr.arr.Pr[p]/=PrTot
+        this.skyarr.arr.Pr[p]/=PrTot;
     }
     // this.skyarr.arr.Pr.forEach(function(d){console.log(d,d/PrTot);d=d/PrTot;PrTotNew+=d})
+    // order pixels by probability
     this.skyarr.orderPix=this.skyarr.arr.pix.sort(function(a,b){
         return loc.skyarr.arr.Pr[b] - loc.skyarr.arr.Pr[a]
     })
-    cumul=0
+    // calculate cumulative porbability for each pixel
+    cumul=0;
     for (p=0;p<this.skyarr.nPix;p++){
         cumul+=this.skyarr.arr.Pr[this.skyarr.orderPix[p]];
         this.skyarr.arr.PrCumul[this.skyarr.orderPix[p]]=cumul;
     }
-    if (!this.skyarr.hasOwnProperty('Pr')){this.skyarr.Pr={}}
-    this.skyarr.Pr.min=Math.min.apply(Math,this.skyarr.arr.Pr)
-    this.skyarr.Pr.max=Math.max.apply(Math,this.skyarr.arr.Pr)
-    console.log('min/max Pr',this.skyarr.Pr.max,this.skyarr.Pr.max)
+    if (!this.skyarr.hasOwnProperty('Pr')){this.skyarr.Pr={}};
+    this.skyarr.Pr.min=Math.min.apply(Math,this.skyarr.arr.Pr);
+    this.skyarr.Pr.max=Math.max.apply(Math,this.skyarr.arr.Pr);
+
+    return
+    // console.log('min/max Pr',this.skyarr.Pr.max,this.skyarr.Pr.max)
 
 }
-Localisation.prototype.filterSky = function (filtVal,threshold) {
+Localisation.prototype.filterSky = function (filtVal,type,threshold) {
     var loc=this;
     if (!loc.skyarr.hasOwnProperty(filtVal)){loc.skyarr[filtVal]={}}
-    if (threshold){loc.skyarr[filtVal].threshold=threshold;}
-    if (filtVal=='T'){
-        // set default
-        if (!loc.skyarr.T.threshold) {loc.skyarr.T.threshold=1.e-3}
+    if (!threshold){threshold=loc.skyarr[filtVal][type+threshold];}
+    // if (filtVal=='T'){
+    //     // set default
+    //     if (!loc.skyarr.T.threshold) {loc.skyarr.T.threshold=1.e-3}
+    //     filtPix=this.skyarr.arr.pix.filter(function(d){
+    //         return(Math.abs(loc.skyarr.arr.dt['HL'][d]-loc.src.dt['HL'])<loc.skyarr.T.threshold)
+    //     })
+    // }else
+    if (filtVal=='Pr'){
+        // if(!loc.skyarr.Pr.threshold){loc.skyarr.Pr.threshold=0.5};
+        // console.log('Pr threshold',threshold,loc.skyarr.Pr.min,loc.skyarr.Pr.max)
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(Math.abs(loc.skyarr.arr.dt['HL'][d]-loc.src.dt['HL'])<loc.skyarr.T.threshold)
+            return(loc.skyarr.arr.PrCumul[d]<threshold)
         })
-    }else if (filtVal=='Pr'){
-        if(!loc.skyarr.Pr.threshold){loc.skyarr.Pr.threshold=0.5};
-        console.log('Pr threshold',loc.skyarr.Pr.threshold,loc.skyarr.Pr.min,loc.skyarr.Pr.max)
-        filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(loc.skyarr.arr.PrCumul[d]<loc.skyarr.Pr.threshold)
-        })
+        if (filtPix.indexOf(this.src.pix)>=0){
+            // valSrc
+            // pixel containing source not in filter
+        }
     }else if(filtVal=='pNet'){
-        if(!loc.skyarr.pNet.threshold){loc.skyarr.pNet.threshold=0.1}
+        // if(!loc.skyarr.pNet.threshold){loc.skyarr.pNet.threshold=0.1}
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(Math.abs(loc.skyarr.arr.pNet[d]-loc.src.pNet)<loc.skyarr.pNet.threshold)
+            return(Math.abs(loc.skyarr.arr.pNet[d]-loc.src.pNet)<threshold)
+        })
+    }else if(filtVal=='FNet'){
+        // if(!loc.skyarr.pNet.threshold){loc.skyarr.pNet.threshold=0.1}
+        filtPix=this.skyarr.arr.pix.filter(function(d){
+            return(Math.abs(loc.skyarr.arr.FNet[d]-loc.src.FNet)<threshold)
         })
     }
     // get limits of filtered Data
-    this.skyarr[filtVal].filtData=[]
+    this.skyarr[filtVal][type+'filtData']=[]
     for (p=0;p<filtPix.length;p++){
-        this.skyarr[filtVal].filtData.push(this.skyarr.arr[filtVal][filtPix[p]])
+        this.skyarr[filtVal][type+'filtData'].push(this.skyarr.arr[filtVal][filtPix[p]])
     }
-    this.skyarr[filtVal].minFilt=Math.min.apply(Math,this.skyarr[filtVal].filtData);
-    this.skyarr[filtVal].maxFilt=Math.max.apply(Math,this.skyarr[filtVal].filtData);
-    loc.skyarr[filtVal].filtPix=filtPix;
+    this.skyarr[filtVal][type+'minFilt']=Math.min.apply(Math,this.skyarr[filtVal][type+'filtData']);
+    this.skyarr[filtVal][type+'maxFilt']=Math.max.apply(Math,this.skyarr[filtVal][type+'filtData']);
+    loc.skyarr[filtVal][type+'filtPix']=filtPix;
     return(filtPix)
 };
 Localisation.prototype.whenLoaded = function(){
     var loc=this;
     // order Data
     loc.setDetOn();
-    loc.processSrc();
-    loc.calcAntFacs();
-    loc.calcAntFacsSky();
     loc.processNetwork();
+    loc.processSrcAmp();
+    loc.calcAntFacs();
+    // loc.processSrcAmpPhase();
+    loc.calcAntFacsSky();
     loc.calcDetTimes();
-    loc.calcSrcTimes();
+    loc.calcProbSky();
     loc.makePlot();
-    if(loc.debug){console.log('plotted');}
+    loc.hideLoading();
+    // if(loc.debug){console.log('plotted');}
     // select a default event
 }
 Localisation.prototype.loadLang = function(lang){
@@ -2180,7 +2752,7 @@ Localisation.prototype.addHelp = function(){
 Localisation.prototype.showHelp = function(){
     //show options
     for (panel in this.panels){
-        console.log(panel)
+        // console.log(panel)
         if (panel!='help'){this.panels[panel].hide()}
     }
     this.panels.help.status=true;
@@ -2296,9 +2868,9 @@ Localisation.prototype.addLang = function(replot){
 
 Localisation.prototype.showLang = function(){
     //show options
-    console.log(this,this.panels);
+    // console.log(this,this.panels);
     for (panel in this.panels){
-        console.log(panel)
+        // console.log(panel)
         if (panel!='lang'){this.panels[panel].hide()}
     }
     this.panels['lang'].status=true;
@@ -2352,8 +2924,8 @@ Localisation.prototype.addNetwork = function(){
     var loc=this;
     d3.select("#network-title")
         .html(this.tl("%text.plotloc.network.title%"))
-        d3.select("#network-text")
-            .html(this.tl("%text.plotloc.network.text%"));
+    d3.select("#network-text")
+        .html(this.tl("%text.plotloc.network.text%"));
     if (this.portrait){
         d3.select('#network-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -2361,18 +2933,18 @@ Localisation.prototype.addNetwork = function(){
         d3.select('#network-title')
             .style("font-size",(2.5*this.ysc)+"em")
     }
-    loc.detLabels=d3.select("#network-dets-cont").selectAll(".det-cont")
+    loc.detSettings=d3.select("#network-dets-cont").selectAll(".det-cont")
         .data(loc.dataDet).enter().append("div")
         .attr("id",function(d){return "det-cont-"+d.id})
         .attr("class","det-cont panel-cont")
-    loc.detLabels.append("div")
+    loc.detSettings.append("div")
         .attr("class","det-icon")
         .style("background-color",function(d){return d.color})
         .html(function(d){return d.id});
-    loc.detLabels.append("div")
+    loc.detSettings.append("div")
         .attr("class","det-name")
         .html(function(d){return d.name});
-    loc.detLabels.append("label")
+    loc.detSettings.append("label")
         .attr("class","det-switch")
         .attr("id",function(d){return "det-switch-"+d.id})
         .html(function(d){
@@ -2381,18 +2953,18 @@ Localisation.prototype.addNetwork = function(){
             console.log('toggling',this,this.id.split('-')[2],loc.dStatus);
             loc.detectorToggle(this.id.split('-')[2])
         })
-    loc.detLabels.append("div")
+    loc.detSettings.append("div")
         .attr("class","det-status")
         .attr("id",function(d){return "det-status-"+d.id})
         .html(function(d){return (loc.dStatus[d.id])?'On':'Off'});
-    loc.detLabels.append("div")
+    loc.detSettings.append("div")
         .attr("class","det-lat")
         .html(function(d){return d.lat});
-    loc.detLabels.append("div")
+    loc.detSettings.append("div")
         .attr("class","det-lon")
         .html(function(d){return d.lon});
-    loc.detLabels.append("div")
-        .attr("class","det-anf")
+    loc.detSettings.append("div")
+        .attr("class","det-ang")
         .html(function(d){return d.ang});
 }
 Localisation.prototype.showNetwork = function(){
@@ -2628,7 +3200,7 @@ Localisation.prototype.replot = function(){
     this.drawEff();
     this.addHelp();
     this.adjCss();
-    // this.redrawLabels();
+    // this.redrawSourceLabels();
     this.setPanel(this.getPanel());
     this.redraw=false;
     // gwcat.initButtons();

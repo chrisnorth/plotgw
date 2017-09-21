@@ -37,6 +37,7 @@ h1{
     border:2px solid black;
     border-radius: 10px;
     background-color: #eee;
+    overflow: auto;
 }
 #effcontainer{
     position:relative;
@@ -143,6 +144,24 @@ h1{
     width:100%;
     cursor:pointer;
 }
+.loading-icon{
+    position:absolute;
+    display:none;
+}
+.loading-icon div{
+    display:inline-block;
+}
+.loading-icon img{
+    display:inline-block;
+    margin-top:5%;
+    height:80%;
+}
+.loading-icon.isLoading{
+    display:inline-block;
+}
+.legend{
+    display:none;
+}
 .panel-close,.popup-close{
     position:absolute;
     width:30px;
@@ -206,6 +225,19 @@ h1{
 }
 .popup-button{
     display:inline-block;
+}
+.loading{
+    text-align:center;
+    transition: opacity 500ms;
+    opacity:0;
+    max-height:0;
+    visibility:hidden;
+}
+.loading.isLoading{
+    transition: opacity 500ms;
+    opacity:1;
+    max-height: 100%;
+    visibility:visible;
 }
 #copy-button{
     padding:5px;
@@ -319,13 +351,80 @@ img.share-icon{
     font-size:2em;
     cursor:pointer;
 }
+.det-stat{
+    margin-bottom:5%;
+    position: relative;
+    height:20%;
+    width:90%;
+    left:5%;
+    border:dashed 1px #555;
+}
+.det-icon{
+    width:20px;
+    height:20px;
+    display:inline-block;
+    margin-right:10px;
+    border-bottom-width:3px;
+    border-left-width:3px;
+    border-bottom-style:solid;
+    border-left-style:solid;
+}
+.det-name{
+    display:inline-block;
+    font-size:large;
+    margin-right:10px;
+}
+.det-snr-label{
+    text-align:right;
+    width:20%;
+    left:0%;
+    bottom:60%;
+    font-size:large;
+}
+.det-bar-outer{
+    position: absolute;
+    height:15%;
+    border:solid 2px black;
+    width:70%;
+    left:20%;
+}
+.det-snr-bar-outer{
+    top:25%;
+}
+.det-mag-bar-outer{
+    top:50%;
+}
+.det-pol-bar-outer{
+    top:75%;
+}
+.det-mag-bar,.det-pol-bar,.det-snr-bar{
+    height:100%;
+    position:absolute;
+}
+.det-pol-bar-plus{
+    border-right:solid white 2px;
+}
+.bar-label{
+    width:10%;
+    font-weight: bold;
+    position:absolute;
+    font-size:2em;
+}
+.bar-label-plus{
+    left:-10%;
+}
+.bar-label-cross{
+    left:100%;
+    text-align:right;
+}
+/* Detector switches */
 .det-switch {
   position: relative;
   display: inline-block;
   width: 20px;
   height: 14px;
+  margin-right: 20px;
 }
-
 .det-switch input {display:none;}
 
 .det-slider {

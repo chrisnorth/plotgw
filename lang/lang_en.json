@@ -160,5 +160,9 @@
  "text.loc.pa":"PA",
  "text.loc.posang":"Position Angle",
  "text.loc.lst":"LST",
- "text.loc.sensitivity":"Sensitivity"
+ "text.loc.sensitivity":"Sensitivity",
+ "text.plotloc.info.detectors-title":"Detectors",
+ "text.plotloc.info.network-title":"Full Network",
+ "text.plotloc.loading":"Loading...",
+ "text.plotloc.label.SNR":"SNR"
 }
