@@ -718,6 +718,21 @@ Localisation.prototype.updateDetResults = function(){
         netStatus.append("div")
             .attr("class","det-bar-outer det-snr-bar-outer")
         .append("div").attr("class","det-snr-bar")
+            .on("mouseover",function(){
+                loc.tooltip.transition()
+                   .duration(200)
+                   .style("opacity", .9);
+                loc.tooltip.html(loc.tl('%tooltip.plotloc.SNR%: '+parseFloat(loc.src.pNet).toPrecision(2)))
+                   .style("left", (d3.event.pageX + 10) + "px")
+                   .style("top", (d3.event.pageY-10) + "px")
+                   .style("width","auto")
+                   .style("height","auto");
+            })
+            .on("mouseout",function(){
+                loc.tooltip.transition()
+                     .duration(500)
+                     .style("opacity", 0);
+            })
         netStatus.append("div")
             .attr("class","det-bar-outer det-mag-bar-outer")
         .append("div").attr("class","det-mag-bar")
@@ -1027,10 +1042,10 @@ Localisation.prototype.updateCalcs = function(newSrc,newDet){
         this.processSrcAmp();
     }
     this.calcAntFacs();
-    this.calcProbSky();
     //  update results
     this.updateContoursT();
-    this.updateContoursPr();
+    // this.calcProbSky();
+    // this.updateContoursPr();
     this.updateDetMarkers();
     this.updateDetResults();
     this.updateSourceLabels();
@@ -1169,7 +1184,7 @@ Localisation.prototype.tttextHmap = function(d){
     // var loc=this;// graph tooltip text
     if (this.debug){console.log(d)}
     return "<span class='ttCoord'>"+this.skyarr.arr.ra[d]+","+this.skyarr.arr.dec[d]+"</span>"+
-    "<span class='ttPr'>Pr: "+this.skyarr.arr.Pr[d]+"</span>"+
+    // "<span class='ttPr'>Pr: "+this.skyarr.arr.Pr[d]+"</span>"+
     "<span class='ttpNet'>pNet: "+this.skyarr.arr.pNet[d]+"</span>"+
     "<span class='ttpNet'>FNet: "+this.skyarr.arr.FNet[d]+"</span>";
 }
@@ -1375,12 +1390,12 @@ Localisation.prototype.drawSky = function(){
     loc.showOverlay('contoursT');
 
     // draw contours (Pr)
-    loc.gContourPr=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays.contoursPr.gid})
-        .attr("class","contoursPr")
-        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .style("opacity",0)
-    loc.updateContoursPr();
+    // loc.gContourPr=loc.svg.append("g")
+    //     .attr("id",function(){return loc.overlays.contoursPr.gid})
+    //     .attr("class","contoursPr")
+    //     .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+    //     .style("opacity",0)
+    // loc.updateContoursPr();
     // loc.showOverlay('contoursPr')
 
     loc.skyarr.overlay={};
@@ -2305,16 +2320,17 @@ Localisation.prototype.processSrcAmp = function(){
     // calculate source amplitudes and phase
     src.h0=src.amp;
     src.h2=src.amp;
+    src.posang2=src.posang;
     src['A+']=src.dist*(1 + Math.cos(d2r(src.inc))*Math.cos(d2r(src.inc)))/2;
     src['Ax']=src.dist*Math.cos(d2r(src.inc));
-    src.A1=src['A+']*Math.cos(d2r(2*src.posang))*Math.cos(d2r(2*src.phase)) -
-        src['Ax']*Math.sin(d2r(2*src.posang))*Math.sin(d2r(2*src.phase));
-    src.A2=src['A+']*Math.cos(d2r(2*src.posang))*Math.sin(d2r(2*src.phase)) +
-        src['Ax']*Math.sin(d2r(2*src.posang))*Math.cos(d2r(2*src.phase));
-    src.A3=-src['A+']*Math.sin(d2r(2*src.posang))*Math.cos(d2r(2*src.phase)) -
-        src['Ax']*Math.cos(d2r(2*src.posang))*Math.sin(d2r(2*src.phase));
-    src.A4=-src['A+']*Math.sin(d2r(2*src.posang))*Math.sin(d2r(2*src.phase)) +
-        src['Ax']*Math.cos(d2r(2*src.posang))*Math.cos(d2r(2*src.phase));
+    src.A1=src['A+']*Math.cos(d2r(2*src.phase))*Math.cos(d2r(2*src.posang2)) -
+        src['Ax']*Math.sin(d2r(2*src.phase))*Math.sin(d2r(2*src.posang2));
+    src.A2=src['A+']*Math.cos(d2r(2*src.phase))*Math.sin(d2r(2*src.posang2)) +
+        src['Ax']*Math.sin(d2r(2*src.phase))*Math.cos(d2r(2*src.posang2));
+    src.A3=-src['A+']*Math.sin(d2r(2*src.phase))*Math.cos(d2r(2*src.posang2)) -
+        src['Ax']*Math.cos(d2r(2*src.phase))*Math.sin(d2r(2*src.posang2));
+    src.A4=-src['A+']*Math.sin(d2r(2*src.phase))*Math.sin(d2r(2*src.posang2)) +
+        src['Ax']*Math.cos(d2r(2*src.phase))*Math.cos(d2r(2*src.posang2));
     src['h+']=math.complex(src.A1*src.h0 , src.A3*src.h2);
     src['hx']=math.complex(src.A2*src.h0 , src.A4*src.h2);
 
@@ -2371,9 +2387,9 @@ Localisation.prototype.calcAntFacs = function(){
             Math.sqrt(innerprod(this.src.h0,this.src.h0,det.noise100)))
         //
         // det['r+']=Math.abs(srcdet.r*Math.cos(2*d2r(srcdet.psi))*Math.sqrt(2.));
-        srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*Math.abs(this.src['h+'].abs())/det.noise100,2))
-        // srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*Math.abs(this.src['h+'].abs())/det.noise100,2) +
-            // Math.pow(srcdet['Fx']*Math.abs(this.src['hx'].abs())/det.noise100,2));
+        // srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*Math.abs(this.src['h+'].abs())/det.noise100,2))
+        srcdet.snr=Math.sqrt(Math.pow(srcdet['F+']*Math.abs(this.src['h+'].abs())/det.noise100,2) +
+            Math.pow(srcdet['Fx']*Math.abs(this.src['hx'].abs())/det.noise100,2));
         //
         this.src.det.push(srcdet)
         //
@@ -2382,7 +2398,7 @@ Localisation.prototype.calcAntFacs = function(){
         Nnet+=srcdet['F+']*srcdet['F+']*det.on/(det.noise100*det.noise100) +
             srcdet['Fx']*srcdet['Fx']*det.on/(det.noise100*det.noise100);
     }
-    this.src.pNet=Math.sqrt(FpSq);
+    this.src.pNet=Math.sqrt(FpSq+FcSq);
     this.src.NNet=Nnet;
     // note that NNet & Snet are defined as inverse of what Fairhust calculates
     this.src.FNet=Math.sqrt(this.src.NNet / this.net.Snet);
@@ -2612,7 +2628,7 @@ Localisation.prototype.whenLoaded = function(){
     // loc.processSrcAmpPhase();
     loc.calcAntFacsSky();
     loc.calcDetTimes();
-    loc.calcProbSky();
+    // loc.calcProbSky();
     loc.makePlot();
     loc.hideLoading();
     // if(loc.debug){console.log('plotted');}
@@ -3081,7 +3097,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",loc.src.posang)
     .on("input",function(){
         loc.src.posang=this.value;
-        loc.updateCalcs(true,true)
+        loc.updateCalcs(true,false)
     })
     // inclination slider
     inccont=d3.select('#source-info-cont').append("div")
@@ -3106,7 +3122,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",loc.src.inc)
     .on("input",function(){
         loc.src.inc=this.value;
-        loc.updateCalcs(true,true)
+        loc.updateCalcs(true,false)
     })
     // amplitude slider
     ampcont=d3.select('#source-info-cont').append("div")
@@ -3131,7 +3147,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",Math.log10(loc.src.amp))
     .on("input",function(){
         loc.src.amp=Math.pow(10,this.value);
-        loc.updateCalcs(true,true)
+        loc.updateCalcs(true,false)
     })
     // labimgdiv.className = 'icon labcont';
     // // labimgdiv.style.width = this.labcontWidth;
