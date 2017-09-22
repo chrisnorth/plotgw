@@ -2061,13 +2061,17 @@ Localisation.prototype.editContours = function(cont,edit,dd){
                 }
                 idx0=[]
                 console.log('finding edges...',newCoords)
-                for (p=1; p<newCoords.length-1;p++){
+                for (p=1; p<newCoords.length;p++){
                     // console.log(newCoords[p],newCoords[p+1])
-                    if((Math.abs(newCoords[p][0]-newCoords[p+1][0])>loc.skyarr.nRA/4.)|
-                        (Math.abs(newCoords[p][1]-newCoords[p+1][1])>loc.skyarr.nDec/4.)){
+                    p0=p
+                    p1=(p==newCoords.length-1)?0:p+1;
+                    if((Math.abs(newCoords[p0][0]-newCoords[p1][0])>loc.skyarr.nRA/4.)|
+                        (Math.abs(newCoords[p0][1]-newCoords[p1][1])>loc.skyarr.nDec/4.)){
                         idx0.push(p+1);
                         console.log('edge at '+(p+1),newCoords[p-1],newCoords[p],newCoords[p+1])
                     }
+                    // if((Math.abs(newCoords[newCoords.length-1][0]-newCoords[0][0])>loc.skyarr.nRA/4.)|
+                    //     (Math.abs(newCoords[newCoords.length-1][1]-newCoords[0][1])>loc.skyarr.nDec/4.)){
                     // asasfd;
                 }
                 if(idx0.length>0){
