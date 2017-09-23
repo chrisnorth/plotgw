@@ -715,9 +715,21 @@ Localisation.prototype.updateDetResults = function(){
         netStatus.append("div")
             .attr("class","det-name")
             .html(function(d){return loc.net.name});
-        netStatus.append("div")
+        netsnrbarouter=netStatus.append("div")
             .attr("class","det-bar-outer det-snr-bar-outer")
-        .append("div").attr("class","det-snr-bar")
+        netsnrbarouter.append("div").attr("class","bar-label bar-label-left")
+            .html(this.tl('%text.plotloc.label.SNR%'));
+        netsnrbarouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+            .style("right","95%").html('0.01');
+        netsnrbarouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+            .style("right","72%").html('0.1');
+        netsnrbarouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+            .style("left","48%").html('1');
+        netsnrbarouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+            .style("left","72%").html('10');
+        netsnrbarouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+            .style("left","95%").html('100');
+        netsnrbarouter.append("div").attr("class","det-snr-bar")
             .on("mouseover",function(){
                 loc.tooltip.transition()
                    .duration(200)
@@ -733,36 +745,59 @@ Localisation.prototype.updateDetResults = function(){
                      .duration(500)
                      .style("opacity", 0);
             })
-        netStatus.append("div")
-            .attr("class","det-bar-outer det-mag-bar-outer")
-        .append("div").attr("class","det-mag-bar")
-            .style("background-color","#0a0")
+        netsnrbarouter.append("div").attr("class","bar-line")
+            .style("left","25%");
+        netsnrbarouter.append("div").attr("class","bar-line")
+            .style("left","50%");
+        netsnrbarouter.append("div").attr("class","bar-line")
+            .style("left","75%");
+
+        // netStatus.append("div")
+        //     .attr("class","det-bar-outer det-mag-bar-outer")
+        // .append("div").attr("class","det-mag-bar")
         netbarpolouter=netStatus.append("div")
             .attr("class","det-bar-outer det-pol-bar-outer")
+        netbarpolouter.append("div").attr("class","bar-label bar-label-left").html('+');
+        netbarpolouter.append("div").attr("class","bar-label bar-label-right").html('x');
         netbarpolouter.append("div").attr("class","det-pol-bar det-pol-bar-plus")
-            .style("background-color","#00f")
         netbarpolouter.append("div").attr("class","det-pol-bar det-pol-bar-cross")
-            .style("background-color","#f00")
+        netbarpolouter.append("div").attr("class","bar-line")
+            .style("left","25%");
+        netbarpolouter.append("div").attr("class","bar-line zero-left")
+            .style("left","50%");
+        netbarpolouter.append("div").attr("class","bar-line zero-right")
+            .style("right","50%");
+        netbarpolouter.append("div").attr("class","bar-line")
+            .style("left","75%");
+        netbarpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+            .style("right","95%").html('100%');
+        netbarpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+            .style("right","70%").html('50%');
+        netbarpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+            .style("left","48%").html('0');
+        netbarpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+            .style("left","70%").html('50%');
+        netbarpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+            .style("left","95%").html('100%');
     }
     netStatus.select(".det-snr-bar")
         .style("background-color","#a0a")
         .transition().duration(500)
         .style("width",function(){return loc.snrRange(Math.log10(loc.src.pNet))+'%'})
         .style("opacity","1");;
-    netStatus.select(".det-mag-bar")
-        .transition().duration(500)
-        .style("width",function(){return parseInt(100.*loc.src.rNet)+"%"})
-        .style("opacity","1");
+    // netStatus.select(".det-mag-bar")
+    //     .transition().duration(500)
+    //     .style("width",function(){return parseInt(100.*loc.src.rNet)+"%"})
+    //     .style("opacity","1");
     netStatus.selectAll(".det-pol-bar-plus")
         .transition().duration(500)
-        .style("margin-left",function(){return parseInt(50.*(1-loc.src['r+Net']))+"%"})
-        .style("width",function(){return parseInt(50.*loc.src['r+Net'])+"%"})
+        .style("margin-left",function(){return parseInt(Math.round(50.*(1-loc.src['r+Net'])))+"%"})
+        .style("width",function(){return parseInt(Math.round(50.*loc.src['r+Net']))+"%"})
         .style("opacity","1");
     netStatus.selectAll(".det-pol-bar-cross")
-        .style("background-color","#f00")
         .transition().duration(500)
         .style("margin-left","50%")
-        .style("width",function(){return parseInt(50.*loc.src['rxNet'])+"%"})
+        .style("width",function(){return parseInt(Math.round(50.*loc.src['rxNet']))+"%"})
         .style("opacity","1");
 
     detStatuses=d3.select("#detector-stats-cont").selectAll(".det-stat")
@@ -774,39 +809,31 @@ Localisation.prototype.updateDetResults = function(){
 
     // detector SNR bar
     detStatuses.selectAll(".det-snr-bar")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#a0a":"ccc"})
         .transition().duration(500)
         .style("width",function(d){return loc.snrRange(Math.log10(loc.src.det[loc.di[d.id]].snr))+'%'})
         .style("opacity",function(d){
             return (loc.dStatus[d.id]==true)?"1":"0"});;
         // .html(function(d){return d.id});
 
-    // detector magnitude bar
-    detStatuses.selectAll(".det-mag-bar")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#0a0":"ccc"})
-        .transition().duration(500)
-        .style("width",function(d){return parseInt(100.*loc.src.det[loc.di[d.id]].r*Math.sqrt(2))+"%"})
-        .style("opacity",function(d){
-            return (loc.dStatus[d.id]==true)?"1":"0"});;
+    // // detector magnitude bar
+    // detStatuses.selectAll(".det-mag-bar")
+    //     .transition().duration(500)
+    //     .style("width",function(d){return parseInt(100.*loc.src.det[loc.di[d.id]].r*Math.sqrt(2))+"%"})
+    //     .style("opacity",function(d){
+    //         return (loc.dStatus[d.id]==true)?"1":"0"});;
         // .html(function(d){return d.id});
 
     // detector polarisation bar
     detStatuses.selectAll(".det-pol-bar-plus")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#00f":"ccf"})
         .transition().duration(500)
-        .style("margin-left",function(d){return parseInt(50.*(1-loc.src.det[loc.di[d.id]]['r+']))+"%"})
-        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['r+'])+"%"})
+        .style("margin-left",function(d){return parseInt(Math.round(50.*(1-loc.src.det[loc.di[d.id]]['r+'])))+"%"})
+        .style("width",function(d){return parseInt(Math.round(50.*loc.src.det[loc.di[d.id]]['r+']))+"%"})
         .style("opacity",function(d){
             return (loc.dStatus[d.id]==true)?"1":"0"});
     detStatuses.selectAll(".det-pol-bar-cross")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#f00":"fcc"})
         .transition().duration(500)
         .style("margin-left","50%")
-        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['rx'])+"%"})
+        .style("width",function(d){return parseInt(Math.round(50.*loc.src.det[loc.di[d.id]]['rx']))+"%"})
         .style("opacity",function(d){
             return (loc.dStatus[d.id]==true)?"1":"0"});;
 
@@ -833,46 +860,75 @@ Localisation.prototype.updateDetResults = function(){
         .html(function(d){return d.name});
 
     // SNR bar
-    detStatusDiv.append("div")
-        .attr("class","det-snr-label")
-        .html(this.tl('%text.plotloc.label.SNR%'))
-    detStatusDiv.append("div")
+    // detStatusDiv.append("div")
+    //     .attr("class","det-snr-label")
+    //     .html(this.tl('%text.plotloc.label.SNR%'))
+    barsnrouter=detStatusDiv.append("div")
         .attr("class","det-bar-outer det-snr-bar-outer")
-    .append("div").attr("class","det-snr-bar")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#a0a":"ccc"})
+    barsnrouter.append("div").attr("class","bar-label bar-label-left").html(this.tl('%text.plotloc.label.SNR%'));
+    barsnrouter.append("div").attr("class","bar-label bar-label-left")
+        .html(this.tl('%text.plotloc.label.SNR%'));
+    barsnrouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+        .style("right","95%").html('0.01');
+    barsnrouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+        .style("right","72%").html('0.1');
+    barsnrouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+        .style("left","48%").html('1');
+    barsnrouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+        .style("left","72%").html('10');
+    barsnrouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+        .style("left","95%").html('100');
+    barsnrouter.append("div").attr("class","det-snr-bar")
         .style("opacity",function(d){
             return (loc.dStatus[d.id]==true)?"1":"0"})
         .style("width",function(d){return loc.snrRange(Math.log10(loc.src.det[loc.di[d.id]].snr))+'%';});
-
+    barsnrouter.append("div").attr("class","bar-line")
+        .style("left","25%");
+    barsnrouter.append("div").attr("class","bar-line")
+        .style("left","50%");
+    barsnrouter.append("div").attr("class","bar-line")
+        .style("left","75%");
     // magnitude bar
-    detStatusDiv.append("div")
-        .attr("class","det-bar-outer det-mag-bar-outer")
-    .append("div").attr("class","det-mag-bar")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#0a0":"ccc"})
-        .style("opacity",function(d){
-            return (loc.dStatus[d.id]==true)?"1":"0"})
-        .style("width",function(d){return parseInt(100.*loc.src.det[loc.di[d.id]].r*Math.sqrt(2))+"%"});
+    // detStatusDiv.append("div")
+    //     .attr("class","det-bar-outer det-mag-bar-outer")
+    // .append("div").attr("class","det-mag-bar")
+    //     .style("opacity",function(d){
+    //         return (loc.dStatus[d.id]==true)?"1":"0"})
+    //     .style("width",function(d){return parseInt(100.*loc.src.det[loc.di[d.id]].r*Math.sqrt(2))+"%"});
+
     // polarisation bar
     barpolouter=detStatusDiv.append("div")
         .attr("class","det-bar-outer det-bar-outer det-pol-bar-outer");
-    barpolouter.append("div").attr("class","bar-label bar-label-plus").html('+');
-    barpolouter.append("div").attr("class","bar-label bar-label-cross").html('x');
+    barpolouter.append("div").attr("class","bar-label bar-label-left").html('+');
+    barpolouter.append("div").attr("class","bar-label bar-label-right").html('x');
     barpolouter.append("div").attr("class","det-pol-bar det-pol-bar-plus")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#00f":"ccf"})
         .style("opacity",function(d){
             return (loc.dStatus[d.id]==true)?"1":"0"})
-        .style("margin-left",function(d){return parseInt(50.*(1-loc.src.det[loc.di[d.id]]['r+']))+"%"})
-        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['r+'])+"%"});
+        .style("margin-left",function(d){return parseInt(Math.round(50.*(1-loc.src.det[loc.di[d.id]]['r+'])))+"%"})
+        .style("width",function(d){return parseInt(Math.round(50.*loc.src.det[loc.di[d.id]]['r+']))+"%"});
     barpolouter.append("div").attr("class","det-pol-bar det-pol-bar-cross")
-        .style("background-color",function(d){
-            return (loc.dStatus[d.id]==true)?"#f00":"fcc"})
         .style("opacity",function(d){
             return (loc.dStatus[d.id]==true)?"1":"0"})
         .style("margin-left","50%")
         .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['rx'])+"%"});
+    barpolouter.append("div").attr("class","bar-line")
+        .style("left","25%");
+    barpolouter.append("div").attr("class","bar-line zero-left")
+        .style("left","50%");
+    barpolouter.append("div").attr("class","bar-line zero-right")
+        .style("right","50%");
+    barpolouter.append("div").attr("class","bar-line")
+        .style("left","75%");
+    barpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+        .style("right","95%").html('100%');
+    barpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+        .style("right","70%").html('50%');
+    barpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
+        .style("left","48%").html('0');
+    barpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+        .style("left","70%").html('50%');
+    barpolouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-right")
+        .style("left","95%").html('100%');
     console.log(detStatuses,detStatusEnter)
     detStatusEnter.merge(detStatuses);
     console.log(detStatuses,detStatusEnter)

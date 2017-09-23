@@ -397,8 +397,9 @@ img.share-icon{
     text-align:right;
     width:20%;
     left:0%;
-    bottom:60%;
+    bottom:50%;
     font-size:large;
+    position:absolute;
 }
 .det-bar-outer{
     position: absolute;
@@ -408,33 +409,68 @@ img.share-icon{
     left:20%;
 }
 .det-snr-bar-outer{
-    top:25%;
+    top:30%;
 }
 .det-mag-bar-outer{
     top:50%;
 }
 .det-pol-bar-outer{
-    top:75%;
+    top:65%;
 }
 .det-mag-bar,.det-pol-bar,.det-snr-bar{
     height:100%;
     position:absolute;
 }
+.det-mag-bar{
+    background-color:#0a0;
+}
+.det-snr-bar{
+    background-color:#a0a;
+}
 .det-pol-bar-plus{
-    border-right:solid white 2px;
+    background-color:#00f;
+}
+.det-pol-bar-cross{
+    background-color:#f00;
 }
 .bar-label{
-    width:10%;
-    font-weight: bold;
+    /*width:10%;*/
+    /*font-weight: bold;*/
     position:absolute;
-    font-size:2em;
+    font-size:large;
+    top:-2px;
 }
-.bar-label-plus{
-    left:-10%;
-}
-.bar-label-cross{
-    left:100%;
+.bar-label-left{
+    right:103%;
     text-align:right;
+}
+.bar-label-right{
+    left:103%;
+    text-align:left;
+}
+.bar-label-axis{
+    font-size:small;
+    top:100%;
+    padding-top:4px;
+}
+.bar-label-axis-left{
+    text-align:right;
+}
+.bar-label-axis-right{
+    text-align:left;
+}
+.bar-line{
+    position:absolute;
+    top:0;
+    height:100%;
+    width:1px;
+    background-color:#aaa;
+}
+.bar-line.zero-left{
+    /*border-right:1px solid #aaa;*/
+}.bar-line.zero-right{
+    /*border-left:1px solid #aaa;
+    border-right:none;*/
 }
 /* Detector switches */
 .det-switch {
