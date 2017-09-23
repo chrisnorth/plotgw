@@ -417,7 +417,11 @@ img.share-icon{
 .det-pol-bar-outer{
     top:65%;
 }
-.det-mag-bar,.det-pol-bar,.det-snr-bar{
+.det-F-bar-outer{
+    top:85%;
+    display:none;
+}
+.det-mag-bar,.det-pol-bar,.det-snr-bar,.det-F-bar{
     height:100%;
     position:absolute;
 }
@@ -427,10 +431,10 @@ img.share-icon{
 .det-snr-bar{
     background-color:#a0a;
 }
-.det-pol-bar-plus{
+.det-pol-bar-plus,.det-F-bar-plus{
     background-color:#00f;
 }
-.det-pol-bar-cross{
+.det-pol-bar-cross,.det-F-bar-cross{
     background-color:#f00;
 }
 .bar-label{
