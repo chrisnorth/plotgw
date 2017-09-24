@@ -347,7 +347,7 @@ h1{
 img.share-icon{
     height:50px;
 }
-.labcont{
+.labcont,{
     margin-left:2%;
     width:42%;
     margin-top:5%;
@@ -366,6 +366,29 @@ img.share-icon{
     padding-right:10px;
     font-size:2em;
     cursor:pointer;
+}
+.settingscont{
+    margin-left:2%;
+    width:95%;
+    margin-top:5%;
+    display:inline-block;
+}
+.labtext.settings{
+    display:inline-block;
+    width:85%;
+}
+.labtext.settings, .labtext.source{
+    font-size:1.3em;
+}
+span.settings-name{
+    display:block;
+    font-size:1em;
+    font-weight:bold;
+    margin-bottom:5px;
+}
+span.settings-desc{
+    display:block;
+    font-size:1em;
 }
 .det-stat{
     margin-bottom:5%;
@@ -477,14 +500,14 @@ img.share-icon{
     border-right:none;*/
 }
 /* Detector switches */
-.det-switch {
+.det-switch, .hmap-switch, .contour-switch {
   position: relative;
   display: inline-block;
   width: 20px;
   height: 14px;
   margin-right: 20px;
 }
-.det-switch input {display:none;}
+.det-switch input, .hmap-siwtch input, .contour-switch input {display:none;}
 
 .det-slider{
   position:absolute;
@@ -565,10 +588,12 @@ input:checked + .det-slider:before {
     background: #4CAF50; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
+#worldmap,#ocean{
+    fill-opacity:0;
+}
 .country{
     stroke:black;
     stroke-width:1px;
-    fill-opacity:0;
 }
 @media (max-width:1200px){
     .panel-title.landscape{

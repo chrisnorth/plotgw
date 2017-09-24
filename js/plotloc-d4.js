@@ -106,6 +106,9 @@ Localisation.prototype.init = function(){
         'info':{'status':true,
             'hide':function(){loc.hideInfo()},
             'show':function(){loc.showInfo()}},
+        'settings':{'status':false,
+            'hide':function(){loc.hideSettings()},
+            'show':function(){loc.showSettings()}},
         'help':{'status':false,
             'hide':function(){loc.hideHelp()},
             'show':function(){loc.showHelp()}},
@@ -732,7 +735,7 @@ Localisation.prototype.updateDetResults = function(){
             .style("left","95%").html('100');
         netsnrbarouter.append("div").attr("class","det-snr-bar")
             .on("mouseover",function(){
-                loc.showTooltipManual(loc.tl('%text.loc.info.snr%: '+parseFloat(loc.src.pNet).toPrecision(2)))
+                loc.showTooltipManual(loc.tl('%tooltip.loc.snr%: '+parseFloat(loc.src.pNet).toPrecision(2)))
             })
             .on("mouseout",function(){loc.hideTooltipManual();});
         netsnrbarouter.append("div").attr("class","bar-line")
@@ -906,7 +909,7 @@ Localisation.prototype.updateDetResults = function(){
             return (loc.dStatus[d.id]==true)?"1":"0.25"})
         .style("width",function(d){return loc.snrRange(Math.log10(loc.src.det[loc.di[d.id]].snr))+'%';})
         .on("mouseover",function(d){
-            loc.showTooltipManual(loc.tl('%text.loc.info.snr%: '+parseFloat(loc.src.det[loc.di[d.id]].snr).toPrecision(2)));
+            loc.showTooltipManual(loc.tl('%tooltip.loc.snr%: '+parseFloat(loc.src.det[loc.di[d.id]].snr).toPrecision(2)));
         })
         .on("mouseout",function(d){
             loc.hideTooltipManual()
@@ -1153,18 +1156,18 @@ Localisation.prototype.updateCalcs = function(newSrc,newDet){
     }
     this.calcAntFacs();
     //  update results
-    this.updateContoursT();
+    if (this.overlays.contoursT.shown){this.updateContoursT();}
     // this.calcProbSky();
     // this.updateContoursPr();
     this.updateDetMarkers();
     this.updateDetResults();
     this.updateSourceLabels();
     this.updateLines();
-    if ((newDet==true)|(this.hmap!='FNet')){
+    if ((newDet==true)|(this.hmap!='none')){
         this.updateHeatmap(this.hmap);
     }
     this.calcTimeRings()
-    this.updateContoursTmatch()
+    if (this.overlays.contoursTmatch.shown){this.updateContoursTmatch()}
     this.updateHeatmap('Tmatch');
     this.hideLoading();
     // this.uncloseContours();
@@ -1427,12 +1430,12 @@ Localisation.prototype.drawSky = function(){
     loc.svg.select(".ra-axis.axis").call(loc.raAxis)
     loc.svg.select(".ra-axis.axis").append("text")
         .attr("class", "ra-axis axis-label")
-        // .attr("x", (loc.relw[0]+loc.relw[1])*loc.graphWidth/2)
+        .attr("fill","black")
         .attr("x", loc.skyWidth/2)
         .attr("y", 1.2*(1+loc.scl)+"em")
         .style("text-anchor", "middle")
         .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.loc.rightasc%'));
+        .text(loc.tl('%text.loc.map.lon%'));
 
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
@@ -1447,12 +1450,13 @@ Localisation.prototype.drawSky = function(){
     loc.svg.select(".dec-axis.axis").append("text")
         .attr("class", "dec-axis axis-label")
         .attr("transform", "rotate(-90)")
+        .attr("fill","black")
         .attr("y", 6)
         .attr("x",-loc.skyHeight/2)
         .attr("dy", (-30*(1+loc.scl))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.loc.declination%'));
+        .text(loc.tl('%text.loc.map.lat%'));
 
     d3.selectAll('.tick > line')
         .style('stroke','#ccc')
@@ -1495,22 +1499,24 @@ Localisation.prototype.drawSky = function(){
 
 
     loc.overlays = {
-        'contoursT':{'gid':"g-contoursT"},
-        'contoursTmatch':{'gid':"g-contoursTmatch"},
-        'contoursPr':{'gid':"g-contoursPr"},
-        'heatmap-Pr':{'gid':"g-heatmap-Pr"},
-        'heatmap-pNet':{'gid':"g-heatmap-pNet"},
-        'heatmap-FNet':{'gid':"g-heatmap-FNet"},
-        'heatmap-Tmatch':{'gid':"g-heatmap-Tmatch"},
-        'overlay':{'gid':"g-overlay"},
+        'contoursT':{gid:"g-contoursT",shown:true},
+        'contoursTmatch':{gid:"g-contoursTmatch",shown:true},
+        'contoursPr':{gid:"g-contoursPr",shown:false},
+        'heatmap-Pr':{gid:"g-heatmap-Pr",shown:false},
+        'heatmap-pNet':{gid:"g-heatmap-pNet",shown:(this.hmap=='pNet')},
+        'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet')},
+        'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet')},
+        'heatmap-Tmatch':{gid:"g-heatmap-Tmatch",shown:true},
+        'overlay':{gid:"g-overlay",shown:false},
     }
     // draw Heatmap
-    loc.skyarr[this.hmap]={}
-    loc.skyarr[this.hmap].gHeatmap=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays['heatmap-'+loc.hmap].gid})
+    loc.skyarr.FNet={}
+    loc.skyarr.FNet.gHeatmap=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['heatmap-FNet'].gid})
         .attr("class","heatmap")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
         .style("opacity",0)
+    loc.skyarr.aNet=loc.skyarr.FNet;
     loc.updateHeatmap(this.hmap)
     loc.showOverlay('heatmap-'+this.hmap)
 
@@ -1519,9 +1525,20 @@ Localisation.prototype.drawSky = function(){
     loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
 
     // add world map
-    networkmap = loc.svg.append("g")
+    ocean = loc.svg.append("rect")
+	    .attr("id", "ocean")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .attr("width",loc.skyWidth)
+        .attr("height",loc.skyHeight)
+        .attr("x",0)
+        .attr("y",0)
+        .style("fill","blue")
+        .style("fill-opacity",0)
+    worldmap = loc.svg.append("g")
 	    .attr("id", "worldmap")
+        .style("fill","green")
         .attr("transform", "translate("+loc.margin.left+","+(loc.margin.top+loc.skyHeight*2.8/180)+")");
+
 
     // loc.skyarr.land = topojson.feature(loc.map, loc.map.objects.countries);
     loc.skyarr.countries = topojson.feature(loc.map, loc.map.objects.countries),
@@ -1530,7 +1547,7 @@ Localisation.prototype.drawSky = function(){
     loc.skyarr.projEq=d3.geoEquirectangular()
         .translate([0,loc.skyHeight/2])
         .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.land)//.rotate([d2r(180),0,0])
-    networkmap.selectAll(".country")
+    worldmap.selectAll(".country")
 	    .data(loc.skyarr.countries.features)
 	    .enter().append("path")
 	    .attr("class", "country")
@@ -1573,14 +1590,15 @@ Localisation.prototype.drawSky = function(){
     // loc.updateContoursPr();
     // loc.showOverlay('contoursPr')
 
-    loc.skyarr.overlay={};
-    loc.skyarr.overlay.gHeatmap=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays['overlay'].gid})
-        .attr("class","heatmap")
-        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .style("opacity",0)
-    loc.updateHeatmap("overlay")
-    // loc.showOverlay("heatmap-overlay")
+    // loc.skyarr.overlay={};
+    // loc.skyarr.overlay.gHeatmap=loc.svg.append("g")
+    //     .attr("id",function(){return loc.overlays['overlay'].gid})
+    //     .attr("class","heatmap")
+    //     .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+    //     .style("opacity",0)
+    // loc.updateHeatmap("overlay")
+    // // loc.showOverlay("heatmap-overlay")
+
     // draw detectors
     detGroup = loc.svg.append("g").attr("class","g-dets")
     loc.updateDetMarkers();
@@ -1649,6 +1667,9 @@ Localisation.prototype.drawSky = function(){
         // .style("stroke","black")
         // .style("stroke-width",3)
 
+
+    // add colour bar
+
     // add Detector status
     this.snrRange=d3.scaleLinear().range([0,100]).domain([-2,2]).clamp(true)
     d3.select("#info-network-title")
@@ -1663,7 +1684,7 @@ Localisation.prototype.drawSky = function(){
     d3.select("div#skycontainer").append("div")
         .attr("id","info-icon")
         .attr("class",infoClass)
-        .style("right",loc.margin.right)
+        .style("right",loc.margin.right + (loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
         .style("top",0)
         .style("width",loc.margin.top)
         .style("height",loc.margin.top);
@@ -1687,13 +1708,45 @@ Localisation.prototype.drawSky = function(){
         .attr("src","img/info.svg")
         .on("click",function(){loc.showInfo()});
 
+    // add settings icon
+    settingsClass = (this.panels.settings.status) ? "graph-icon" : "graph-icon hidden";
+    this.settingsouter = d3.select('#settings-outer');
+    d3.select("div#skycontainer").append("div")
+        .attr("id","settings-icon")
+        .attr("class",settingsClass)
+        .style("right",loc.margin.right + (loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
+        .style("top",0)
+        .style("width",loc.margin.top)
+        .style("height",loc.margin.top);
+    d3.select("div#skycontainer > #settings-icon").on("mouseover", function() {
+              loc.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              loc.tooltip.html(loc.tl('%tooltip.loc.showsettings%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function() {
+            loc.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("effcontainer").style.opacity=0.;
+        })
+    d3.select("div#skycontainer > #settings-icon").append("img")
+        .attr("src","img/settings.svg")
+        .on("click",function(){loc.showSettings()});
+    this.settingsouter.select("#settings-close")
+        .on("click",function(){loc.hideSettings();});
+
     //add help icon
     helpClass = (this.panels.help.status) ? "graph-icon" : "graph-icon hidden";
     this.helpouter = d3.select('#help-outer')
     d3.select("div#skycontainer").append("div")
         .attr("id","help-icon")
         .attr("class",helpClass)
-        .style("right",loc.margin.right+1*(loc.margin.top+10))
+        .style("right",loc.margin.right+(loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
         .style("top",0)
         .style("width",40*loc.ysc)
         .style("height",40*loc.ysc);
@@ -1727,7 +1780,7 @@ Localisation.prototype.drawSky = function(){
     d3.select("div#skycontainer").append("div")
         .attr("id","network-icon")
         .attr("class",networkClass)
-        .style("right",loc.margin.right+2*(loc.margin.top+10))
+        .style("right",loc.margin.right+(loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
         .style("top",0)
         .style("width",40*loc.ysc)
         .style("height",40*loc.ysc);
@@ -1761,7 +1814,7 @@ Localisation.prototype.drawSky = function(){
     d3.select("div#skycontainer").append("div")
         .attr("id","source-icon")
         .attr("class",sourceClass)
-        .style("right",loc.margin.right+3*(loc.margin.top+10))
+        .style("right",loc.margin.right+(loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
         .style("top",0)
         .style("width",40*loc.ysc)
         .style("height",40*loc.ysc);
@@ -1796,7 +1849,7 @@ Localisation.prototype.drawSky = function(){
     d3.select("div#skycontainer").append("div")
         .attr("id","lang-icon")
         .attr("class",langClass)
-        .style("right",loc.margin.right+4*(loc.margin.top+10))
+        .style("right",loc.margin.right+(loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
         .style("top",0)
         .style("width",40*loc.ysc)
         .style("height",40*loc.ysc);
@@ -1872,6 +1925,14 @@ Localisation.prototype.hideLoading = function(){
     //     .transition().duration(500)
     //     .style("opacity",1);
 }
+Localisation.prototype.colourWorldMap = function(){
+    d3.select('#ocean').transition().duration(500).style('fill-opacity',1)
+    d3.select('#worldmap').transition().duration(500).style('fill-opacity',1)
+}
+Localisation.prototype.uncolourWorldMap = function(){
+    d3.select('#ocean').transition().duration(500).style('fill-opacity',0)
+    d3.select('#worldmap').transition().duration(500).style('fill-opacity',0)
+}
 Localisation.prototype.updateDetMarkers = function(){
     var loc=this;
     this.detMarkers=detGroup.selectAll(".detmarker")
@@ -1883,7 +1944,7 @@ Localisation.prototype.updateDetMarkers = function(){
         .attr("y2", function(d){return loc.det2xy(d,'xarm')[1]})
         .attr("cursor","default")
         .style("opacity",function(d){return ((loc.dStatus[d.id]==1)? 1 :0.5)})
-        .attr("stroke-dasharray",function(d){console.log('updating '+d.id+':'+loc.dStatus[d.id]+' '+this);return ((loc.dStatus[d.id]==1)? 0 :1)})
+        .attr("stroke-dasharray",function(d){console.log('updating '+d.id+':'+loc.dStatus[d.id]+' '+this);return ((loc.dStatus[d.id]==1)? 0 :0)})
         .style("stroke", function(d){return d.color})
         .style("stroke-width",Math.min(5,2./loc.sksc));
     loc.detMarkers.selectAll("line.detline-y")
@@ -1893,7 +1954,7 @@ Localisation.prototype.updateDetMarkers = function(){
         .attr("y2", function(d){return loc.det2xy(d,'yarm')[1]})
         .attr("cursor","default")
         .attr("opacity",function(d){return ((loc.dStatus[d.id]==1)? 1 :0.5)})
-        .attr("stroke-dasharray",function(d){return ((loc.dStatus[d.id]==1)? 0 :1)})
+        .attr("stroke-dasharray",function(d){return ((loc.dStatus[d.id]==1)? 0 :0)})
         .style("stroke", function(d){return d.color})
         .style("stroke-width",Math.min(5,2./loc.sksc));
     loc.detMarkers.selectAll("circle.detcircle")
@@ -1946,8 +2007,8 @@ Localisation.prototype.updateDetMarkers = function(){
         .style("stroke", function(d){return d.color})
         .style("stroke-width",Math.min(5,2./loc.sksc));
     loc.detGroups.append("circle")
-        .attr("class","detcircle")
-        .attr("id",function(d){return "detcircle detcircle-"+d.id;})
+        .attr("class","detcircle-overlay")
+        .attr("id",function(d){return "detcircle-overlay detcircle-overlay-"+d.id;})
         .attr("cx", function(d){return loc.det2xy(d,'middle')[0]})
         .attr("cy", function(d){return loc.det2xy(d,'middle')[1]})
         .attr("r", function(d){return loc.lenScale(Math.max(d.length,2))})
@@ -1990,11 +2051,9 @@ Localisation.prototype.moveHighlight = function(){
 }
 Localisation.prototype.updateHeatmap = function(dataIn){
     // update heatmap
-    if (!data){data='Pr'}
-    var data = (dataIn) ? dataIn : 'Pr';
     nearVals=[];
     nearValsRows=[]
-    if (data=="Pr"){
+    if (dataIn=="Pr"){
         for (i=-1;i<=1;i++){
             row=[];
             for (j=-1;j<=1;j++){
@@ -2005,86 +2064,97 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         }
         this.skyarr.Pr.srcThresh=Math.max.apply(Math,nearValsRows);
         loc.skyarr.Pr.hmapthreshold=Math.max(0.1,this.skyarr.Pr.srcThresh);
-    }else if (data=="pNet"){
+    }else if (dataIn=="pNet"){
         loc.skyarr.pNet.hmapthreshold=5;
-        loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1])
+        loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1])
             .domain([0,1])
-    }else if (data=="FNet"){
+    }else if (dataIn=="FNet"){
         loc.skyarr.FNet.hmapthreshold=5;
-        loc.skyarr[data].opHeat=function(d){return 1;};
-        // loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
-        loc.skyarr[data].colHeat=function(p){
-            val=loc.skyarr.arr[data][p];
+        loc.skyarr[dataIn].opHeat=function(d){return 1;};
+        // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
+        loc.skyarr[dataIn].colHeat=function(p){
+            val=loc.skyarr.arr[dataIn][p];
             scale=d3.scaleSequential(d3.interpolateInferno).domain([0, 1]);
             return scale(val);
         }
-    }else if (data=="Tmatch"){
+    }else if (dataIn=="aNet"){
+        loc.skyarr.FNet.hmapthreshold=5;
+        loc.skyarr[dataIn].opHeat=function(d){return 1;};
+        // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
+        loc.skyarr[dataIn].colHeat=function(p){
+            val=Math.log10(loc.skyarr.arr[dataIn][p]);
+            scale=d3.scaleSequential(d3.interpolateInferno).domain([-1,1]);
+            return scale(val);
+        }
+    }else if (dataIn=="Tmatch"){
         loc.skyarr.Tmatch.hmapthreshold=0.5;
-        loc.skyarr[data].opHeat=function(d){
+        loc.skyarr[dataIn].opHeat=function(d){
             if (loc.Ndet<=1){return 0}
             else{ return d3.scaleLinear().range([0,1])
             .domain([0.5,1]).clamp(true)(d)}
         }
-        loc.skyarr[data].colHeat=function(d){return "#fff";};
-    }else if (data="overlay"){
-        loc.skyarr[data].opHeat=function(d){return 0;};
-        loc.skyarr[data].colHeat=function(d){return "#fff";};
+        loc.skyarr[dataIn].colHeat=function(d){return "#fff";};
+    }else if (dataIn=="overlay"){
+        loc.skyarr[dataIn].opHeat=function(d){return 0;};
+        loc.skyarr[dataIn].colHeat=function(d){return "#fff";};
     }
-    if (data=="overlay"){
-        loc.skyarr[data].hmapfiltPix=loc.skyarr.arr.pix;
-    }else{
-        loc.skyarr[data].hmapfiltPix=loc.filterSky(data,'hmap',loc.skyarr[data].hmapthreshold);
-        if (data=='Pr'){
+    if (dataIn=="overlay"){
+        loc.skyarr[dataIn].hmapfiltPix=loc.skyarr.arr.pix;
+    }else if ((dataIn=="FNet")|(dataIn=="aNet")){
+        if (loc.Ndet>0){loc.skyarr[dataIn].hmapfiltPix=loc.skyarr.arr.pix;}
+        else{loc.skyarr[dataIn].hmapfiltPix=[]}
+    }else if (dataIn!="none"){
+        console.log(dataIn)
+        loc.skyarr[dataIn].hmapfiltPix=loc.filterSky(dataIn,'hmap',loc.skyarr[dataIn].hmapthreshold);
+        if (dataIn=='Pr'){
             loc.skyarr.Pr.opHeat=d3.scaleLinear().range([0,0.7])
                     .domain([(loc.skyarr.Pr.hmapfiltPix.length>1)?loc.skyarr.Pr.hmapminFilt:0,loc.skyarr.Pr.hmapmaxFilt])
         }
     }
-    // if (data=='Pr'){
+    // if (dataIn=='Pr'){
     //     loc.skyarr.Pr.opHeat=d3.scaleLinear().range([0,0.7])
     //         .domain([(loc.skyarr.Pr.hmapfiltPix.length>1)?loc.skyarr.Pr.hmapminFilt:0,loc.skyarr.Pr.hmapmaxFilt])
     // }else{
-    //     loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1])
+    //     loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1])
     //         .domain([0,1])
     // }
-    if (data!="overlay"){
-        console.log(data)
-        // console.log('opHeat',data,loc.skyarr[data].opHeat.domain())
+    if (dataIn!="none"){
+        console.log(dataIn,loc.skyarr[dataIn],loc.skyarr[dataIn].heatmap)
+        loc.skyarr[dataIn].heatmap = loc.skyarr[dataIn].gHeatmap.selectAll(".hm-rect")
+            .data(loc.skyarr[dataIn].hmapfiltPix)
+        loc.skyarr[dataIn].heatmap.exit()
+            .attr("class","hm-rect old")
+            .transition().duration(500)
+            .style("fill-opacity",0).remove()
+        loc.skyarr[dataIn].heatmap.enter().append("rect")
+            .attr("class","hm-rect new")
+            // .on("mouseover",function(d){
+            //     loc.tooltip
+            //        .style("opacity", .9);
+            //     loc.tooltip.html(loc.tttextHmap(d))
+            //        .style("left", (d3.event.pageX + 10) + "px")
+            //        .style("top", (d3.event.pageY-10) + "px")
+            //        .style("width","auto")
+            //        .style("height","auto");
+            // })
+            // .on("mouseout", function(d) {
+            //     loc.tooltip.style("opacity", 0);
+            // })
+        .merge(loc.skyarr[dataIn].heatmap)
+            .transition().duration(500)
+            .attr("x",function(d){return loc.rect2xy(d)[0];})
+            .attr("y",function(d){return loc.rect2xy(d)[1];})
+            .attr("width",function(d){return loc.rect2xy(d)[2];})
+            .attr("height",function(d){return loc.rect2xy(d)[3];})
+            .style("fill",function(d){return loc.skyarr[dataIn].colHeat(d)})
+            .style("fill-opacity",function(d){
+                if (dataIn=="overlay"){
+                    return 0
+                }else{
+                    return (loc.skyarr[dataIn].opHeat(loc.skyarr.arr[dataIn][d]));
+                }
+            })
     }
-    console.log(data,loc.skyarr[data],loc.skyarr[data].heatmap)
-    loc.skyarr[data].heatmap = loc.skyarr[data].gHeatmap.selectAll(".hm-rect")
-        .data(loc.skyarr[data].hmapfiltPix)
-    loc.skyarr[data].heatmap.exit()
-        .attr("class","hm-rect old")
-        .transition().duration(500)
-        .style("fill-opacity",0).remove()
-    loc.skyarr[data].heatmap.enter().append("rect")
-        .attr("class","hm-rect new")
-        // .on("mouseover",function(d){
-        //     loc.tooltip
-        //        .style("opacity", .9);
-        //     loc.tooltip.html(loc.tttextHmap(d))
-        //        .style("left", (d3.event.pageX + 10) + "px")
-        //        .style("top", (d3.event.pageY-10) + "px")
-        //        .style("width","auto")
-        //        .style("height","auto");
-        // })
-        // .on("mouseout", function(d) {
-        //     loc.tooltip.style("opacity", 0);
-        // })
-    .merge(loc.skyarr[data].heatmap)
-        .transition().duration(500)
-        .attr("x",function(d){return loc.rect2xy(d)[0];})
-        .attr("y",function(d){return loc.rect2xy(d)[1];})
-        .attr("width",function(d){return loc.rect2xy(d)[2];})
-        .attr("height",function(d){return loc.rect2xy(d)[3];})
-        .style("fill",function(d){return loc.skyarr[data].colHeat(d)})
-        .style("fill-opacity",function(d){
-            if (data=="overlay"){
-                return 0
-            }else{
-                return (loc.skyarr[data].opHeat(loc.skyarr.arr[data][d]));
-            }
-        })
 }
 Localisation.prototype.updateContoursT = function(){
     console.log(loc.src.dt,loc.skyarr.arr.dt);
@@ -2142,18 +2212,18 @@ Localisation.prototype.updateContoursT = function(){
             .attr("class","contourT contourT-"+dd)
             .attr("d", function(d){return d.path})
             // .attr("d",d3.geoPath().projection(loc.skyarr.ProjCont))
-            .on("mouseover",function(d){
-                loc.tooltip
-                   .style("opacity", .9);
-                loc.tooltip.html(loc.tttextHmap(d))
-                   .style("left", (d3.event.pageX + 10) + "px")
-                   .style("top", (d3.event.pageY-10) + "px")
-                   .style("width","auto")
-                   .style("height","auto");
-            })
-            .on("mouseout", function(d) {
-                loc.tooltip.style("opacity", 0);
-            })
+            // .on("mouseover",function(d){
+            //     loc.tooltip
+            //        .style("opacity", .9);
+            //     loc.tooltip.html(loc.tttextHmap(d))
+            //        .style("left", (d3.event.pageX + 10) + "px")
+            //        .style("top", (d3.event.pageY-10) + "px")
+            //        .style("width","auto")
+            //        .style("height","auto");
+            // })
+            // .on("mouseout", function(d) {
+            //     loc.tooltip.style("opacity", 0);
+            // })
             .transition().duration(500).ease(d3.easeExp)
             .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
 
@@ -2203,18 +2273,18 @@ Localisation.prototype.updateContoursPr = function(){
         .style("stroke-width","3")
         .attr("class","contourPr contour-Pr")
         .attr("d", d3.geoPath(loc.skyarr.projI))
-        .on("mouseover",function(d){
-            loc.tooltip
-               .style("opacity", .9);
-            loc.tooltip.html(loc.tttextHmap(d))
-               .style("left", (d3.event.pageX + 10) + "px")
-               .style("top", (d3.event.pageY-10) + "px")
-               .style("width","auto")
-               .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            loc.tooltip.style("opacity", 0);
-        })
+        // .on("mouseover",function(d){
+        //     loc.tooltip
+        //        .style("opacity", .9);
+        //     loc.tooltip.html(loc.tttextHmap(d))
+        //        .style("left", (d3.event.pageX + 10) + "px")
+        //        .style("top", (d3.event.pageY-10) + "px")
+        //        .style("width","auto")
+        //        .style("height","auto");
+        // })
+        // .on("mouseout", function(d) {
+        //     loc.tooltip.style("opacity", 0);
+        // })
         .transition().duration(500).ease(d3.easeExp)
         .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
         // .merge(loc.skyarr[dd].dtcontours)
@@ -2257,18 +2327,18 @@ Localisation.prototype.updateContoursTmatch = function(){
         .style("stroke-width","3")
         .attr("class","contourTmatch contour-Tmatch")
         .attr("d", d3.geoPath(loc.skyarr.projI))
-        .on("mouseover",function(d){
-            loc.tooltip
-               .style("opacity", .9);
-            loc.tooltip.html(loc.tttextHmap(d))
-               .style("left", (d3.event.pageX + 10) + "px")
-               .style("top", (d3.event.pageY-10) + "px")
-               .style("width","auto")
-               .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            loc.tooltip.style("opacity", 0);
-        })
+        // .on("mouseover",function(d){
+        //     loc.tooltip
+        //        .style("opacity", .9);
+        //     loc.tooltip.html(loc.tttextHmap(d))
+        //        .style("left", (d3.event.pageX + 10) + "px")
+        //        .style("top", (d3.event.pageY-10) + "px")
+        //        .style("width","auto")
+        //        .style("height","auto");
+        // })
+        // .on("mouseout", function(d) {
+        //     loc.tooltip.style("opacity", 0);
+        // })
         .transition().duration(500).ease(d3.easeExp)
         .style("stroke-opacity",function(d){return (loc.skyarr.Tmatch.opCont(d.value))})
         // .merge(loc.skyarr[dd].dtcontours)
@@ -2288,12 +2358,14 @@ Localisation.prototype.showOverlay = function(olName){
     d3.select('#'+gid)
         .transition().duration(500)
         .style("opacity",1)
+    this.overlays[olName].shown=true;
 }
 Localisation.prototype.hideOverlay = function(olName){
     gid=this.overlays[olName].gid;
     d3.select('#'+gid)
         .transition().duration(500)
         .style("opacity",0)
+    this.overlays[olName].shown=false;
 }
 Localisation.prototype.editContours = function(cont,edit,dd){
     console.log('edit contour ',dd,cont)
@@ -3397,7 +3469,7 @@ Localisation.prototype.addSource = function(){
         .attr('id','lab-lon')
         .style('height',loc.labcontHeight)
     .append("div")
-        .attr('class','labtext info')
+        .attr('class','labtext source')
         .attr('id','lab-lon-txt')
         .html(this.tl(loc.labels.lon.labstr()));
     d3.select('#source-info-cont').append("div")
@@ -3405,7 +3477,7 @@ Localisation.prototype.addSource = function(){
         .attr('id','lab-lat')
         .style('height',loc.labcontHeight)
     .append("div")
-        .attr('class','labtext info')
+        .attr('class','labtext source')
         .attr('id','lab-lat-txt')
         .html(this.tl(loc.labels.lat.labstr()));
     // position angle slider
@@ -3414,7 +3486,7 @@ Localisation.prototype.addSource = function(){
         .attr('id','lab-posang')
         .style('height',loc.labcontHeight)
     posangcont.append("div")
-        .attr('class','labtext info')
+        .attr('class','labtext source')
         .attr('id','lab-posang-txt')
         .style('height','50%')
         .style('width','100%')
@@ -3440,7 +3512,7 @@ Localisation.prototype.addSource = function(){
         .attr('id','lab-inc')
         .style('height',loc.labcontHeight)
     inccont.append("div")
-        .attr('class','labtext info')
+        .attr('class','labtext source')
         .attr('id','lab-inc-txt')
         .style('height','50%')
         .style('width','100%')
@@ -3465,7 +3537,7 @@ Localisation.prototype.addSource = function(){
         .attr('id','lab-amp')
         .style('height',loc.labcontHeight)
     ampcont.append("div")
-        .attr('class','labtext info')
+        .attr('class','labtext source')
         .attr('id','lab-amp-txt')
         .style('height','50%')
         .style('width','100%')
@@ -3484,25 +3556,6 @@ Localisation.prototype.addSource = function(){
         loc.src.amp=Math.pow(10,this.value);
         loc.updateCalcs(true,false)
     })
-    // labimgdiv.className = 'icon labcont';
-    // // labimgdiv.style.width = this.labcontWidth;
-    // labimgdiv.style.height = this.labcontHeight;
-    // labimgdiv.style.display = "inline-block";
-    // if (this.labels[lab].hasOwnProperty('icon')){
-    //     labimgdiv.setAttribute("id",lab+'icon');
-    //     labimgdiv.innerHTML ="<img src='"+this.labels[lab].icon+"'>"
-    // }
-    // labtxtdiv = document.createElement('div');
-    // labtxtdiv.className = 'labtext info';
-    // labtxtdiv.setAttribute('id',lab+'txt');
-    // labtxtdiv.innerHTML = this.tl(loc.labels[lab].labstr());
-    // labimgdiv.appendChild(labtxtdiv);
-    //
-    // for (lab in this.labels){
-    //     if (this.labels[lab].loc=='source'){
-    //         this.addLabel(lab,"source-info-cont")
-    //     }
-    // }
 }
 Localisation.prototype.showSource = function(){
     //show options
@@ -3567,6 +3620,245 @@ Localisation.prototype.hideInfo = function(){
     // do nothing
     console.log('hiding info')
     return
+}
+Localisation.prototype.addSettings = function(){
+    var loc=this;
+    d3.select("#settings-title")
+        .html(this.tl("%text.loc.settings.title%"))
+    d3.select("#settings-text")
+        .html(this.tl("%text.loc.settings.text%"));
+    if (this.portrait){
+        d3.select('#settings-title')
+            .style("font-size",(5.0*this.xsc)+"em")
+    }else{
+        d3.select('#settings-title')
+            .style("font-size",(2.5*this.ysc)+"em")
+    }
+
+    heatmapcont=d3.select("#settings-heatmap-cont")
+    d3.select('#settings-heatmap-cont').append("div")
+        .attr('class','icon settingscont')
+        .attr('id','lab-heatmap-FNet')
+    .append("div")
+        .attr('class','labtext settings')
+        .attr('id','lab-heatmap-text')
+        .html(loc.tl('<span class="settings-desc">%text.loc.settings.heatmap.text%</span>'));
+
+    hmapFNet=d3.select('#settings-heatmap-cont').append("div")
+        .attr('class','icon settingscont')
+        .attr('id','lab-heatmap-FNet')
+    hmapFNet.append("label")
+        .attr("class","hmap-switch")
+        .attr("id",function(d){return "det-switch-FNet"})
+        .html(function(){
+                return "<input type='checkbox' "+((loc.hmap=='FNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
+        .on("mousedown",function(){
+            console.log('toggling',this,this.id.split('-')[2],loc.hmap);
+            if (loc.hmap=='FNet'){
+                // turn off overlay
+                console.log('FNet > none');
+                loc.hideOverlay('heatmap-FNet')
+                loc.hmap='none';
+                loc.colourWorldMap();
+            }else if(loc.hmap=='none'){
+                // turn on overlay
+                console.log('none > FNet');
+                loc.hmap='FNet';
+                loc.showOverlay('heatmap-FNet');
+                loc.updateHeatmap(loc.hmap);
+                loc.uncolourWorldMap();
+            }else{
+                // switch overlay from aNet to FNet
+                console.log('aNet > FNet');
+                loc.hmap='FNet';
+                d3.select('#det-switch-aNet > input').property("checked",false)
+                loc.updateHeatmap(loc.hmap);
+            }
+        })
+    hmapFNet.append("div")
+        .attr('class','labtext settings')
+        .attr('id','lab-heatmap-FNet-txt')
+        .html(loc.tl('<span class="settings-name">%text.loc.settings.FNet%</span>'+
+            '<span class="settings-desc">%text.loc.settings.FNet.desc%</span>'));
+
+    hmapaNet=d3.select('#settings-heatmap-cont').append("div")
+        .attr('class','icon settingscont')
+        .attr('id','lab-heatmap-aNet')
+    hmapaNet.append("label")
+        .attr("class","hmap-switch")
+        .attr("id",function(d){return "det-switch-aNet"})
+        .html(function(){
+                return "<input type='checkbox' "+((loc.hmap=='aNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
+        .on("mousedown",function(){
+            console.log('toggling',this,this.id.split('-')[2],loc.hmap);
+            if (loc.hmap=='aNet'){
+                console.log('aNet > none');
+                // turn off overlay
+                loc.hideOverlay('heatmap-aNet')
+                loc.hmap='none';
+                loc.colourWorldMap();
+            }else if (loc.hmap=='none'){
+                // turn on overlay
+                console.log('none > aNet');
+                loc.showOverlay('heatmap-aNet');
+                loc.hmap='aNet';
+                loc.updateHeatmap(loc.hmap);
+                loc.uncolourWorldMap();
+            }else{
+                // switch from FNet to aNet
+                console.log('FNet > aNet',d3.select('#det-switch-FNet > input').property("checked"));
+                loc.hmap='aNet';
+                d3.select('#det-switch-FNet > input').property("checked",false);
+                console.log(d3.select('#det-switch-FNet > input').property("checked"));
+                loc.updateHeatmap(loc.hmap);
+            }
+        })
+    hmapaNet.append("div")
+        .attr('class','labtext settings')
+        .attr('id','lab-heatmap-aNet-txt')
+        .html(loc.tl('<span class="settings-name">%text.loc.settings.aNet%</span>'+
+            '<span class="settings-desc">%text.loc.settings.aNet.desc%</span>'));
+
+    // hmapnone=d3.select('#settings-heatmap-cont').append("div")
+    //     .attr('class','icon settingscont')
+    //     .attr('id','lab-heatmap-none')
+    // hmapnone.append("label")
+    //     .attr("class","hmap-switch")
+    //     .attr("id",function(d){return "det-switch-none"})
+    //     .html(function(){
+    //             return "<input type='checkbox' "+((loc.hmap=='none')?"checked":"")+">"+"<span class='det-slider round'></span>"})
+    //     .on("mousedown",function(){
+    //         console.log('toggling',this,this.id.split('-')[2],loc.hmap);
+    //         if (loc.hmap=='none'){
+    //             loc.hmap='FNet';
+    //             d3.select('#det-switch-FNet > input').attr("checked","")
+    //         }else{
+    //             loc.hideOverlay('heatmap-FNet')
+    //             loc.hideOverlay('heatmap-aNet')
+    //             loc.hmap='none';
+    //             d3.select('#det-switch-FNet > input').attr("checked",null)
+    //             d3.select('#det-switch-aNet > input').attr("checked",null)
+    //         }
+    //     })
+    // hmapnone.append("div")
+    //     .attr('class','labtext settings')
+    //     .attr('id','lab-heatmap-none-txt')
+    //     .html(loc.tl('<span class="settings-name">%text.loc.settings.none%</span>'+
+    //         '<span class="settings-desc">%text.loc.settings.none.desc%</span>'));
+
+    contourcont=d3.select("#settings-contour-cont")
+    d3.select('#settings-contour-cont').append("div")
+        .attr('class','icon settingscont')
+        .attr('id','lab-contour-Tmatch')
+    .append("div")
+        .attr('class','labtext settings')
+        .attr('id','lab-contour-text')
+        .html(loc.tl('<span class="settings-desc">%text.loc.settings.contour.text%</span>'));
+
+    contourTmatch=d3.select('#settings-contour-cont').append("div")
+        .attr('class','icon settingscont')
+        .attr('id','lab-contour-FNet')
+    contourTmatch.append("label")
+        .attr("class","contour-switch")
+        .attr("id",function(d){return "det-switch-Tmatch"})
+        .html(function(){
+                return "<input type='checkbox' "+((loc.overlays.contoursTmatch.shown)?"checked":"")+">"+
+                    "<span class='det-slider round'></span>"})
+        .on("mousedown",function(){
+            if ((loc.overlays.contoursTmatch.shown)){
+                loc.hideOverlay('contoursTmatch')
+                loc.hideOverlay('heatmap-Tmatch')
+            }else{
+                loc.showOverlay('contoursTmatch')
+                loc.showOverlay('heatmap-Tmatch')
+            }
+        })
+    contourTmatch.append("div")
+        .attr('class','labtext settings')
+        .attr('id','lab-contour-Tmatch-txt')
+        .html(loc.tl('<span class="settings-name">%text.loc.settings.Tmatch%</span>'+
+            '<span class="settings-desc">%text.loc.settings.Tmatch.desc%</span>'));
+
+    contourdt=d3.select('#settings-contour-cont').append("div")
+        .attr('class','icon settingscont')
+        .attr('id','lab-contour-dt')
+    contourdt.append("label")
+        .attr("class","contour-switch")
+        .attr("id",function(d){return "det-switch-dt"})
+        .html(function(){
+                return "<input type='checkbox' "+((loc.overlays.contoursT.shown)?"checked":"")+">"+
+                    "<span class='det-slider round'></span>"})
+        .on("mousedown",function(){
+            if (loc.overlays.contoursT.shown){
+                loc.hideOverlay('contoursT')
+            }else{
+                loc.showOverlay('contoursT')
+            }
+        })
+    contourdt.append("div")
+        .attr('class','labtext settings')
+        .attr('id','lab-contour-dt-txt')
+        .html(loc.tl('<span class="settings-name">%text.loc.settings.dt%</span>'+
+            '<span class="settings-desc">%text.loc.settings.dt.desc%</span>'));
+
+
+    // hmapFNetDesc=d3.select('#settings-heatmap-cont').append("div")
+    //     .attr('class','icon labcont')
+    //     .attr('id','lab-heatmap-FNet-desc')
+    //     .style('height',loc.labcontHeight)
+    // hmapFNetDesc.append("div")
+    //     .attr('class','labtext info')
+    //     .attr('id','lab-heatmap-FNet-desc-txt')
+    //     .html(loc.tl('%text.loc.FNet.desc%'));
+}
+Localisation.prototype.showSettings = function(){
+    //show network
+    // this.panels.network.show=this.showNetwork()
+    // this.panels.network.hide=this.hideNetwork()
+    for (panel in this.panels){
+        console.log(panel)
+        if (panel!='settings'){this.panels[panel].hide()}
+    }
+    this.panels['settings'].status=true;
+    // fade in semi-transparent background layer (greys out image)
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style({"opacity":0.5});
+    // this.helpbg.style("height","100%");
+    //fade in infopanel
+    this.settingsouter = d3.select('#settings-outer')
+    this.settingsouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    // this.infopanel.html(this.iptext(d));
+    this.settingsouter.style("left", document.getElementById('infoouter').offsetLeft-1)
+        .style("top", document.getElementById('infoouter').offsetTop-1)
+        .style("width",document.getElementById('infoouter').offsetWidth-2)
+        .style("height",document.getElementById('infoouter').offsetHeight-22);
+    if (this.portrait){
+        document.getElementById('settings-heatmap-cont').classList.add('bottom')
+    }else{
+        document.getElementById('settings-contour-cont').classList.remove('bottom')
+    }
+    document.getElementById("settings-icon").classList.remove("hidden");
+    document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
+}
+Localisation.prototype.hideSettings = function() {
+    // hide options box
+    console.log('hiding settings',this,this.panels)
+    this.panels['settings'].status=false;
+    this.panels['info'].status=true;
+    // fade out infopanel
+    this.settingsouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.settingsouter.style("top","200%");
+    document.getElementById("info-icon").classList.remove("hidden");
+    document.getElementById("settings-icon").classList.add("hidden");
+    this.updateUrl();
+    console.log('settings hidden')
 }
 Localisation.prototype.showShare = function(){
     //show share pot
@@ -3647,6 +3939,7 @@ Localisation.prototype.makePlot = function(){
     this.addLang(false);
     this.addNetwork();
     this.addSource();
+    this.addSettings();
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
