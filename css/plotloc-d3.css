@@ -565,6 +565,11 @@ input:checked + .det-slider:before {
     background: #4CAF50; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
+.country{
+    stroke:black;
+    stroke-width:1px;
+    fill-opacity:0;
+}
 @media (max-width:1200px){
     .panel-title.landscape{
         font-size:2.5em;

@@ -130,9 +130,9 @@ Localisation.prototype.init = function(){
         phase:0,
         posang:0,
         lst:0,
-        srcamp:1e-22,
+        srcamp:1e-20,
         hmap:'FNet',
-        res:5
+        res:2.5
     }
     this.src={}
     this.skyarr={}
@@ -1153,6 +1153,7 @@ Localisation.prototype.updateCalcs = function(newSrc,newDet){
         this.updateHeatmap(this.hmap);
     }
     this.calcTimeRings()
+    this.updateContoursTmatch()
     this.updateHeatmap('Tmatch');
     this.hideLoading();
     // this.uncloseContours();
@@ -1339,7 +1340,7 @@ Localisation.prototype.drawSkyInit = function(){
     // initialise graph drawing from data
     var loc = this;
     loc.loaded=0;
-    loc.toLoad=3;
+    loc.toLoad=4;
     loc.data=[];
     loc.optionsOn=false;
     loc.helpOn=false;
@@ -1356,9 +1357,22 @@ Localisation.prototype.drawSkyInit = function(){
     loc.loadLang(this.langIn)
     // loc.langdict_default = loc.loadLang(loc.langDefault,true);
 
+    d3.json('json/world50m.json', function(error, dataIn){
+        if (error){alert("Fatal error loading input file: '"+loc.fileInDet+"'. Sorry!")}
+        loc.map=dataIn;
+        loc.loaded++;
+        if (loc.debug){console.log('loaded: '+loc.fileInDet)}
+        //call next functions
+        if (loc.loaded==loc.toLoad){
+            loc.whenLoaded();
+        }else{
+            if (loc.debug){console.log('not ready yet')}
+        }
+    });
     // read in Detector data
     d3.json(loc.fileInDet, function(error, dataIn){
         if (error){alert("Fatal error loading input file: '"+loc.fileInDet+"'. Sorry!")}
+        // sort data
         loc.dataDet = [];
         loc.di={};
         loc.dStatus={};
@@ -1368,12 +1382,16 @@ Localisation.prototype.drawSkyInit = function(){
         for (d in dataIn){
             loc.processDet(dataIn[d])
             loc.dataDet.push(dataIn[d])
-            loc.di[dataIn[d].id]=i;
-            loc.dStatus[dataIn[d].id]=parseFloat(dataIn[d].on);
-            if (loc.dStatus[dataIn[d].id]==1){loc.Ndet+=1}
-            loc.legenddescs[dataIn[d].id]=dataIn[d].name;
+        }
+        // loc.dataDet=loc.dataDet.sort(function(a,b){return a.id > b.id;});
+        for (d in loc.dataDet){
+            loc.di[loc.dataDet[d].id]=i;
+            loc.dStatus[loc.dataDet[d].id]=parseFloat(loc.dataDet[d].on);
+            if (loc.dStatus[loc.dataDet[d].id]==1){loc.Ndet+=1}
+            loc.legenddescs[loc.dataDet[d].id]=loc.dataDet[d].name;
             i++;
         }
+
         loc.loaded++;
         if (loc.debug){console.log('loaded: '+loc.fileInDet)}
         //call next functions
@@ -1467,6 +1485,7 @@ Localisation.prototype.drawSky = function(){
 
     loc.overlays = {
         'contoursT':{'gid':"g-contoursT"},
+        'contoursTmatch':{'gid':"g-contoursTmatch"},
         'contoursPr':{'gid':"g-contoursPr"},
         'heatmap-Pr':{'gid':"g-heatmap-Pr"},
         'heatmap-pNet':{'gid':"g-heatmap-pNet"},
@@ -1484,6 +1503,28 @@ Localisation.prototype.drawSky = function(){
     loc.updateHeatmap(this.hmap)
     loc.showOverlay('heatmap-'+this.hmap)
 
+    // set projection
+    loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
+    loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
+
+    // add world map
+    networkmap = loc.svg.append("g")
+	    .attr("id", "worldmap")
+        .attr("transform", "translate("+loc.margin.left+","+(loc.margin.top+loc.skyHeight*2.8/180)+")");
+
+    // loc.skyarr.land = topojson.feature(loc.map, loc.map.objects.countries);
+    loc.skyarr.countries = topojson.feature(loc.map, loc.map.objects.countries),
+    loc.skyarr.land = topojson.feature(loc.map, loc.map.objects.land),
+	loc.skyarr.neighbors = topojson.neighbors(loc.map.objects.countries.geometries);
+    loc.skyarr.projEq=d3.geoEquirectangular()
+        .translate([0,loc.skyHeight/2])
+        .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.land)//.rotate([d2r(180),0,0])
+    networkmap.selectAll(".country")
+	    .data(loc.skyarr.countries.features)
+	    .enter().append("path")
+	    .attr("class", "country")
+	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
+
     // draw Heatmap
     loc.skyarr['Tmatch']={}
     loc.skyarr['Tmatch'].gHeatmap=loc.svg.append("g")
@@ -1495,10 +1536,6 @@ Localisation.prototype.drawSky = function(){
     loc.showOverlay('heatmap-Tmatch')
 
     // draw contours (dt)
-    loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
-    loc.skyarr.projEq=d3.geoEquirectangular()
-        .translate([0,loc.svgHeight/2]).rotate([d2r(180),0,0])
-    loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
     // loc.skyarr.projEq([0,0])
     loc.gContourT=loc.svg.append("g")
         .attr("id",function(){return loc.overlays.contoursT.gid})
@@ -1507,6 +1544,14 @@ Localisation.prototype.drawSky = function(){
         .style("opacity",0)
     loc.updateContoursT();
     loc.showOverlay('contoursT');
+
+    loc.gContourTmatch=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays.contoursTmatch.gid})
+        .attr("class","contoursTmatch")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateContoursTmatch();
+    loc.showOverlay('contoursTmatch');
 
     // draw contours (Pr)
     // loc.gContourPr=loc.svg.append("g")
@@ -1937,8 +1982,8 @@ Localisation.prototype.updateHeatmap = function(dataIn){
     }else if (data=="Tmatch"){
         loc.skyarr.Tmatch.hmapthreshold=0.5;
         loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1])
-            .domain([0,1])
-        loc.skyarr[data].colHeat=function(d){return "#000";};
+            .domain([0.5,1]).clamp(true)
+        loc.skyarr[data].colHeat=function(d){return "#fff";};
     }else if (data="overlay"){
         loc.skyarr[data].opHeat=function(d){return 0;};
         loc.skyarr[data].colHeat=function(d){return "#fff";};
@@ -2021,8 +2066,13 @@ Localisation.prototype.updateContoursT = function(){
         // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
 
         // loc.gContour.selectAll(".contour-"+dd).remove()
+        loc.skyarr.fullCont={type:"Polygon",coordinates:[[[-180,90],[180,90],[180,-90],[0,-90]]]}
+        loc.skyarr.projCont=d3.geoEquirectangular()
+            // .translate([0,loc.skyHeight/2])
+            .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullCont)//.rotate([d2r(180),0,0])
         loc.skyarr.contoursdt=loc.editContours(d3.contours()
             .size([loc.skyarr.nRA,loc.skyarr.nDec])
+            // .size([360,180])
             .thresholds(loc.skyarr.dtCont)
             (loc.skyarr.arr.dt[dd]),true,dd)
         for (c=0;c<loc.skyarr.contoursdt.length;c++){
@@ -2049,6 +2099,7 @@ Localisation.prototype.updateContoursT = function(){
             .style("stroke-width","3")
             .attr("class","contourT contourT-"+dd)
             .attr("d", function(d){return d.path})
+            // .attr("d",d3.geoPath().projection(loc.skyarr.ProjCont))
             .on("mouseover",function(d){
                 loc.tooltip
                    .style("opacity", .9);
@@ -2126,6 +2177,60 @@ Localisation.prototype.updateContoursPr = function(){
         .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
         // .merge(loc.skyarr[dd].dtcontours)
 }
+Localisation.prototype.updateContoursTmatch = function(){
+    var loc=this;
+    console.log(loc.src.Pr,loc.skyarr.arr.Pr);
+    loc.skyarr.Tmatch.filtPix=loc.filterSky('Tmatch','cont',0.5);
+
+    loc.skyarr.Tmatch.colCont = d3.scaleOrdinal().range(['#fff'])
+    loc.skyarr.Tmatch.opCont = d3.scaleOrdinal().range([1])
+    // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
+
+    // loc.gContour.selectAll(".contour-"+dd).remove()
+    contoursTmatch=loc.editContours(d3.contours()
+        .size([loc.skyarr.nRA,loc.skyarr.nDec])
+        .thresholds([0.9])
+        (loc.skyarr.arr.Tmatch),true,'Tmatch')
+    for (c=0;c<contoursTmatch.length;c++){
+        path=d3.geoPath().projection(loc.skyarr.projI)(contoursTmatch[c]);
+        if (contoursTmatch[c].hasEdge){
+            contoursTmatch[c].path=path.replace('Z','');
+        }else{
+            contoursTmatch[c].path=path;
+        }
+    }
+    loc.skyarr.Tmatch.Tmatchcontours = loc.gContourTmatch.selectAll(".contour-Tmatch")
+        .data(contoursTmatch)
+    loc.skyarr.Tmatch.Tmatchcontours.exit()
+        .transition().duration(500)
+        .style("opacity",0).remove()
+    loc.skyarr.Tmatch.Tmatchcontours
+        .transition().duration(500).ease(d3.easeExp)
+        .attr("d", function(d){return d.path})
+        .style("stroke-opacity",function(d){return (loc.skyarr.Tmatch.opCont(d.value))})
+    loc.skyarr.Tmatch.Tmatchcontours.enter().append("path")
+        // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
+        .style("fill-opacity",0)
+        .style("stroke",function(d){return loc.skyarr.Tmatch.colCont(d.value)})
+        .style("stroke-width","3")
+        .attr("class","contourTmatch contour-Tmatch")
+        .attr("d", d3.geoPath(loc.skyarr.projI))
+        .on("mouseover",function(d){
+            loc.tooltip
+               .style("opacity", .9);
+            loc.tooltip.html(loc.tttextHmap(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY-10) + "px")
+               .style("width","auto")
+               .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.style("opacity", 0);
+        })
+        .transition().duration(500).ease(d3.easeExp)
+        .style("stroke-opacity",function(d){return (loc.skyarr.Tmatch.opCont(d.value))})
+        // .merge(loc.skyarr[dd].dtcontours)
+}
 Localisation.prototype.showContoursT = function(){
     d3.select('#g-contoursT')
         .transition().duration(500)
@@ -2153,84 +2258,86 @@ Localisation.prototype.editContours = function(cont,edit,dd){
     if (edit){
         for (i in cont){
             // console.log('edit contour ',dd,' ',i,cont[i])
-            coordIn=cont[i].coordinates[0]
-            // cont[i].type="MultiLineString"
-            // console.log('i in ',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
-            coordOut=[]
-            for (j in d3.range(coordIn.length)){
-                // console.log('j in ',j,coordIn[j].length,coordIn[j][0])
-                idxCoords=[];
-                newCoords=[];
-                z=[[],[],[]]
-                edges=[[0,0],[0,0],[0,0]];
-                lim=[this.skyarr.nRA,this.skyarr.nDec]
-                for (p in coordIn[j]){
-                    z[0]=(coordIn[j][p-1])?coordIn[j][p-1]:[null,null];
-                    z[1]=coordIn[j][p];
-                    z[2]=(coordIn[j][p+1])?coordIn[j][p+1]:[null,null];
-                    // if (coordIn[j][p-1]){d1=coordIn[j][p-1]}else{d1=[null,null]}
-                    for (x in z){
-                        for (y in z[x]){
-                            if(z[x][y]<=0){edges[x][y]=-1}
-                            else if(z[x][y]>=lim[y]){edges[x][y]=1}
-                            else{edges[x][y]=0}
+            if (cont[i].coordinates.length>0){
+                coordIn=cont[i].coordinates[0]
+                // cont[i].type="MultiLineString"
+                // console.log('i in ',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
+                coordOut=[]
+                for (j in d3.range(coordIn.length)){
+                    // console.log('j in ',j,coordIn[j].length,coordIn[j][0])
+                    idxCoords=[];
+                    newCoords=[];
+                    z=[[],[],[]]
+                    edges=[[0,0],[0,0],[0,0]];
+                    lim=[this.skyarr.nRA,this.skyarr.nDec]
+                    for (p in coordIn[j]){
+                        z[0]=(coordIn[j][p-1])?coordIn[j][p-1]:[null,null];
+                        z[1]=coordIn[j][p];
+                        z[2]=(coordIn[j][p+1])?coordIn[j][p+1]:[null,null];
+                        // if (coordIn[j][p-1]){d1=coordIn[j][p-1]}else{d1=[null,null]}
+                        for (x in z){
+                            for (y in z[x]){
+                                if(z[x][y]<=0){edges[x][y]=-1}
+                                else if(z[x][y]>=lim[y]){edges[x][y]=1}
+                                else{edges[x][y]=0}
+                            }
                         }
+                        if ((edges[1][0]==0)&(edges[1][1]==0)){
+                            idxCoords.push(p)
+                        }
+                        // else if((edges[1][1]==0)&(edges[1][0]!=0)&((edges[0][0]==0)&(edges[2][0]==0))){
+                        //     idxCoords.push(p)
+                        // }
+                        // if(!((d[0]<=0)|(d[0]==this.skyarr.nRA)|(d[1]==0)|(d[1]==this.skyarr.nDec))){
+                        //     // not at edge
+                        //     idxCoords.push(p)
+                        // }
+                        // edges[0]=edges[1];
+                        // edges[1]=edges[2];
+                        // z[0]=z[1];
                     }
-                    if ((edges[1][0]==0)&(edges[1][1]==0)){
-                        idxCoords.push(p)
+                    for (p in idxCoords){
+                        newCoords.push(coordIn[j][idxCoords[p]])
                     }
-                    // else if((edges[1][1]==0)&(edges[1][0]!=0)&((edges[0][0]==0)&(edges[2][0]==0))){
-                    //     idxCoords.push(p)
-                    // }
-                    // if(!((d[0]<=0)|(d[0]==this.skyarr.nRA)|(d[1]==0)|(d[1]==this.skyarr.nDec))){
-                    //     // not at edge
-                    //     idxCoords.push(p)
-                    // }
-                    // edges[0]=edges[1];
-                    // edges[1]=edges[2];
-                    // z[0]=z[1];
-                }
-                for (p in idxCoords){
-                    newCoords.push(coordIn[j][idxCoords[p]])
-                }
-                idx0=[]
-                console.log('finding edges...',newCoords)
-                for (p=1; p<newCoords.length;p++){
-                    // console.log(newCoords[p],newCoords[p+1])
-                    p0=p
-                    p1=(p==newCoords.length-1)?0:p+1;
-                    if((Math.abs(newCoords[p0][0]-newCoords[p1][0])>loc.skyarr.nRA/4.)|
-                        (Math.abs(newCoords[p0][1]-newCoords[p1][1])>loc.skyarr.nDec/4.)){
-                        idx0.push(p+1);
-                        console.log('edge at '+(p+1),newCoords[p-1],newCoords[p],newCoords[p+1])
+                    idx0=[]
+                    console.log('finding edges...',newCoords)
+                    for (p=1; p<newCoords.length;p++){
+                        // console.log(newCoords[p],newCoords[p+1])
+                        p0=p
+                        p1=(p==newCoords.length-1)?0:p+1;
+                        if((Math.abs(newCoords[p0][0]-newCoords[p1][0])>loc.skyarr.nRA/4.)|
+                            (Math.abs(newCoords[p0][1]-newCoords[p1][1])>loc.skyarr.nDec/4.)){
+                            idx0.push(p+1);
+                            console.log('edge at '+(p+1),newCoords[p-1],newCoords[p],newCoords[p+1])
+                        }
+                        // if((Math.abs(newCoords[newCoords.length-1][0]-newCoords[0][0])>loc.skyarr.nRA/4.)|
+                        //     (Math.abs(newCoords[newCoords.length-1][1]-newCoords[0][1])>loc.skyarr.nDec/4.)){
+                        // asasfd;
                     }
-                    // if((Math.abs(newCoords[newCoords.length-1][0]-newCoords[0][0])>loc.skyarr.nRA/4.)|
-                    //     (Math.abs(newCoords[newCoords.length-1][1]-newCoords[0][1])>loc.skyarr.nDec/4.)){
-                    // asasfd;
+                    if(idx0.length>0){
+                        // console.log(idx0,newCoords);
+                        newCoords=newCoords.slice(idx0,newCoords.length)
+                            .concat(newCoords.slice(0,idx0));
+                        cont[i].hasEdge=true;
+                        // console.log(idx0,newCoords);
+                    }else{cont[i].hasEdge=false;}
+                    // newCoords=coordIn[j].filter(function(d){
+                    //     isVal= (!((d[0]<=0)|(d[0]==loc.skyarr.nRA)|(d[1]==0)|(d[1]==loc.skyarr.nDec)));
+                    //     // if (!isVal){console.log(d[0],d[1])};
+                    //     return(isVal)
+                    // });
+                    if (newCoords.length>0){
+                        coordOut.push(newCoords)
+                    }else{
+                        // newCoords=[]
+                        // coordOut.push(newCoords)
+                    }
+                    // console.log('j out',j,newCoords.length,newCoords[0])
+                    // console.log('i',i,'j',j,coordOut)
                 }
-                if(idx0.length>0){
-                    // console.log(idx0,newCoords);
-                    newCoords=newCoords.slice(idx0,newCoords.length)
-                        .concat(newCoords.slice(0,idx0));
-                    cont[i].hasEdge=true;
-                    // console.log(idx0,newCoords);
-                }else{cont[i].hasEdge=false;}
-                // newCoords=coordIn[j].filter(function(d){
-                //     isVal= (!((d[0]<=0)|(d[0]==loc.skyarr.nRA)|(d[1]==0)|(d[1]==loc.skyarr.nDec)));
-                //     // if (!isVal){console.log(d[0],d[1])};
-                //     return(isVal)
-                // });
-                if (newCoords.length>0){
-                    coordOut.push(newCoords)
-                }else{
-                    // newCoords=[]
-                    // coordOut.push(newCoords)
-                }
-                // console.log('j out',j,newCoords.length,newCoords[0])
-                // console.log('i',i,'j',j,coordOut)
+                cont[i].coordinates[0]=coordOut;
+                // console.log('i out',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
             }
-            cont[i].coordinates[0]=coordOut;
-            // console.log('i out',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
         }
     }
     cont.type="MultiLineString"
@@ -2693,8 +2800,9 @@ Localisation.prototype.calcTimeRings = function(){
         for (i in this.dOn){
             for (j in this.dOn){
                 if (this.dOn[j]>this.dOn[i]){
-                    dtp=this.skyarr.arr.dt[i+j][p]
-                    Tm=Math.exp(-Math.pow((dtp-this.src.dt[i+j])/(4*this.contourWidth(i+j)),2));
+                    if (this.skyarr.arr.dt[i+j]){dd=i+j}else{dd=j+i}
+                    dtp=this.skyarr.arr.dt[dd][p]
+                    Tm=Math.exp(-Math.pow((dtp-this.src.dt[dd])/(4*this.contourWidth(dd)),2));
                     this.skyarr.arr.Tmatch[p]*=Tm;
                 }
             }
