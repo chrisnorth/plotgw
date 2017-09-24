@@ -130,7 +130,7 @@ Localisation.prototype.init = function(){
         phase:0,
         posang:0,
         lst:0,
-        srcamp:1e-20,
+        srcamp:1e-21,
         hmap:'FNet',
         res:2.5
     }
