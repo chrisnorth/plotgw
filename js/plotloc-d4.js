@@ -1981,8 +1981,11 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         }
     }else if (data=="Tmatch"){
         loc.skyarr.Tmatch.hmapthreshold=0.5;
-        loc.skyarr[data].opHeat=d3.scaleLinear().range([0,1])
-            .domain([0.5,1]).clamp(true)
+        loc.skyarr[data].opHeat=function(d){
+            if (loc.Ndet<=1){return 0}
+            else{ return d3.scaleLinear().range([0,1])
+            .domain([0.5,1]).clamp(true)(d)}
+        }
         loc.skyarr[data].colHeat=function(d){return "#fff";};
     }else if (data="overlay"){
         loc.skyarr[data].opHeat=function(d){return 0;};
@@ -2567,7 +2570,7 @@ Localisation.prototype.processSrcAmp = function(){
     // calculate source amplitudes and phase
     src.h0=src.amp/2;
     // ignore second phase
-    src.h2=0;//src.amp/2;
+    src.h2=src.amp/2;
     src.posang2=src.posang;
     src['A+']=src.dist*(1 + Math.cos(d2r(src.inc))*Math.cos(d2r(src.inc)))/2;
     src['Ax']=src.dist*Math.cos(d2r(src.inc));
