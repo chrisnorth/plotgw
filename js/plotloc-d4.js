@@ -719,7 +719,7 @@ Localisation.prototype.updateDetResults = function(){
         netsnrbarouter=netStatus.append("div")
             .attr("class","det-bar-outer det-snr-bar-outer")
         netsnrbarouter.append("div").attr("class","bar-label bar-label-left")
-            .html(this.tl('%text.plotloc.label.SNR%'));
+            .html(this.tl('%text.loc.info.snr%'));
         netsnrbarouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
             .style("right","95%").html('0.01');
         netsnrbarouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
@@ -732,20 +732,9 @@ Localisation.prototype.updateDetResults = function(){
             .style("left","95%").html('100');
         netsnrbarouter.append("div").attr("class","det-snr-bar")
             .on("mouseover",function(){
-                loc.tooltip.transition()
-                   .duration(200)
-                   .style("opacity", .9);
-                loc.tooltip.html(loc.tl('%tooltip.plotloc.SNR%: '+parseFloat(loc.src.pNet).toPrecision(2)))
-                   .style("left", (d3.event.pageX + 10) + "px")
-                   .style("top", (d3.event.pageY-10) + "px")
-                   .style("width","auto")
-                   .style("height","auto");
+                loc.showTooltipManual(loc.tl('%text.loc.info.snr%: '+parseFloat(loc.src.pNet).toPrecision(2)))
             })
-            .on("mouseout",function(){
-                loc.tooltip.transition()
-                     .duration(500)
-                     .style("opacity", 0);
-            })
+            .on("mouseout",function(){loc.hideTooltipManual();});
         netsnrbarouter.append("div").attr("class","bar-line")
             .style("left","25%");
         netsnrbarouter.append("div").attr("class","bar-line")
@@ -761,7 +750,15 @@ Localisation.prototype.updateDetResults = function(){
         netbarpolouter.append("div").attr("class","bar-label bar-label-left").html('+');
         netbarpolouter.append("div").attr("class","bar-label bar-label-right").html('x');
         netbarpolouter.append("div").attr("class","det-pol-bar det-pol-bar-plus")
+            .on("mouseover",function(){
+                loc.showTooltipManual(loc.tl('%text.loc.info.pluspol%: '+parseFloat(100*loc.src['r+Net']).toPrecision(2))+'%')
+            })
+            .on("mouseout",function(){loc.hideTooltipManual();});
         netbarpolouter.append("div").attr("class","det-pol-bar det-pol-bar-cross")
+            .on("mouseover",function(){
+                loc.showTooltipManual(loc.tl('%text.loc.info.crosspol%: '+parseFloat(100*loc.src['rxNet']).toPrecision(2))+'%')
+            })
+            .on("mouseout",function(){loc.hideTooltipManual();});
         netbarpolouter.append("div").attr("class","bar-line")
             .style("left","25%");
         netbarpolouter.append("div").attr("class","bar-line zero-left")
@@ -893,9 +890,7 @@ Localisation.prototype.updateDetResults = function(){
     //     .html(this.tl('%text.plotloc.label.SNR%'))
     barsnrouter=detStatusDiv.append("div")
         .attr("class","det-bar-outer det-snr-bar-outer")
-    barsnrouter.append("div").attr("class","bar-label bar-label-left").html(this.tl('%text.plotloc.label.SNR%'));
-    barsnrouter.append("div").attr("class","bar-label bar-label-left")
-        .html(this.tl('%text.plotloc.label.SNR%'));
+    barsnrouter.append("div").attr("class","bar-label bar-label-left").html(this.tl('%text.loc.info.snr%'));
     barsnrouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
         .style("right","95%").html('0.01');
     barsnrouter.append("div").attr("class","bar-label bar-label-axis bar-label-axis-left")
@@ -908,8 +903,14 @@ Localisation.prototype.updateDetResults = function(){
         .style("left","95%").html('100');
     barsnrouter.append("div").attr("class","det-snr-bar")
         .style("opacity",function(d){
-            return (loc.dStatus[d.id]==true)?"1":"0"})
-        .style("width",function(d){return loc.snrRange(Math.log10(loc.src.det[loc.di[d.id]].snr))+'%';});
+            return (loc.dStatus[d.id]==true)?"1":"0.25"})
+        .style("width",function(d){return loc.snrRange(Math.log10(loc.src.det[loc.di[d.id]].snr))+'%';})
+        .on("mouseover",function(d){
+            loc.showTooltipManual(loc.tl('%text.loc.info.snr%: '+parseFloat(loc.src.det[loc.di[d.id]].snr).toPrecision(2)));
+        })
+        .on("mouseout",function(d){
+            loc.hideTooltipManual()
+        })
     barsnrouter.append("div").attr("class","bar-line")
         .style("left","25%");
     barsnrouter.append("div").attr("class","bar-line")
@@ -931,14 +932,24 @@ Localisation.prototype.updateDetResults = function(){
     barpolouter.append("div").attr("class","bar-label bar-label-right").html('x');
     barpolouter.append("div").attr("class","det-pol-bar det-pol-bar-plus")
         .style("opacity",function(d){
-            return (loc.dStatus[d.id]==true)?"1":"0"})
+            return (loc.dStatus[d.id]==true)?"1":"0.25"})
         .style("margin-left",function(d){return parseInt(Math.round(50.*(1-loc.src.det[loc.di[d.id]]['r+'])))+"%"})
-        .style("width",function(d){return parseInt(Math.round(50.*loc.src.det[loc.di[d.id]]['r+']))+"%"});
+        .style("width",function(d){return parseInt(Math.round(50.*loc.src.det[loc.di[d.id]]['r+']))+"%"})
+        .on("mouseover",function(d){
+            loc.showTooltipManual(loc.tl('%text.loc.info.pluspol%: '+
+                parseFloat(100*loc.src.det[loc.di[d.id]]['r+']).toPrecision(2))+'%')
+        })
+        .on("mouseout",function(){loc.hideTooltipManual();});;
     barpolouter.append("div").attr("class","det-pol-bar det-pol-bar-cross")
         .style("opacity",function(d){
-            return (loc.dStatus[d.id]==true)?"1":"0"})
+            return (loc.dStatus[d.id]==true)?"1":"0.25"})
         .style("margin-left","50%")
-        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['rx'])+"%"});
+        .style("width",function(d){return parseInt(50.*loc.src.det[loc.di[d.id]]['rx'])+"%"})
+        .on("mouseover",function(d){
+            loc.showTooltipManual(loc.tl('%text.loc.info.crosspol%: '+
+                parseFloat(100*loc.src.det[loc.di[d.id]]['rx']).toPrecision(2))+'%')
+        })
+        .on("mouseout",function(){loc.hideTooltipManual();});
     barpolouter.append("div").attr("class","bar-line")
         .style("left","25%");
     barpolouter.append("div").attr("class","bar-line zero-left")
@@ -1017,9 +1028,9 @@ Localisation.prototype.addLabelDet = function (det,container) {
     labtxtdiv.style.height = "100%";
     labtxtdiv.style["font-size"] = (1.3*loc.sksc)+"em";
     if (this.dStatus[det]==1){
-        labtxtdiv.innerHTML = this.tl('ON');
+        labtxtdiv.innerHTML = this.tl('%text.loc.network.on%');
     }else{
-        labtxtdiv.innerHTML = this.tl('OFF');
+        labtxtdiv.innerHTML = this.tl('%text.loc.network.off%');
     }
     labimgdiv.appendChild(labtxtdiv);
     document.getElementById(container).appendChild(labimgdiv);
@@ -1266,21 +1277,21 @@ Localisation.prototype.setStyles = function(){
     this.getOpacity = function(d) {return 1}
 
     this.labels = {
-        'ra':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.ra%')+': '+
+        'ra':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.ra%')+': '+
             parseInt(loc.src.ra)+'<sup>o</sup>')}},
-        'dec':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.dec%')+': '+
+        'dec':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.dec%')+': '+
             parseInt(loc.src.dec)+'<sup>o</sup>')}},
-        'lon':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.lon%')+': '+
+        'lon':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.lon%')+': '+
             parseInt(loc.src.lon)+'<sup>o</sup>')}},
-        'lat':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.lat%')+': '+
+        'lat':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.lat%')+': '+
             parseInt(loc.src.lat)+'<sup>o</sup>')}},
-        'posang':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.posang%')+': '+
+        'posang':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.posang%')+': '+
             parseInt(loc.src.posang)+'<sup>o</sup>')}},
-        'inc':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.inc%')+': '+
+        'inc':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.inclination%')+': '+
             parseInt(loc.src.inc)+'<sup>o</sup>')}},
-        'amp':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.amplitude%')+': '+
+        'amp':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.amplitude%')+': '+
             parseFloat(loc.src.amp).toPrecision(2))}},
-        'lst':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.lst%')+': '+
+        'gmst':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.gmst%')+': '+
             parseInt(loc.src.lst))},
             "icon":"img/time.svg"},
         // 'detr':{'type':'det','labstrdet':function(det){return det+' %text.loc.sensitivity%: '+loc.dataDet[loc.di[det]]['r+'].toPrecision(2)}}
@@ -1623,13 +1634,27 @@ Localisation.prototype.drawSky = function(){
         .attr("y1",function(){return loc.src2xy('y-')[1]})
         .attr("x2",function(){return loc.src2xy('y+')[0]})
         .attr("y2",function(){return loc.src2xy('y+')[1]})
+    loc.srcMarker.append("circle")
+        .attr("id","FG-src")
+        .attr("class","FG-src")
+        .attr("opacity",0)
+        .attr("cx",function(){return loc.src2xy('ctr')[0]})
+        .attr("cy",function(){return loc.src2xy('ctr')[1]})
+        .attr("r",10)
+        .style("fill","white")
+        .on("mouseover",function(){
+            loc.showTooltipManual(loc.tl('%tooltip.loc.sourceloc%'))
+        })
+        .on("mouseout",function(){loc.hideTooltipManual()})
+        // .style("stroke","black")
+        // .style("stroke-width",3)
 
     // add Detector status
     this.snrRange=d3.scaleLinear().range([0,100]).domain([-2,2]).clamp(true)
     d3.select("#info-network-title")
-        .html(this.tl("%text.plotloc.info.network-title%"))
+        .html(this.tl("%text.loc.info.network-title%"))
     d3.select("#info-det-title")
-        .html(this.tl("%text.plotloc.info.detectors-title%"))
+        .html(this.tl("%text.loc.info.detectors-title%"))
 
     loc.updateDetResults();
 
@@ -1646,7 +1671,7 @@ Localisation.prototype.drawSky = function(){
               loc.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.showinfo%'))
+              loc.tooltip.html(loc.tl('%tooltip.loc.showinfo%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1676,7 +1701,7 @@ Localisation.prototype.drawSky = function(){
               loc.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.showhelp%'))
+              loc.tooltip.html(loc.tl('%tooltip.loc.showhelp%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1710,7 +1735,7 @@ Localisation.prototype.drawSky = function(){
               loc.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.shownetwork%'))
+              loc.tooltip.html(loc.tl('%tooltip.loc.shownetwork%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1744,7 +1769,7 @@ Localisation.prototype.drawSky = function(){
               loc.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.showsource%'))
+              loc.tooltip.html(loc.tl('%tooltip.loc.showsource%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1779,7 +1804,7 @@ Localisation.prototype.drawSky = function(){
               loc.tooltip.transition()
                  .duration(200)
                  .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.plotloc.showlang%'))
+              loc.tooltip.html(loc.tl('%tooltip.loc.showlang%'))
                  .style("left", (d3.event.pageX + 10) + "px")
                  .style("top", (d3.event.pageY-10) + "px")
                  .style("width","auto")
@@ -1920,6 +1945,20 @@ Localisation.prototype.updateDetMarkers = function(){
         .attr("stroke-dasharray",function(d){return ((loc.dStatus[d.id]==1)? 0 :1)})
         .style("stroke", function(d){return d.color})
         .style("stroke-width",Math.min(5,2./loc.sksc));
+    loc.detGroups.append("circle")
+        .attr("class","detcircle")
+        .attr("id",function(d){return "detcircle detcircle-"+d.id;})
+        .attr("cx", function(d){return loc.det2xy(d,'middle')[0]})
+        .attr("cy", function(d){return loc.det2xy(d,'middle')[1]})
+        .attr("r", function(d){return loc.lenScale(Math.max(d.length,2))})
+        .attr("cursor","default")
+        .attr("opacity","0")
+        .attr("stroke-opacity",0)
+        .style("fill", "#fff")
+        .on("mouseover",function(d){
+            loc.showTooltipManual(loc.tl(d.name+' ('+((d.on)?'%text.loc.network.on%':'%text.loc.network.off%')+')'))
+        })
+        .on("mouseout",function(d){loc.hideTooltipManual();});
     // loc.detGroups.merge(loc.detMarkers);
     // loc.detGroups=this.detMarkers.enter()
 }
@@ -2020,18 +2059,18 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         .style("fill-opacity",0).remove()
     loc.skyarr[data].heatmap.enter().append("rect")
         .attr("class","hm-rect new")
-        .on("mouseover",function(d){
-            loc.tooltip
-               .style("opacity", .9);
-            loc.tooltip.html(loc.tttextHmap(d))
-               .style("left", (d3.event.pageX + 10) + "px")
-               .style("top", (d3.event.pageY-10) + "px")
-               .style("width","auto")
-               .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            loc.tooltip.style("opacity", 0);
-        })
+        // .on("mouseover",function(d){
+        //     loc.tooltip
+        //        .style("opacity", .9);
+        //     loc.tooltip.html(loc.tttextHmap(d))
+        //        .style("left", (d3.event.pageX + 10) + "px")
+        //        .style("top", (d3.event.pageY-10) + "px")
+        //        .style("width","auto")
+        //        .style("height","auto");
+        // })
+        // .on("mouseout", function(d) {
+        //     loc.tooltip.style("opacity", 0);
+        // })
     .merge(loc.skyarr[data].heatmap)
         .transition().duration(500)
         .attr("x",function(d){return loc.rect2xy(d)[0];})
@@ -2935,7 +2974,7 @@ Localisation.prototype.loadLang = function(lang){
     var reload = (!loc.lang)||(loc.lang=="") ? false:true;
     loc.lang=lang;
     loc.langshort = (loc.lang.indexOf('-') > 0 ? loc.lang.substring(0,loc.lang.indexOf('-')) : loc.lang.substring(0,2));
-    loc.fileInLang="lang/lang_"+lang+".json";
+    loc.fileInLang="lang_loc/lang_loc_"+lang+".json";
     d3.json(loc.fileInLang, function(error, dataIn) {
         if (error){
             if (loc.lang==loc.defaults.lang){
@@ -2992,7 +3031,7 @@ Localisation.prototype.loadLang = function(lang){
 Localisation.prototype.loadLangDefault = function(){
     var loc=this;
     var reload = (loc.lang) ? true:false;
-    loc.fileInLangDefault="lang/lang_"+loc.defaults.lang+".json";
+    loc.fileInLangDefault="lang_loc/lang_loc_"+loc.defaults.lang+".json";
     d3.json(loc.fileInLangDefault, function(error, dataIn) {
         if (error){
             console.log(error);
@@ -3032,7 +3071,7 @@ Localisation.prototype.setLang = function(){
         .html(this.tl('%text.loc.page.title%'))
     if (this.langdict['meta.translator'] && this.langdict['meta.translator']!=''){
         d3.select('#lang-credit')
-            .html(this.tl('%text.gen.langcredit% (%meta.name%): %meta.translator%'));
+            .html(this.tl('%text.loc.langcredit% (%meta.name%): %meta.translator%'));
     }else{
         d3.select('#lang-credit')
             .html('');
@@ -3044,19 +3083,19 @@ Localisation.prototype.setLang = function(){
 Localisation.prototype.addHelp = function(){
     // add help to panel
     d3.select("#help-title")
-        .html(this.tl("%text.plotloc.help.title%"))
+        .html(this.tl("%text.loc.help.title%"))
     d3.select("#help-text")
-        .html(this.tl("%text.plotloc.help.text%%text.plotloc.help.about%%text.plotloc.help.tech%"));
+        .html(this.tl("%text.loc.help.text%%text.loc.help.about%%text.loc.help.tech%"));
     // d3.select("#help-tech")
     //     .html(this.tl("%text.plotloc.help.about%%text.plotloc.help.tech%"));
     d3.select("#help-help-text")
-        .html(this.tl("%text.plotloc.help.help%"));
+        .html(this.tl("%text.loc.help.help%"));
     d3.select("#help-info-text")
-        .html(this.tl("%text.plotloc.help.info%"));
+        .html(this.tl("%text.loc.help.info%"));
     d3.select("#help-lang-text")
-        .html(this.tl("%text.plotloc.help.lang%"));
+        .html(this.tl("%text.loc.help.lang%"));
     d3.select("#help-share-text")
-        .html(this.tl("%text.plotloc.help.share%"));
+        .html(this.tl("%text.loc.help.share%"));
     if (this.portrait){
         d3.select('.help-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -3127,9 +3166,9 @@ Localisation.prototype.addLang = function(replot){
     // this.panels.lang.show=this.showLang()
     // this.panels.lang.hide=this.hideLang()
     d3.select("#lang-title")
-        .html(this.tl("%text.plotloc.lang.title%"))
+        .html(this.tl("%text.loc.lang.title%"))
         d3.select("#lang-text")
-            .html(this.tl("%text.plotloc.lang.text%"));
+            .html(this.tl("%text.loc.lang.text%"));
     if (this.portrait){
         d3.select('#lang-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -3247,9 +3286,9 @@ Localisation.prototype.hideLang = function(d) {
 Localisation.prototype.addNetwork = function(){
     var loc=this;
     d3.select("#network-title")
-        .html(this.tl("%text.plotloc.network.title%"))
+        .html(this.tl("%text.loc.network.title%"))
     d3.select("#network-text")
-        .html(this.tl("%text.plotloc.network.text%"));
+        .html(this.tl("%text.loc.network.text%"));
     if (this.portrait){
         d3.select('#network-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -3345,7 +3384,7 @@ Localisation.prototype.addSource = function(){
     // this.panels.source.hide=this.hideSource()
     var loc=this;
     d3.select("#source-title")
-        .html(this.tl("%text.plotloc.source.title%"))
+        .html(this.tl("%text.loc.source.title%"))
     if (this.portrait){
         d3.select('#network-source')
             .style("font-size",(5.0*this.xsc)+"em")
