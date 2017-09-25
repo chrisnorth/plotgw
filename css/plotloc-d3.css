@@ -588,12 +588,32 @@ input:checked + .det-slider:before {
     background: #4CAF50; /* Green background */
     cursor: pointer; /* Cursor on hover */
 }
+#background{
+    fill:black;
+    fill-opacity:1;
+}
 #worldmap,#ocean{
     fill-opacity:0;
+}
+#ocean{
+    fill:#000096;
 }
 .country{
     stroke:black;
     stroke-width:1px;
+    fill:#009600;
+}
+.constellation{
+    stroke:#f0f;
+    stroke-width:1px;
+}
+.constlines{
+    stroke:#0ff;
+    stroke-width:1px;
+}
+.constname{
+    fill:#ff0;
+    fill-opacity:1;
 }
 @media (max-width:1200px){
     .panel-title.landscape{

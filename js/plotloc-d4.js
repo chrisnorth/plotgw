@@ -112,9 +112,9 @@ Localisation.prototype.init = function(){
         'help':{'status':false,
             'hide':function(){loc.hideHelp()},
             'show':function(){loc.showHelp()}},
-        'network':{'status':false,
-            'hide':function(){loc.hideNetwork()},
-            'show':function(){loc.showNetwork()}},
+        // 'network':{'status':false,
+        //     'hide':function(){loc.hideNetwork()},
+        //     'show':function(){loc.showNetwork()}},
         'source':{'status':false,
             'hide':function(){loc.hideSource()},
             'show':function(){loc.showSource()}},
@@ -132,24 +132,27 @@ Localisation.prototype.init = function(){
         dist:1,
         phase:0,
         posang:0,
-        lst:0,
+        gmst:0,
         srcamp:1e-21,
         hmap:'FNet',
-        res:2.5
+        res:2.5,
+        world:false
     }
     this.src={}
     this.skyarr={}
     this.src.ra = (this.urlVars.ra) ? parseFloat(this.urlVars.ra) : this.defaults.ra;
     this.src.dec = (this.urlVars.dec) ? parseFloat(this.urlVars.dec) : this.defaults.dec;
     this.src.posang = (this.urlVars.posang) ? parseFloat(this.urlVars.posang) : this.defaults.posang;
-    this.src.lst = (this.urlVars.lst) ? parseFloat(this.urlVars.lst) : this.defaults.lst;
+    this.src.gmst = (this.urlVars.gmst) ? parseFloat(this.urlVars.gmst) : this.defaults.gmst;
     this.src.amp = (this.urlVars.srcamp) ? parseFloat(this.urlVars.srcamp) : this.defaults.srcamp;
     this.src.inc = (this.urlVars.inc) ? parseFloat(this.urlVars.inc) : this.defaults.inc;
     this.src.dist = (this.urlVars.dist) ? parseFloat(this.urlVars.dist) : this.defaults.dist;
     this.src.phase = (this.urlVars.phase) ? parseFloat(this.urlVars.phase) : this.defaults.phase;
     this.skyarr.res=(this.urlVars.res) ? parseFloat(this.urlVars.res) : this.defaults.res;
     this.hmap = (this.urlVars.hmap) ? this.urlVars.hmap : this.defaults.hmap;
+    this.world = (this.urlVars.world) ? this.urlVars.world : this.defaults.world;
 
+    this.world = ((this.world=="1")|(this.world=="true")) ? true : false;
     this.old={"src":{"ra":null,"dec":null},"Ndet":0};
     // set values for styles
     this.setStyles();
@@ -175,7 +178,7 @@ Localisation.prototype.init = function(){
         // "en2":{code:"en",name:"English (en)"},
         // "fr2":{code:"fr",name:"Francais (fr)"},
     }
-    this.src.lon=-this.src.ra;
+    this.src.lon=this.ra2lon(this.src.ra);
     this.src.lat=this.src.dec;
     // set arrays for sky
     this.rE = 6.3716e6;
@@ -188,7 +191,7 @@ Localisation.prototype.init = function(){
     this.skyarr.yList=d3.range(-90+this.skyarr.dDec/2.,90+this.skyarr.dDec/2.,this.skyarr.dDec);
     this.skyarr.dec2i = d3.scaleLinear().domain([-90,90]).range([-0.5,loc.skyarr.nDec+0.5])
     // RA needs to run backwards to switch to longitude
-    this.skyarr.xList=d3.range(360-this.skyarr.dRA/2.,0-this.skyarr.dRA/2.,-this.skyarr.dRA);
+    this.skyarr.xList=d3.range(180-this.skyarr.dRA/2.,-180-this.skyarr.dRA/2.,-this.skyarr.dRA);
     this.skyarr.ra2i = d3.scaleLinear().domain([-180,180]).range([loc.skyarr.nRA+0.5,-0.5])
     this.skyarr.radec2p = function(ra,dec){
         ira=Math.max(Math.floor(loc.skyarr.ra2i(ra)),0)
@@ -197,14 +200,14 @@ Localisation.prototype.init = function(){
         return idec*loc.skyarr.nRA + ira
     }
     this.src.pix = this.skyarr.radec2p(this.src.ra,this.src.dec);
-    this.skyarr.arr={'ra':[],'dec':[],'vec':[],'pix':[]};
+    this.skyarr.arr={'lon':[],'lat':[],'vec':[],'pix':[]};
     p=0;
     for (j in d3.range(0,this.skyarr.nDec)){
         for (i in d3.range(0,this.skyarr.nRA)){
             this.skyarr.arr.pix.push(p);
-            this.skyarr.arr.ra.push(loc.mod360(180+this.skyarr.xList[i]));
-            this.skyarr.arr.dec.push(-this.skyarr.yList[j]);
-            this.skyarr.arr.vec.push($V(lb2vec(this.skyarr.arr.ra[p],this.skyarr.arr.dec[p])))
+            this.skyarr.arr.lon.push(loc.mod360(this.skyarr.xList[i]));
+            this.skyarr.arr.lat.push(-this.skyarr.yList[j]);
+            this.skyarr.arr.vec.push($V(lb2vec(this.skyarr.arr.lon[p],this.skyarr.arr.lat[p])))
             p++;
         }
     }
@@ -440,7 +443,12 @@ Localisation.prototype.setScales = function(){
             return(ra)
         }
     }
-
+    this.ra2lon = function(ra){
+        return (loc.src.gmst - loc.mod360(ra));
+    }
+    this.lon2ra  = function(lon){
+        return (loc.src.gmst - loc.mod360(lon));
+    }
     this.raValue = function(d) {return d.ra;} // data -> value
     // value -> display
     this.raScale = d3.scaleLinear().domain([180,-180])
@@ -454,9 +462,12 @@ Localisation.prototype.setScales = function(){
     // RA axis
     this.raAxis = d3.axisBottom(this.raScale)
             // .orient("bottom")
-            .tickSizeInner(-this.skyHeight)
+            .tickSizeInner(0)
             .tickValues(d3.range(-180,180+30,30))
-            .tickFormat(function(d){if (d<0){return -d+"E"}else if(d>0){return d+"W"}else{return d}});
+            .tickFormat(function(d){
+                if(loc.world){if (d<0){return -d+"E"}else if(d>0){return d+"W"}else{return d}}
+                else{return d;}
+            });
 
     this.lonValue = function(d){return d.lon}
     this.lonScale = d3.scaleLinear().domain([180,-180]).range([0,this.skyWidth])
@@ -480,73 +491,18 @@ Localisation.prototype.setScales = function(){
     this.decAxis = d3.axisLeft(this.decScale)
             // .orient("left")
             // .innerTickSize(-(this.relw[1]-this.relw[0])*this.graphWidth);
-            .tickSizeInner(-this.skyWidth)
+            .tickSizeInner(0)
             .tickValues(d3.range(-90,90+30,30))
-            .tickFormat(function(d){if (d<0){return (-d)+"S"}else if(d>0){return d+"N"}else{return d}});
+            .tickFormat(function(d){
+                if(loc.world){if (d<0){return (-d)+"S"}else if(d>0){return d+"N"}else{return d}}
+                else{return d}
+            });
 
     // set length scale (normalised to 20px=4km)
     this.lenScale = function(len){return 20*this.scl * len/4.}
 
     // convert detector position to xy on sky
-    this.det2xy = function(d,pt){
-        if (pt=='ctr'){
-            x=loc.lonMap(d);
-            y=loc.latMap(d);
-        }else if(pt=='xarm'){
-            x = loc.lonMap(d) - loc.lenScale(Math.max(d.length,2))*Math.cos(d2r(d.ang));
-            y = loc.latMap(d) - loc.lenScale(Math.max(d.length,2))*Math.sin(d2r(d.ang));
-        }else if(pt=='yarm'){
-            x = loc.lonMap(d) + loc.lenScale(Math.max(d.length,2))*Math.sin(d2r(d.ang));
-            y = loc.latMap(d) - loc.lenScale(Math.max(d.length,2))*Math.cos(d2r(d.ang));
-        }else if(pt='middle'){
-            x = loc.lonMap(d) + Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
-                (-Math.cos(d2r(d.ang))+Math.sin(d2r(d.ang)));
-            y = loc.latMap(d) + Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
-                (-Math.sin(d2r(d.ang))-Math.cos(d2r(d.ang)));
-        }else if(pt=='radius'){
-            x = loc.lenScale(Math.max(d.length,2));
-            y = loc.lenScale(Math.max(d.length,2));
-        }
-        return([x,y]);
-    }
-    this.rect2xy = function(p,pt){
-        x1=loc.raScale(loc.mod360(loc.skyarr.arr.ra[p]-loc.skyarr.dRA/2.));
-        y1=loc.decScale(loc.skyarr.arr.dec[p]-loc.skyarr.dDec/2.);
-        x2=loc.raScale(loc.mod360(loc.skyarr.arr.ra[p]+loc.skyarr.dRA/2.));
-        y2=loc.decScale(loc.skyarr.arr.dec[p]+loc.skyarr.dDec/2.);
-        xout1=Math.min(x1,x2)
-        xout2=Math.max(x1,x2)
-        yout1=Math.min(y1,y2)
-        yout2=Math.max(y1,y2)
-        if (xout2-xout1>loc.svgWidth/2.){
-            // rectangle wraps around edge
-            xout1=Math.max(x1,x2);
-            xout2=Math.min(x1,x2)+(loc.svgWidth-loc.margin.left-loc.margin.right);
-        }
-        return([xout1,yout1,xout2-xout1,yout2-yout1]);
-    }
 
-    // convert source position 2 xy on sky
-    this.src2xy = function(pt){
-        console.log(loc.src.ra,loc.src.dec)
-        if (pt=='ctr'){
-            x=loc.raMap(loc.src);
-            y=loc.decMap(loc.src);
-        }else if(pt=='x-'){
-            x = loc.raMap(loc.src) - 10*Math.cos(d2r(loc.src.posang));
-            y = loc.decMap(loc.src) - 10*Math.sin(d2r(loc.src.posang));
-        }else if(pt=='x+'){
-            x = loc.raMap(loc.src) + 10*Math.cos(d2r(loc.src.posang));
-            y = loc.decMap(loc.src) + 10*Math.sin(d2r(loc.src.posang));
-        }else if(pt=='y-'){
-            x = loc.raMap(loc.src) - 10*Math.sin(d2r(loc.src.posang));
-            y = loc.decMap(loc.src) + 10*Math.cos(d2r(loc.src.posang));
-        }else if(pt=='y+'){
-            x = loc.raMap(loc.src) + 10*Math.sin(d2r(loc.src.posang));
-            y = loc.decMap(loc.src) - 10*Math.cos(d2r(loc.src.posang));
-        }
-        return([x,y]);
-    }
     ///////////////////////////////////////////////////////////////////////////
     // Set eff scales
     ///////////////////////////////////////////////////////////////////////////
@@ -572,6 +528,111 @@ Localisation.prototype.setScales = function(){
         return(x*this.effWidth*this.aspectEff)}
     this.yScaleEff = d3.scaleLinear().domain([-1,1]).range([0,this.effHeight])
 
+}
+Localisation.prototype.det2xy = function(d,pt){
+    // convert detector position 2 xy on sky
+    if (this.world){
+        if (pt=='ctr'){
+            x=loc.lonMap(d);
+            y=loc.latMap(d);
+        }else if(pt=='xarm'){
+            x = loc.lonMap(d) - loc.lenScale(Math.max(d.length,2))*Math.cos(d2r(d.ang));
+            y = loc.latMap(d) - loc.lenScale(Math.max(d.length,2))*Math.sin(d2r(d.ang));
+        }else if(pt=='yarm'){
+            x = loc.lonMap(d) + loc.lenScale(Math.max(d.length,2))*Math.sin(d2r(d.ang));
+            y = loc.latMap(d) - loc.lenScale(Math.max(d.length,2))*Math.cos(d2r(d.ang));
+        }else if(pt='middle'){
+            x = loc.lonMap(d) + Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
+                (-Math.cos(d2r(d.ang))+Math.sin(d2r(d.ang)));
+            y = loc.latMap(d) + Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
+                (-Math.sin(d2r(d.ang))-Math.cos(d2r(d.ang)));
+        }else if(pt=='radius'){
+            x = loc.lenScale(Math.max(d.length,2));
+            y = loc.lenScale(Math.max(d.length,2));
+        }
+        return([x,y]);
+    }else{
+        if (pt=='ctr'){
+            x=loc.raScale(loc.lon2ra(d.lon));
+            y=loc.decScale(d.lat);
+        }else if(pt=='xarm'){
+            x = loc.raScale(loc.lon2ra(d.lon)) + loc.lenScale(Math.max(d.length,2))*Math.cos(d2r(d.ang));
+            y = loc.decScale(d.lat) - loc.lenScale(Math.max(d.length,2))*Math.sin(d2r(d.ang));
+        }else if(pt=='yarm'){
+            x = loc.raScale(loc.lon2ra(d.lon)) - loc.lenScale(Math.max(d.length,2))*Math.sin(d2r(d.ang));
+            y = loc.decScale(d.lat) - loc.lenScale(Math.max(d.length,2))*Math.cos(d2r(d.ang));
+        }else if(pt='middle'){
+            x = loc.raScale(loc.lon2ra(d.lon)) - Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
+                (-Math.cos(d2r(d.ang))+Math.sin(d2r(d.ang)));
+            y = loc.decScale(d.lat) + Math.sqrt(0.25) * loc.lenScale(Math.max(d.length,2)) *
+                (-Math.sin(d2r(d.ang))-Math.cos(d2r(d.ang)));
+        }else if(pt=='radius'){
+            x = loc.lenScale(Math.max(d.length,2));
+            y = loc.lenScale(Math.max(d.length,2));
+        }
+        return([x,y]);
+    }
+}
+Localisation.prototype.rect2xy = function(p,pt){
+    // convert rectangle position 2 xy on sky
+    if (this.world){
+        xy1=loc.skyarr.projEq([-(loc.skyarr.arr.lon[p]-loc.skyarr.dRA/2.),loc.skyarr.arr.lat[p]-loc.skyarr.dDec/2.])
+        xy2=loc.skyarr.projEq([-(loc.skyarr.arr.lon[p]+loc.skyarr.dRA/2.),loc.skyarr.arr.lat[p]+loc.skyarr.dDec/2.])
+        x1=xy1[0]
+        y1=xy1[1]
+        x2=xy2[0]
+        y2=xy2[1]
+        // x1=loc.lonScale(loc.skyarr.arr.lon[p]-loc.skyarr.dRA/2.);
+        // y1=loc.latScale(loc.skyarr.arr.lat[p]-loc.skyarr.dDec/2.);
+        // x2=loc.lonScale(loc.skyarr.arr.lon[p]+loc.skyarr.dRA/2.);
+        // y2=loc.latScale(loc.skyarr.arr.lat[p]+loc.skyarr.dDec/2.);
+        xout1=Math.min(x1,x2)
+        xout2=Math.max(x1,x2)
+        yout1=Math.min(y1,y2)
+        yout2=Math.max(y1,y2)
+        if (xout2-xout1>loc.svgWidth/2.){
+            // rectangle wraps around edge
+            xout1=Math.max(x1,x2);
+            xout2=Math.min(x1,x2)+(loc.svgWidth-loc.margin.left-loc.margin.right);
+        }
+        return([xout1,yout1,xout2-xout1,yout2-yout1]);
+    }else{
+        x1=loc.raScale(loc.lon2ra(loc.skyarr.arr.lon[p]-loc.skyarr.dRA/2.));
+        y1=loc.decScale(loc.skyarr.arr.lat[p]-loc.skyarr.dDec/2.);
+        x2=loc.raScale(loc.lon2ra(loc.skyarr.arr.lon[p]+loc.skyarr.dRA/2.));
+        y2=loc.decScale(loc.skyarr.arr.lat[p]+loc.skyarr.dDec/2.);
+        xout1=Math.min(x1,x2)
+        xout2=Math.max(x1,x2)
+        yout1=Math.min(y1,y2)
+        yout2=Math.max(y1,y2)
+        if (xout2-xout1>loc.svgWidth/2.){
+            // rectangle wraps around edge
+            xout1=Math.max(x1,x2);
+            xout2=Math.min(x1,x2)+(loc.svgWidth-loc.margin.left-loc.margin.right);
+        }
+        return([xout1,yout1,xout2-xout1,yout2-yout1]);
+    }
+}
+Localisation.prototype.src2xy = function(pt){
+    // convert source position 2 xy on sky
+    console.log(loc.src.ra,loc.src.dec)
+    if (pt=='ctr'){
+        x=loc.raMap(loc.src);
+        y=loc.decMap(loc.src);
+    }else if(pt=='x-'){
+        x = loc.raMap(loc.src) - 10*Math.cos(d2r(loc.src.posang));
+        y = loc.decMap(loc.src) - 10*Math.sin(d2r(loc.src.posang));
+    }else if(pt=='x+'){
+        x = loc.raMap(loc.src) + 10*Math.cos(d2r(loc.src.posang));
+        y = loc.decMap(loc.src) + 10*Math.sin(d2r(loc.src.posang));
+    }else if(pt=='y-'){
+        x = loc.raMap(loc.src) - 10*Math.sin(d2r(loc.src.posang));
+        y = loc.decMap(loc.src) + 10*Math.cos(d2r(loc.src.posang));
+    }else if(pt=='y+'){
+        x = loc.raMap(loc.src) + 10*Math.sin(d2r(loc.src.posang));
+        y = loc.decMap(loc.src) - 10*Math.cos(d2r(loc.src.posang));
+    }
+    return([x,y]);
 }
 Localisation.prototype.adjCss = function(){
     // adjust css of some elements
@@ -1169,6 +1230,7 @@ Localisation.prototype.updateCalcs = function(newSrc,newDet){
     this.calcTimeRings()
     if (this.overlays.contoursTmatch.shown){this.updateContoursTmatch()}
     this.updateHeatmap('Tmatch');
+    this.updateHeatmap('Tall');
     this.hideLoading();
     // this.uncloseContours();
 }
@@ -1305,7 +1367,7 @@ Localisation.prototype.setStyles = function(){
 Localisation.prototype.tttextHmap = function(d){
     // var loc=this;// graph tooltip text
     if (this.debug){console.log(d)}
-    return "<span class='ttCoord'>"+this.skyarr.arr.ra[d]+","+this.skyarr.arr.dec[d]+"</span>"+
+    return "<span class='ttCoord'>Lon/lat:"+this.skyarr.arr.lon[d]+","+this.skyarr.arr.lat[d]+"</span>"+
     // "<span class='ttPr'>Pr: "+this.skyarr.arr.Pr[d]+"</span>"+
     "<span class='ttpNet'>pNet: "+this.skyarr.arr.pNet[d]+"</span>"+
     "<span class='ttpNet'>FNet: "+this.skyarr.arr.FNet[d]+"</span>"+
@@ -1354,15 +1416,18 @@ Localisation.prototype.drawSkyInit = function(){
     // initialise graph drawing from data
     var loc = this;
     loc.loaded=0;
-    loc.toLoad=4;
+    loc.toLoad=3;
     loc.data=[];
     loc.optionsOn=false;
     loc.helpOn=false;
     loc.lengOn=false;
 
     loc.fileInDetDefault="json/detectors.json";
-    loc.fileInDet = (loc.urlVars.detFile) ? loc.urlVars.detFile : loc.fileInDetDefault
-
+    loc.fileInDet = (loc.urlVars.detFile) ? loc.urlVars.detFile : loc.fileInDetDefault;
+    loc.fileInWorld='json/world50m.json';
+    loc.fileInSky='json/constellations.bounds.json';
+    loc.fileInConst='json/constellations.json';
+    loc.fileInConstLines='json/constellations.lines.json';
     // if (loc.urlVars.lang){
     //     lang=loc.urlVars.lang;
     // }else{lang=loc.defaults.lang}
@@ -1371,18 +1436,74 @@ Localisation.prototype.drawSkyInit = function(){
     loc.loadLang(this.langIn)
     // loc.langdict_default = loc.loadLang(loc.langDefault,true);
 
-    d3.json('json/world50m.json', function(error, dataIn){
-        if (error){alert("Fatal error loading input file: '"+loc.fileInDet+"'. Sorry!")}
-        loc.map=dataIn;
-        loc.loaded++;
-        if (loc.debug){console.log('loaded: '+loc.fileInDet)}
-        //call next functions
-        if (loc.loaded==loc.toLoad){
-            loc.whenLoaded();
-        }else{
-            if (loc.debug){console.log('not ready yet')}
-        }
-    });
+    if (loc.world){
+        loc.toLoad+=1;
+        d3.json(loc.fileInWorld, function(error, dataIn){
+            if (error){alert("Fatal error loading input file: '"+loc.fileInWorld+"'. Sorry!")}
+            loc.map=dataIn;
+            loc.loaded++;
+            if (loc.debug){console.log('loaded: '+loc.fileInWorld)}
+
+            loc.skyarr.countries = topojson.feature(loc.map, loc.map.objects.countries),
+            loc.skyarr.fullglobe={type:'Feature',geometry:{type:'Polygon',coordinates:[[[-179.999,0],[0,90],[179.999,0],[0,-90]]]}}
+            loc.skyarr.land = topojson.feature(loc.map, loc.map.objects.land),
+            // loc.skyarr.neighbors = topojson.neighbors(loc.map.objects.countries.geometries);
+            loc.skyarr.projEq=d3.geoEquirectangular()
+                .translate([0,loc.skyHeight/2])
+                .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullglobe)//.rotate([d2r(180),0,0])
+            //call next functions
+            if (loc.loaded==loc.toLoad){
+                loc.whenLoaded();
+            }else{
+                if (loc.debug){console.log('not ready yet')}
+            }
+        });
+    }else{
+        loc.toLoad+=3;
+        d3.json(loc.fileInSky, function(error, dataIn){
+            if (error){alert("Fatal error loading input file: '"+loc.fileInSky+"'. Sorry!")}
+            loc.skymap=dataIn;
+            loc.loaded++;
+            if (loc.debug){console.log('loaded: '+loc.fileInSky)}
+            loc.skyarr.projEq=d3.geoEquirectangular()
+                .translate([0,loc.skyHeight/2])
+                .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skymap)
+            //call next functions
+            if (loc.loaded==loc.toLoad){
+                loc.whenLoaded();
+            }else{
+                if (loc.debug){console.log('not ready yet')}
+            }
+        });
+        d3.json(loc.fileInConst, function(error, dataIn){
+            if (error){alert("Fatal error loading input file: '"+loc.fileInConst+"'. Sorry!")}
+            loc.constnames=dataIn;
+            loc.constlist={}
+            for (c in loc.constnames.features){
+                loc.constlist[loc.constnames.features[c].id]=loc.constnames.features[c].properties.name;
+            }
+            loc.loaded++;
+            if (loc.debug){console.log('loaded: '+loc.fileInConst)}
+            //call next functions
+            if (loc.loaded==loc.toLoad){
+                loc.whenLoaded();
+            }else{
+                if (loc.debug){console.log('not ready yet')}
+            }
+        });
+        d3.json(loc.fileInConstLines, function(error, dataIn){
+            if (error){alert("Fatal error loading input file: '"+loc.fileInConstLines+"'. Sorry!")}
+            loc.constLines=dataIn;
+            loc.loaded++;
+            if (loc.debug){console.log('loaded: '+loc.fileInConstLines)}
+            //call next functions
+            if (loc.loaded==loc.toLoad){
+                loc.whenLoaded();
+            }else{
+                if (loc.debug){console.log('not ready yet')}
+            }
+        });
+    }
     // read in Detector data
     d3.json(loc.fileInDet, function(error, dataIn){
         if (error){alert("Fatal error loading input file: '"+loc.fileInDet+"'. Sorry!")}
@@ -1421,6 +1542,13 @@ Localisation.prototype.drawSky = function(){
     var loc = this;
     // loc.setSvgScales();
     loc.makeSky();
+    loc.svg.append("rect")
+        .attr("id", "background")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .attr("width",loc.skyWidth)
+        .attr("height",loc.skyHeight)
+        .attr("x",0)
+        .attr("y",0);
     data = loc.dataDet;
     // x-axis
     loc.svg.append("g")
@@ -1435,7 +1563,7 @@ Localisation.prototype.drawSky = function(){
         .attr("y", 1.2*(1+loc.scl)+"em")
         .style("text-anchor", "middle")
         .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.loc.map.lon%'));
+        .text((loc.world)?loc.tl('%text.loc.map.lon%'):loc.tl('%text.loc.map.rightasc%'));
 
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
@@ -1456,7 +1584,7 @@ Localisation.prototype.drawSky = function(){
         .attr("dy", (-30*(1+loc.scl))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+loc.scl)+"em")
-        .text(loc.tl('%text.loc.map.lat%'));
+        .text((loc.world)?loc.tl('%text.loc.map.lat%'):loc.tl('%text.loc.map.declination%'));
 
     d3.selectAll('.tick > line')
         .style('stroke','#ccc')
@@ -1497,17 +1625,21 @@ Localisation.prototype.drawSky = function(){
       .style("text-anchor", "start")
       .text(function(d) { return loc.tl(d.name);})
 
-
     loc.overlays = {
-        'contoursT':{gid:"g-contoursT",shown:true},
-        'contoursTmatch':{gid:"g-contoursTmatch",shown:true},
-        'contoursPr':{gid:"g-contoursPr",shown:false},
-        'heatmap-Pr':{gid:"g-heatmap-Pr",shown:false},
-        'heatmap-pNet':{gid:"g-heatmap-pNet",shown:(this.hmap=='pNet')},
-        'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet')},
-        'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet')},
-        'heatmap-Tmatch':{gid:"g-heatmap-Tmatch",shown:true},
-        'overlay':{gid:"g-overlay",shown:false},
+      'contoursT':{gid:"g-contoursT",shown:false,opacity:1},
+      'contoursTmatch':{gid:"g-contoursTmatch",shown:false,opacity:1},
+      'contoursPr':{gid:"g-contoursPr",shown:false,opacity:1},
+      'heatmap-Pr':{gid:"g-heatmap-Pr",shown:false,opacity:1},
+      'heatmap-pNet':{gid:"g-heatmap-pNet",shown:(this.hmap=='pNet'),opacity:1,cbar:false},
+      'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet'),opacity:0.9,cbar:true},
+      'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet'),opacity:0.9,cbar:true},
+      'heatmap-Tmatch':{gid:"g-heatmap-Tmatch",shown:true,opacity:1,cbar:false},
+      'heatmap-Tall':{gid:"g-heatmap-Tall",shown:true,opacity:1,cbar:false},
+      'overlay':{gid:"g-overlay",shown:false,opacity:0,cbar:false},
+      'worldmap':{gid:"worldmap",shown:true,opacity:0.7,cbar:false},
+      'bounds':{gid:"skymap-bounds",shown:true,opacity:0.7,cbar:false},
+      'lines':{gid:"skymap-lines",shown:true,opacity:0.7,cbar:false},
+      'names':{gid:"skymap-names",shown:true,opacity:0.7,cbar:false},
     }
     // draw Heatmap
     loc.skyarr.FNet={}
@@ -1524,36 +1656,71 @@ Localisation.prototype.drawSky = function(){
     loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
     loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
 
-    // add world map
-    ocean = loc.svg.append("rect")
-	    .attr("id", "ocean")
+    if (loc.world){
+        // add world map
+        worldmap = loc.svg.append("g")
+    	    .attr("id", "worldmap")
+            .style("opacity",loc.overlays.worldmap.opacity)
+            .attr("transform", "translate("+loc.margin.left+","+(loc.margin.top)+")");
+        worldmap.append("rect")
+    	    .attr("id", "ocean")
+            .attr("width",loc.skyWidth)
+            .attr("height",loc.skyHeight)
+            .attr("x",0)
+            .attr("y",0)
+        worldmap.selectAll(".country")
+    	    .data(loc.skyarr.countries.features)
+    	    .enter().append("path")
+    	    .attr("class", "country")
+    	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
+    }else{
+        // add sky map
+        loc.svg.append("g")
+    	    .attr("id", "skymap-lines")
+            .style("fill-opacity","0")
+            .style("opacity",loc.overlays.lines.opacity)
+            .attr("transform", "translate("+loc.margin.left+","+(loc.margin.top)+")")
+        .selectAll(".constlines")
+    	    .data(loc.constLines.features)
+    	    .enter().append("path")
+    	    .attr("class", "constlines")
+    	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
+        loc.svg.append("g")
+    	    .attr("id", "skymap-names")
+            .style("fill-opacity","0")
+            .style("opacity",loc.overlays.names.opacity)
+            .attr("transform", "translate("+loc.margin.left+","+(loc.margin.top)+")")
+        .selectAll(".constname")
+    	    .data(loc.constnames.features)
+    	    .enter().append("text")
+    	    .attr("class", "constname")
+            .attr("fill","black")
+            .attr("x", function(d){x=loc.skyarr.projEq(d.geometry.coordinates)[0];console.log(d,x);return x;})
+            .attr("y", function(d){y=loc.skyarr.projEq(d.geometry.coordinates)[1];console.log(d,y);return y;})
+            .style("text-anchor", "middle")
+            .style("font-size",(1*loc.scl)+"em")
+            .text(function(d){return d.properties.desig})
+        loc.svg.append("g")
+    	    .attr("id", "skymap-bounds")
+            .style("fill-opacity","0")
+            .style("opacity",loc.overlays.bounds.opacity)
+            .attr("transform", "translate("+loc.margin.left+","+(loc.margin.top)+")")
+        .selectAll(".constellation")
+    	    .data(loc.skymap.features)
+    	    .enter().append("path")
+    	    .attr("class", "constellation")
+    	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
+    }
+    // draw Heatmap for all rings
+    loc.skyarr['Tall']={}
+    loc.skyarr['Tall'].gHeatmap=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['heatmap-Tall'].gid})
+        .attr("class","heatmap")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .attr("width",loc.skyWidth)
-        .attr("height",loc.skyHeight)
-        .attr("x",0)
-        .attr("y",0)
-        .style("fill","blue")
-        .style("fill-opacity",0)
-    worldmap = loc.svg.append("g")
-	    .attr("id", "worldmap")
-        .style("fill","green")
-        .attr("transform", "translate("+loc.margin.left+","+(loc.margin.top+loc.skyHeight*2.8/180)+")");
+        .style("opacity",0)
+    loc.updateHeatmap('Tall')
+    loc.showOverlay('heatmap-Tall')
 
-
-    // loc.skyarr.land = topojson.feature(loc.map, loc.map.objects.countries);
-    loc.skyarr.countries = topojson.feature(loc.map, loc.map.objects.countries),
-    loc.skyarr.land = topojson.feature(loc.map, loc.map.objects.land),
-	loc.skyarr.neighbors = topojson.neighbors(loc.map.objects.countries.geometries);
-    loc.skyarr.projEq=d3.geoEquirectangular()
-        .translate([0,loc.skyHeight/2])
-        .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.land)//.rotate([d2r(180),0,0])
-    worldmap.selectAll(".country")
-	    .data(loc.skyarr.countries.features)
-	    .enter().append("path")
-	    .attr("class", "country")
-	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
-
-    // draw Heatmap
     loc.skyarr['Tmatch']={}
     loc.skyarr['Tmatch'].gHeatmap=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['heatmap-Tmatch'].gid})
@@ -1564,22 +1731,22 @@ Localisation.prototype.drawSky = function(){
     loc.showOverlay('heatmap-Tmatch')
 
     // draw contours (dt)
-    // loc.skyarr.projEq([0,0])
-    loc.gContourT=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays.contoursT.gid})
-        .attr("class","contoursT")
-        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .style("opacity",0)
-    loc.updateContoursT();
-    loc.showOverlay('contoursT');
+    // loc.gContourT=loc.svg.append("g")
+    //     .attr("id",function(){return loc.overlays.contoursT.gid})
+    //     .attr("class","contoursT")
+    //     .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+    //     .style("opacity",0)
+    // loc.updateContoursT();
+    // loc.showOverlay('contoursT');
 
-    loc.gContourTmatch=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays.contoursTmatch.gid})
-        .attr("class","contoursTmatch")
-        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
-        .style("opacity",0)
-    loc.updateContoursTmatch();
-    loc.showOverlay('contoursTmatch');
+    // loc.gContourTmatch=loc.svg.append("g")
+    //     .attr("id",function(){return loc.overlays.contoursTmatch.gid})
+    //     .attr("class","contoursTmatch")
+    //     .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+    //     .style("opacity",0)
+    // loc.updateContoursTmatch();
+
+    // loc.showOverlay('contoursTmatch');
 
     // draw contours (Pr)
     // loc.gContourPr=loc.svg.append("g")
@@ -1775,38 +1942,38 @@ Localisation.prototype.drawSky = function(){
         .on("click",function(){loc.hideHelp();});
 
     //add network icon
-    networkClass = (this.panels.network.status) ? "graph-icon" : "graph-icon hidden";
-    this.networkouter = d3.select('#network-outer')
-    d3.select("div#skycontainer").append("div")
-        .attr("id","network-icon")
-        .attr("class",networkClass)
-        .style("right",loc.margin.right+(loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
-        .style("top",0)
-        .style("width",40*loc.ysc)
-        .style("height",40*loc.ysc);
-    d3.select("div#skycontainer > #network-icon").on("mouseover", function(d) {
-              loc.tooltip.transition()
-                 .duration(200)
-                 .style("opacity", .9);
-              loc.tooltip.html(loc.tl('%tooltip.loc.shownetwork%'))
-                 .style("left", (d3.event.pageX + 10) + "px")
-                 .style("top", (d3.event.pageY-10) + "px")
-                 .style("width","auto")
-                 .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            loc.tooltip.transition()
-                 .duration(500)
-                 .style("opacity", 0);
-          //   document.getElementById("effcontainer").style.opacity=0.;
-        })
-    d3.select("div#skycontainer > #network-icon").append("img")
-        .attr("src","img/detector.svg")
-        .on("click",function(){loc.showNetwork();});
-    this.networkouter
-        .style("top","200%");
-    this.networkouter.select("#network-close")
-        .on("click",function(){loc.hideNetwork();});
+    // networkClass = (this.panels.network.status) ? "graph-icon" : "graph-icon hidden";
+    // this.networkouter = d3.select('#network-outer')
+    // d3.select("div#skycontainer").append("div")
+    //     .attr("id","network-icon")
+    //     .attr("class",networkClass)
+    //     .style("right",loc.margin.right+(loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
+    //     .style("top",0)
+    //     .style("width",40*loc.ysc)
+    //     .style("height",40*loc.ysc);
+    // d3.select("div#skycontainer > #network-icon").on("mouseover", function(d) {
+    //           loc.tooltip.transition()
+    //              .duration(200)
+    //              .style("opacity", .9);
+    //           loc.tooltip.html(loc.tl('%tooltip.loc.shownetwork%'))
+    //              .style("left", (d3.event.pageX + 10) + "px")
+    //              .style("top", (d3.event.pageY-10) + "px")
+    //              .style("width","auto")
+    //              .style("height","auto");
+    //     })
+    //     .on("mouseout", function(d) {
+    //         loc.tooltip.transition()
+    //              .duration(500)
+    //              .style("opacity", 0);
+    //       //   document.getElementById("effcontainer").style.opacity=0.;
+    //     })
+    // d3.select("div#skycontainer > #network-icon").append("img")
+    //     .attr("src","img/detector.svg")
+    //     .on("click",function(){loc.showNetwork();});
+    // this.networkouter
+    //     .style("top","200%");
+    // this.networkouter.select("#network-close")
+    //     .on("click",function(){loc.hideNetwork();});
 
     //add source icon
     sourceClass = (this.panels.source.status) ? "graph-icon" : "graph-icon hidden";
@@ -1926,12 +2093,16 @@ Localisation.prototype.hideLoading = function(){
     //     .style("opacity",1);
 }
 Localisation.prototype.colourWorldMap = function(){
-    d3.select('#ocean').transition().duration(500).style('fill-opacity',1)
-    d3.select('#worldmap').transition().duration(500).style('fill-opacity',1)
+    if (this.world){
+        d3.select('#ocean').transition().duration(500).style('fill-opacity',1)
+        d3.select('#worldmap').transition().duration(500).style('fill-opacity',1)
+    }
 }
 Localisation.prototype.uncolourWorldMap = function(){
-    d3.select('#ocean').transition().duration(500).style('fill-opacity',0)
-    d3.select('#worldmap').transition().duration(500).style('fill-opacity',0)
+    if (this.world){
+        d3.select('#ocean').transition().duration(500).style('fill-opacity',0)
+        d3.select('#worldmap').transition().duration(500).style('fill-opacity',0)
+    }
 }
 Localisation.prototype.updateDetMarkers = function(){
     var loc=this;
@@ -2094,9 +2265,17 @@ Localisation.prototype.updateHeatmap = function(dataIn){
             .domain([0.5,1]).clamp(true)(d)}
         }
         loc.skyarr[dataIn].colHeat=function(d){return "#fff";};
+    }else if (dataIn=="Tall"){
+        loc.skyarr.Tall.hmapthreshold=0.5;
+        loc.skyarr.Tall.opHeat=function(d){
+            if (loc.Ndet<=1){return 0}
+            else{ return d3.scaleLinear().range([0,1])
+            .domain([0.5,0.5*loc.Ndet*(loc.Ndet-1)]).clamp(true)(d)}
+        }
+        loc.skyarr.Tall.colHeat=function(d){return "#fff";};
     }else if (dataIn=="overlay"){
-        loc.skyarr[dataIn].opHeat=function(d){return 0;};
-        loc.skyarr[dataIn].colHeat=function(d){return "#fff";};
+        loc.skyarr.overlay.opHeat=function(d){return 0;};
+        loc.skyarr.overlay.colHeat=function(d){return "#fff";};
     }
     if (dataIn=="overlay"){
         loc.skyarr[dataIn].hmapfiltPix=loc.skyarr.arr.pix;
@@ -2157,6 +2336,16 @@ Localisation.prototype.updateHeatmap = function(dataIn){
     }
 }
 Localisation.prototype.updateContoursT = function(){
+    loc.skyarr.fullcontour={type:'Feature',
+        geometry:{type:'Polygon',coordinates:[[
+            [0,loc.skyarr.nDec/2],
+            [loc.skyarr.nRA/2,0],
+            [loc.skyarr.nRA,loc.skyarr.nDec/2],
+            [loc.skyarr.nRA/2,loc.skyarr.nDec/2]
+        ]]}}
+    loc.skyarr.projCont=d3.geoEquirectangular()
+        .translate([0,loc.skyHeight])
+        .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullcontour)//.rotate([d2r(180),0,0])
     console.log(loc.src.dt,loc.skyarr.arr.dt);
     for (dd in loc.src.dt){
         loc.skyarr[dd]={}
@@ -2178,31 +2367,32 @@ Localisation.prototype.updateContoursT = function(){
         // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
 
         // loc.gContour.selectAll(".contour-"+dd).remove()
-        loc.skyarr.fullCont={type:"Polygon",coordinates:[[[-180,90],[180,90],[180,-90],[0,-90]]]}
-        loc.skyarr.projCont=d3.geoEquirectangular()
-            // .translate([0,loc.skyHeight/2])
-            .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullCont)//.rotate([d2r(180),0,0])
-        loc.skyarr.contoursdt=loc.editContours(d3.contours()
+
+        // loc.skyarr.contoursdt=loc.editContours(d3.contours()
+        //     .size([loc.skyarr.nRA,loc.skyarr.nDec])
+        //     // .size([360,180])
+        //     .thresholds(loc.skyarr.dtCont)
+        //     (loc.skyarr.arr.dt[dd]),true,dd)
+        loc.skyarr[dd].contoursdt=loc.editContours2(d3.contours()
             .size([loc.skyarr.nRA,loc.skyarr.nDec])
-            // .size([360,180])
             .thresholds(loc.skyarr.dtCont)
             (loc.skyarr.arr.dt[dd]),true,dd)
-        for (c=0;c<loc.skyarr.contoursdt.length;c++){
-            path=d3.geoPath().projection(loc.skyarr.projI)(loc.skyarr.contoursdt[c]);
-            if (loc.skyarr.contoursdt[c].hasEdge){
-                loc.skyarr.contoursdt[c].path=path.replace('Z','');
+        for (c=0;c<loc.skyarr[dd].contoursdt.length;c++){
+            path=d3.geoPath().projection(loc.skyarr.projI)(loc.skyarr[dd].contoursdt[c]);
+            if (loc.skyarr[dd].contoursdt[c].hasEdge){
+                loc.skyarr[dd].contoursdt[c].path=path.replace('Z','');
             }else{
-                loc.skyarr.contoursdt[c].path=path;
+                loc.skyarr[dd].contoursdt[c].path=path;
             }
         }
         loc.skyarr[dd].dtcontours = loc.gContourT.selectAll(".contourT-"+dd)
-            .data(loc.skyarr.contoursdt)
+            .data(loc.skyarr[dd].contoursdt)
         loc.skyarr[dd].dtcontours.exit()
             .transition().duration(500)
             .style("opacity",0).remove()
         loc.skyarr[dd].dtcontours
             .transition().duration(500).ease(d3.easeExp)
-            .attr("d", function(d){return d.path})
+            .attr("d", d3.geoPath().projection(loc.skyarr.projEq))
             .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
         loc.skyarr[dd].dtcontours.enter().append("path")
             // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
@@ -2210,8 +2400,8 @@ Localisation.prototype.updateContoursT = function(){
             .style("stroke",function(d){return loc.skyarr.colCont(d.value)})
             .style("stroke-width","3")
             .attr("class","contourT contourT-"+dd)
-            .attr("d", function(d){return d.path})
-            // .attr("d",d3.geoPath().projection(loc.skyarr.ProjCont))
+            // .attr("d", function(d){return d.path})
+            .attr("d",d3.geoPath().projection(loc.skyarr.projEq))
             // .on("mouseover",function(d){
             //     loc.tooltip
             //        .style("opacity", .9);
@@ -2357,7 +2547,7 @@ Localisation.prototype.showOverlay = function(olName){
     gid=this.overlays[olName].gid;
     d3.select('#'+gid)
         .transition().duration(500)
-        .style("opacity",1)
+        .style("opacity",this.overlays[olName].opacity)
     this.overlays[olName].shown=true;
 }
 Localisation.prototype.hideOverlay = function(olName){
@@ -2458,8 +2648,34 @@ Localisation.prototype.editContours = function(cont,edit,dd){
     // console.log('edit contour ',dd,cont)
     return cont;
 }
-Localisation.prototype.contourTop = function(){
-
+Localisation.prototype.editContours2 = function(cont,edit,dd){
+    console.log('edit contour 2 ',dd,cont)
+    if ((edit)&(!cont[0].edited)){
+        for (i in cont){
+            console.log('edit contour ',dd,' ',i,cont[i])
+            if (cont[i].coordinates.length>0){
+                cont[i].edited=true;
+                coordIn=cont[i].coordinates[0]
+                // cont[i].type="MultiLineString"
+                console.log('i in ',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
+                coordOut=[]
+                for (j in d3.range(coordIn.length)){
+                    console.log('j in ',j,coordIn[j].length,coordIn[j][0])
+                    newCoords=[]
+                    for (l=0;l<coordIn[j].length;l++){
+                        newCoords.push([loc.mod360(180-(coordIn[j][l][0]*loc.skyarr.dRA)),90-(coordIn[j][l][1]*loc.skyarr.dDec)])
+                    }
+                    coordOut.push(newCoords)
+                    console.log('j out ',j,coordOut[j].length,coordOut[j][0])
+                }
+                cont[i].coordinates[0]=coordOut;
+                console.log('i out',i,cont[i],cont[i].coordinates[0],cont[i].coordinates[0].length,'paths')
+            }
+        }
+    }
+    // cont.type="MultiLineString"
+    // console.log('edit contour ',dd,cont)
+    return cont;
 }
 // matrix functions
 var outer = function(a,b){
@@ -2491,11 +2707,15 @@ var vec2lb = function(vec){
     lat=Math.atan2(v[2],Math.sqrt(v[0]*v[0] + v[1]*v[1]))
     return([r2d(lon),r2d(lat)]);
 }
-var rotate = function (lon,lat,ang) {
+Localisation.prototype.rotate = function (lon,lat,ang) {
     // rotate around x axis by ang
     angrot=$M([[1,0,0],[0,Math.cos(d2r(ang)),-Math.sin(d2r(ang))],[0,Math.sin(d2r(ang)),Math.cos(d2r(ang))]]);
     // rotate around z axis by lon
-    lonrot=$M([[Math.cos(d2r(lon)),-Math.sin(d2r(lon)),0],[Math.sin(d2r(lon)),Math.cos(d2r(lon)),0],[0,0,1]]);
+    if (this.world){
+        lonrot=$M([[Math.cos(d2r(lon)),Math.sin(d2r(lon)),0],[-Math.sin(d2r(lon)),Math.cos(d2r(lon)),0],[0,0,1]]);
+    }else{
+        lonrot=$M([[Math.cos(d2r(lon)),-Math.sin(d2r(lon)),0],[Math.sin(d2r(lon)),Math.cos(d2r(lon)),0],[0,0,1]]);
+    }
     // rotate around y axis by lat
     latrot=$M([[Math.cos(d2r(-lat)),0,Math.sin(d2r(-lat))],[0,1,0],[-Math.sin(d2r(-lat)),0,Math.cos(d2r(-lat))]]);
     // multiply together and return
@@ -2556,11 +2776,11 @@ Localisation.prototype.processDet = function(det){
     // process detectors
     // get vector of detector position
     // console.log('processing ',det.id,det)
-    det.vec=rotate(det.lon,det.lat,0).multiply(lb2vec(0,0));
+    det.vec=this.rotate(det.lon,det.lat,0).multiply(lb2vec(0,0));
     //convert to latlon
     det.lb=vec2lb(det.vec);
     // construct rotation matrix
-    det.rotmat=rotate(det.lon,det.lat,det.ang);
+    det.rotmat=this.rotate(det.lon,det.lat,det.ang);
     // get initial arm vectors
     det.uvec=$M([0,1,0])
     det.vvec=$M([0,0,1]);;
@@ -2636,8 +2856,8 @@ Localisation.prototype.processSrcAmp = function(){
     src=this.src
     // console.log('processing src',src)
     // construct rotation matrix
-    src.rotmat=rotate(src.ra,src.dec,0);
-    src.rotmatpos=rotate(src.ra,src.dec,src.posang);
+    src.rotmat=this.rotate(src.lon,src.lat,0);
+    src.rotmatpos=this.rotate(src.lon,src.lat,-src.posang);
     // get vector of source position
     src.vec=$V(src.rotmatpos.multiply(lb2vec(0,0)));
     // initial vectors
@@ -2682,7 +2902,7 @@ Localisation.prototype.processSrcAmp = function(){
     src.h0=src.amp/2;
     // ignore second phase
     src.h2=src.amp/2;
-    src.posang2=src.posang;
+    src.posang2=-src.posang;
     src['A+']=src.dist*(1 + Math.cos(d2r(src.inc))*Math.cos(d2r(src.inc)))/2;
     src['Ax']=src.dist*Math.cos(d2r(src.inc));
     src.A1=src['A+']*Math.cos(d2r(2*src.phase))*Math.cos(d2r(2*src.posang2)) -
@@ -2783,7 +3003,7 @@ Localisation.prototype.calcAntFacsSky = function(){
     this.skyarr.arr.NNet=[];
     this.skyarr.arr.aNet=[];
     for (p in this.skyarr.arr.pix){
-        rotmat=rotate(this.skyarr.arr.ra[p],this.skyarr.arr.dec[p],0);
+        rotmat=this.rotate(this.skyarr.arr.lon[p],this.skyarr.arr.lat[p],0);
         ivec=rotmat.multiply($M([0,1,0]));
         jvec=rotmat.multiply($M([0,0,1]));
         eps={'+':ij2eps(ivec,jvec,'+'),'x':ij2eps(ivec,jvec,'x')};
@@ -2824,7 +3044,7 @@ Localisation.prototype.calcAntFacsSkyAmpPhase = function(){
     this.skyarr.arr.pNet=[];
     this.skyarr.arr.aNet=[];
     for (p in this.skyarr.arr.pix){
-        rotmat=rotate(this.skyarr.arr.ra[p],this.skyarr.arr.dec[p],0);
+        rotmat=this.rotate(this.skyarr.arr.lon[p],this.skyarr.arr.lat[p],0);
         ivec=rotmat.multiply($M([0,1,0]));
         jvec=rotmat.multiply($M([0,0,1]));
         eps={'+':ij2eps(ivec,jvec,'+'),'x':ij2eps(ivec,jvec,'x')};
@@ -2904,20 +3124,28 @@ Localisation.prototype.calcDetTimes = function(){
 Localisation.prototype.calcTimeRings = function(){
     if (!this.skyarr.arr.hasOwnProperty('Tmatch')){
         this.skyarr.arr.Tmatch=[];
-        for (p in this.skyarr.arr.pix){this.skyarr.arr.Tmatch.push(1);}
+        this.skyarr.arr.Tall=[];
+        for (p in this.skyarr.arr.pix){
+            this.skyarr.arr.Tmatch.push(1);
+            this.skyarr.arr.Tall.push(0);}
     }
     for (p in this.skyarr.arr.pix){
         if (this.Ndet<2){
             this.skyarr.arr.Tmatch[p]=0;
-        }
-        this.skyarr.arr.Tmatch[p]=1;
-        for (i in this.dOn){
-            for (j in this.dOn){
-                if (this.dOn[j]>this.dOn[i]){
-                    if (this.skyarr.arr.dt[i+j]){dd=i+j}else{dd=j+i}
-                    dtp=this.skyarr.arr.dt[dd][p]
-                    Tm=Math.exp(-Math.pow((dtp-this.src.dt[dd])/(4*this.contourWidth(dd)),2));
-                    this.skyarr.arr.Tmatch[p]*=Tm;
+            this.skyarr.arr.Tall[p]=0;
+        }else{
+            this.skyarr.arr.Tmatch[p]=1;
+            this.skyarr.arr.Tall[p]=0;
+            for (i in this.dOn){
+                for (j in this.dOn){
+                    if (this.dOn[j]>this.dOn[i]){
+                        if (this.skyarr.arr.dt[i+j]){dd=i+j}else{dd=j+i}
+                        dtp=this.skyarr.arr.dt[dd][p]
+                        Tm=Math.exp(-Math.pow((dtp-this.src.dt[dd])/(4*this.contourWidth(dd)),2));
+                        Ta=(Math.abs(dtp-this.src.dt[dd])<this.contourWidth(dd))?1:0
+                        this.skyarr.arr.Tmatch[p]*=Tm;
+                        this.skyarr.arr.Tall[p]+=Ta;
+                    }
                 }
             }
         }
@@ -2998,19 +3226,18 @@ Localisation.prototype.filterSky = function (filtVal,type,threshold) {
             // valSrc
             // pixel containing source not in filter
         }
-    }else if(filtVal=='pNet'){
+    }else if((filtVal=='pNet')|(filtVal=='FNet')){
         // if(!loc.skyarr.pNet.threshold){loc.skyarr.pNet.threshold=0.1}
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(Math.abs(loc.skyarr.arr.pNet[d]-loc.src.pNet)<threshold)
+            return(Math.abs(loc.skyarr.arr[filtVal][d]-loc.src[filtVal])<threshold)
         })
-    }else if(filtVal=='FNet'){
-        // if(!loc.skyarr.pNet.threshold){loc.skyarr.pNet.threshold=0.1}
-        filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(Math.abs(loc.skyarr.arr.FNet[d]-loc.src.FNet)<threshold)
-        });
     }else if(filtVal=='Tmatch'){
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(Math.abs(loc.skyarr.arr.Tmatch[d]>threshold))
+            return(loc.skyarr.arr.Tmatch[d]>threshold)
+        });
+    }else if(filtVal=='Tall'){
+        filtPix=this.skyarr.arr.pix.filter(function(d){
+            return(loc.skyarr.arr.Tall[d]>threshold)
         });
     }
     // get limits of filtered Data
@@ -3762,14 +3989,12 @@ Localisation.prototype.addSettings = function(){
         .attr("class","contour-switch")
         .attr("id",function(d){return "det-switch-Tmatch"})
         .html(function(){
-                return "<input type='checkbox' "+((loc.overlays.contoursTmatch.shown)?"checked":"")+">"+
+                return "<input type='checkbox' "+((loc.overlays['heatmap-Tmatch'].shown)?"checked":"")+">"+
                     "<span class='det-slider round'></span>"})
         .on("mousedown",function(){
-            if ((loc.overlays.contoursTmatch.shown)){
-                loc.hideOverlay('contoursTmatch')
+            if (loc.overlays['heatmap-Tmatch'].shown){
                 loc.hideOverlay('heatmap-Tmatch')
             }else{
-                loc.showOverlay('contoursTmatch')
                 loc.showOverlay('heatmap-Tmatch')
             }
         })
@@ -3786,13 +4011,13 @@ Localisation.prototype.addSettings = function(){
         .attr("class","contour-switch")
         .attr("id",function(d){return "det-switch-dt"})
         .html(function(){
-                return "<input type='checkbox' "+((loc.overlays.contoursT.shown)?"checked":"")+">"+
+                return "<input type='checkbox' "+((loc.overlays['heatmap-Tall'].shown)?"checked":"")+">"+
                     "<span class='det-slider round'></span>"})
         .on("mousedown",function(){
-            if (loc.overlays.contoursT.shown){
-                loc.hideOverlay('contoursT')
+            if (loc.overlays['heatmap-Tall'].shown){
+                loc.hideOverlay('heatmap-Tall')
             }else{
-                loc.showOverlay('contoursT')
+                loc.showOverlay('heatmap-Tall')
             }
         })
     contourdt.append("div")
