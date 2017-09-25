@@ -23,7 +23,7 @@
     "text.loc.source.distance":"Distance",
     "text.loc.source.lat":"Latitude",
     "text.loc.source.lon":"Longitude",
-    "text.loc.source.label.gmst":"Sidereal Time",
+    "text.loc.source.gmst":"Sidereal Time",
     "text.loc.network.on":"On",
     "text.loc.network.off":"Off",
     "text.loc.settings.title":"Display Settings",

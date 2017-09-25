@@ -1179,10 +1179,12 @@ Localisation.prototype.updateLines = function(){
 
 };
 Localisation.prototype.updateSourceLabels = function(){
-    d3.select('#lab-lon-txt')
-        .html(this.tl(loc.labels.lon.labstr()));
-    d3.select('#lab-lat-txt')
-        .html(this.tl(loc.labels.lat.labstr()));
+    d3.select('#lab-ra-txt')
+        .html(this.tl(loc.labels.ra.labstr()));
+    d3.select('#lab-dec-txt')
+        .html(this.tl(loc.labels.dec.labstr()));
+    d3.select('#lab-gmst-txt')
+        .html(this.tl(loc.labels.gmst.labstr()));
     d3.select('#lab-posang-txt')
         .html(this.tl(loc.labels.posang.labstr()));
     d3.select('#lab-inc-txt')
@@ -1357,7 +1359,7 @@ Localisation.prototype.setStyles = function(){
         'amp':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.amplitude%')+': '+
             parseFloat(loc.src.amp).toPrecision(2))}},
         'gmst':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.gmst%')+': '+
-            parseInt(loc.src.lst))},
+            parseInt(loc.src.gmst))},
             "icon":"img/time.svg"},
         // 'detr':{'type':'det','labstrdet':function(det){return det+' %text.loc.sensitivity%: '+loc.dataDet[loc.di[det]]['r+'].toPrecision(2)}}
     }
@@ -3747,20 +3749,28 @@ Localisation.prototype.addSource = function(){
     }
     d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont')
-        .attr('id','lab-lon')
+        .attr('id','lab-ra')
         .style('height',loc.labcontHeight)
     .append("div")
         .attr('class','labtext source')
-        .attr('id','lab-lon-txt')
-        .html(this.tl(loc.labels.lon.labstr()));
+        .attr('id','lab-ra-txt')
+        .html(this.tl(loc.labels.ra.labstr()));
     d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont')
-        .attr('id','lab-lat')
+        .attr('id','lab-dec')
         .style('height',loc.labcontHeight)
     .append("div")
         .attr('class','labtext source')
-        .attr('id','lab-lat-txt')
-        .html(this.tl(loc.labels.lat.labstr()));
+        .attr('id','lab-dec-txt')
+        .html(this.tl(loc.labels.dec.labstr()));
+    d3.select('#source-info-cont').append("div")
+        .attr('class','icon labcont')
+        .attr('id','lab-gmst')
+        .style('height',loc.labcontHeight)
+    .append("div")
+        .attr('class','labtext source')
+        .attr('id','lab-gmst-txt')
+        .html(this.tl(loc.labels.gmst.labstr()));
     // position angle slider
     posangcont=d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont labcont-full')
