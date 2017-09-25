@@ -1478,14 +1478,14 @@ Localisation.prototype.drawSkyInit = function(){
         d3.json(loc.fileInConst, function(error, dataIn){
             if (error){alert("Fatal error loading input file: '"+loc.fileInConst+"'. Sorry!")}
             loc.constnames=dataIn;
-            loc.constlist={}
-            for (c in loc.constnames.features){
-                loc.constlist[loc.constnames.features[c].id]=loc.constnames.features[c].properties.name;
-            }
             loc.loaded++;
             if (loc.debug){console.log('loaded: '+loc.fileInConst)}
             //call next functions
             if (loc.loaded==loc.toLoad){
+                loc.constlist={}
+                for (c in loc.constnames.features){
+                    loc.constlist[loc.constnames.features[c].id]=loc.constnames.features[c].properties.name;
+                }
                 loc.whenLoaded();
             }else{
                 if (loc.debug){console.log('not ready yet')}
@@ -1631,8 +1631,8 @@ Localisation.prototype.drawSky = function(){
       'contoursPr':{gid:"g-contoursPr",shown:false,opacity:1},
       'heatmap-Pr':{gid:"g-heatmap-Pr",shown:false,opacity:1},
       'heatmap-pNet':{gid:"g-heatmap-pNet",shown:(this.hmap=='pNet'),opacity:1,cbar:false},
-      'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet'),opacity:0.9,cbar:true},
-      'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet'),opacity:0.9,cbar:true},
+      'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet'),opacity:0.9,cbar:true,min:0,max:1},
+      'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet'),opacity:0.9,cbar:true,min:-1,max:1},
       'heatmap-Tmatch':{gid:"g-heatmap-Tmatch",shown:true,opacity:1,cbar:false},
       'heatmap-Tall':{gid:"g-heatmap-Tall",shown:true,opacity:1,cbar:false},
       'overlay':{gid:"g-overlay",shown:false,opacity:0,cbar:false},
@@ -1641,6 +1641,34 @@ Localisation.prototype.drawSky = function(){
       'lines':{gid:"skymap-lines",shown:true,opacity:0.7,cbar:false},
       'names':{gid:"skymap-names",shown:true,opacity:0.7,cbar:false},
     }
+    loc.cbar=loc.svg.append("g")
+        .attr("id","cbar-outer")
+        .attr("transform","translate("+(loc.margin.left+loc.skyWidth/4)+","+(loc.margin.top+loc.skyHeight+80*loc.scl)+")")
+        .style("opacity",1)
+    loc.cbarWidth=loc.skyWidth/2;
+    loc.cbarHeight=20;
+    loc.cbar.append("rect")
+        .attr("x",0).attr("y",0).attr("width",loc.cbarWidth).attr("height",loc.cbarHeight)
+        .attr("stroke","black")
+    // cbarCol=loc.skyarr[this.hmap].colHeatScale
+    loc.cbarRes=100;
+    loc.cbarRng=d3.range(0,1,1/loc.cbarRes)
+    // loc.cbar.selectAll(".cbar-el")
+    //     .data(loc.cbarRng)
+    // .enter().append("rect")
+    //     .attr("class","cbar-el")
+    //     .attr("x",function(d){return loc.cbarWidth*d})
+    //     .attr("y",0)
+    //     .attr("width",(loc.cbarWidth/loc.cbarRes))
+    //     .attr("height",loc.cbarHeight)
+    // .merge(loc.cbar.selectAll(".cbar-el"))
+    //     .attr("fill",function(d){
+    //         colDom=loc.skyarr[loc.hmap].colHeatScale.domain()
+    //         colx=colDom[0] + d*(colDom[1]-colDom[0]);
+    //         console.log(d,colx,loc.skyarr[loc.hmap].colHeatScale(colx))
+    //         return loc.skyarr[loc.hmap].colHeatScale(colx);
+    //     })
+
     // draw Heatmap
     loc.skyarr.FNet={}
     loc.skyarr.FNet.gHeatmap=loc.svg.append("g")
@@ -2243,19 +2271,19 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         loc.skyarr.FNet.hmapthreshold=5;
         loc.skyarr[dataIn].opHeat=function(d){return 1;};
         // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
+        loc.skyarr[dataIn].colHeatScale=d3.scaleSequential(d3.interpolateInferno).domain([0, 1]);
         loc.skyarr[dataIn].colHeat=function(p){
             val=loc.skyarr.arr[dataIn][p];
-            scale=d3.scaleSequential(d3.interpolateInferno).domain([0, 1]);
-            return scale(val);
+            return loc.skyarr[dataIn].colHeatScale(val);
         }
     }else if (dataIn=="aNet"){
         loc.skyarr.FNet.hmapthreshold=5;
         loc.skyarr[dataIn].opHeat=function(d){return 1;};
         // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
+        loc.skyarr[dataIn].colHeatScale=d3.scaleSequential(d3.interpolateRdBu).domain([-1,1]);
         loc.skyarr[dataIn].colHeat=function(p){
             val=Math.log10(loc.skyarr.arr[dataIn][p]);
-            scale=d3.scaleSequential(d3.interpolateInferno).domain([-1,1]);
-            return scale(val);
+            return loc.skyarr[dataIn].colHeatScale(val);
         }
     }else if (dataIn=="Tmatch"){
         loc.skyarr.Tmatch.hmapthreshold=0.5;
@@ -2332,6 +2360,24 @@ Localisation.prototype.updateHeatmap = function(dataIn){
                 }else{
                     return (loc.skyarr[dataIn].opHeat(loc.skyarr.arr[dataIn][d]));
                 }
+            })
+    }
+    // update colour bar
+    if (loc.overlays['heatmap-'+dataIn].cbar){
+        loc.cbar.selectAll(".cbar-el")
+            .data(loc.cbarRng)
+        .enter().append("rect")
+            .attr("class","cbar-el")
+            .attr("x",function(d){return loc.cbarWidth*d})
+            .attr("y",0)
+            .attr("width",(loc.cbarWidth/loc.cbarRes))
+            .attr("height",loc.cbarHeight)
+        .merge(loc.cbar.selectAll(".cbar-el"))
+            .attr("fill",function(d){
+                colDom=loc.skyarr[loc.hmap].colHeatScale.domain()
+                colx=colDom[0] + d*(colDom[1]-colDom[0]);
+                console.log(d,colx,loc.skyarr[loc.hmap].colHeatScale(colx))
+                return loc.skyarr[loc.hmap].colHeatScale(colx);
             })
     }
 }
@@ -2548,11 +2594,19 @@ Localisation.prototype.showOverlay = function(olName){
     d3.select('#'+gid)
         .transition().duration(500)
         .style("opacity",this.overlays[olName].opacity)
+    if (this.overlays[olName].cbar){
+        d3.select('#cbar-outer')
+            .transition().duration(500)
+            .style("opacity",1)
+    }
     this.overlays[olName].shown=true;
 }
 Localisation.prototype.hideOverlay = function(olName){
     gid=this.overlays[olName].gid;
     d3.select('#'+gid)
+        .transition().duration(500)
+        .style("opacity",0)
+    d3.select('#cbar-outer')
         .transition().duration(500)
         .style("opacity",0)
     this.overlays[olName].shown=false;
