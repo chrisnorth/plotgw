@@ -120,6 +120,8 @@
     "tooltip.plotgw.showlang":{"_title":"Tooltip: language button","_text":"Tooltip text for language button","_type":"string"},
     "tooltip.plotgw.share":{"_title":"Tooltip: share button","_text":"Tooltip text for share button","_type":"string"},
     "tooltip.plotgw.search":{"_title":"Tooltip: search button","_text":"Tooltip text for search button","_type":"string"},
+    "tooltip.plotgw.next":{"_title":"Tooltip: next button","_text":"Tooltip text for previous event button","_type":"string"},
+    "tooltip.plotgw.previous":{"_title":"Tooltip: previous button","_text":"Tooltip text for next event button","_type":"string"},
 
     "section.bhbubble.data":{"_title":"Data labels and units shown on bubble plot"},
     "subsection.bhbubble.names":{"_subtitle":"Prefixes and suffixes of event names","_text":"Useful for non-Roman alphabets"},

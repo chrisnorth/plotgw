@@ -97,6 +97,8 @@
  "tooltip.plotgw.showlang": "Change language",
  "tooltip.plotgw.share": "Share",
  "tooltip.plotgw.search": "Search",
+ "tooltip.plotgw.nextevent": "Next event",
+ "tooltip.plotgw.prevevent": "Previous event",
  "data.bub.name.GW": "GW",
  "data.bub.name.LVT": "LVT",
  "data.bub.name.A": "-A",
