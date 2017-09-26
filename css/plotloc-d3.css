@@ -156,7 +156,7 @@ h1{
     width:100%;
     cursor:pointer;
 }
-.loading-icon{
+/*.loading-icon{
     position:absolute;
     display:none;
 }
@@ -170,7 +170,7 @@ h1{
 }
 .loading-icon.isLoading{
     display:inline-block;
-}
+}*/
 .legend{
     display:none;
 }
@@ -240,17 +240,17 @@ h1{
 }
 .loading{
     text-align:center;
-    transition: opacity 500ms;
-    opacity:0;
-    max-height:0;
+    /*transition: opacity 500ms;*/
+    opacity:1;
+    max-height:100%;
     visibility:hidden;
 }
-.loading.isLoading{
+/*.loading.isLoading{
     transition: opacity 500ms;
     opacity:1;
     max-height: 100%;
     visibility:visible;
-}
+}*/
 #copy-button{
     padding:5px;
     background-color: white;
@@ -366,6 +366,11 @@ img.share-icon{
     padding-right:10px;
     font-size:2em;
     cursor:pointer;
+}
+.settings-block{
+    border: black dashed 1px;
+    width:90%;
+    margin-bottom:10px;
 }
 .settingscont{
     margin-left:2%;
@@ -500,14 +505,14 @@ span.settings-desc{
     border-right:none;*/
 }
 /* Detector switches */
-.det-switch, .hmap-switch, .contour-switch {
+.det-switch, .settings-switch {
   position: relative;
   display: inline-block;
   width: 20px;
   height: 14px;
   margin-right: 20px;
 }
-.det-switch input, .hmap-siwtch input, .contour-switch input {display:none;}
+.det-switch input, .settings-switch input {display:none;}
 
 .det-slider{
   position:absolute;
@@ -622,6 +627,15 @@ input:checked + .det-slider:before {
 .cbar-el{
     stroke-opacity:0;
     fill-opacity:1;
+}
+.cbar-label{
+    font-size:1.5em;
+    fill:black;
+    fill-opacity:1;
+}
+.cbar-label-title{
+    font-size:2em;
+    fill:black;
 }
 @media (max-width:1200px){
     .panel-title.landscape{
