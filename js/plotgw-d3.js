@@ -2245,21 +2245,21 @@ GWCatalogue.prototype.drawGraph = function(){
     })
     d3.select("#search-bg").on("click",function(){gw.hideSearch();});
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
-    //add download button
-    this.graphcont.append("div")
-        .attr("id","save-icon")
-        .attr("class","graph-icon hidden")
-        .style({"right":gw.margin.right+7*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
-        .on("mouseover",function(){
-            gw.showTooltipManual("%tooltip.plotgw.save%");
-        })
-        .on("mouseout",function(){
-            gw.hideTooltipManual();
-        }).append("img")
-        .attr("src","img/save.svg")
-        .attr("class","hidden")
-        .attr("id","save-img")
-        .on("click",function(){gw.writeDownloadLink()});
+    // //add download button
+    // this.graphcont.append("div")
+    //     .attr("id","save-icon")
+    //     .attr("class","graph-icon hidden")
+    //     .style({"right":gw.margin.right+7*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+    //     .on("mouseover",function(){
+    //         gw.showTooltipManual("%tooltip.plotgw.save%");
+    //     })
+    //     .on("mouseout",function(){
+    //         gw.hideTooltipManual();
+    //     }).append("img")
+    //     .attr("src","img/save.svg")
+    //     .attr("class","hidden")
+    //     .attr("id","save-img")
+    //     .on("click",function(){gw.writeDownloadLink()});
 }
 GWCatalogue.prototype.selectEvent = function(ev,redraw=false){
     var gw=this;
@@ -2780,6 +2780,8 @@ GWCatalogue.prototype.addHelp = function(){
         .html(this.tl("%text.plotgw.help.lang%"));
     d3.select("#help-share-text")
         .html(this.tl("%text.plotgw.help.share%"));
+    d3.select("#help-search-text")
+        .html(this.tl("%text.plotgw.help.search%"));
     if (this.portrait){
         d3.select('.help-title')
             .style("font-size",(5.0*this.xsc)+"em")

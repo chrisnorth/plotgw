@@ -101,6 +101,7 @@
     "text.plotgw.help.errors":{"_title":"Errors button help text","_text":"Help text for errors button","_type":"textarea","_height":"2em"},
     "text.plotgw.help.lang":{"_title":"Language button help text","_text":"Help text for language button","_type":"textarea","_height":"2em"},
     "text.plotgw.help.share":{"_title":"Share button help text","_text":"Help text for share button","_type":"textarea","_height":"2em"},
+    "text.plotgw.help.search":{"_title":"Search button help text","_text":"Help text for search button","_type":"textarea","_height":"2em"},
 
     "subsection.plotgw.lang":{"_subtitle":"Language panel"},
     "text.plotgw.lang.title":{"_title":"Language panel title","_text":"Title of panel for changing the language","_type":"string"},
@@ -118,6 +119,7 @@
     "tooltip.plotgw.showhelp":{"_title":"Tooltip: help button","_text":"Tooltip text for help button","_type":"string"},
     "tooltip.plotgw.showlang":{"_title":"Tooltip: language button","_text":"Tooltip text for language button","_type":"string"},
     "tooltip.plotgw.share":{"_title":"Tooltip: share button","_text":"Tooltip text for share button","_type":"string"},
+    "tooltip.plotgw.search":{"_title":"Tooltip: search button","_text":"Tooltip text for search button","_type":"string"},
 
     "section.bhbubble.data":{"_title":"Data labels and units shown on bubble plot"},
     "subsection.bhbubble.names":{"_subtitle":"Prefixes and suffixes of event names","_text":"Useful for non-Roman alphabets"},
