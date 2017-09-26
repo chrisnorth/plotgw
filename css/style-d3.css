@@ -52,6 +52,7 @@ button.down{
     border:2px solid black;
     border-radius: 10px;
     background-color: #eee;
+    position:relative;
 }
 .select-event{
     position:absolute;
