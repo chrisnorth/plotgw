@@ -506,8 +506,8 @@ BHBubble.prototype.loadData = function(){
                 fin.massBH=dj.Mfinal.best;
                 fin.massBHerr='e'+parseFloat(dj.Mfinal.err[1])+'-'+
                     parseFloat(dj.Mfinal.err[0]);
-                distance=parseInt(3.26*(dj.DL.best-dj.DL.err[0]))+
-                    '-'+parseInt(3.26*(dj.DL.best+dj.DL.err[1]));
+                distance=(Math.round(3.26*(dj.DL.best-dj.DL.err[0])/100)*100)+
+                    '-'+(Math.round(3.26*(dj.DL.best+dj.DL.err[1])/100)*100);
             }else{
                 pri.massBH=dj.M1[0];
                 pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
@@ -520,8 +520,8 @@ BHBubble.prototype.loadData = function(){
                 fin.massBH=dj.Mfinal[0];
                 fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
                     parseFloat(dj.Mfinal[1]);
-                distance=parseInt(3.26*(dj.DL[0]-dj.DL[1]))+
-                    '-'+parseInt(3.26*(dj.DL[0]+dj.DL[2]));
+                distance=(Math.round(3.26*(dj.DL[0]-dj.DL[1])/100)*100)+
+                    '-'+(Math.round(3.26*(dj.DL[0]+dj.DL[2])/100)*100);
             }
             if (i[0]=='G'){method='GW'}
             else if (i[0]=='L'){method='LVT'}

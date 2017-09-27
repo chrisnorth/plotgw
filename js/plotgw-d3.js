@@ -43,13 +43,13 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding infoouter')}
         d3.select("#"+this.holderid).insert("div","#graphcontainer + *")
             .attr("id","infoouter")
-            .html('<div id="sketchcontainer"></div><div id="labcontainer"></div>')
+            .html('<div id="sketchcontainer"></div><div id="labcontainer"></div><div id="select-next" class="select-event select-next"></div><div id="select-previous" class="select-event select-previous"></div>')
     }
     if (d3.select("#options-outer").empty()){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer")
-            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="options-close" class="panel-close"><img src="img/close.png" title="close"></div></div>')
+            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="options-close" class="panel-close"></div></div>')
     }
     if (d3.select("#help-outer").empty()){
         if(this.debug){console.log('adding help-outer')}
@@ -79,7 +79,6 @@ GWCatalogue.prototype.init = function(){
             .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
         d3.select("#help-outer").append("div")
             .attr("id","help-close").attr("class","panel-close")
-            .html('<img src="img/close.png" title="close">')
         d3.select("#help-outer").append("div")
             .attr("id","help-block-text").attr("class","panel-text")
             .html('<div class="panel-text" id="help-text"></div>')
@@ -96,7 +95,6 @@ GWCatalogue.prototype.init = function(){
         //     .attr("id","lang-block-credit").attr("class","panel-block panel-block-full")
         d3.select("#lang-outer").append("div")
             .attr("id","lang-close").attr("class","panel-close")
-            .html('<img src="img/close.png" title="close">')
     }
     if (d3.select('#share-bg').empty()){
         if(this.debug){console.log('adding share-bg')}
@@ -119,7 +117,6 @@ GWCatalogue.prototype.init = function(){
             .html('<a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fchrisnorth.github.io%2Fplotgw%2F&amp;src=sdkpreparse">Share</a>')
         d3.select('#share-outer').append("div")
             .attr("id","share-close").attr("class","popup-close")
-            .html('<img src="img/close.png" title="close">')
     }
     if (d3.select('#tooltip').empty()){
         if(this.debug){console.log('adding tooltip')}
@@ -134,12 +131,17 @@ GWCatalogue.prototype.init = function(){
         panel:"info",
         lang:"en",
         showerrors:true,
+        showxray:false,
         selectedevent:"GW170104"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
     this.showerrors = (this.urlVars.err) ? this.urlVars.err : this.defaults.showerrors;
     this.showerrors = (this.showerrors=="false") ? false : true;
+<<<<<<< HEAD
+=======
+    this.showxray = (this.urlVars.xray) ? this.urlVars.xray : this.defaults.showxray;
+>>>>>>> o2-dev
     this.selectedevent = (this.urlVars.event) ? this.urlVars.event : this.defaults.selectedevent;
     this.setStyles();
     this.sketchName="None";
@@ -715,7 +717,7 @@ GWCatalogue.prototype.setScales = function(){
     // set axis scales
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
-    this.xValue = function(d) {return d[gw.xvar].best;} // data -> value
+    this.xValue = function(d) {return (((d[gw.xvar])&&(d[gw.xvar].best)) ? d[gw.xvar].best : 0);} // data -> value
     // value -> display
     this.xScale = d3.scale.linear().domain([0,100])
         .range([0, this.graphWidth])
@@ -739,7 +741,7 @@ GWCatalogue.prototype.setScales = function(){
             .innerTickSize(-this.graphHeight);
 
     //data -> value
-    this.yValue = function(d) {return d[gw.yvar].best;}
+    this.yValue = function(d) {return (((d[gw.yvar])&&(d[gw.yvar].best)) ? d[gw.yvar].best : 0);}
     // value -> display
     // this.yScale = d3.scale.linear().
     //     range([this.relh[1]*this.graphHeight, this.relh[0]*this.graphHeight])
@@ -975,6 +977,16 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("text-anchor","middle")
         .style("font-size",(0.75*fs)+"em")
         .html(this.tl("%text.plotgw.information.subtitle%"));
+
+    // add actions to nex/previous
+    d3.select('#select-next')
+        .on('mouseover',function(){gw.showTooltipManual("%tooltip.plotgw.nextevent%");})
+        .on('mouseout',function(){gw.hideTooltipManual();})
+        .on('click',function(){gw.selectNext(+1);})
+    d3.select('#select-previous')
+        .on('mouseover',function(){gw.showTooltipManual("%tooltip.plotgw.prevevent%");})
+        .on('mouseout',function(){gw.hideTooltipManual();})
+        .on('click',function(){gw.selectNext(-1);})
 
     // this.tooltipSk = document.createElement('div');
     // this.tooltipSk.className = "tooltip";
@@ -1243,9 +1255,20 @@ GWCatalogue.prototype.updateSketch = function(d){
 
 GWCatalogue.prototype.setStyles = function(){
     // setup colours and linestyles
+    var gw=this
     this.cValue = function(d) {return d.type;};
-    this.color = d3.scale.category10();
-    this.linestyles = {GW:"#000",LVT:"#999"}
+    this.color1 = d3.scale.category10();
+    this.styleDomains = (this.showxray) ? ['GW','LVT','xray'] : ['GW','LVT'];
+    this.color = d3.scale.ordinal().range(["#1f77b4", "#ff7f0e","#999999"]).domain(this.styleDomains);
+    this.linestyles = d3.scale.ordinal().range(["#000","#555","#555"]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3,0]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
+    this.getOpacity = function(d) {return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.type) : 0)}
+    this.xrayShown = function(d) {
+        if ((gw.xrayCols.hasOwnProperty(gw.xvar))&&(gw.xrayCols.hasOwnProperty(gw.yvar))&&(gw.showxray)){
+            return true
+        }else{return false}
+    }
     this.colorErr = "#555";
     this.swErr = 2;
     this.opErr = 0.7;
@@ -1253,7 +1276,6 @@ GWCatalogue.prototype.setStyles = function(){
     // set colours
     this.colBH = ["rgba(0,0,0,1)","rgba(0,0,0,0)"];
     this.colShadow = ["rgba(128,128,128,1)","rgba(192,192,192,0)"];
-
 }
 GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
@@ -1264,7 +1286,21 @@ GWCatalogue.prototype.tttext = function(d){
     "<span class='ttsec'>"+this.tl(this.columns[this.yvar].name) +
         ": "+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
 }
-
+GWCatalogue.prototype.tttextXray = function(d){
+    // graph tooltip text
+    if (this.debug){console.log(d["name"],this.columns[this.xvar].name,d[this.xvar].strnoerr,this.columns[this.yvar].name,d[this.yvar].strnoerr)}
+    return "<span class='ttname'>"+d["name"]+"</span>"+
+    "<span class='ttpri'>"+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
+    "<span class='ttsec'>"+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
+}
+GWCatalogue.prototype.orderData = function(order='GPS'){
+    this.data=this.data.sort(function(a,b){
+        return b[order].best - a[order].best
+    });
+    var dataOrder=[];
+    this.data.forEach(function(d){dataOrder.push(d.name);});
+    this.dataOrder=dataOrder;
+}
 GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     if (this.debug){console.log('formatData',d.name);}
@@ -1304,10 +1340,61 @@ GWCatalogue.prototype.formatData = function(d,cols){
         // console.log(col,d[col]);
     }
 }
+GWCatalogue.prototype.formatDataXray = function(d,cols){
+    // generate new columns
+    if (this.debug){console.log('formatData',d.name);}
+    var gw=this;
+    gw.xrayCols=['M1','M2'];
+    gw.xrayCols={
+        M1:{icon:"img/primass.svg",avail:true,type:'src',
+            strfn:function(d){
+                return("%text.plotgw.bhmass%<br/>"+(d.M1.best)+" %data.M1.unit%");}
+            },
+        M2:{icon:"img/secmass.svg",avail:true,type:'src',
+            strfn:function(d){
+                return("%text.plotgw.compmass%<br/>"+(d.M2.best)+" %data.M2.unit%");}
+        }
+    }
+    for (col in gw.xrayCols){
+        // console.log(col,gw.columns[col].type);
+        if (gw.xrayCols[col].type=="derived"){
+            d[col]={}
+            if (gw.xrayCols[col].bestfn){d[col].best=gw.xrayCols[col].bestfn(d);}
+            if ((gw.xrayCols[col].errfn)&&(d[col].err)){d[col].err=gw.columns[col].errfn(d);}
+            // console.log('new column',col,d[col])
+        }else{
+            // console.log('existing column',col,d[col])
+        }
+        if (d[col]){
+            if ((d[col].err)&&(d[col].err.length==2)){
+                d[col].errv =
+                    [d[col].best+d[col].err[0],
+                    d[col].best-d[col].err[1]];
+            }else if (typeof d[col].best=="number"){
+                d[col].errv =[d[col].best,d[col].best];
+            }
+            if (gw.xrayCols[col].strfn){
+                d[col].str=gw.xrayCols[col].strfn(d);
+                if ((gw.xrayCols[col].strfnnoerr)&&(d[col].err)){
+                    d[col].strnoerr=gw.xrayCols[col].strfnnoerr(d);
+                }else{
+                    d[col].strnoerr=gw.xrayCols[col].strfn(d);
+                }
+            }else{
+                d[col].str=(d[col].err) ? gw.stdlabel(d,col) : gw.stdlabelNoErr(d,col);
+                d[col].strnoerr = gw.stdlabelNoErr(d,col);
+            }
+        }
+        // console.log(col,d[col])
+        // console.log(col,d[col])
+        // console.log(col,d[col]);
+    }
+}
 GWCatalogue.prototype.makeGraph = function(){
     // create graph
     // console.log('makeGraph');
-    this.svgcont = d3.select("div#graphcontainer").append("div")
+    this.graphcont=d3.select("div#graphcontainer")
+    this.svgcont = this.graphcont.append("div")
         .attr("id","svg-container")
         .attr("width",this.svgWidth)
         .attr("height",this.svgHeight)
@@ -1315,6 +1402,7 @@ GWCatalogue.prototype.makeGraph = function(){
     this.svg = d3.select(".svg-container").append("svg")
         // .attr("preserveAspectRatio", "xMidYMid meet")
         // .attr("viewBox","0 0 "+this.graphWidth+" " +1.2*this.graphHeight)
+        .attr("class","graph")
         .attr("width",this.svgWidth)
         .attr("height",this.svgHeight)
         // .classed("svg-content-responsive",true);
@@ -1355,7 +1443,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
     gw.loaded=0;
-    gw.toLoad=4;
+    gw.toLoad=5;
     gw.data=[];
     gw.optionsOn=false;
     gw.helpOn=false;
@@ -1365,6 +1453,8 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.fileInDataDict = (gw.urlVars.dictFile) ? gw.urlVars.dictFile : gw.fileInDataDictDefault
     gw.fileInEventsDefault="json/events.json";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault
+    gw.fileInXrayDefault="csv/bhcat_xray.csv";
+    gw.fileInXray = (gw.urlVars.xrayFile) ? gw.urlVars.xrayFile : gw.fileInXrayDefault
 
     // if (gw.urlVars.lang){
     //     lang=gw.urlVars.lang;
@@ -1451,10 +1541,18 @@ GWCatalogue.prototype.drawGraphInit = function(){
         if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
         for (e in dataIn.data){
             dataIn.data[e].name=e;
-            if (e[0]=='G'){t='GW'}
-            else if (e[0]=='L'){t='LVT'}
-            else{t=''}
-            dataIn.data[e].type=t;
+            if (dataIn.data[e].type){
+                dataIn.data[e].type=dataIn.data[e].type.best
+            }else{
+                if (e[0]=='G'){t='GW'}
+                else if (e[0]=='L'){t='LVT'}
+                else{t=''}
+                dataIn.data[e].type=t;
+            }
+            if (e[0]=='G'){c='GW'}
+            else if (e[0]=='L'){c='LVT'}
+            else{c=''}
+            dataIn.data[e].conf=c;
             if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
                 link=dataIn.links[e].LOSCData;
                 link.url=link.url;
@@ -1484,7 +1582,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
         gw.loaded++;
         // if(gw.debug){console.log((dataIn),(dataIn.datadict))}
         gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
-        if(gw.debug){console.log('datadict:',gw.datadict,dataIn);}
+        if((gw.debug)&&(dataIn)){console.log('datadict:',gw.datadict,dataIn);}
         if (gw.loaded==gw.toLoad){
             gw.whenLoaded();
             // gw.setColumns(gw.datadict);
@@ -1493,15 +1591,37 @@ GWCatalogue.prototype.drawGraphInit = function(){
             // if(gw.debug){console.log('plotted');}
         }
     });
+    // read in Xray data
+    d3.csv(gw.fileInXray, function(error, dataIn){
+        if (error){alert("Fatal error loading input file: '"+gw.fileInXray+"'. Sorry!")}
+        gw.dataXray = dataIn;
+        for (i in gw.dataXray){
+            d=gw.dataXray[i];
+            d.M1={best:d.massBH};
+            d.M2={best:d.compMass};
+            d.D2={best:d.distance};
+            d.type='xray';
+        }
+        gw.loaded++;
+        if (gw.debug){console.log('loaded: '+gw.inputFileXray)}
+        //call next functions
+        if (gw.loaded==gw.toLoad){
+            gw.whenLoaded();
+        }else{
+            if (gw.debug){console.log('not ready yet')}
+        }
+    })
 }
 GWCatalogue.prototype.whenLoaded = function(){
     var gw=this;
     gw.setColumns(gw.datadict);
     gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+    gw.dataXray.forEach(function(d){gw.formatDataXray(d,gw.columns)});
+    // order Data
+    gw.orderData();
     gw.makePlot();
     if(gw.debug){console.log('plotted');}
     // select a default event
-    this.selectEvent(gw.selectedevent);
 }
 GWCatalogue.prototype.loadLang = function(lang){
     var gw=this;
@@ -1603,7 +1723,8 @@ GWCatalogue.prototype.setLang = function(){
     d3.select("#options-y > .panel-title")
         .html(this.tl('%text.plotgw.vertical-axis%'))
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
-        LVT:this.tl('%text.plotgw.legend.candidates%')}
+        LVT:this.tl('%text.plotgw.legend.candidates%'),
+        xray:this.tl('%text.bub.legend.xray%')}
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
@@ -1670,7 +1791,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.xvar,true));
-    gw.svgcont.append("div")
+    gw.graphcont.append("div")
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
@@ -1707,7 +1828,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.yvar,true));
-    gw.svgcont.append("div")
+    gw.graphcont.append("div")
         .attr("class", "y-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
@@ -1720,6 +1841,46 @@ GWCatalogue.prototype.drawGraph = function(){
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.scl))+"em");
+
+    d3.selectAll('.tick > line')
+            .style('stroke','#ccc')
+            .style('opacity',1)
+
+    // draw x-ray dots
+    if (this.showxray){
+    xrayGroup = gw.svg.append("g").attr("class","g-xray")
+    xrayGroup.selectAll(".xraydot")
+        .data(gw.dataXray)
+    .enter().append("circle")
+        .attr("class", "xraydot")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")")
+        .attr("r", Math.min(10.,7/gw.sksc))
+        .attr("cx", gw.xMap)
+        .attr("cy", gw.yMap)
+        .attr("cursor","default")
+        .attr("opacity",function(d){return gw.getOpacity(d)})
+    //   .style("fill", function(d) { return color(cValue(d));})
+        .style("fill", function(d){return gw.color(gw.cValue(d));})
+        .style("stroke",function(d){return gw.linestyles(d.type);})
+        .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
+        .style("stroke-width",Math.min(5,2./gw.sksc))
+        .on("mouseover", function(d) {
+            gw.tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+            gw.tooltip.html(gw.tttextXray(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY-10) + "px")
+               .style("width","auto")
+               .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            gw.tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+        })
+    }
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
@@ -1819,8 +1980,10 @@ GWCatalogue.prototype.drawGraph = function(){
     }else{
         if(this.debug){console.log('no gwcat.d');}
     }
+
     // draw dots
-    gw.svg.selectAll(".dot")
+    dotsGroup = gw.svg.append("g").attr("class","g-dots")
+    dotsGroup.selectAll(".dot")
       .data(data)
     .enter().append("circle")
       .attr("class", "dot")
@@ -1830,9 +1993,12 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("cx", gw.xMap)
       .attr("cy", gw.yMap)
       .attr("cursor","pointer")
+      .attr("opacity",function(d){return gw.getOpacity(d)})
     //   .style("fill", function(d) { return color(cValue(d));})
       .style("fill", function(d){return gw.color(gw.cValue(d));})
-      .style("stroke",function(d){return gw.linestyles[d.type];})
+      .style("stroke",function(d){return gw.linestyles(d.type);})
+      .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
+      .style("stroke-width",Math.min(5,2./gw.sksc))
       .on("mouseover", function(d) {
             gw.tooltip.transition()
                .duration(200)
@@ -1855,23 +2021,25 @@ GWCatalogue.prototype.drawGraph = function(){
         //   gw.updateSketch(d);
         //   add highlight to selected circle
         });
+
     // draw legend
     gw.legend = gw.svg.selectAll(".legend")
       .data(gw.color.domain())
     .enter().append("g")
-      .attr("class", "legend")
+      .attr("class", function(d,i){return "legend "+d;})
       .attr("transform", function(d, i) { return "translate(0," +
         (i * 24) + ")"; });
 
-    // draw legend colored rectangles
-    gw.legend.append("rect")
-      .attr("x", gw.margin.left + 12)
-      .attr("y", gw.margin.top + 12)
-      .attr("width", 18)
-      .attr("height", 18)
+    // draw legend colored circles
+    gw.legend.append("circle")
+      .attr("cx", gw.margin.left+16.5)
+      .attr("cy", gw.margin.top+21)
+      .attr("r", 9)
       .style("fill", gw.color)
-      .style("stroke",function(d){return gw.linestyles[d.type];})
-      .style("stroke","#000");
+      .style("stroke-dasharray",function(d){return gw.linedashes(d);})
+      .style("stroke-width",Math.min(5,2./gw.sksc))
+      .style("stroke",function(d){return gw.linestyles(d);})
+      .attr("opacity",function(d){return gw.dotopacity(d)});
 
     // draw legend text
     gw.legend.append("text")
@@ -1880,13 +2048,21 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("dy", ".35em")
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
-      .text(function(d) { return gw.legenddescs[d];})
+      .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
+
+    // hide/show xray legend dot
+    if(gw.xrayShown()){
+        d3.select('.legend.xray')
+            .transition().duration(750).attr("opacity",1)
+    }else{
+        d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
+    }
 
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
     this.optionsbg = d3.select('#options-bg');
     this.optionsouter = d3.select('#options-outer')
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","options-icon")
         .attr("class",optionsClass)
         .style({"right":gw.margin.right+gw.margin.top+10,"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -1917,7 +2093,7 @@ GWCatalogue.prototype.drawGraph = function(){
 
     // add info icon
     infoClass = ((!this.optionsOn)&(!this.helpOn)&(!this.langOn)) ? "graph-icon" : "graph-icon hidden";
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","info-icon")
         .attr("class",infoClass)
         .style({"right":gw.margin.right,"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -1944,7 +2120,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add help icon
     helpClass = (this.helpOn) ? "graph-icon" : "graph-icon hidden";
     this.helpouter = d3.select('#help-outer')
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","help-icon")
         .attr("class",helpClass)
         .style({"right":gw.margin.right+2*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
@@ -1974,7 +2150,7 @@ GWCatalogue.prototype.drawGraph = function(){
     // add language button
     langClass = (this.langOn) ? "graph-icon" : "graph-icon hidden";
     this.langouter = d3.select('#lang-outer')
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","lang-icon")
         .attr("class",langClass)
         .style({"right":gw.margin.right+3*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
@@ -2005,7 +2181,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add error toggle button
     errorClass = (this.showerrors) ? "errors-show" : "errors-hide";
     // errordivClass = (this.showerrors) ? "graph-icon" : "graph-icon hidden";
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","errors-icon")
         .attr("class","graph-icon"+((this.showerrors) ? "" : " hidden"))
         .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -2025,7 +2201,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.toggleErrors();gw.hideTooltipManual();});
 
     //add share button
-    d3.select("#svg-container").append("div")
+    this.graphcont.append("div")
         .attr("id","share-icon")
         .attr("class","graph-icon hidden")
         .style({"right":gw.margin.right+5*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
@@ -2041,24 +2217,117 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.showShare();gw.hideTooltipManual();});
     d3.select("#share-bg").on("click",function(){gw.hideShare();});
     d3.select("#share-close").on("click",function(){gw.hideShare();});
-}
-GWCatalogue.prototype.selectEvent = function(evname){
-    var gw=this;
-    if (typeof evname == "string"){
-        // evname is a string
-        for (ev in gw.data){
-            if (gw.data[ev].name==evname){d=gw.data[ev]}
+
+    //add search button
+    this.graphcont.append("div")
+        .attr("id","search-icon")
+        .attr("class","graph-icon hidden")
+        .style({"right":gw.margin.right+6*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            gw.showTooltipManual("%tooltip.plotgw.search%");
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        }).append("img")
+        .attr("src","img/search.svg")
+        .attr("class","hidden")
+        .attr("id","search-img")
+        .on("click",function(){gw.showSearch();gw.hideTooltipManual();});
+    gw.data.forEach(function(d){
+        d3.select('#search-outer').append("div")
+            .attr("class","popup-list-item search-list-item")
+            .attr("id","search-list-"+d.name)
+            .html(d.name)
+            .on("click",function(){
+                if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);}gw.hideSearch();})
+        if (gw.selectedevent==d.name){
+            document.getElementById("search-list-"+d.name).classList.add("current")
+        }else{
+            document.getElementById("search-list-"+d.name).classList.remove("current")
         }
+    })
+    d3.select("#search-bg").on("click",function(){gw.hideSearch();});
+    d3.select("#search-close").on("click",function(){gw.hideSearch();});
+    // //add download button
+    // this.graphcont.append("div")
+    //     .attr("id","save-icon")
+    //     .attr("class","graph-icon hidden")
+    //     .style({"right":gw.margin.right+7*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+    //     .on("mouseover",function(){
+    //         gw.showTooltipManual("%tooltip.plotgw.save%");
+    //     })
+    //     .on("mouseout",function(){
+    //         gw.hideTooltipManual();
+    //     }).append("img")
+    //     .attr("src","img/save.svg")
+    //     .attr("class","hidden")
+    //     .attr("id","save-img")
+    //     .on("click",function(){gw.writeDownloadLink()});
+}
+GWCatalogue.prototype.selectEvent = function(ev,redraw=false){
+    var gw=this;
+    if (typeof ev == "string"){
+        if(parseInt(ev)==parseInt(ev)){
+            // ev is a string which is a number
+            evnum=parseInt(ev)
+            if (evnum<0){
+                evnum=gw.dataOrder.length + evnum
+            }
+            evnum=evnum % gw.dataOrder.length
+        }else{
+            // ev is a string which is not a number
+            evnum=gw.dataOrder.indexOf(ev)
+        }
+        if (evnum>=0){d=gw.data[evnum]}else{d=null}
+    }else if(typeof ev == "number"){
+        // ev is a number
+        evnum=ev
+        if (evnum<0){
+            evnum=gw.dataOrder.length + evnum
+        }
+        evnum=evnum % gw.dataOrder.length
+        d=gw.data[evnum]
     }else{
         // evname is an event object
-        d=evname;
+        evnum=gw.dataOrder.indexOf(ev.name)
+        d=ev;
     }
-    gw.moveHighlight(d);
-    gw.updateSketch(d);
-    gw.selectedevent=d.name;
+    if (d){
+        // d exists
+        if((d.name!=gw.selectedevent)||(redraw)){
+            // different to currently selected event
+            gw.dataIdx=evnum;
+            gw.moveHighlight(d);
+            gw.updateSketch(d);
+            if (document.getElementById("search-list-"+gw.selectedevent)){
+                document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
+            }
+            if (gw.selectedevent!=d.name){
+                gw.selectedevent=d.name;
+                if(document.getElementById("search-list-"+d.name)){
+                    document.getElementById("search-list-"+d.name).classList.add("current")
+                }
+            }
+        }else{
+            // selected the same event
+            gw.moveHighlight(d);
+            gw.updateSketch(d);
+            if (document.getElementById("search-list-"+gw.selectedevent)){
+                document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
+            }
+            gw.selectedevent="none";
+            gw.dataIdx=null;
+        }
+    }else{
+        gw.selectedevent="none";
+        gw.dataIdx=null;
+    }
     this.updateUrl();
 }
-
+GWCatalogue.prototype.selectNext = function(dir=1){
+    this.selectEvent(this.dataIdx+dir)
+    return(this.dataIdx)
+}
 
 GWCatalogue.prototype.moveHighlight = function(d){
     // move highlight circle
@@ -2218,16 +2487,25 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         // Select the section we want to apply our changes to
         var svg = d3.select("body").transition();
 
-        // Make the changes
+        // Move the dots
         gw.svg.selectAll(".dot")   // change the line
             .transition()
             .duration(750)
             .attr("cx", gw.xMap)
-        // gw.svg.select(".dot-hl")
-        //     .transition()
-        //     .duration(750)
-        //     .attr("cx", gw.xMap)
-        gw.svg.select(".x-axis.axis") // change the x axis
+        gw.svg.selectAll(".xraydot")   // change the line
+            .transition()
+            .duration(750)
+            .attr("cx", gw.xMap)
+            .attr("opacity",function(d){return gw.getOpacity(d)})
+        // hide/show xray legend dot
+        if(gw.xrayShown()){
+            d3.select('.legend.xray')
+                .transition().duration(750).attr("opacity",1)
+        }else{
+            d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
+        }
+        // change the x axis
+        gw.svg.select(".x-axis.axis")
             .transition()
             .duration(750)
             .call(gw.xAxis);
@@ -2282,12 +2560,25 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         // Select the section we want to apply our changes to
         // var svg = d3.select("body").transition();
 
-        // Make the changes
+        // Move the dots
         gw.svg.selectAll(".dot")   // change the line
             .transition()
             .duration(750)
             .attr("cy", gw.yMap)
-        gw.svg.select(".y-axis.axis") // change the y axis
+        gw.svg.selectAll(".xraydot")   // change the line
+            .transition()
+            .duration(750)
+            .attr("cy", gw.yMap)
+            .attr("opacity",function(d){return gw.getOpacity(d)})
+        // hide/show xray legend dots
+        if(gw.xrayShown()){
+            d3.select('.legend.xray')
+                .transition().duration(750).attr("opacity",1)
+        }else{
+            d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
+        }
+        // change the y axis
+        gw.svg.select(".y-axis.axis")
             .transition()
             .duration(750)
             .call(gw.yAxis);
@@ -2492,6 +2783,8 @@ GWCatalogue.prototype.addHelp = function(){
         .html(this.tl("%text.plotgw.help.lang%"));
     d3.select("#help-share-text")
         .html(this.tl("%text.plotgw.help.share%"));
+    d3.select("#help-search-text")
+        .html(this.tl("%text.plotgw.help.search%"));
     if (this.portrait){
         d3.select('.help-title')
             .style("font-size",(5.0*this.xsc)+"em")
@@ -2682,15 +2975,16 @@ GWCatalogue.prototype.showShare = function(){
     shareouter=d3.select('#share-outer')
     shareouter.transition()
        .duration(500)
-       .style("opacity",1);
+       .style("opacity",1)
+       .style("max-height",document.getElementById('svg-container').offsetHeight);;
     shareouter.style("top",
-        document.getElementById('svg-container').offsetTop+
-        document.getElementById('share-icon').offsetTop +
-        document.getElementById('share-icon').offsetHeight + 10)
-    .style("left",
-        document.getElementById('share-icon').offsetLeft +
-        document.getElementById('share-icon').offsetWidth/2 -
-        document.getElementById('share-outer').offsetWidth/2)
+            document.getElementById('svg-container').offsetTop+
+            document.getElementById('share-icon').offsetTop +
+            document.getElementById('share-icon').offsetHeight + 10)
+        .style("left",
+            document.getElementById('share-icon').offsetLeft +
+            document.getElementById('share-icon').offsetWidth/2 -
+            document.getElementById('share-outer').offsetWidth/2)
     d3.select("#twitter-share-button")
         .attr("href",
             gw.tl("https://twitter.com/intent/tweet?text=%share.plotgw.twitter.text%&url=")+
@@ -2702,10 +2996,38 @@ GWCatalogue.prototype.showShare = function(){
 }
 GWCatalogue.prototype.hideShare = function(){
     //show share pot
-    d3.select("#share-bg").style("height","0").style("display","none");
+    d3.select('#share-bg').style("height",0).style("display","none");
     d3.select('#share-outer').transition()
        .duration(500)
-       .style("opacity",0);
+       .style("opacity",0)
+       .style("max-height",0);
+
+}
+GWCatalogue.prototype.showSearch = function(){
+    //show share pot
+    var gw=this;
+    d3.select("#search-bg").style("height","100%").style("display","block");
+    searchouter=d3.select('#search-outer')
+    searchouter.transition()
+       .duration(500)
+       .style("opacity",1)
+       .style("max-height",document.getElementById('svg-container').offsetHeight);
+    searchouter.style("top",
+            document.getElementById('svg-container').offsetTop+
+            document.getElementById('search-icon').offsetTop +
+            document.getElementById('search-icon').offsetHeight + 10)
+        .style("left",
+            document.getElementById('search-icon').offsetLeft +
+            document.getElementById('search-icon').offsetWidth/2 -
+            document.getElementById('search-outer').offsetWidth/2)
+}
+GWCatalogue.prototype.hideSearch = function(){
+    //show share pot
+    d3.select("#search-bg").style("height","0").style("display","none");
+    d3.select('#search-outer').transition()
+       .duration(500)
+       .style("opacity",0)
+       .style("max-height",0);
 }
 
 
@@ -2752,6 +3074,24 @@ GWCatalogue.prototype.hideTooltipManual = function(){
         .duration(500)
         .style("opacity", 0);
 }
+
+GWCatalogue.prototype.writeDownloadLink = function(){
+    //write download link
+    try {
+        var isFileSaverSupported = !!new Blob();
+    } catch (e) {
+        alert("SVG export not supported. Sorry!");
+    }
+
+    var html = d3.select("svg.graph")
+        .attr("title", "test2")
+        .attr("version", 1.1)
+        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .node().parentNode.innerHTML;
+
+    var blob = new Blob([html], {type: "image/svg+xml"});
+    saveAs(blob, "Catalogue.svg");
+};
 GWCatalogue.prototype.makePlot = function(){
     // make plot (calls other function)
     this.setLang();
@@ -2766,6 +3106,7 @@ GWCatalogue.prototype.makePlot = function(){
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
+    this.selectEvent(this.selectedevent,redraw=true);
     d3.select('#copy-button').attr('data-clipboard-text',newUrl);
 }
 GWCatalogue.prototype.replot = function(){
@@ -2775,6 +3116,9 @@ GWCatalogue.prototype.replot = function(){
     // remove elements
     d3.select("svg#svgSketch").remove()
     d3.select("div#svg-container").remove()
+    d3.selectAll(".graph-icon").remove()
+    d3.selectAll(".axis-icon").remove()
+    d3.selectAll(".search-list-item").remove()
     // d3.selectAll("div.labcont").remove()
     // redraw graph and sketch
     this.redraw=true;
