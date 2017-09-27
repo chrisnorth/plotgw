@@ -127,6 +127,9 @@
 	},
 	"data": {
 		"GW150914": {
+			"typeNew": {
+				"best":"BBH"
+			},
 			"Mratio": {
 				"err": [
 					0.17,
@@ -230,6 +233,9 @@
 			}
 		},
 		"LVT151012": {
+			"typeNew": {
+				"best":"BBH"
+			},
 			"Mratio": {
 				"err": [
 					0.38,
@@ -333,6 +339,9 @@
 			}
 		},
 		"GW151226": {
+			"typeNew": {
+				"best":"BBH"
+			},
 			"Mratio": {
 				"err": [
 					0.40,
@@ -436,6 +445,9 @@
 			}
 		},
 		"GW170104": {
+			"typeNew": {
+				"best":"BBH"
+			},
 			"Mratio": {
 				"err": [
 					0.32,
@@ -536,6 +548,113 @@
 			},
 			"GPS": {
 				"best": 1167559936.6
+			}
+		},
+		"GW170814": {
+			"typeNew": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.18,
+					0.22
+				],
+				"best": 0.82
+			},
+			"Mchirp": {
+				"err": [
+					1.4,
+					1.1
+				],
+				"best": 24.1
+			},
+			"DL": {
+				"err": [
+					130,
+					210
+				],
+				"best": 540
+			},
+			"Mtotal": {
+				"err": [
+					3.4,
+					2.7
+				],
+				"best": 55.9
+			},
+			"UTC": {
+				"best": "2017-08-14T10:30:43"
+			},
+			"net": {
+				"best": "HLV"
+			},
+			"FAR": {
+				"best": 3.7e-5
+			},
+			"chi": {
+				"err": [
+					0.12,
+					0.12
+				],
+				"best": 0.06
+			},
+			"af": {
+				"err": [
+					0.07,
+					0.05
+				],
+				"best": 0.7
+			},
+			"Erad": {
+				"err": [
+					0.4,
+					0.3
+				],
+				"best": 2.7
+			},
+			"deltaOmega": {
+				"best": 60
+			},
+			"lpeak": {
+				"err": [
+					0.5,
+					0.5
+				],
+				"best": 3.7
+			},
+			"M1": {
+				"err": [
+					5.7,
+					3.0
+				],
+				"best": 30.5
+			},
+			"rho": {
+				"best": 18.3
+			},
+			"M2": {
+				"err": [
+					2.8,
+					4.2
+				],
+				"best": 25.3
+			},
+			"Mfinal": {
+				"err": [
+					3.2,
+					2.5
+				],
+				"best": 53.2
+			},
+			"z": {
+				"err": [
+					0.03,
+					0.04
+				],
+				"best": 0.11
+			},
+			"GPS": {
+				"best": 1186741861.5
 			}
 		}
 	},
@@ -661,6 +780,14 @@
                 "text": "Skymap Viewer",
                 "type": "web-data"
             }
+		},
+		"GW170814": {
+			"023":{
+				"url": "http://dcc.ligo.org/P170814/public/",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017)",
+				"type": "web-data"
+			}
 		}
 	}
 }
