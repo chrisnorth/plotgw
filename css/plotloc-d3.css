@@ -525,8 +525,25 @@ span.settings-desc{
   -webkit-transition: .4s;
   transition: .4s;
 }
+.slider-outer{
+    position:relative;
+}
+.slider-label{
+    width:5%;
+    display:inline-block;
+    position:absolute;
+}
+.slider-label-left{
+    right:90%;
+    text-align:right;
+}
+.slider-label-right{
+    left:95%;
+    text-align:left;
+}
 .ang-slider {
   display:inline-block;
+  position:absolute;
   cursor: pointer;
   left:10%;
   height:10%;

@@ -3397,6 +3397,7 @@ Localisation.prototype.whenLoaded = function(){
     loc.calcTimeRings();
     // loc.calcProbSky();
     loc.makePlot();
+    // loc.showIntro();
     loc.hideLoading();
     // if(loc.debug){console.log('plotted');}
     // select a default event
@@ -3861,6 +3862,7 @@ Localisation.prototype.addSource = function(){
         .style('width','100%')
         .html(this.tl(loc.labels.posang.labstr()));
     posangcont.append("div")
+        .attr("class","slider-outer")
         .attr("id","ang-slider")
         .style("width","100%")
     .append("input")
@@ -3875,6 +3877,14 @@ Localisation.prototype.addSource = function(){
         loc.updateCalcs(true,false)
         console.log(loc.src['h+'],loc.src['hx'],Math.sqrt(Math.pow(loc.src['h+'],2)+Math.pow(loc.src['hx'],2)))
     })
+    posangcont.select(".slider-outer")
+        .append("div")
+        .attr("class","slider-label slider-label-left")
+        .html("0<sup>o</sup>");
+    posangcont.select(".slider-outer")
+        .append("div")
+        .attr("class","slider-label slider-label-right")
+        .html("180<sup>o</sup>");
     // inclination slider
     inccont=d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont labcont-full')
@@ -3888,6 +3898,7 @@ Localisation.prototype.addSource = function(){
         .html(this.tl(loc.labels.inc.labstr()));
     inccont.append("div")
         .attr("id","ang-slider")
+        .attr("class","slider-outer")
         .style("width","100%")
     .append("input")
         .attr('class','ang-slider round')
@@ -3900,6 +3911,14 @@ Localisation.prototype.addSource = function(){
         loc.src.inc=this.value;
         loc.updateCalcs(true,false)
     })
+    inccont.select(".slider-outer")
+        .append("div")
+        .attr("class","slider-label slider-label-left")
+        .html("0<sup>o</sup>");
+    inccont.select(".slider-outer")
+        .append("div")
+        .attr("class","slider-label slider-label-right")
+        .html("180<sup>o</sup>");
     // amplitude slider
     ampcont=d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont labcont-full')
@@ -3912,19 +3931,28 @@ Localisation.prototype.addSource = function(){
         .style('width','100%')
         .html(this.tl(loc.labels.amp.labstr()));
     ampcont.append("div")
+        .attr("class","slider-outer")
         .attr("id","ang-slider")
         .style("width","100%")
     .append("input")
         .attr('class','ang-slider round')
         .attr('id','amp-slider')
         .attr('type','range')
-        .attr("min","-24")
-        .attr("max","-20")
-        .attr("value",Math.log10(loc.src.amp))
+        .attr("min","-240")
+        .attr("max","-200")
+        .attr("value",Math.log10(loc.src.amp)*10)
     .on("input",function(){
-        loc.src.amp=Math.pow(10,this.value);
+        loc.src.amp=Math.pow(10,this.value/10);
         loc.updateCalcs(true,false)
     })
+    ampcont.select(".slider-outer")
+        .append("div")
+        .attr("class","slider-label slider-label-left")
+        .html("10<sup>-24</sup>");
+    ampcont.select(".slider-outer")
+        .append("div")
+        .attr("class","slider-label slider-label-right")
+        .html("10<sup>-20</sup>");
 }
 Localisation.prototype.showSource = function(){
     //show options
@@ -4301,6 +4329,32 @@ Localisation.prototype.hideShare = function(){
        .style("max-height",0);
 
 }
+Localisation.prototype.addIntro = function(){
+    var loc=this;
+    d3.select('#intro-text').html(loc.tl("%loc.text.intro.text%"))
+    d3.select('#intro-title').html(loc.tl("%loc.text.intro.title%"))
+    d3.select("#intro-bg").on("click",function(){loc.hideIntro();});
+    d3.select("#intro-close").on("click",function(){loc.hideIntro();});
+}
+Localisation.prototype.showIntro = function(){
+    d3.select("#intro-bg").style("height","100%").style("display","block");
+    introouter=d3.select('#intro-outer')
+    introouter.transition()
+       .duration(500)
+       .style("opacity",1)
+       .style("max-height",this.skyHeight);
+    introouter.style("top",this.margin.top+this.skyHeight/4)
+        .style("left",this.margin.left+this.skyWidth/4)
+        .style("width",this.skyWidth/2)
+        .style("height",this.skyHeight/2);
+}
+Localisation.prototype.hideIntro = function(){
+    d3.select('#intro-bg').style("height",0).style("display","none");
+    d3.select('#intro-outer').transition()
+       .duration(500)
+       .style("opacity",0)
+       .style("max-height",0);
+}
 Localisation.prototype.showTooltip = function(e,tttxt,type){
     // add tooltip to eff
     ttSk = document.getElementById("tooltipSk")
@@ -4346,6 +4400,7 @@ Localisation.prototype.makePlot = function(){
     this.addNetwork();
     this.addSource();
     this.addSettings();
+    this.addIntro();
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
