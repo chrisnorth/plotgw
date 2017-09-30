@@ -116,6 +116,7 @@
             </div>
             <div class="popup-button" id="share-block-icon-copy">
                 <button id="copy-button" data-clipboard-text="URL" title="Copy link to clipboard"><img src="img/copy.svg"></button>
+                <span id='copy-conf'>&#x2713</span>
             </div>
             <div id="share-close" class="popup-close"></div>
         </div>
@@ -126,8 +127,7 @@
         <div class="tooltip" id="tooltipSk"></div>
     </div>
     <script type="text/javascript">
-    var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
-    new Clipboard('#copy-button');
+    var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':true})
     </script>
 </body>
 </html>

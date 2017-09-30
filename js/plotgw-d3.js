@@ -123,6 +123,12 @@ GWCatalogue.prototype.init = function(){
         d3.select('#'+this.holderid).insert("div","#share-outer + *")
             .attr("id","tooltipSk").attr("class","tooltip")
     }
+    var clipboard = new Clipboard('#copy-button');
+    clipboard.on('success',function(e){
+        d3.select('#copy-conf').transition().duration(500).style("opacity",1)
+        d3.select('#copy-conf').transition().delay(2000).duration(500).style("opacity",0)
+    })
+
     //initialyse common values
     this.flySp=1000;
     this.defaults = {
@@ -132,7 +138,7 @@ GWCatalogue.prototype.init = function(){
         lang:"en",
         showerrors:true,
         showxray:false,
-        selectedevent:"GW170104"
+        selectedevent:"GW170814"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
@@ -155,6 +161,28 @@ GWCatalogue.prototype.init = function(){
         // "de2":{code:"de",name:"Deutsch (de)"},
         // "en2":{code:"en",name:"English (en)"},
         // "fr2":{code:"fr",name:"Francais (fr)"},
+    }
+
+    this.panels = {
+        'info':{'status':true,
+            'hide':function(){gw.hideInfo()},
+            'show':function(){gw.showInfo()}},
+        'options':{'status':false,
+            'hide':function(){gw.hideOptions()},
+            'show':function(){gw.showSettings()}},
+        'help':{'status':false,
+            'hide':function(){gw.hideHelp()},
+            'show':function(){gw.showHelp()}},
+        'lang':{'status':false,
+            'hide':function(){gw.hideLang()},
+            'show':function(){gw.showLang()}}
+    }
+    if (this.urlVars.panel){
+        for (p in this.panels){
+            if (p==this.urlVars.panel){
+                this.panels[p].status=true
+            }else{this.panels[p].status=false}
+        }
     }
 }
 GWCatalogue.prototype.getUrlVars = function(){
@@ -188,8 +216,7 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
         "y":[this.yvar,this.defaults.yvar],
         "lang":[this.lang,this.defaults.lang],
         "err":[this.showerrors,this.defaults.showerrors],
-        "panel":[this.getPanel(),this.defaults.panel],
-        "event":[this.selectedevent,this.defaults.selectedevent],
+        "event":[this.selectedevent,""],
     }
     for (key in allKeys){
         if (this.debug){console.log(key,allKeys[key]);}
@@ -215,10 +242,22 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
     return newUrl;
 }
 GWCatalogue.prototype.updateUrl = function(vars){
-    window.history.pushState({},null,this.makeUrl((vars) ? vars : {}));
+    // don't show panel in URL
+    if (!vars){vars={}}
+    // vars.panel=this.defaults.panel
+    newUrl=this.makeUrl(vars)
+    // window.history.pushState({},null,newURl);
     d3.select('#copy-button').attr('data-clipboard-text',newUrl);
 }
 GWCatalogue.prototype.getPanel = function(){
+    // set defauly
+    // panel="info"
+    // for (p in this.panels){
+    //     if (this.panels[p].status){
+    //         panel=p
+    //     }
+    // }
+
     if (this.optionsOn){return "options";}
     else if(this.helpOn){return "help";}
     else if(this.langOn){return "lang";}
@@ -1636,7 +1675,8 @@ GWCatalogue.prototype.loadLang = function(lang){
                 if(gw.debug){console.log('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');}
                 if (gw.urlVars.lang){
                     alert('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');
-                    window.history.pushState({},null,gw.makeUrl({'lang':gw.defaults.lang}));
+                    gw.updateUrl();
+                    window.location.replace({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 }
                 window.location.replace(gw.makeUrl({'lang':gw.langshort}));
             }else{
@@ -2237,14 +2277,15 @@ GWCatalogue.prototype.drawGraph = function(){
             .html(d.name)
             .on("click",function(){
                 if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);}gw.hideSearch();})
-        if (gw.selectedevent==d.name){
-            document.getElementById("search-list-"+d.name).classList.add("current")
-        }else{
-            document.getElementById("search-list-"+d.name).classList.remove("current")
-        }
+        // if (gw.selectedevent==d.name){
+        //     document.getElementById("search-list-"+d.name).classList.add("current")
+        // }else{
+        //     document.getElementById("search-list-"+d.name).classList.remove("current")
+        // }
     })
     d3.select("#search-bg").on("click",function(){gw.hideSearch();});
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
+    console.log(gw.selectedevent); 
     // //add download button
     // this.graphcont.append("div")
     //     .attr("id","save-icon")
@@ -2261,7 +2302,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //     .attr("id","save-img")
     //     .on("click",function(){gw.writeDownloadLink()});
 }
-GWCatalogue.prototype.selectEvent = function(ev,redraw=false){
+GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
     var gw=this;
     if (typeof ev == "string"){
         if(parseInt(ev)==parseInt(ev)){
@@ -2291,7 +2332,14 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false){
     }
     if (d){
         // d exists
-        if((d.name!=gw.selectedevent)||(redraw)){
+        if (init){
+            gw.dataIdx=evnum;
+            gw.moveHighlight(d);
+            gw.updateSketch(d);
+            if(document.getElementById("search-list-"+d.name)){
+                document.getElementById("search-list-"+d.name).classList.add("current")
+            }
+        }else if((d.name!=gw.selectedevent)||(redraw)){
             // different to currently selected event
             gw.dataIdx=evnum;
             gw.moveHighlight(d);
@@ -2529,7 +2577,8 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
         });
         gw.updateErrors();
     // });
-    window.history.pushState({},null,gw.makeUrl());
+    gw.updateUrl();
+    // window.history.pushState({},null,gw.makeUrl());
 }
 
 GWCatalogue.prototype.updateYaxis = function(yvarNew) {
@@ -2600,7 +2649,8 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         });
         gw.updateErrors();
     // });
-    window.history.pushState({},null,gw.makeUrl());
+    gw.updateUrl()
+    // window.history.pushState({},null,gw.makeUrl());
 }
 GWCatalogue.prototype.addOptions = function(){
     // add options boxetc.
@@ -2883,6 +2933,7 @@ GWCatalogue.prototype.addLang = function(replot){
             newlang = this.id.split('_')[1];
             oldlang = gw.lang;
             if (newlang!=oldlang){
+                gw.updateUrl();
                 window.history.pushState({},null,gw.makeUrl({'lang':newlang}));
                 gw.loadLang(newlang);
             }
@@ -2975,7 +3026,7 @@ GWCatalogue.prototype.showShare = function(){
        .style("opacity",1)
        .style("max-height",document.getElementById('svg-container').offsetHeight);;
     shareouter.style("top",
-            document.getElementById('svg-container').offsetTop+
+            document.getElementById('graphcontainer').offsetTop+
             document.getElementById('share-icon').offsetTop +
             document.getElementById('share-icon').offsetHeight + 10)
         .style("left",
@@ -3010,7 +3061,7 @@ GWCatalogue.prototype.showSearch = function(){
        .style("opacity",1)
        .style("max-height",document.getElementById('svg-container').offsetHeight);
     searchouter.style("top",
-            document.getElementById('svg-container').offsetTop+
+            document.getElementById('graphcontainer').offsetTop+
             document.getElementById('search-icon').offsetTop +
             document.getElementById('search-icon').offsetHeight + 10)
         .style("left",
@@ -3103,7 +3154,7 @@ GWCatalogue.prototype.makePlot = function(){
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
-    this.selectEvent(this.selectedevent,redraw=true);
+    this.selectEvent(this.selectedevent,redraw=true,init=true);
     d3.select('#copy-button').attr('data-clipboard-text',newUrl);
 }
 GWCatalogue.prototype.replot = function(){

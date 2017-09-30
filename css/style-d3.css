@@ -302,6 +302,12 @@ button.down{
     padding:5px;
     background-color: white;
     border:none;
+    cursor:pointer;
+}
+#copy-conf{
+    opacity:0;
+    font-size:2em;
+    color:green;
 }
 .options-buttons{
     padding-bottom:20px;
