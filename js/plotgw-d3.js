@@ -803,9 +803,9 @@ GWCatalogue.prototype.setScales = function(){
     this.errw = 0.01;//*xyAspect;
     this.xValue = function(d) {
         if (!d[gw.xvar]){return 0}
-        else if (d[gw.xvar].best){return d[gw.xvar].best}
-        else if (d[gw.xvar].lower){return d[gw.xvar].lower}
-        else if (d[gw.xvar].upper){return d[gw.xvar].upper};
+        else if (d[gw.xvar].best!=null){return d[gw.xvar].best}
+        else if (d[gw.xvar].lower!=null){return d[gw.xvar].lower}
+        else if (d[gw.xvar].upper!=null){return d[gw.xvar].upper};
     } // data -> value
     // value -> display
     this.xScale = d3.scale.linear().domain([0,100])
@@ -830,7 +830,12 @@ GWCatalogue.prototype.setScales = function(){
             .innerTickSize(-this.graphHeight);
 
     //data -> value
-    this.yValue = function(d) {return (((d[gw.yvar])&&(d[gw.yvar].best)) ? d[gw.yvar].best : 0);}
+    this.yValue = function(d) {
+        if (!d[gw.yvar]){return 0}
+        else if (d[gw.yvar].best!=null){return d[gw.yvar].best}
+        else if (d[gw.yvar].lower!=null){return d[gw.yvar].lower}
+        else if (d[gw.yvar].upper!=null){return d[gw.yvar].upper};
+    }
     // value -> display
     // this.yScale = d3.scale.linear().
     //     range([this.relh[1]*this.graphHeight, this.relh[0]*this.graphHeight])
