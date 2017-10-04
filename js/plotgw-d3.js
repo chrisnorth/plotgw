@@ -323,13 +323,19 @@ GWCatalogue.prototype.stdlabel = function(d,src){
         console.log("can't find 'best' value for '"+src+"' in event '"+d.name+"':");
         return(gw.labBlank);
     }
-    if ((gw.columns[src].err)&&(!d[src].err)){
+    if ((gw.columns[src].err)&&(!d[src].err)&&(gw.debug)){
         console.log("can't find 'err' value for '"+src+"' in event '"+d.name+"'");
     }
-    if ((d[src].err)&&(d[src].err.length==2)){
-        txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
-        '&ndash;'+
-        parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
+    if ((d[src].errv)&&(d[src].errv.length==2)){
+        if ((d[src].errtype)&&(d[src].errtype=='normal')){
+            txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
+            '&ndash;'+
+            parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
+        }else if((d[src].errtype)&&(d[src].errtype=='lower')){
+            txt='> '+parseFloat(d[src].lower.toPrecision(gw.columns[src].sigfig))
+        }else if((d[src].errtype)&&(d[src].errtype=='upper')){
+            txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
+        }
     }else if (typeof d[src].best=="number"){
         txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig)).toString()
     }else{
@@ -356,10 +362,16 @@ GWCatalogue.prototype.stdlabelNoErr = function(d,src){
         console.log("can't find 'best' value for '"+src+"' in event '"+d.name+"'");
         return(this.labBlank);
     }
-    if (typeof d[src].best=="number"){
-        txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig)).toString()
-    }else{
-        txt=d[src].best
+    if (d[src].best){
+        if (typeof d[src].best=="number"){
+            txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig)).toString()
+        }else{
+            txt=d[src].best
+        }
+    }else if((d[src].errtype)&&(d[src].errtype=='lower')){
+        txt='> '+parseFloat(d[src].lower.toPrecision(gw.columns[src].sigfig))
+    }else if((d[src].errtype)&&(d[src].errtype=='upper')){
+        txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
     }
     if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
     if (typeof txt == "string"){
@@ -435,6 +447,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             border:0.1,type:'src'},
         lpeak:{avail:true,icon:"img/peaklum.svg",type:'src'},
         M1kg:{type:'derived',
+            depfn:function(d){return (d.M1)},
             namefn:function(){return(gw.columns.M1.name)},
             bestfn:function(d){
                 return(d['M1'].best/2.)},
@@ -446,6 +459,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             unit:'%data.mass.unit.kg%',
             avail:false},
         M2kg:{type:'derived',
+            depfn:function(d){return (d.M2)},
             namefn:function(){return(gw.columns.M2.name)},
             bestfn:function(d){
                 return(d['M2'].best/2.)},
@@ -457,17 +471,23 @@ GWCatalogue.prototype.setColumns = function(datadict){
             unit:'%data.mass.unit.kg%',
             avail:false},
         Mfinalkg:{type:'derived',
+            depfn:function(d){return (d.Mfinal)},
             namefn:function(){return(gw.columns.Mfinal.name)},
             bestfn:function(d){
-                return(d['Mfinal'].best/2.)},
+                return((d['Mfinal'].best) ? d['Mfinal'].best/2. : null)},
             errfn:function(d){
-                return([d['Mfinal'].err[0]/2.,
-                d['Mfinal'].err[1]/2.])},
+                return((d['Mfinal'].err) ? [d['Mfinal'].err[0]/2.,
+                d['Mfinal'].err[1]/2.] : null)},
+            lowerfn:function(d){
+                return((d['Mfinal'].lower) ? d['Mfinal'].lower/2 : null)},
+            upperfn:function(d){
+                return((d['Mfinal'].upper) ? d['Mfinal'].upper/2 : null)},
             sigfig:2,
             err:2,
             unit:'%data.mass.unit.kg%',
             avail:false},
         Mchirpkg:{type:'derived',
+            depfn:function(d){return (d.Mchirp)},
             namefn:function(){return(gw.columns.Mchirp.name)},
             bestfn:function(d){
                 return(d['Mchirp'].best/2.)},
@@ -483,6 +503,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             avail:true,
             border:0.1},
         DLly:{type:'derived',
+            depfn:function(d){return (d.DL)},
             namefn:function(){return(gw.columns.DL.name)},
             bestfn:function(d){
                 return(d['DL'].best*3.26)},
@@ -495,67 +516,91 @@ GWCatalogue.prototype.setColumns = function(datadict){
             avail:false},
         lpeakMsun:{
             type:'derived',
+            depfn:function(d){return (d.lpeak)},
             name:function(){return(gw.columns.lpeak.name)},
             bestfn:function(d){
-                return(d['lpeak'].best*55.956)},
+                return((d.lpeak) ? d['lpeak'].best*55.956 : null)},
             errfn:function(d){
-                return([d['lpeak'].err[0]*55.956,
-                d['lpeak'].err[1]*55.956])},
+                if (d.lpeak){
+                    return([d['lpeak'].err[0]*55.956,
+                    d['lpeak'].err[1]*55.956]);
+                }else{return null;}
+            },
             sigfig:2,
             err:2,
             unit:'%data.lpeak.unit.Mc2%',
             avail:false},
         lpeakWatt:{
             type:'derived',
+            depfn:function(d){return (d.lpeak)},
             name:function(){return(gw.columns.lpeak.name)},
             bestfn:function(d){
-                return(d['lpeak'].best)},
+                return((d.lpeak) ? d['lpeak'].best : null)},
             errfn:function(d){
-                return([d['lpeak'].err[0],
-                d['lpeak'].err[1]])},
+                if(d.lpeak){
+                    return([d['lpeak'].err[0],
+                    d['lpeak'].err[1]]);
+                }else{return null}
+            },
             sigfig:2,
             err:2,
             unit:'%data.lpeak.unit.Watt%',
             avail:false},
         EradErg:{
             type:'derived',
+            depfn:function(d){return (d.Erad)},
             namefn:function(){return(gw.columns.Erad.name)},
             bestfn:function(d){
-                return(d['Erad'].best*1.787)},
+                return((d['Erad'].best) ? d['Erad'].best*1.787 : null)},
             errfn:function(d){
-                return([d['Erad'].err[0]*1.787,
-                d['Erad'].err[1]*1.787])},
+                return((d['Erad'].err) ? [d['Erad'].err[0]*1.787,
+                d['Erad'].err[1]*1.787] : null)},
+            lowerfn:function(d){
+                return((d['Erad'].lower) ? d['Erad'].lower*1.787 : null)},
+            upperfn:function(d){
+                return((d['Erad'].upper) ? d['Erad'].upper*1.787 : null)},
             err:2,
             sigfig:2,
             unit:'%data.Erad.unit.erg%'
         },
         EradJoule:{
             type:'derived',
+            depfn:function(d){return (d.Erad)},
             namefn:function(){return(gw.columns.Erad.name)},
             bestfn:function(d){
-                return(d['Erad'].best*1.787)},
+                return((d['Erad'].best) ? d['Erad'].best*1.787 : null)},
             errfn:function(d){
-                return([d['Erad'].err[0]*1.787,
-                d['Erad'].err[1]*1.787])},
+                return((d['Erad'].best) ? [d['Erad'].err[0]*1.787,
+                d['Erad'].err[1]*1.787] : null)},
+            lowerfn:function(d){
+                return((d['Erad'].lower) ? d['Erad'].lower*1.787 : null)},
+            upperfn:function(d){
+                return((d['Erad'].upper) ? d['Erad'].upper*1.787 : null)},
             err:2,
             sigfig:2,
             unit:'%data.Erad.unit.Joule%'
         },
         date:{
             type:'derived',
+            depfn:function(d){return (d.UTC)},
             strfn:function(d){
                 // console.log(d);
                 months=['Jan','Feb','Mar','Apr','May','Jun',
                     'Jul','Aug','Sep','Oct','Nov','Dec'];
-                day=d.UTC.best.split('T')[0].split('-')[0];
-                month=months[parseInt(d['UTC'].best.split('T')[0].split('-')[1])-1];
-                year=d['UTC'].best.split('T')[0].split('-')[2];
-                return(day+'<br/>'+month+' '+year);
+                if (d.UTC){
+                    day=d.UTC.best.split('T')[0].split('-')[0];
+                    month=months[parseInt(d['UTC'].best.split('T')[0].split('-')[1])-1];
+                    year=d['UTC'].best.split('T')[0].split('-')[2];
+                    return(day+'<br/>'+month+' '+year);
+                }else{
+                    return(gw.labBlank);
+                }
             },
             name:'%data.date.name%',
             icon:"img/date.svg"},
         time:{
             type:'derived',
+            depfn:function(d){return (d.UTC)},
             strfn:function(d){
                 return(d['UTC'].best.split('T')[1]+"<br/>UT")
             },
@@ -563,6 +608,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             name:'%data.time.name%'},
         datetime:{
             type:'derived',
+            depfn:function(d){return (d.UTC)},
             strfn:function(d){
                 day=d.UTC.best.split('T')[0].split('-')[0];
                 month=d['UTC'].best.split('T')[0].split('-')[1];
@@ -574,6 +620,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             name:'%data.time.name%'},
         data:{
             type:'derived',
+            depfn:function(d){return (d.link)},
             strfn:function(d){
                 if ((d.link)&&d.link.url){
                     return gw.tl("<a target='_blank' href='"+d.link.url+
@@ -586,6 +633,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             icon:"img/data.svg"},
         paper:{
             type:'derived',
+            depfn:function(d){return (d.ref)},
             strfn:function(d){
                 if (gw.debug){console.log('PAPER',d.ref)}
                 if ((d.ref)&&(d.ref.url)){
@@ -753,15 +801,20 @@ GWCatalogue.prototype.setScales = function(){
     // set axis scales
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
-    this.xValue = function(d) {return (((d[gw.xvar])&&(d[gw.xvar].best)) ? d[gw.xvar].best : 0);} // data -> value
+    this.xValue = function(d) {
+        if (!d[gw.xvar]){return 0}
+        else if (d[gw.xvar].best){return d[gw.xvar].best}
+        else if (d[gw.xvar].lower){return d[gw.xvar].lower}
+        else if (d[gw.xvar].upper){return d[gw.xvar].upper};
+    } // data -> value
     // value -> display
     this.xScale = d3.scale.linear().domain([0,100])
         .range([0, this.graphWidth])
         // data -> display
     this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
     // x error bars
-    this.xErrP = function(d) {return d[gw.xvar].errv[0];} //error+ -> value
-    this.xErrM = function(d) {return d[gw.xvar].errv[1];} //error- -> value
+    this.xErrP = function(d) {return (d[gw.xvar]) ? d[gw.xvar].errv[0] : null;} //error+ -> value
+    this.xErrM = function(d) {return (d[gw.xvar]) ? d[gw.xvar].errv[1] : null;} //error- -> value
     // x error+ -> display
     this.xMapErrP = function(d) {return gw.xScale(gw.xErrP(d))}
     // x error- -> display
@@ -785,8 +838,8 @@ GWCatalogue.prototype.setScales = function(){
     // data -> display
     this.yMap = function(d) { return gw.yScale(gw.yValue(d));}
     // y error bars
-    this.yErrP = function(d) {return d[gw.yvar].errv[0];} //error+ -> value
-    this.yErrM = function(d) {return d[gw.yvar].errv[1];} //error- -> value
+    this.yErrP = function(d) {return (d[gw.yvar]) ? d[gw.yvar].errv[0] : null;} //error+ -> value
+    this.yErrM = function(d) {return (d[gw.yvar]) ? d[gw.yvar].errv[1] : null;} //error- -> value
     // y error+ -> display
     this.yMapErrP = function(d) { return gw.yScale(gw.yErrP(d));}
     // y error- -> display
@@ -802,6 +855,7 @@ GWCatalogue.prototype.setScales = function(){
             // .innerTickSize(-(this.relw[1]-this.relw[0])*this.graphWidth);
             .innerTickSize(-this.graphWidth);
 
+    this.dotOp = function(d) {return ((d[gw.xvar])&&(d[gw.yvar])) ? 1 : 0}
     ///////////////////////////////////////////////////////////////////////////
     // Set sketch scales
     ///////////////////////////////////////////////////////////////////////////
@@ -819,8 +873,17 @@ GWCatalogue.prototype.setScales = function(){
     // console.log('sketchcont',this.sketchHeight,this.sketchWidth);
 
     // set scaleing functions for sketch
-    this.scaleRadius = function(mass,ref){
-        return(0.2*this.sketchWidth*(mass/100.))}
+    this.scaleRadius = function(mass,fact=1){
+        if(typeof mass=="number"){
+            return(fact*0.2*this.sketchWidth*(mass/100.))
+        }else if (mass.best){
+            return(fact*0.2*this.sketchWidth*(mass.best/100.))
+        }else if (mass.lower){
+            return(fact*0.2*this.sketchWidth*(mass.lower/100.))
+        }else if (mass.upper){
+            return(fact*0.2*this.sketchWidth*(mass.upper/100.))
+        }
+    }
     this.xScaleSk = function(x){return(x*this.sketchWidth)}
     this.xScaleSkAspect = function(x){
         return(x*this.sketchWidth*this.aspectSketch)}
@@ -1038,15 +1101,15 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         .attr("class","sketch shadow-"+bh)
         .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
         .attr("cy",this.yScaleSk(this.bhpos[bh].scy))
-        .attr("rx",this.scaleRadius(0,1))
-        .attr("ry",this.scaleRadius(0,1))
+        .attr("rx",this.scaleRadius(0))
+        .attr("ry",this.scaleRadius(0))
         .attr("fill","url(#gradShadow)");
     // add circle for black hole
     this.svgSketch.append("circle")
         .attr("class","sketch bh-"+bh)
         .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
         .attr("cy",this.yScaleSk(this.yout))
-        .attr("r",this.scaleRadius(1,1))
+        .attr("r",this.scaleRadius(1))
         .attr("fill","url(#gradBH)");
     // add mass icon
     if (!redraw){
@@ -1112,8 +1175,8 @@ GWCatalogue.prototype.flyOutMasses = function(bh){
         .attr("cy",this.yScaleSk(this.yout));
     this.svgSketch.select('ellipse.shadow-'+bh)
         .transition().duration(this.flySp)
-        .attr("rx",this.scaleRadius(1,1))
-        .attr("ry",this.scaleRadius(1,1));
+        .attr("rx",this.scaleRadius(1))
+        .attr("ry",this.scaleRadius(1));
     //replace text in label
     document.getElementById("mtxt-"+bh).innerHTML = this.labBlank;
 
@@ -1126,44 +1189,33 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         // only resize circle & shadow
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp)
-            .attr("r",this.scaleRadius(
-                d[bh].best,d.Mfinal.best))
-            .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[bh].best,d.Mfinal.best));
+            .attr("r",this.scaleRadius(d[bh]))
+            .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp)
-            .attr("rx",this.scaleRadius(
-                d[bh].best,d.Mfinal.best))
-            .attr("ry",this.scaleRadius(
-                0.2*d[bh].best,d.Mfinal.best));
+            .attr("rx",this.scaleRadius(d[bh]))
+            .attr("ry",this.scaleRadius(d[bh],0.2));
     }else if(resize=="fly"){
         // resize & fly in
         this.svgSketch.select('circle.bh-'+bh)
-            .attr("r",this.scaleRadius(
-                d[bh].best,d.Mfinal.best));
+            .attr("r",this.scaleRadius(d[bh]));
         this.svgSketch.select('circle.bh-'+bh)
             .transition().duration(this.flySp).ease("bounce")
             .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
-            .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[bh].best,d.Mfinal.best));
+            .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .transition().duration(this.flySp).ease("bounce")
-            .attr("rx",this.scaleRadius(
-                d[bh].best,d.Mfinal.best))
-            .attr("ry",this.scaleRadius(
-                0.2*d[bh].best,d.Mfinal.best));
+            .attr("rx",this.scaleRadius(d[bh]))
+            .attr("ry",this.scaleRadius(d[bh],0.2));
     }else if(resize=="snap"){
         // snap resize (when redrawing sketch)
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(
                 d[bh].best,d.Mfinal.best))
-            .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-
-                this.scaleRadius(d[bh].best,d.Mfinal.best));
+            .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
-            .attr("rx",this.scaleRadius(
-                d[bh].best,d.Mfinal.best))
-            .attr("ry",this.scaleRadius(
-                0.2*d[bh].best,d.Mfinal.best));
+            .attr("rx",this.scaleRadius(d[bh]))
+            .attr("ry",this.scaleRadius(d[bh],0.2));
     };
 
     // update mass label text
@@ -1200,18 +1252,22 @@ GWCatalogue.prototype.redrawLabels = function(){
         if (this.d!=null){
             for (i in labs){
                 if (this.d[labs[i]]){
-                    if (this.showerrors){
-                        labTxt += " "+this.d[labs[i]].str;
-                    }else{
-                        labTxt += " "+this.d[labs[i]].strnoerr;
-                    }
-                    if (i<labs.length-1){
-                        labTxt += "<br>";
-                    }
-                }else if (gw.debug){console.log("can't find '"+labs[i]+"' in event '"+this.d.name+"'");}
+                    if (this.d[labs[i]]){
+                        if (this.showerrors){
+                            labTxt += " "+this.d[labs[i]].str;
+                        }else{
+                            labTxt += " "+this.d[labs[i]].strnoerr;
+                        }
+                        if (i<labs.length-1){
+                            labTxt += "<br>";
+                        }
+                    }else if (gw.debug){console.log("can't find '"+labs[i]+"' in event '"+this.d.name+"'");}
+                    labTxt = (labTxt=='') ? gw.labBlank : labTxt;
+                }else{
+                    labTxt = gw.labBlank;
+                }
+                document.getElementById(lab+"txt").innerHTML = this.tl(labTxt);
             }
-            labTxt = (labTxt=='') ? gw.labBlank : labTxt;
-            document.getElementById(lab+"txt").innerHTML = this.tl(labTxt);
             // console.log(this.lang,labTxt,this.tl(labTxt));
         }
     }
@@ -1344,20 +1400,30 @@ GWCatalogue.prototype.formatData = function(d,cols){
     for (col in gw.columns){
         // console.log(col,gw.columns[col].type);
         if (gw.columns[col].type=="derived"){
-            d[col]={}
-            if (gw.columns[col].bestfn){d[col].best=gw.columns[col].bestfn(d);}
-            if (gw.columns[col].errfn){d[col].err=gw.columns[col].errfn(d);}
-            // console.log('new column',col,d[col])
-        }else{
-            // console.log('existing column',col,d[col])
+            if (gw.columns[col].depfn(d)){
+                d[col]={}
+                if (gw.columns[col].bestfn){d[col].best=gw.columns[col].bestfn(d);}
+                if (gw.columns[col].errfn){d[col].err=gw.columns[col].errfn(d);}
+                if (gw.columns[col].lowerfn){d[col].lower=gw.columns[col].lowerfn(d);}
+                if (gw.columns[col].upperfn){d[col].upper=gw.columns[col].upperfn(d);}
+                // console.log('new column',col,d[col])
+            }
         }
         if (d[col]){
             if ((d[col].err)&&(d[col].err.length==2)){
                 d[col].errv =
                     [d[col].best+d[col].err[0],
                     d[col].best-d[col].err[1]];
-            }else if (typeof d[col].best=="number"){
+                d[col].errtype='normal';
+            }else if ((d[col].best)&&(typeof d[col].best=="number")){
                 d[col].errv =[d[col].best,d[col].best];
+                d[col].errtype='none';
+            }else if ((d[col].lower)){
+                d[col].errv =[d[col].lower,d[col].lower*2];
+                d[col].errtype='lower';
+            }else if ((d[col].upper)){
+                d[col].errv =[d[col].upper/2,d[col].upper];
+                d[col].errtype='upper';
             }
             if (gw.columns[col].strfn){
                 d[col].str=gw.columns[col].strfn(d);
@@ -2427,19 +2493,19 @@ GWCatalogue.prototype.updateErrors = function(){
             .duration(750)
             .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
             .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",1);
+            .attr("opacity",this.dotOp);
         this.svg.selectAll(".errorXp")
             .transition()
             .duration(750)
             .attr("x1",this.xMapErrP).attr("x2",this.xMapErrP)
             .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
-            .attr("opacity",1);
+            .attr("opacity",this.dotOp);
         this.svg.selectAll(".errorXm")
             .transition()
             .duration(750)
             .attr("x1",this.xMapErrM).attr("x2",this.xMapErrM)
             .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
-            .attr("opacity",1);
+            .attr("opacity",this.dotOp);
     }
     if ((this.columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
         // remove y-errors
@@ -2468,19 +2534,19 @@ GWCatalogue.prototype.updateErrors = function(){
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.xMap)
             .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
-            .attr("opacity",1);
+            .attr("opacity",this.dotOp);
         this.svg.selectAll(".errorYp")
             .transition()
             .duration(750)
             .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
             .attr("y1",this.yMapErrP).attr("y2",this.yMapErrP)
-            .attr("opacity",1);
+            .attr("opacity",this.dotOp);
         this.svg.selectAll(".errorYm")
             .transition()
             .duration(750)
             .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
             .attr("y1",this.yMapErrM).attr("y2",this.yMapErrM)
-            .attr("opacity",1);
+            .attr("opacity",this.dotOp);
     }
 }
 GWCatalogue.prototype.toggleErrors = function(){
@@ -2537,6 +2603,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .transition()
             .duration(750)
             .attr("cx", gw.xMap)
+            .style("opacity",this.dotOp);
         gw.svg.selectAll(".xraydot")   // change the line
             .transition()
             .duration(750)
@@ -2566,15 +2633,16 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .duration(750)
             .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
             .attr("opacity",gw.yAxLineOp);
-        // Update error bars
         data.forEach(function(d){
             if (d.name==gw.sketchName){
                 gw.svg.select("#highlight")
                     .transition()
                     .duration(750)
-                    .attr("cx", gw.xMap(d));
+                    .attr("cx", gw.xMap(d))
+                    .style("opacity",gw.dotOp(d));
             }
         });
+        // Update error bars
         gw.updateErrors();
     // });
     gw.updateUrl();
@@ -2611,6 +2679,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .transition()
             .duration(750)
             .attr("cy", gw.yMap)
+            .style("opacity",this.dotOp);
         gw.svg.selectAll(".xraydot")   // change the line
             .transition()
             .duration(750)
@@ -2644,9 +2713,11 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
                 gw.svg.select("#highlight")
                     .transition()
                     .duration(750)
-                    .attr("cy", gw.yMap(d));
+                    .attr("cy", gw.yMap(d))
+                    .style("opacity",gw.dotOp(d));
             }
         });
+        // Update error bars
         gw.updateErrors();
     // });
     gw.updateUrl()
