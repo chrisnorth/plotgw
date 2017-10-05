@@ -801,6 +801,8 @@ GWCatalogue.prototype.setScales = function(){
     // set axis scales
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
+    this.uplow=0.1;
+    this.uploh=0.1;
     this.xValue = function(d) {
         if (!d[gw.xvar]){return 0}
         else if (d[gw.xvar].best!=null){return d[gw.xvar].best}
@@ -813,12 +815,62 @@ GWCatalogue.prototype.setScales = function(){
         // data -> display
     this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
     // x error bars
-    this.xErrP = function(d) {return (d[gw.xvar]) ? d[gw.xvar].errv[0] : null;} //error+ -> value
-    this.xErrM = function(d) {return (d[gw.xvar]) ? d[gw.xvar].errv[1] : null;} //error- -> value
+    this.xErrP = function(d) {
+        //error+ -> value
+        if (!d[gw.xvar]){return null}
+        else if((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
+            return d[gw.xvar].lower;
+        }else{
+            return (d[gw.xvar].errv[0])
+        }
+    }
+    this.xErrM = function(d) {
+        //error- -> value
+        if (!d[gw.xvar]){return null}
+        else if((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
+            return d[gw.xvar].upper;
+        }else{
+            return (d[gw.xvar].errv[1])
+        }
+    }
     // x error+ -> display
-    this.xMapErrP = function(d) {return gw.xScale(gw.xErrP(d))}
+    this.xMapErrP = function(d) {
+        if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
+            xval=gw.xScale(gw.xErrP(d)) + (gw.uplow*gw.graphWidth);
+            if (xval>gw.graphWidth){
+                xval=Math.min(gw.graphWidth,gw.xScale(gw.xErrM(d))+2*(gw.errh*gw.graphHeight));
+            }
+            return xval;
+        }else{
+            return gw.xScale(gw.xErrP(d));
+        }
+    }
+    this.xMapErrPouter = function(d) {
+        if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
+            return gw.xMapErrP(d) - (gw.errh*gw.graphHeight)
+        }else{
+            return gw.xScale(gw.xErrP(d))
+        }
+    }
     // x error- -> display
-    this.xMapErrM = function(d) { return gw.xScale(gw.xErrM(d));}
+    this.xMapErrM = function(d) {
+        if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
+            xval=gw.xScale(gw.xErrM(d)) - (gw.uplow*gw.graphWidth);
+            if (xval<0){
+                xval=Math.min(0,gw.xScale(gw.xErrM(d))-2*(gw.errh*gw.graphHeight));
+            }
+            return xval;
+        }else{
+            return gw.xScale(gw.xErrM(d));
+        }
+    }
+    this.xMapErrMouter = function(d) {
+        if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
+            return gw.xMapErrM(d) + (gw.errh*gw.graphHeight)
+        }else{
+            return gw.xScale(gw.xErrM(d))
+        }
+    }
     // x error caps -> display
     this.xMapErrY0 = function(d) { return gw.yScale(gw.yValue(d)) - (gw.errh*gw.graphHeight);}
     this.xMapErrY1 = function(d) { return gw.yScale(gw.yValue(d)) + (gw.errh*gw.graphHeight);}
@@ -843,12 +895,65 @@ GWCatalogue.prototype.setScales = function(){
     // data -> display
     this.yMap = function(d) { return gw.yScale(gw.yValue(d));}
     // y error bars
-    this.yErrP = function(d) {return (d[gw.yvar]) ? d[gw.yvar].errv[0] : null;} //error+ -> value
-    this.yErrM = function(d) {return (d[gw.yvar]) ? d[gw.yvar].errv[1] : null;} //error- -> value
+    this.yErrP = function(d) {
+        //error- -> value
+        if (!d[gw.yvar]){
+            return null
+        }else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
+            return d[gw.yvar].lower;
+        }else{
+            return (d[gw.yvar].errv[0])
+        }
+    }
+    //error+ -> value
+    this.yErrM = function(d) {
+        //error- -> value
+        if (!d[gw.yvar]){
+            return null
+        }else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
+            return d[gw.yvar].upper;
+        }else{
+            return (d[gw.yvar].errv[1])
+        }
+    }
     // y error+ -> display
-    this.yMapErrP = function(d) { return gw.yScale(gw.yErrP(d));}
+    this.yMapErrP = function(d) {
+        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
+            yval=gw.yScale(gw.yErrP(d)) - (gw.uploh*gw.graphHeight)
+            if (yval<0){
+                yval=Math.min(0,gw.yScale(gw.yErrM(d))-2*(gw.errw*gw.graphWidth));
+            }
+            return yval;
+        }else{
+            return gw.yScale(gw.yErrP(d));
+        }
+    }
+    this.yMapErrPouter = function(d) {
+        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
+            return gw.yMapErrP(d) + (gw.errw*gw.graphWidth)
+        }else{
+            return gw.yScale(gw.yErrP(d))
+        }
+    }
     // y error- -> display
-    this.yMapErrM = function(d) { return gw.yScale(gw.yErrM(d));}
+    this.yMapErrM = function(d) {
+        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
+            yval=gw.yScale(gw.yErrM(d)) + (gw.uploh*gw.graphHeight);
+            if (yval>gw.graphHeight){
+                yval=Math.max(gw.graphHeight,gw.yScale(gw.yErrM(d))+2*(gw.errw*gw.graphWidth));
+            }
+            return yval;
+        }else{
+            return gw.yScale(gw.yErrM(d));
+        }
+    }
+    this.yMapErrMouter = function(d) {
+        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
+            return gw.yMapErrM(d) - (gw.errw*gw.graphWidth)
+        }else{
+            return gw.yScale(gw.yErrM(d))
+        }
+    }
     // y error caps -< display
     this.yMapErrX0 = function(d) { return gw.xScale(gw.xValue(d)) - (gw.errw*gw.graphWidth);}
     this.yMapErrX1 = function(d) { return gw.xScale(gw.xValue(d)) + (gw.errw*gw.graphWidth);}
@@ -1424,10 +1529,10 @@ GWCatalogue.prototype.formatData = function(d,cols){
                 d[col].errv =[d[col].best,d[col].best];
                 d[col].errtype='none';
             }else if ((d[col].lower)){
-                d[col].errv =[d[col].lower,d[col].lower*2];
+                d[col].errv =[d[col].lower,d[col].lower];
                 d[col].errtype='lower';
             }else if ((d[col].upper)){
-                d[col].errv =[d[col].upper/2,d[col].upper];
+                d[col].errv =[d[col].upper,d[col].upper];
                 d[col].errtype='upper';
             }
             if (gw.columns[col].strfn){
@@ -1992,78 +2097,115 @@ GWCatalogue.prototype.drawGraph = function(){
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
-    errorGroup.selectAll(".errorX")
+    errX=errorGroup.selectAll(".errorX-g")
         .data(data)
-    .enter().append("line")
-        .attr("class","error errorX")
+    .enter().append("g")
+        .attr("class","error errorX-g")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
+    errX.append("line")
+        .attr("class","error errorX errorXline")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
         .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrM)
         .attr("y1",gw.yMap).attr("y2",gw.yMap)
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add top of x error bar
-    errorGroup.selectAll(".errorXp")
-        .data(data)
-    .enter().append("line")
-        .attr("class","error errorXp")
-        .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")")
-        .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrP)
-        .attr("y1",gw.xMapErrY0).attr("y2",gw.xMapErrY1)
+    errX.append("line")
+        .attr("class","error errorX errorXp1")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.xMapErrPouter).attr("x2",gw.xMapErrP)
+        .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+    errX.append("line")
+        .attr("class","error errorX errorXp2")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrPouter)
+        .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add bottom of x error bar
-    errorGroup.selectAll(".errorXm")
-        .data(data)
-    .enter().append("line")
-        .attr("class","error errorXm")
-        .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")")
-        .attr("x1",gw.xMapErrM).attr("x2",gw.xMapErrM)
-        .attr("y1",gw.xMapErrY0).attr("y2",gw.xMapErrY1)
+    errX.append("line")
+        .attr("class","error errorX errorXm1")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.xMapErrMouter).attr("x2",gw.xMapErrM)
+        .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+    errX.append("line")
+        .attr("class","error errorX errorXm2")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.xMapErrM).attr("x2",gw.xMapErrMouter)
+        .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
 
     // add y error bar
-    errorGroup.selectAll(".errorY")
+    errY=errorGroup.selectAll(".errorY-g")
         .data(data)
-    .enter().append("line")
-        .attr("class","error errorY")
+    .enter().append("g")
+        .attr("class","error errorY-g")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
+    errY.append("line")
+        .attr("class","error errorY errorYline")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
         .attr("x1",gw.xMap).attr("x2",gw.xMap)
         .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrM)
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add top of y error bar
-    errorGroup.selectAll(".errorYp")
-        .data(data)
-    .enter().append("line")
-        .attr("class","error errorYp")
-        .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")")
-        .attr("x1",gw.yMapErrX0).attr("x2",gw.yMapErrX1)
-        .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrP)
+    errY.append("line")
+        .attr("class","error errorY errorYp1")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.yMapErrX0).attr("x2",gw.xMap)
+        .attr("y1",gw.yMapErrPouter).attr("y2",gw.yMapErrP)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+    errY.append("line")
+        .attr("class","error errorY errorYp2")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.xMap).attr("x2",gw.yMapErrX1)
+        .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrPouter)
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add bottom of y error bar
-    errorGroup.selectAll(".errorYm")
-        .data(data)
-    .enter().append("line")
-        .attr("class","error errorYm")
-        .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")")
-        .attr("x1",gw.yMapErrX0).attr("x2",gw.yMapErrX1)
-        .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrM)
+    errY.append("line")
+        .attr("class","error errorY errorYm1")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.yMapErrX0).attr("x2",gw.xMap)
+        .attr("y1",gw.yMapErrMouter).attr("y2",gw.yMapErrM)
         .attr("stroke",gw.colorErr)
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
+    errY.append("line")
+        .attr("class","error errorY errorYm2")
+        // .attr("transform", "translate("+gw.margin.left+","+
+        //     gw.margin.top+")")
+        .attr("x1",gw.xMap).attr("x2",gw.yMapErrX1)
+        .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrMouter)
+        .attr("stroke",gw.colorErr)
+        .attr("stroke-width",gw.swErr)
+        .attr("opacity",gw.opErr);
+
     // if (!gw.showerrors){gw.toggleErrors();}
 
     // add highlight circle
@@ -2473,84 +2615,128 @@ GWCatalogue.prototype.updateErrors = function(){
 
     if ((this.columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
         // remove x-errors
-        this.svg.selectAll(".errorX")
+        errX=this.svg.selectAll(".errorX-g")
+            .data(this.data)
+        errX.selectAll('.errorX')
             .transition()
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.xMap)
             .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
-        this.svg.selectAll(".errorXp")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",0);
-        this.svg.selectAll(".errorXm")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",0);
+        // errX.selectAll(".errorXp1")
+        //     .transition()
+        //     .duration(750)
+        //     .attr("x1",this.xMap).attr("x2",this.xMap)
+        //     .attr("y1",this.yMap).attr("y2",this.yMap)
+        //     .attr("opacity",0);
+        // errX.selectAll(".errorXm1")
+        //     .transition()
+        //     .duration(750)
+        //     .attr("x1",this.xMap).attr("x2",this.xMap)
+        //     .attr("y1",this.yMap).attr("y2",this.yMap)
+        //     .attr("opacity",0);
     }else{
         // add/update x-errors
-        this.svg.selectAll(".errorX")
+        errX=this.svg.selectAll(".errorX-g")
+            .data(this.data)
+        errX.selectAll(".errorXline")
             .transition()
             .duration(750)
             .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
             .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",this.dotOp);
-        this.svg.selectAll(".errorXp")
+        errX.selectAll(".errorXp1")
             .transition()
             .duration(750)
-            .attr("x1",this.xMapErrP).attr("x2",this.xMapErrP)
-            .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
+            .attr("x1",this.xMapErrPouter).attr("x2",this.xMapErrP)
+            .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
             .attr("opacity",this.dotOp);
-        this.svg.selectAll(".errorXm")
+        errX.selectAll(".errorXp2")
             .transition()
             .duration(750)
-            .attr("x1",this.xMapErrM).attr("x2",this.xMapErrM)
-            .attr("y1",this.xMapErrY0).attr("y2",this.xMapErrY1)
+            .attr("x1",this.xMapErrP).attr("x2",this.xMapErrPouter)
+            .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
+            .attr("opacity",this.dotOp);
+        errX.selectAll(".errorXm1")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMapErrMouter).attr("x2",this.xMapErrM)
+            .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
+            .attr("opacity",this.dotOp);
+        errX.selectAll(".errorXm2")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMapErrM).attr("x2",this.xMapErrMouter)
+            .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
             .attr("opacity",this.dotOp);
     }
     if ((this.columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
         // remove y-errors
-        this.svg.selectAll(".errorY")
+        errY=this.svg.selectAll(".errorY-g")
+            .data(this.data)
+        errY.selectAll('.errorY')
             .transition()
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.xMap)
             .attr("y1",this.yMap).attr("y2",this.yMap)
             .attr("opacity",0);
-        this.svg.selectAll(".errorYp")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",0);
-        this.svg.selectAll(".errorYm")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",0);
+        // errY.selectAll(".errorYp1")
+        //     .transition()
+        //     .duration(750)
+        //     .attr("x1",this.xMap).attr("x2",this.xMap)
+        //     .attr("y1",this.yMap).attr("y2",this.yMap)
+        //     .attr("opacity",0);
+        // errY.selectAll(".errorYp2")
+        //     .transition()
+        //     .duration(750)
+        //     .attr("x1",this.xMap).attr("x2",this.xMap)
+        //     .attr("y1",this.yMap).attr("y2",this.yMap)
+        //     .attr("opacity",0);
+        // errY.selectAll(".errorYm1")
+        //     .transition()
+        //     .duration(750)
+        //     .attr("x1",this.xMap).attr("x2",this.xMap)
+        //     .attr("y1",this.yMap).attr("y2",this.yMap)
+        //     .attr("opacity",0);
+        // errY.selectAll(".errorYm2")
+        //     .transition()
+        //     .duration(750)
+        //     .attr("x1",this.xMap).attr("x2",this.xMap)
+        //     .attr("y1",this.yMap).attr("y2",this.yMap)
+        //     .attr("opacity",0);
     }else{
         // add/update y-errors
-        this.svg.selectAll(".errorY")
+        errY=this.svg.selectAll(".errorY-g")
+            .data(this.data)
+        errY.selectAll('.errorYline')
             .transition()
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.xMap)
             .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
             .attr("opacity",this.dotOp);
-        this.svg.selectAll(".errorYp")
+        errY.selectAll(".errorYp1")
             .transition()
             .duration(750)
-            .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
-            .attr("y1",this.yMapErrP).attr("y2",this.yMapErrP)
+            .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
+            .attr("y1",this.yMapErrPouter).attr("y2",this.yMapErrP)
             .attr("opacity",this.dotOp);
-        this.svg.selectAll(".errorYm")
+        errY.selectAll(".errorYp2")
             .transition()
             .duration(750)
-            .attr("x1",this.yMapErrX0).attr("x2",this.yMapErrX1)
-            .attr("y1",this.yMapErrM).attr("y2",this.yMapErrM)
+            .attr("x1",this.xMap).attr("x2",this.yMapErrX1)
+            .attr("y1",this.yMapErrP).attr("y2",this.yMapErrPouter)
+            .attr("opacity",this.dotOp);
+        errY.selectAll(".errorYm1")
+            .transition()
+            .duration(750)
+            .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
+            .attr("y1",this.yMapErrMouter).attr("y2",this.yMapErrM)
+            .attr("opacity",this.dotOp);
+        errY.selectAll(".errorYm2")
+            .transition()
+            .duration(750)
+            .attr("x1",this.xMap).attr("x2",this.yMapErrX1)
+            .attr("y1",this.yMapErrM).attr("y2",this.yMapErrMouter)
             .attr("opacity",this.dotOp);
     }
 }
@@ -2559,15 +2745,15 @@ GWCatalogue.prototype.toggleErrors = function(){
     // console.log(this.svgcont.select("#errors-img"));
     if (this.showerrors){
         this.showerrors = false;
-        this.svgcont.select("#errors-icon ")
+        this.graphcont.select("#errors-icon")
             .attr("class","graph-icon hidden")
-        this.svgcont.select("#errors-img ")
+        this.graphcont.select("#errors-img")
             .attr("class","errors-hide")
     }else{
         this.showerrors = true;
-        this.svgcont.select("#errors-icon ")
+        this.graphcont.select("#errors-icon")
             .attr("class","graph-icon")
-        this.svgcont.select("#errors-img")
+        this.graphcont.select("#errors-img")
             .attr("class","errors-show")
     }
     // console.log("toggling errors");
