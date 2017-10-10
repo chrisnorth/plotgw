@@ -335,6 +335,10 @@ GWCatalogue.prototype.stdlabel = function(d,src){
             txt='> '+parseFloat(d[src].lower.toPrecision(gw.columns[src].sigfig))
         }else if((d[src].errtype)&&(d[src].errtype=='upper')){
             txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
+        }else if((d[src].errtype)&&(d[src].errtype=='lim')){
+            txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
+            '&ndash;'+
+            parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
         }
     }else if (typeof d[src].best=="number"){
         txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig)).toString()
@@ -449,23 +453,15 @@ GWCatalogue.prototype.setColumns = function(datadict){
         M1kg:{type:'derived',
             depfn:function(d){return (d.M1)},
             namefn:function(){return(gw.columns.M1.name)},
-            bestfn:function(d){
-                return(d['M1'].best/2.)},
-            errfn:function(d){
-                return([d['M1'].err[0]/2.,
-                d['M1'].err[1]/2.])},
+            convfn:['M1',function(x){return x/2}],
             sigfig:2,
             err:2,
             unit:'%data.mass.unit.kg%',
             avail:false},
         M2kg:{type:'derived',
             depfn:function(d){return (d.M2)},
+            convfn:['M2',function(x){return x/2}],
             namefn:function(){return(gw.columns.M2.name)},
-            bestfn:function(d){
-                return(d['M2'].best/2.)},
-            errfn:function(d){
-                return([d['M2'].err[0]/2.,
-                d['M2'].err[1]/2.])},
             sigfig:2,
             err:2,
             unit:'%data.mass.unit.kg%',
@@ -473,15 +469,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         Mfinalkg:{type:'derived',
             depfn:function(d){return (d.Mfinal)},
             namefn:function(){return(gw.columns.Mfinal.name)},
-            bestfn:function(d){
-                return((d['Mfinal'].best) ? d['Mfinal'].best/2. : null)},
-            errfn:function(d){
-                return((d['Mfinal'].err) ? [d['Mfinal'].err[0]/2.,
-                d['Mfinal'].err[1]/2.] : null)},
-            lowerfn:function(d){
-                return((d['Mfinal'].lower) ? d['Mfinal'].lower/2 : null)},
-            upperfn:function(d){
-                return((d['Mfinal'].upper) ? d['Mfinal'].upper/2 : null)},
+            convfn:['Mfinal',function(x){return x/2}],
             sigfig:2,
             err:2,
             unit:'%data.mass.unit.kg%',
@@ -489,11 +477,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         Mchirpkg:{type:'derived',
             depfn:function(d){return (d.Mchirp)},
             namefn:function(){return(gw.columns.Mchirp.name)},
-            bestfn:function(d){
-                return(d['Mchirp'].best/2.)},
-            errfn:function(d){
-                return([d['Mchirp'].err[0]/2.,
-                d['Mchirp'].err[1]/2.])},
+            convfn:['Mchirp',function(x){return(x/2)}],
             sigfig:2,
             err:2,
             unit:'%data.mass.unit.kg%',
@@ -505,11 +489,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         DLly:{type:'derived',
             depfn:function(d){return (d.DL)},
             namefn:function(){return(gw.columns.DL.name)},
-            bestfn:function(d){
-                return(d['DL'].best*3.26)},
-            errfn:function(d){
-                return([d['DL'].err[0]*3.26,
-                d['DL'].err[1]*3.26])},
+            convfn:['DL',function(x){return x*3.26}],
             sigfig:2,
             err:2,
             unit:'%data.DL.unit.Mly%',
@@ -518,14 +498,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             type:'derived',
             depfn:function(d){return (d.lpeak)},
             name:function(){return(gw.columns.lpeak.name)},
-            bestfn:function(d){
-                return((d.lpeak) ? d['lpeak'].best*55.956 : null)},
-            errfn:function(d){
-                if (d.lpeak){
-                    return([d['lpeak'].err[0]*55.956,
-                    d['lpeak'].err[1]*55.956]);
-                }else{return null;}
-            },
+            convfn:['lpeak',function(x){return x*55.956}],
             sigfig:2,
             err:2,
             unit:'%data.lpeak.unit.Mc2%',
@@ -534,14 +507,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             type:'derived',
             depfn:function(d){return (d.lpeak)},
             name:function(){return(gw.columns.lpeak.name)},
-            bestfn:function(d){
-                return((d.lpeak) ? d['lpeak'].best : null)},
-            errfn:function(d){
-                if(d.lpeak){
-                    return([d['lpeak'].err[0],
-                    d['lpeak'].err[1]]);
-                }else{return null}
-            },
+            convfn:['lpeak',function(x){return x}],
             sigfig:2,
             err:2,
             unit:'%data.lpeak.unit.Watt%',
@@ -550,15 +516,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             type:'derived',
             depfn:function(d){return (d.Erad)},
             namefn:function(){return(gw.columns.Erad.name)},
-            bestfn:function(d){
-                return((d['Erad'].best) ? d['Erad'].best*1.787 : null)},
-            errfn:function(d){
-                return((d['Erad'].err) ? [d['Erad'].err[0]*1.787,
-                d['Erad'].err[1]*1.787] : null)},
-            lowerfn:function(d){
-                return((d['Erad'].lower) ? d['Erad'].lower*1.787 : null)},
-            upperfn:function(d){
-                return((d['Erad'].upper) ? d['Erad'].upper*1.787 : null)},
+            convfn:['Erad',function(x){return x*1.787}],
             err:2,
             sigfig:2,
             unit:'%data.Erad.unit.erg%'
@@ -567,15 +525,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             type:'derived',
             depfn:function(d){return (d.Erad)},
             namefn:function(){return(gw.columns.Erad.name)},
-            bestfn:function(d){
-                return((d['Erad'].best) ? d['Erad'].best*1.787 : null)},
-            errfn:function(d){
-                return((d['Erad'].best) ? [d['Erad'].err[0]*1.787,
-                d['Erad'].err[1]*1.787] : null)},
-            lowerfn:function(d){
-                return((d['Erad'].lower) ? d['Erad'].lower*1.787 : null)},
-            upperfn:function(d){
-                return((d['Erad'].upper) ? d['Erad'].upper*1.787 : null)},
+            convfn:['Erad',function(x){return x*1.787}],
             err:2,
             sigfig:2,
             unit:'%data.Erad.unit.Joule%'
@@ -1512,10 +1462,34 @@ GWCatalogue.prototype.formatData = function(d,cols){
         if (gw.columns[col].type=="derived"){
             if (gw.columns[col].depfn(d)){
                 d[col]={}
-                if (gw.columns[col].bestfn){d[col].best=gw.columns[col].bestfn(d);}
-                if (gw.columns[col].errfn){d[col].err=gw.columns[col].errfn(d);}
-                if (gw.columns[col].lowerfn){d[col].lower=gw.columns[col].lowerfn(d);}
-                if (gw.columns[col].upperfn){d[col].upper=gw.columns[col].upperfn(d);}
+                if (gw.columns[col].convfn){
+                    cIn=gw.columns[col].convfn[0]
+                    if (d[cIn].best){
+                        d[col].best=gw.columns[col].convfn[1](d[cIn].best)
+                    }
+                    if (d[cIn].upper){
+                        d[col].upper=gw.columns[col].convfn[1](d[cIn].upper)
+                    }
+                    if (d[cIn].lower){
+                        d[col].lower=gw.columns[col].convfn[1](d[cIn].lower)
+                    }
+                    if (d[cIn].err){
+                        d[col].err=
+                            [gw.columns[col].convfn[1](d[cIn].err[0]),
+                            gw.columns[col].convfn[1](d[cIn].err[1])]
+                    }
+                    if (d[cIn].lim){
+                        d[col].lim=
+                            [gw.columns[col].convfn[1](d[cIn].lim[0]),
+                            gw.columns[col].convfn[1](d[cIn].lim[1])]
+                    }
+                }else{
+                    if (gw.columns[col].bestfn){d[col].best=gw.columns[col].bestfn(d);}
+                    if (gw.columns[col].errfn){d[col].err=gw.columns[col].errfn(d);}
+                    if (gw.columns[col].limfn){d[col].lim=gw.columns[col].limfn(d);}
+                    if (gw.columns[col].lowerfn){d[col].lower=gw.columns[col].lowerfn(d);}
+                    if (gw.columns[col].upperfn){d[col].upper=gw.columns[col].upperfn(d);}
+                }
                 // console.log('new column',col,d[col])
             }
         }
@@ -1524,6 +1498,12 @@ GWCatalogue.prototype.formatData = function(d,cols){
                 d[col].errv =
                     [d[col].best+d[col].err[0],
                     d[col].best-d[col].err[1]];
+                d[col].errtype='normal';
+            }else if ((d[col].lim)&&(d[col].lim.length==2)){
+                d[col].errv =
+                    [Math.max.apply(Math,d[col].lim),
+                    Math.min.apply(Math,d[col].lim)];
+                d[col].best = 0.5*(d[col].lim[0] + d[col].lim[1]);
                 d[col].errtype='normal';
             }else if ((d[col].best)&&(typeof d[col].best=="number")){
                 d[col].errv =[d[col].best,d[col].best];
