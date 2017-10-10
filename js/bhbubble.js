@@ -466,7 +466,7 @@ BHBubble.prototype.loadData = function(){
         }else if(jsonIn.events){
             dataJson=jsonIn.events;
         }
-        links=jsonIn.links
+        links=jsonIn.links;
         data = [];
         nametr={};
         for (i in dataJson){
@@ -493,36 +493,78 @@ BHBubble.prototype.loadData = function(){
                 parentName:'',
                 BHtype:'%data.bub.type.final%',
             }
-            if (dj.M1.best){
-                // use M1.best, M1.err
-                pri.massBH=dj.M1.best;
-                pri.massBHerr='e'+parseFloat(dj.M1.err[1])+'-'+
-                    parseFloat(dj.M1.err[0]);
-                pri.compMass=dj.M2.best;
-                sec.massBH=dj.M2.best;
-                sec.massBHerr='e'+parseFloat(dj.M2.err[1])+'-'+
-                    parseFloat(dj.M2.err[0]);
-                sec.compMass=dj.M1.best;
-                fin.massBH=dj.Mfinal.best;
-                fin.massBHerr='e'+parseFloat(dj.Mfinal.err[1])+'-'+
-                    parseFloat(dj.Mfinal.err[0]);
-                distance=(Math.round(3.26*(dj.DL.best-dj.DL.err[0])/100)*100)+
-                    '-'+(Math.round(3.26*(dj.DL.best+dj.DL.err[1])/100)*100);
-            }else{
-                pri.massBH=dj.M1[0];
-                pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
-                    parseFloat(dj.M1[1]);
-                pri.compMass=dj.M2[0];
-                sec.massBH=dj.M2[0];
-                sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
-                    parseFloat(dj.M2[1]);
-                sec.compMass=dj.M1[0];
-                fin.massBH=dj.Mfinal[0];
-                fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
-                    parseFloat(dj.Mfinal[1]);
-                distance=(Math.round(3.26*(dj.DL[0]-dj.DL[1])/100)*100)+
-                    '-'+(Math.round(3.26*(dj.DL[0]+dj.DL[2])/100)*100);
+            massbfn=function(m){
+                if((m.best)&&(m.err)){return m.best}
+                else if(m.lim){return 0.5*(m.lim[0]+m.lim[1])}
+                else if(m.lower){return m.lower}
+                else if(m.upper){return m.upper}
+                else{return m[0]}
             }
+            massefn=function(m){
+                if((m.best)&&(m.err)){return 'e'+parseFloat(m.err[1])+'-'+
+                    parseFloat(m.err[0]);}
+                else if(m.lim){return 'e'+parseFloat(Math.min.apply(Math,m.err))+'-'+
+                    parseFloat(Math.max.apply(Math,m.err));}
+                else if(m.lower){return '>'+parseFloat(m.lower)}
+                else if(m.upper){return '<'+parseFloat(m.upper)}
+                else{return'e'+parseFloat(m[2])+'-'+
+                    parseFloat(m[1]);}
+            }
+            distfn=function(d){
+                if((d.best)&&(d.err)){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
+                '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
+                else if(d.lim){return (Math.round(3.26*(Math.min.apply(Math,d.lim)/100)*100)+
+                '-'+(Math.round(3.26*(Math.max.apply(Math,d.lim)/100)*100)));}
+                else if(d.lower){return '>'+parseFloat(d.lower)}
+                else if(d.upper){return '<'+parseFloat(d.upper)}
+                else{return (Math.round(3.26*(d[0]-d[1])/100)*100)+
+                    '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
+            }
+            // if ((dj.M1.best)&&(dj.M1.err)){
+            //     // use M1.best, M1.err
+            //     massbfn=function(m){return m.best}
+            //     massefn=function(m){return'e'+parseFloat(m.err[1])+'-'+
+            //         parseFloat(m.err[0]);}
+            //     distfn=function(d){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
+            //         '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
+            // }if (dj.M1.lim){
+            //     // use M1.best, M1.err
+            //     massbfn=function(m){return 0.5*(m.err[0]+m.err[1])}
+            //     massefn=function(m){return'e'+parseFloat(Math.min.apply(Math,m.err))+'-'+
+            //         parseFloat(Math.max.apply(Math,m.err));}
+            //     distfn=function(d){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
+            //         '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
+            // }else{
+            //     massbfn=function(m){return m[0]}
+            //     massefn=function(m){return'e'+parseFloat(m[2])+'-'+
+            //         parseFloat(m[1]);}
+            //     distfn=function(d){return (Math.round(3.26*(d[0]-d[1])/100)*100)+
+            //         '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
+            // }
+            pri.massBH=massbfn(dj.M1);
+            pri.massBHerr=massefn(dj.M1);
+            pri.compMass=massbfn(dj.M2);
+            sec.massBH=massbfn(dj.M2);
+            sec.massBHerr=massefn(dj.M2)
+            sec.compMass=massbfn(dj.M1);
+            fin.massBH=massbfn(dj.Mfinal);
+            fin.massBHerr=massefn(dj.Mfinal);
+            distance=distfn(dj.DL);
+            // }else{
+            //     pri.massBH=dj.M1[0];
+            //     pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
+            //         parseFloat(dj.M1[1]);
+            //     pri.compMass=dj.M2[0];
+            //     sec.massBH=dj.M2[0];
+            //     sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
+            //         parseFloat(dj.M2[1]);
+            //     sec.compMass=dj.M1[0];
+            //     fin.massBH=dj.Mfinal[0];
+            //     fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
+            //         parseFloat(dj.Mfinal[1]);
+            //     distance=(Math.round(3.26*(dj.DL[0]-dj.DL[1])/100)*100)+
+            //         '-'+(Math.round(3.26*(dj.DL[0]+dj.DL[2])/100)*100);
+            // }
             if (i[0]=='G'){method='GW'}
             else if (i[0]=='L'){method='LVT'}
             paper='-';
@@ -568,9 +610,11 @@ BHBubble.prototype.loadData = function(){
                 evs[b].refcomp=refcomp;
                 evs[b].refper=refper;
             }
-            data.push(sec);
-            data.push(fin);
-            data.push(pri);
+            if (dj.type.best=='BBH'){
+                data.push(sec);
+                data.push(fin);
+                data.push(pri);
+            }
         }
         data= bh.filterData(data,bh.filterType);
         bh.dataGw = data;
