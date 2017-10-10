@@ -610,7 +610,7 @@ BHBubble.prototype.loadData = function(){
                 evs[b].refcomp=refcomp;
                 evs[b].refper=refper;
             }
-            if (dj.type.best=='BBH'){
+            if (dj.objType.best=='BBH'){
                 data.push(sec);
                 data.push(fin);
                 data.push(pri);
