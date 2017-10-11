@@ -785,7 +785,8 @@ GWCatalogue.prototype.setScales = function(){
     }
     // x error+ -> display
     this.xMapErrP = function(d) {
-        if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
+        if (!d[gw.xvar]){return null}
+        else if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
             xval=gw.xScale(gw.xErrP(d)) + (gw.uplow*gw.graphWidth);
             if (xval>gw.graphWidth){
                 xval=Math.min(gw.graphWidth,gw.xScale(gw.xErrM(d))+2*(gw.errh*gw.graphHeight));
@@ -796,6 +797,7 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.xMapErrPouter = function(d) {
+        if (!d[gw.xvar]){return null}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
             return gw.xMapErrP(d) - (gw.errh*gw.graphHeight)
         }else{
@@ -804,6 +806,7 @@ GWCatalogue.prototype.setScales = function(){
     }
     // x error- -> display
     this.xMapErrM = function(d) {
+        if (!d[gw.xvar]){return null}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
             xval=gw.xScale(gw.xErrM(d)) - (gw.uplow*gw.graphWidth);
             if (xval<0){
@@ -815,6 +818,7 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.xMapErrMouter = function(d) {
+        if (!d[gw.xvar]){return null}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
             return gw.xMapErrM(d) + (gw.errh*gw.graphHeight)
         }else{
@@ -847,9 +851,8 @@ GWCatalogue.prototype.setScales = function(){
     // y error bars
     this.yErrP = function(d) {
         //error- -> value
-        if (!d[gw.yvar]){
-            return null
-        }else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
+        if (!d[gw.yvar]){return null}
+        else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
             return d[gw.yvar].lower;
         }else{
             return (d[gw.yvar].errv[0])
@@ -858,9 +861,8 @@ GWCatalogue.prototype.setScales = function(){
     //error+ -> value
     this.yErrM = function(d) {
         //error- -> value
-        if (!d[gw.yvar]){
-            return null
-        }else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
+        if (!d[gw.yvar]){return null}
+        else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
             return d[gw.yvar].upper;
         }else{
             return (d[gw.yvar].errv[1])
@@ -868,7 +870,8 @@ GWCatalogue.prototype.setScales = function(){
     }
     // y error+ -> display
     this.yMapErrP = function(d) {
-        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
+        if (!d[gw.yvar]){return null}
+        else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
             yval=gw.yScale(gw.yErrP(d)) - (gw.uploh*gw.graphHeight)
             if (yval<0){
                 yval=Math.min(0,gw.yScale(gw.yErrM(d))-2*(gw.errw*gw.graphWidth));
@@ -879,7 +882,8 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.yMapErrPouter = function(d) {
-        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
+        if (!d[gw.yvar]){return null}
+        else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
             return gw.yMapErrP(d) + (gw.errw*gw.graphWidth)
         }else{
             return gw.yScale(gw.yErrP(d))
@@ -887,7 +891,8 @@ GWCatalogue.prototype.setScales = function(){
     }
     // y error- -> display
     this.yMapErrM = function(d) {
-        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
+        if (!d[gw.yvar]){return null}
+        else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
             yval=gw.yScale(gw.yErrM(d)) + (gw.uploh*gw.graphHeight);
             if (yval>gw.graphHeight){
                 yval=Math.max(gw.graphHeight,gw.yScale(gw.yErrM(d))+2*(gw.errw*gw.graphWidth));
@@ -898,7 +903,8 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.yMapErrMouter = function(d) {
-        if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
+        if (!d[gw.yvar]){return null}
+        else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
             return gw.yMapErrM(d) - (gw.errw*gw.graphWidth)
         }else{
             return gw.yScale(gw.yErrM(d))
