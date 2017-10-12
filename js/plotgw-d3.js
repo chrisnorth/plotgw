@@ -7,8 +7,8 @@ function GWCatalogue(inp){
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
     if ((inp)&&(inp.clearhtml)){
-        if(this.debug){console.log('clearing current html')}
-        d3.select('#'+this.holderid).html()
+        if(this.debug){console.log('clearing current html from '+gw.holderid)}
+        d3.select('#'+gw.holderid).html('')
     }
 
     //set default language from browser
@@ -28,9 +28,21 @@ function GWCatalogue(inp){
 }
 GWCatalogue.prototype.init = function(){
     // created HTML of not included
+    if (d3.select("#fb-root").empty()){
+        d3.select("#"+this.holderid).insert("div",":first-child")
+            .attr("id","fb-root")
+        fbfn=function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) return;
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.9";
+          fjs.parentNode.insertBefore(js, fjs);
+        }
+        fbfn(document, 'script', 'facebook-jssdk');
+    }
     if (d3.select("#hdr").empty()){
         if(this.debug){console.log('adding hdr')}
-        d3.select("#"+this.holderid).insert("div",":first-child")
+        d3.select("#"+this.holderid).insert("div","#fb-root + *")
             .attr("id","hdr")
             .html('<h1 id="page-title"></h1>')
     }
@@ -77,6 +89,9 @@ GWCatalogue.prototype.init = function(){
         d3.select("#help-block-icons").append("div")
             .attr("id","help-share-cont").attr("class","panel-cont")
             .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-search-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/search.svg"><div class="panel-cont-text" id="help-search-text"></div>')
         d3.select("#help-outer").append("div")
             .attr("id","help-close").attr("class","panel-close")
         d3.select("#help-outer").append("div")
@@ -115,12 +130,27 @@ GWCatalogue.prototype.init = function(){
             .attr("data-size","small")
             .attr("data-mobile-iframe","true")
             .html('<a class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fchrisnorth.github.io%2Fplotgw%2F&amp;src=sdkpreparse">Share</a>')
+        d3.select('#share-outer').append('div')
+            .attr("class","popup-button")
+            .attr("id","share-block-icon-copy")
+            .html('<button id="copy-button" data-clipboard-text="URL" title="Copy link to clipboard"><img src="img/copy.svg"></button><span id="copy-conf">&#x2713</span>')
         d3.select('#share-outer').append("div")
             .attr("id","share-close").attr("class","popup-close")
     }
-    if (d3.select('#tooltip').empty()){
+    if (d3.select('#search-bg').empty()){
+        if(this.debug){console.log('adding search-bg')}
+        d3.select('#'+this.holderid).insert("div","#search-outer + *")
+            .attr("id","search-bg").attr("class","popup-bg")
+    }
+    if (d3.select('#search-outer').empty()){
+        if(this.debug){console.log('adding search-outer')}
+        d3.select('#'+this.holderid).insert("div","#search-bg + *")
+            .attr("id","search-outer").attr("class","popup-outer")
+            .html('<div id="search-close" class="popup-close"></div>')
+    }
+    if (d3.select('#tooltipSk').empty()){
         if(this.debug){console.log('adding tooltip')}
-        d3.select('#'+this.holderid).insert("div","#share-outer + *")
+        d3.select('#'+this.holderid).insert("div","#search-outer + *")
             .attr("id","tooltipSk").attr("class","tooltip")
     }
     var clipboard = new Clipboard('#copy-button');
@@ -326,16 +356,22 @@ GWCatalogue.prototype.stdlabel = function(d,src){
     if ((gw.columns[src].err)&&(!d[src].err)&&(gw.debug)){
         console.log("can't find 'err' value for '"+src+"' in event '"+d.name+"'");
     }
+    // txt='';
     if ((d[src].errv)&&(d[src].errv.length==2)){
+        if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
         if ((d[src].errtype)&&(d[src].errtype=='normal')){
+            // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
             txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
             '&ndash;'+
             parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
         }else if((d[src].errtype)&&(d[src].errtype=='lower')){
+            // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
             txt='> '+parseFloat(d[src].lower.toPrecision(gw.columns[src].sigfig))
         }else if((d[src].errtype)&&(d[src].errtype=='upper')){
+            // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
             txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
         }else if((d[src].errtype)&&(d[src].errtype=='lim')){
+            // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
             txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
             '&ndash;'+
             parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
@@ -1511,15 +1547,17 @@ GWCatalogue.prototype.formatData = function(d,cols){
                     Math.min.apply(Math,d[col].lim)];
                 d[col].best = 0.5*(d[col].lim[0] + d[col].lim[1]);
                 d[col].errtype='normal';
-            }else if ((d[col].best)&&(typeof d[col].best=="number")){
-                d[col].errv =[d[col].best,d[col].best];
-                d[col].errtype='none';
             }else if ((d[col].lower)){
                 d[col].errv =[d[col].lower,d[col].lower];
+                d[col].best = d[col].lower;
                 d[col].errtype='lower';
             }else if ((d[col].upper)){
                 d[col].errv =[d[col].upper,d[col].upper];
+                d[col].best = d[col].upper;
                 d[col].errtype='upper';
+            }else if ((d[col].best)&&(typeof d[col].best=="number")){
+                d[col].errv =[d[col].best,d[col].best];
+                d[col].errtype='none';
             }
             if (gw.columns[col].strfn){
                 d[col].str=gw.columns[col].strfn(d);
