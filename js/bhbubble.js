@@ -1,3 +1,13 @@
+/**
+ * Copyright (c) 2017 Chris North
+ * Contact: Chris North <chris.north@astro.cf.ac.uk>
+ * This source is subject to the license found in the file 'LICENSE' which must
+ * be distributed together with this source. All other rights reserved.
+ *
+ * THIS CODE AND INFORMATION IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND,
+ * EITHER EXPRESSED OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
+ */
 // var diameter = Math.min(document.getElementById("svg-container").offsetWidth,document.getElementById("svg-container").offsetHeight);
 // // document.getElementById("hdr").setAttribute("width",diameter);
 // document.getElementById("svg-container").setAttribute("width",diameter);
@@ -1661,4 +1671,3 @@ BHBubble.prototype.makePlot = function(){
     this.addButtons();
     this.addTooltips();
 }
-
