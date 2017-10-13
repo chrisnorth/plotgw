@@ -28,7 +28,7 @@
  "data.chi.name": "Spin effectif pour la phase spiralante",
  "data.FAR.name": "Taux de fausses alarmes",
  "data.FAR.unit": "an⁻¹",
- "data.FAR.unit.1per": "1 par",
+ "data.FAR.unit.1per": "< 1 par",
  "data.FAR.unit.yr": "an",
  "data.FAR.unit.kyr": "milliers d'années",
  "data.FAR.unit.Myr": "millions d'années",

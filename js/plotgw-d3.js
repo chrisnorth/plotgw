@@ -370,23 +370,32 @@ GWCatalogue.prototype.stdlabel = function(d,src){
     // txt='';
     if ((d[src].errv)&&(d[src].errv.length==2)){
         if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
-        if ((d[src].errtype)&&(d[src].errtype=='normal')){
+        if ((d[src].errtype)&&((d[src].errtype=='normal')||(d[src].errtype=='lim'))){
             // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
-            txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
-            '&ndash;'+
-            parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
+            sigfig=gw.columns[src].sigfig
+            eneg=d[src].errv[1].toPrecision(sigfig)
+            epos=d[src].errv[0].toPrecision(sigfig)
+            if (d[src].errv[1]!=d[src].errv[0]){
+                while (eneg==epos){
+                    sigfig+=1
+                    eneg=d[src].errv[1].toPrecision(sigfig)
+                    epos=d[src].errv[0].toPrecision(sigfig)
+                }
+            }
+            txt=parseFloat(eneg)+'&ndash;'+parseFloat(epos)
         }else if((d[src].errtype)&&(d[src].errtype=='lower')){
             // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
             txt='> '+parseFloat(d[src].lower.toPrecision(gw.columns[src].sigfig))
         }else if((d[src].errtype)&&(d[src].errtype=='upper')){
             // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
             txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
-        }else if((d[src].errtype)&&(d[src].errtype=='lim')){
-            // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
-            txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
-            '&ndash;'+
-            parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
         }
+        // }else if((d[src].errtype)&&(d[src].errtype=='lim')){
+        //     // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
+        //     txt=parseFloat(d[src].errv[1].toPrecision(gw.columns[src].sigfig))+
+        //     '&ndash;'+
+        //     parseFloat(d[src].errv[0].toPrecision(gw.columns[src].sigfig))
+        // }
     }else if (typeof d[src].best=="number"){
         txt=parseFloat(d[src].best.toPrecision(gw.columns[src].sigfig)).toString()
     }else{
