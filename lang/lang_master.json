@@ -36,7 +36,7 @@
     "subsection.data.far":{"_subtitle":"False alarm rate (FAR)"},
     "data.FAR.name":{"_title":"False alarm rate","_text":"data name","_type":"string"},
     "data.FAR.unit":{"_title":"False alarm rate default unit","_text":"yr⁻¹ (e.g. 5.4x10<sup>-7</sup> yr⁻¹)","_type":"string","_usedef":true},
-    "data.FAR.unit.1per":{"_title":"FAR alternative description","_text":"Text to read '1 per' for FAR","_type":"string"},
+    "data.FAR.unit.1per":{"_title":"FAR alternative description","_text":"Text to read '< 1 per' for FAR","_type":"string"},
     "data.FAR.unit.yr":{"_title":"FAR alternative unit (yr)","_text":"e.g. 1 per 5.4 <strong>yr</strong>","_type":"string"},
     "data.FAR.unit.kyr":{"_title":"FAR alternative unit (kyr)","_text":"e.g. 1 per 5.4 <strong>thousand yr</strong>","_type":"string"},
     "data.FAR.unit.Myr":{"_title":"FAR alternative unit (Myr)","_text":"e.g. 1 per 5.4 <strong>million yr</strong>","_type":"string"},

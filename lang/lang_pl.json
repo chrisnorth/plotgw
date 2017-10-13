@@ -28,7 +28,7 @@
  "data.chi.name": "Efektywny spin podczas zacieśniania się układu podwójnego",
  "data.FAR.name": "Częstość fałszywego alarmu",
  "data.FAR.unit": "lat⁻¹",
- "data.FAR.unit.1per": "raz na",
+ "data.FAR.unit.1per": "< raz na",
  "data.FAR.unit.yr": "lat",
  "data.FAR.unit.kyr": "tysięcy lat",
  "data.FAR.unit.Myr": "milionów lat",
