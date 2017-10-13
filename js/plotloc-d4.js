@@ -148,7 +148,8 @@ Localisation.prototype.init = function(){
         srcamp:1e-21,
         hmap:'FNet',
         res:2.5,
-        world:false
+        world:false,
+        event:''
     }
     this.src={}
     this.skyarr={}
@@ -164,6 +165,7 @@ Localisation.prototype.init = function(){
     this.skyarr.res=(this.urlVars.res) ? parseFloat(this.urlVars.res) : this.defaults.res;
     this.hmap = (this.urlVars.hmap) ? this.urlVars.hmap : this.defaults.hmap;
     this.world = (this.urlVars.world) ? this.urlVars.world : this.defaults.world;
+    this.event = (this.urlVars.event) ? this.urlVars.event : this.defaults.event;
 
     this.src.gmst = astrojs.dates.getGST(this.src.utc)
     this.world = ((this.world=="1")|(this.world=="true")) ? true : false;
@@ -4572,6 +4574,7 @@ Localisation.prototype.makePlot = function(){
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
+    if (this.event!=''){this.selectEvent(this.event)}
 }
 Localisation.prototype.replot = function(){
     // remove plots and redraw (e.g. on window resize)
