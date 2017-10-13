@@ -19,6 +19,9 @@
     <script type="text/javascript" src="js/analytics.js"></script>
     <script type="text/javascript" src="js/plotloc-d4.js"></script>
     <script type="text/javascript" src="js/topojson.v1.min.js"></script>
+    <!-- <script type="text/javascript">import gpstime from 'js/gpstime.js'</script> -->
+    <script type="text/javascript" src="js/astro.js"></script>
+    <script type="text/javascript" src="js/astro.dates.js"></script>
 </head>
 <body>
     <div id="plotloc-cont" class="plotloc-container">
@@ -91,6 +94,10 @@
             <!-- <div class="panel-block panel-block-full" id="lang-block-credit">
                 <div class="panel-text" id="lang-credit"></div>
             </div> -->
+        </div>
+        <div class="popup-bg" id="search-bg"></div>
+        <div class="popup-outer" id="search-outer">
+            <div id="search-close" class="popup-close"></div>
         </div>
         <div class="tooltip" id="tooltipSk"></div>
         <div class="popup-outer loading" id="loading">

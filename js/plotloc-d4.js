@@ -143,7 +143,8 @@ Localisation.prototype.init = function(){
         dist:1,
         phase:0,
         posang:0,
-        gmst:0,
+        utc:new Date(),
+        // gmst:0,
         srcamp:1e-21,
         hmap:'FNet',
         res:2.5,
@@ -154,7 +155,8 @@ Localisation.prototype.init = function(){
     this.src.ra = (this.urlVars.ra) ? parseFloat(this.urlVars.ra) : this.defaults.ra;
     this.src.dec = (this.urlVars.dec) ? parseFloat(this.urlVars.dec) : this.defaults.dec;
     this.src.posang = (this.urlVars.posang) ? parseFloat(this.urlVars.posang) : this.defaults.posang;
-    this.src.gmst = (this.urlVars.gmst) ? parseFloat(this.urlVars.gmst) : this.defaults.gmst;
+    this.src.utc = (this.urlVars.utc) ? new Date(this.urlVars.utc) : this.defaults.utc;
+    // this.src.gmst = (this.urlVars.gmst) ? parseFloat(this.urlVars.gmst) : this.defaults.gmst;
     this.src.amp = (this.urlVars.srcamp) ? parseFloat(this.urlVars.srcamp) : this.defaults.srcamp;
     this.src.inc = (this.urlVars.inc) ? parseFloat(this.urlVars.inc) : this.defaults.inc;
     this.src.dist = (this.urlVars.dist) ? parseFloat(this.urlVars.dist) : this.defaults.dist;
@@ -163,6 +165,7 @@ Localisation.prototype.init = function(){
     this.hmap = (this.urlVars.hmap) ? this.urlVars.hmap : this.defaults.hmap;
     this.world = (this.urlVars.world) ? this.urlVars.world : this.defaults.world;
 
+    this.src.gmst = astrojs.dates.getGST(this.src.utc)
     this.world = ((this.world=="1")|(this.world=="true")) ? true : false;
     this.old={"src":{"ra":null,"dec":null},"Ndet":0};
     // set values for styles
@@ -452,19 +455,27 @@ Localisation.prototype.setScales = function(){
     this.errh = 0.01;
     this.errw = 0.01;//*xyAspect;
     this.mod360 = function(ra){
-        if(ra>180.){
-            return(ra-360.)
-        }else if(ra<-180.){
-            return(ra+360.)
-        }else{
-            return(ra)
+        while(ra>180.){
+            ra=ra-360;
         }
+        while(ra<-180.){
+            ra=ra+360;
+        }
+        return ra;
+        // if(ra>180.){
+        //     return(ra-360.)
+        // }else if(ra<-180.){
+        //     return(ra+360.)
+        // }else{
+        //     return(ra)
+        // }
     }
     this.ra2lon = function(ra){
-        return (loc.src.gmst - loc.mod360(ra));
+        // include sign reversal because of bug
+        return -loc.mod360(loc.src.gmst*15 - loc.mod360(ra));
     }
     this.lon2ra  = function(lon){
-        return (loc.src.gmst - loc.mod360(lon));
+        return loc.mod360(loc.src.gmst*15 - (-loc.mod360(lon)));
     }
     this.raValue = function(d) {return d.ra;} // data -> value
     // value -> display
@@ -476,6 +487,9 @@ Localisation.prototype.setScales = function(){
     this.x2raScale = d3.scaleLinear()
         .domain([this.sky.offsetLeft+this.margin.left,this.sky.offsetLeft+this.margin.left+this.skyWidth])
         .range([180,-180])
+    this.x2lonScale = d3.scaleLinear()
+        .domain([this.sky.offsetLeft+this.margin.left,this.sky.offsetLeft+this.margin.left+this.skyWidth])
+        .range([-180,180])
     // RA axis
     this.raAxis = d3.axisBottom(this.raScale)
             // .orient("bottom")
@@ -1291,7 +1305,7 @@ Localisation.prototype.moveSrc = function(ra,dec){
         if (this.world){
             this.old.src.ra=this.src.ra;
             this.old.src.dec=this.src.dec;
-            this.src.lon=-ra;
+            this.src.lon=ra;
             this.src.lat=dec;
             this.src.ra=this.lon2ra(ra);
             this.src.dec=this.src.lat;
@@ -1414,7 +1428,10 @@ Localisation.prototype.setStyles = function(){
         'amp':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.amplitude%')+': '+
             parseFloat(loc.src.amp).toPrecision(2))}},
         'gmst':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.gmst%')+': '+
-            parseInt(loc.src.gmst))},
+            parseInt(loc.src.gmst)+' %text.loc.source.hours%')},
+            "icon":"img/time.svg"},
+        'utc':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.utc%')+': '+
+            loc.src.utc)},
             "icon":"img/time.svg"},
         // 'detr':{'type':'det','labstrdet':function(det){return det+' %text.loc.sensitivity%: '+loc.dataDet[loc.di[det]]['r+'].toPrecision(2)}}
     }
@@ -1447,7 +1464,12 @@ Localisation.prototype.makeSky = function(){
         .attr("width",this.svgWidth)
         .attr("height",this.svgHeight)
         .on("click",function(){
-            raClick=loc.x2raScale(d3.event.pageX);
+            if (loc.world){
+                raClick=loc.x2lonScale(d3.event.pageX);
+                // raClick=loc.lon2ra(lonClick);
+                // loc.moveSrc(raClick,decClick);
+            }
+            else{raClick=loc.x2raScale(d3.event.pageX);}
             decClick=loc.y2decScale(d3.event.pageY);
             loc.moveSrc(raClick,decClick);
             // console.log((d3.event.pageX)+"px",loc.x2raScale(d3.event.pageX));
@@ -1473,7 +1495,7 @@ Localisation.prototype.drawSkyInit = function(){
     // initialise graph drawing from data
     var loc = this;
     loc.loaded=0;
-    loc.toLoad=7;
+    loc.toLoad=8;
     loc.data=[];
     loc.optionsOn=false;
     loc.helpOn=false;
@@ -1485,6 +1507,8 @@ Localisation.prototype.drawSkyInit = function(){
     loc.fileInSky='json/constellations.bounds.json';
     loc.fileInConst='json/constellations.json';
     loc.fileInConstLines='json/constellations.lines.json';
+    loc.fileInEventsDefault="json/eventlocs.json"
+    loc.fileInEvents = (loc.urlVars.eventsFile) ? loc.urlVars.eventsFile : loc.fileInEventsDefault;
     // if (loc.urlVars.lang){
     //     lang=loc.urlVars.lang;
     // }else{lang=loc.defaults.lang}
@@ -1492,6 +1516,22 @@ Localisation.prototype.drawSkyInit = function(){
     loc.loadLangDefault()
     loc.loadLang(this.langIn)
     // loc.langdict_default = loc.loadLang(loc.langDefault,true);
+
+    d3.json(loc.fileInEvents, function(error, dataIn) {
+        // var loc=this;
+        if (error){
+            console.log('events error:',error,dataIn);
+            alert("Fatal error loading input file: '"+loc.fileInEvents+"'. Sorry!");
+        }
+        loc.loaded++;
+        if (loc.debug){console.log('loaded: '+loc.fileInEvents)}
+        loc.events=dataIn;
+        if (loc.loaded==loc.toLoad){
+            loc.whenLoaded();
+        }else{
+            if (loc.debug){console.log('not ready yet')}
+        }
+    });
 
     d3.json(loc.fileInWorld, function(error, dataIn){
         if (error){alert("Fatal error loading input file: '"+loc.fileInWorld+"'. Sorry!")}
@@ -1517,6 +1557,15 @@ Localisation.prototype.drawSkyInit = function(){
     d3.json(loc.fileInSky, function(error, dataIn){
         if (error){alert("Fatal error loading input file: '"+loc.fileInSky+"'. Sorry!")}
         loc.skymap=dataIn;
+        // flip RA to show sky
+        for (c=0;c<loc.skymap.features.length;c++){
+            cnst=loc.skymap.features[c]
+            for (l=0;l<cnst.geometry.coordinates.length;l++){
+                for (rd=0;rd<cnst.geometry.coordinates[l].length;rd++){
+                    cnst.geometry.coordinates[l][rd][0]*=-1
+                }
+            }
+        }
         loc.loaded++;
         if (loc.debug){console.log('loaded: '+loc.fileInSky)}
         loc.skyarr.projEq=d3.geoEquirectangular()
@@ -1532,6 +1581,10 @@ Localisation.prototype.drawSkyInit = function(){
     d3.json(loc.fileInConst, function(error, dataIn){
         if (error){alert("Fatal error loading input file: '"+loc.fileInConst+"'. Sorry!")}
         loc.constnames=dataIn;
+        for (c=0;c<loc.constnames.features.length;c++){
+            cnst=loc.constnames.features[c];
+            cnst.geometry.coordinates[0]*=-1
+        }
         loc.loaded++;
         if (loc.debug){console.log('loaded: '+loc.fileInConst)}
         //call next functions
@@ -1548,6 +1601,14 @@ Localisation.prototype.drawSkyInit = function(){
     d3.json(loc.fileInConstLines, function(error, dataIn){
         if (error){alert("Fatal error loading input file: '"+loc.fileInConstLines+"'. Sorry!")}
         loc.constLines=dataIn;
+        for (c=0;c<loc.constLines.features.length;c++){
+            cnst=loc.constLines.features[c]
+            for (l=0;l<cnst.geometry.coordinates.length;l++){
+                for (rd=0;rd<cnst.geometry.coordinates[l].length;rd++){
+                    cnst.geometry.coordinates[l][rd][0]*=-1;
+                }
+            }
+        }
         loc.loaded++;
         if (loc.debug){console.log('loaded: '+loc.fileInConstLines)}
         //call next functions
@@ -2138,6 +2199,46 @@ Localisation.prototype.drawSky = function(){
     d3.select("div#skycontainer > #lang-icon").append("img")
         .attr("src","img/lang.svg")
         .on("click",function(){console.log('showing lang panel');loc.showLang();});
+
+    // add language button
+    langClass = (this.langOn) ? "graph-icon" : "graph-icon hidden";
+    this.langouter = d3.select('#search-outer')
+    d3.select("div#skycontainer").append("div")
+        .attr("id","search-icon")
+        .attr("class",langClass)
+        .style("right",loc.margin.right+(loc.margin.top+10)*(d3.selectAll('.graph-icon').nodes().length-1))
+        .style("top",0)
+        .style("width",40*loc.ysc)
+        .style("height",40*loc.ysc);
+    d3.select("div#skycontainer > #search-icon").on("mouseover", function(d) {
+              loc.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              loc.tooltip.html(loc.tl('%tooltip.loc.showsearch%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            loc.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("effcontainer").style.opacity=0.;
+        })
+    d3.select("div#skycontainer > #search-icon").append("img")
+        .attr("src","img/search.svg")
+        .on("click",function(){console.log('showing search panel');loc.showSearch();});
+    for (e in loc.events){
+        d3.select('#search-outer').append("div")
+            .attr("class","popup-list-item search-list-item")
+            .attr("id","search-list-"+e)
+            .html(e)
+            .on("click",function(){
+                {loc.selectEvent(this.innerHTML);}loc.hideSearch();})
+    }
+    d3.select("#search-bg").on("click",function(){loc.hideSearch();});
+    d3.select("#search-close").on("click",function(){loc.hideSearch();});
     // this.langbg.on("click",function(){loc.hideLang();});
     this.langouter
         .style("top","200%");
@@ -3727,6 +3828,54 @@ Localisation.prototype.hideLang = function(d) {
     document.getElementById("lang-icon").classList.add("hidden");
     this.updateUrl();
 }
+
+Localisation.prototype.showSearch = function(){
+    //show share outer
+    var loc=this;
+    d3.select("#search-bg").style("height","100%").style("display","block");
+    searchouter=d3.select('#search-outer')
+    searchouter.transition()
+       .duration(500)
+       .style("opacity",1)
+       .style("max-height",document.getElementById('svg-container').offsetHeight);
+    searchouter.style("top",
+            document.getElementById('skycontainer').offsetTop+
+            document.getElementById('search-icon').offsetTop +
+            document.getElementById('search-icon').offsetHeight + 10)
+        .style("left",
+            document.getElementById('search-icon').offsetLeft +
+            document.getElementById('search-icon').offsetWidth/2 -
+            document.getElementById('search-outer').offsetWidth/2)
+}
+Localisation.prototype.hideSearch = function(){
+    //show share pot
+    d3.select("#search-bg").style("height","0").style("display","none");
+    d3.select('#search-outer').transition()
+       .duration(500)
+       .style("opacity",0)
+       .style("max-height",0);
+}
+Localisation.prototype.selectEvent = function(e){
+    // var lov=this;
+    ev=this.events[e];
+    console.log('selecting event '+e+': ',ev)
+    this.src.utc = ev.UTC;
+    this.src.gmst = astrojs.dates.getGST(this.src.utc)
+    ra=parseFloat(ev.ra);
+    dec=parseFloat(ev.dec);
+    this.src.ra=ra;
+    this.src.dec=dec;
+    this.src.lon=this.ra2lon(ra);
+    this.src.lat=this.src.dec;
+    this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);
+    this.updateCalcs(true,false);
+    // this.moveSrc(ra,dec)
+    // this.src.ra=parseFloat(ev.ra);
+    // this.src.dec=parseFloat(ev.dec);
+    // this.src.lon=this.ra2lon(this.src.ra);
+    // this.src.lat=this.src.dec;
+    // this.updateCalcs(true,false);
+}
 Localisation.prototype.addNetwork = function(){
     var loc=this;
     d3.select("#network-title")
@@ -3852,6 +4001,14 @@ Localisation.prototype.addSource = function(){
         .attr('class','labtext source')
         .attr('id','lab-dec-txt')
         .html(this.tl(loc.labels.dec.labstr()));
+    d3.select('#source-info-cont').append("div")
+        .attr('class','icon labcont')
+        .attr('id','lab-utc')
+        .style('height',loc.labcontHeight)
+    .append("div")
+        .attr('class','labtext source')
+        .attr('id','lab-gmst-txt')
+        .html(this.tl(loc.labels.utc.labstr()));
     d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont')
         .attr('id','lab-gmst')
@@ -4209,11 +4366,12 @@ Localisation.prototype.addSettings = function(){
             loc.svg.select("#skymap").style("opacity",function(){return (loc.world)?0:1;})
             if(loc.hmap=='none'){loc.colourWorldMap()}else{loc.uncolourWorldMap()}
             loc.updateAxes();
-            loc.updateHeatmap(loc.hmap);
-            loc.updateHeatmap('Tmatch');
-            loc.updateHeatmap('Tall');
-            loc.updateDetMarkers();
-            loc.moveHighlight();
+            loc.updateCalcs(true,true);
+            // loc.moveHighlight();
+            // loc.updateHeatmap(loc.hmap);
+            // loc.updateHeatmap('Tmatch');
+            // loc.updateHeatmap('Tall');
+            // loc.updateDetMarkers();
         })
     coordWorld.append("div")
         .attr('class','labtext settings')
