@@ -1596,56 +1596,56 @@ GWCatalogue.prototype.formatData = function(d,cols){
         // console.log(col,d[col]);
     }
 }
-GWCatalogue.prototype.formatDataXray = function(d,cols){
-    // generate new columns
-    if (this.debug){console.log('formatData',d.name);}
-    var gw=this;
-    gw.xrayCols=['M1','M2'];
-    gw.xrayCols={
-        M1:{icon:"img/primass.svg",avail:true,type:'src',
-            strfn:function(d){
-                return("%text.plotgw.bhmass%<br/>"+(d.M1.best)+" %data.M1.unit%");}
-            },
-        M2:{icon:"img/secmass.svg",avail:true,type:'src',
-            strfn:function(d){
-                return("%text.plotgw.compmass%<br/>"+(d.M2.best)+" %data.M2.unit%");}
-        }
-    }
-    for (col in gw.xrayCols){
-        // console.log(col,gw.columns[col].type);
-        if (gw.xrayCols[col].type=="derived"){
-            d[col]={}
-            if (gw.xrayCols[col].bestfn){d[col].best=gw.xrayCols[col].bestfn(d);}
-            if ((gw.xrayCols[col].errfn)&&(d[col].err)){d[col].err=gw.columns[col].errfn(d);}
-            // console.log('new column',col,d[col])
-        }else{
-            // console.log('existing column',col,d[col])
-        }
-        if (d[col]){
-            if ((d[col].err)&&(d[col].err.length==2)){
-                d[col].errv =
-                    [d[col].best+d[col].err[0],
-                    d[col].best-d[col].err[1]];
-            }else if (typeof d[col].best=="number"){
-                d[col].errv =[d[col].best,d[col].best];
-            }
-            if (gw.xrayCols[col].strfn){
-                d[col].str=gw.xrayCols[col].strfn(d);
-                if ((gw.xrayCols[col].strfnnoerr)&&(d[col].err)){
-                    d[col].strnoerr=gw.xrayCols[col].strfnnoerr(d);
-                }else{
-                    d[col].strnoerr=gw.xrayCols[col].strfn(d);
-                }
-            }else{
-                d[col].str=(d[col].err) ? gw.stdlabel(d,col) : gw.stdlabelNoErr(d,col);
-                d[col].strnoerr = gw.stdlabelNoErr(d,col);
-            }
-        }
-        // console.log(col,d[col])
-        // console.log(col,d[col])
-        // console.log(col,d[col]);
-    }
-}
+// GWCatalogue.prototype.formatDataXray = function(d,cols){
+//     // generate new columns
+//     if (this.debug){console.log('formatData',d.name);}
+//     var gw=this;
+//     gw.xrayCols=['M1','M2'];
+//     gw.xrayCols={
+//         M1:{icon:"img/primass.svg",avail:true,type:'src',
+//             strfn:function(d){
+//                 return("%text.plotgw.bhmass%<br/>"+(d.M1.best)+" %data.M1.unit%");}
+//             },
+//         M2:{icon:"img/secmass.svg",avail:true,type:'src',
+//             strfn:function(d){
+//                 return("%text.plotgw.compmass%<br/>"+(d.M2.best)+" %data.M2.unit%");}
+//         }
+//     }
+//     for (col in gw.xrayCols){
+//         // console.log(col,gw.columns[col].type);
+//         if (gw.xrayCols[col].type=="derived"){
+//             d[col]={}
+//             if (gw.xrayCols[col].bestfn){d[col].best=gw.xrayCols[col].bestfn(d);}
+//             if ((gw.xrayCols[col].errfn)&&(d[col].err)){d[col].err=gw.columns[col].errfn(d);}
+//             // console.log('new column',col,d[col])
+//         }else{
+//             // console.log('existing column',col,d[col])
+//         }
+//         if (d[col]){
+//             if ((d[col].err)&&(d[col].err.length==2)){
+//                 d[col].errv =
+//                     [d[col].best+d[col].err[0],
+//                     d[col].best-d[col].err[1]];
+//             }else if (typeof d[col].best=="number"){
+//                 d[col].errv =[d[col].best,d[col].best];
+//             }
+//             if (gw.xrayCols[col].strfn){
+//                 d[col].str=gw.xrayCols[col].strfn(d);
+//                 if ((gw.xrayCols[col].strfnnoerr)&&(d[col].err)){
+//                     d[col].strnoerr=gw.xrayCols[col].strfnnoerr(d);
+//                 }else{
+//                     d[col].strnoerr=gw.xrayCols[col].strfn(d);
+//                 }
+//             }else{
+//                 d[col].str=(d[col].err) ? gw.stdlabel(d,col) : gw.stdlabelNoErr(d,col);
+//                 d[col].strnoerr = gw.stdlabelNoErr(d,col);
+//             }
+//         }
+//         // console.log(col,d[col])
+//         // console.log(col,d[col])
+//         // console.log(col,d[col]);
+//     }
+// }
 GWCatalogue.prototype.makeGraph = function(){
     // create graph
     // console.log('makeGraph');
@@ -1699,7 +1699,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
     gw.loaded=0;
-    gw.toLoad=5;
+    gw.toLoad=4;
     gw.data=[];
     gw.optionsOn=false;
     gw.helpOn=false;
@@ -1848,31 +1848,31 @@ GWCatalogue.prototype.drawGraphInit = function(){
         }
     });
     // read in Xray data
-    d3.csv(gw.fileInXray, function(error, dataIn){
-        if (error){alert("Fatal error loading input file: '"+gw.fileInXray+"'. Sorry!")}
-        gw.dataXray = dataIn;
-        for (i in gw.dataXray){
-            d=gw.dataXray[i];
-            d.M1={best:d.massBH};
-            d.M2={best:d.compMass};
-            d.D2={best:d.distance};
-            d.type='xray';
-        }
-        gw.loaded++;
-        if (gw.debug){console.log('loaded: '+gw.inputFileXray)}
-        //call next functions
-        if (gw.loaded==gw.toLoad){
-            gw.whenLoaded();
-        }else{
-            if (gw.debug){console.log('not ready yet')}
-        }
-    })
+    // d3.csv(gw.fileInXray, function(error, dataIn){
+    //     if (error){alert("Fatal error loading input file: '"+gw.fileInXray+"'. Sorry!")}
+    //     gw.dataXray = dataIn;
+    //     for (i in gw.dataXray){
+    //         d=gw.dataXray[i];
+    //         d.M1={best:d.massBH};
+    //         d.M2={best:d.compMass};
+    //         d.D2={best:d.distance};
+    //         d.type='xray';
+    //     }
+    //     gw.loaded++;
+    //     if (gw.debug){console.log('loaded: '+gw.inputFileXray)}
+    //     //call next functions
+    //     if (gw.loaded==gw.toLoad){
+    //         gw.whenLoaded();
+    //     }else{
+    //         if (gw.debug){console.log('not ready yet')}
+    //     }
+    // })
 }
 GWCatalogue.prototype.whenLoaded = function(){
     var gw=this;
     gw.setColumns(gw.datadict);
     gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-    gw.dataXray.forEach(function(d){gw.formatDataXray(d,gw.columns)});
+    // gw.dataXray.forEach(function(d){gw.formatDataXray(d,gw.columns)});
     // order Data
     gw.orderData();
     gw.makePlot();
@@ -2104,40 +2104,40 @@ GWCatalogue.prototype.drawGraph = function(){
             .style('opacity',1)
 
     // draw x-ray dots
-    if (this.showxray){
-    xrayGroup = gw.svg.append("g").attr("class","g-xray")
-    xrayGroup.selectAll(".xraydot")
-        .data(gw.dataXray)
-    .enter().append("circle")
-        .attr("class", "xraydot")
-        .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")")
-        .attr("r", Math.min(10.,7/gw.sksc))
-        .attr("cx", gw.xMap)
-        .attr("cy", gw.yMap)
-        .attr("cursor","default")
-        .attr("opacity",function(d){return gw.getOpacity(d)})
-    //   .style("fill", function(d) { return color(cValue(d));})
-        .style("fill", function(d){return gw.color(gw.cValue(d));})
-        .style("stroke",function(d){return gw.linestyles(d.type);})
-        .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
-        .style("stroke-width",Math.min(5,2./gw.sksc))
-        .on("mouseover", function(d) {
-            gw.tooltip.transition()
-               .duration(200)
-               .style("opacity", .9);
-            gw.tooltip.html(gw.tttextXray(d))
-               .style("left", (d3.event.pageX + 10) + "px")
-               .style("top", (d3.event.pageY-10) + "px")
-               .style("width","auto")
-               .style("height","auto");
-        })
-        .on("mouseout", function(d) {
-            gw.tooltip.transition()
-               .duration(500)
-               .style("opacity", 0);
-        })
-    }
+    // if (this.showxray){
+    // xrayGroup = gw.svg.append("g").attr("class","g-xray")
+    // xrayGroup.selectAll(".xraydot")
+    //     .data(gw.dataXray)
+    // .enter().append("circle")
+    //     .attr("class", "xraydot")
+    //     .attr("transform", "translate("+gw.margin.left+","+
+    //         gw.margin.top+")")
+    //     .attr("r", Math.min(10.,7/gw.sksc))
+    //     .attr("cx", gw.xMap)
+    //     .attr("cy", gw.yMap)
+    //     .attr("cursor","default")
+    //     .attr("opacity",function(d){return gw.getOpacity(d)})
+    // //   .style("fill", function(d) { return color(cValue(d));})
+    //     .style("fill", function(d){return gw.color(gw.cValue(d));})
+    //     .style("stroke",function(d){return gw.linestyles(d.type);})
+    //     .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
+    //     .style("stroke-width",Math.min(5,2./gw.sksc))
+    //     .on("mouseover", function(d) {
+    //         gw.tooltip.transition()
+    //            .duration(200)
+    //            .style("opacity", .9);
+    //         gw.tooltip.html(gw.tttextXray(d))
+    //            .style("left", (d3.event.pageX + 10) + "px")
+    //            .style("top", (d3.event.pageY-10) + "px")
+    //            .style("width","auto")
+    //            .style("height","auto");
+    //     })
+    //     .on("mouseout", function(d) {
+    //         gw.tooltip.transition()
+    //            .duration(500)
+    //            .style("opacity", 0);
+    //     })
+    // }
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
