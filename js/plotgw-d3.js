@@ -1412,6 +1412,12 @@ GWCatalogue.prototype.redrawLabels = function(){
         }
     }
 }
+GWCatalogue.prototype.obj2hint = function(objType){
+    if (objType=='BBH'){ return this.tl('%text.gen.bbh%')}
+    else if (objType=='BNS'){ return this.tl('%text.gen.bns%')}
+    else if (objType=='BHNS'){ return this.tl('%text.gen.bhns%')}
+    else {return ""}
+}
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
     if (this.redraw){
@@ -1422,7 +1428,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         // update title
         this.sketchTitle.html(
             this.tl("%text.plotgw.information.heading% "+this.sketchName));
-        this.sketchTitleHint.html("");
+        this.sketchTitleHint.html(this.obj2hint(d.objType.best));
         // update labels
         this.redrawLabels();
     }else if ((this.sketchName==d["name"])){
@@ -1457,7 +1463,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         // update title
         this.sketchName = d["name"];
         this.sketchTitle.html("Information: "+this.sketchName);
-        this.sketchTitleHint.html("");
+        this.sketchTitleHint.html(this.obj2hint(d.objType.best));
         //update labels
         this.redrawLabels();
     }
@@ -1478,11 +1484,11 @@ GWCatalogue.prototype.setStyles = function(){
     this.linedashes = d3.scale.ordinal().range([0,3,0]).domain(this.styleDomains);
     this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
     this.getOpacity = function(d) {return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.type) : 0)}
-    this.xrayShown = function(d) {
-        if ((gw.xrayCols.hasOwnProperty(gw.xvar))&&(gw.xrayCols.hasOwnProperty(gw.yvar))&&(gw.showxray)){
-            return true
-        }else{return false}
-    }
+    // this.xrayShown = function(d) {
+    //     if ((gw.xrayCols.hasOwnProperty(gw.xvar))&&(gw.xrayCols.hasOwnProperty(gw.yvar))&&(gw.showxray)){
+    //         return true
+    //     }else{return false}
+    // }
     this.colorErr = "#555";
     this.swErr = 2;
     this.opErr = 0.7;
@@ -2345,12 +2351,12 @@ GWCatalogue.prototype.drawGraph = function(){
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
 
     // hide/show xray legend dot
-    if(gw.xrayShown()){
-        d3.select('.legend.xray')
-            .transition().duration(750).attr("opacity",1)
-    }else{
-        d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
-    }
+    // if(gw.xrayShown()){
+    //     d3.select('.legend.xray')
+    //         .transition().duration(750).attr("opacity",1)
+    // }else{
+    //     d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
+    // }
 
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
@@ -2845,12 +2851,12 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .attr("cx", gw.xMap)
             .attr("opacity",function(d){return gw.getOpacity(d)})
         // hide/show xray legend dot
-        if(gw.xrayShown()){
-            d3.select('.legend.xray')
-                .transition().duration(750).attr("opacity",1)
-        }else{
-            d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
-        }
+        // if(gw.xrayShown()){
+        //     d3.select('.legend.xray')
+        //         .transition().duration(750).attr("opacity",1)
+        // }else{
+        //     d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
+        // }
         // change the x axis
         gw.svg.select(".x-axis.axis")
             .transition()
@@ -2921,12 +2927,12 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .attr("cy", gw.yMap)
             .attr("opacity",function(d){return gw.getOpacity(d)})
         // hide/show xray legend dots
-        if(gw.xrayShown()){
-            d3.select('.legend.xray')
-                .transition().duration(750).attr("opacity",1)
-        }else{
-            d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
-        }
+        // if(gw.xrayShown()){
+        //     d3.select('.legend.xray')
+        //         .transition().duration(750).attr("opacity",1)
+        // }else{
+        //     d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
+        // }
         // change the y axis
         gw.svg.select(".y-axis.axis")
             .transition()
