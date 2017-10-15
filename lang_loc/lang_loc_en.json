@@ -25,6 +25,8 @@
     "text.loc.source.lon":"Longitude",
     "text.loc.source.utc":"UTC",
     "text.loc.source.gmst":"Sidereal Time",
+    "text.loc.source.hr":"hr",
+    "text.loc.source.min":"min",
     "text.loc.source.hours":"hrs",
     "text.loc.network.on":"On",
     "text.loc.network.off":"Off",

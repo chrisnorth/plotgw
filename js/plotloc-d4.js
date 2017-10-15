@@ -1245,6 +1245,8 @@ Localisation.prototype.updateSourceLabels = function(){
         .html(this.tl(loc.labels.ra.labstr()));
     d3.select('#lab-dec-txt')
         .html(this.tl(loc.labels.dec.labstr()));
+    d3.select('#lab-utc-txt')
+        .html(this.tl(loc.labels.utc.labstr()));
     d3.select('#lab-gmst-txt')
         .html(this.tl(loc.labels.gmst.labstr()));
     d3.select('#lab-posang-txt')
@@ -1264,38 +1266,46 @@ Localisation.prototype.updateCalcs = function(newSrc,newDet){
     // update calculations and show results
     this.setDetOn();
     this.showLoading();
-    console.log('calc args:',newSrc,newDet);
+    console.log('calc args:',this.updated);
     // recalculate
     console.log('recalculating detectors');
     console.log(this.dStatus);
-    this.processNetwork();
-    if (newDet){
+    if (this.updated.network){
+        this.processNetwork();
+    }
+    if (this.updated.coord){
         this.calcDetTimes();
+    }
+    if ((this.updated.network)||(this.updated.coord)){
         this.calcAntFacsSky();
     }
-    if (newSrc==true){
+    if (this.updated.src){
         // move source
         this.moveHighlight();
         // calculate results for source
         this.processSrcAmp();
+        this.calcAntFacs();
     }
-    this.calcAntFacs();
-    //  update results
-    if (this.overlays.contoursT.shown){this.updateContoursT();}
+    if ((this.updated.src)||(this.updated.coord)||(this.updated.network)){
+        this.calcTimeRings()
+    }
     // this.calcProbSky();
     // this.updateContoursPr();
+    // update displayed results
     this.updateDetMarkers();
     this.updateDetResults();
     this.updateSourceLabels();
     this.updateLines();
-    if ((newDet==true)|(this.hmap!='none')){
-        this.updateHeatmap(this.hmap);
-    }
-    this.calcTimeRings()
-    if (this.overlays.contoursTmatch.shown){this.updateContoursTmatch()}
-    this.updateHeatmap('Tmatch');
-    this.updateHeatmap('Tall',this.hideLoading());
-
+    //  update contours and overlays
+    if (this.overlays.contoursT.shown){this.updateContoursT();}
+    if ((this.updated.network)|(this.hmap!='none')){this.updateHeatmap(this.hmap);}
+    if (this.overlays.contoursTmatch.shown){this.updateContoursTmatch();}
+    if (this.overlays['heatmap-Tmatch'].shown){this.updateHeatmap('Tmatch');}
+    if (this.overlays['heatmap-Tall'].shown){this.updateHeatmap('Tall');}
+    this.updated.src=false;
+    this.updated.network=false;
+    this.updated.coord=false;
+    this.hideLoading()
     // this.uncloseContours();
 }
 Localisation.prototype.moveSrc = function(ra,dec){
@@ -1320,6 +1330,7 @@ Localisation.prototype.moveSrc = function(ra,dec){
             this.src.lat=this.src.dec;
         }
         this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);
+        this.updated.src=true;
         this.updateCalcs(true,false);
         this.old.src.ra=this.src.ra;
         this.old.src.dec=this.src.dec;
@@ -1369,6 +1380,7 @@ Localisation.prototype.detectorToggle = function(det){
         // document.getElementById('det-toggle-lab-'+det).innerHTML=this.tl("OFF")
     }
     this.showLoading();
+    this.updated.network=true;
     loc.updateCalcs(false,true);
     // this.updateDet();
 }
@@ -1430,7 +1442,7 @@ Localisation.prototype.setStyles = function(){
         'amp':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.amplitude%')+': '+
             parseFloat(loc.src.amp).toPrecision(2))}},
         'gmst':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.gmst%')+': '+
-            parseInt(loc.src.gmst)+' %text.loc.source.hours%')},
+            parseInt(loc.src.gmst)+loc.tl('%text.loc.source.hr%')+' '+parseInt((loc.src.gmst-Math.floor(loc.src.gmst))*60)+loc.tl('%text.loc.source.min%'))},
             "icon":"img/time.svg"},
         'utc':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.utc%')+': '+
             loc.src.utc)},
@@ -3499,6 +3511,7 @@ Localisation.prototype.filterSky = function (filtVal,type,threshold) {
 };
 Localisation.prototype.whenLoaded = function(){
     var loc=this;
+    loc.updated={}
     // order Data
     loc.setDetOn();
     loc.processNetwork();
@@ -3870,13 +3883,8 @@ Localisation.prototype.selectEvent = function(e){
     this.src.lon=this.ra2lon(ra);
     this.src.lat=this.src.dec;
     this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);
+    this.updated.src=true;
     this.updateCalcs(true,false);
-    // this.moveSrc(ra,dec)
-    // this.src.ra=parseFloat(ev.ra);
-    // this.src.dec=parseFloat(ev.dec);
-    // this.src.lon=this.ra2lon(this.src.ra);
-    // this.src.lat=this.src.dec;
-    // this.updateCalcs(true,false);
 }
 Localisation.prototype.addNetwork = function(){
     var loc=this;
@@ -4009,7 +4017,7 @@ Localisation.prototype.addSource = function(){
         .style('height',loc.labcontHeight)
     .append("div")
         .attr('class','labtext source')
-        .attr('id','lab-gmst-txt')
+        .attr('id','lab-utc-txt')
         .html(this.tl(loc.labels.utc.labstr()));
     d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont')
@@ -4043,6 +4051,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",loc.src.posang)
     .on("input",function(){
         loc.src.posang=this.value;
+        this.updated.src=true;
         loc.updateCalcs(true,false)
         console.log(loc.src['h+'],loc.src['hx'],Math.sqrt(Math.pow(loc.src['h+'],2)+Math.pow(loc.src['hx'],2)))
     })
@@ -4078,6 +4087,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",loc.src.inc)
     .on("input",function(){
         loc.src.inc=this.value;
+        this.updated.src=true;
         loc.updateCalcs(true,false)
     })
     inccont.select(".slider-outer")
@@ -4112,6 +4122,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",Math.log10(loc.src.amp)*10)
     .on("input",function(){
         loc.src.amp=Math.pow(10,this.value/10);
+        loc.updated.src=true;
         loc.updateCalcs(true,false)
     })
     ampcont.select(".slider-outer")
@@ -4368,6 +4379,7 @@ Localisation.prototype.addSettings = function(){
             loc.svg.select("#skymap").style("opacity",function(){return (loc.world)?0:1;})
             if(loc.hmap=='none'){loc.colourWorldMap()}else{loc.uncolourWorldMap()}
             loc.updateAxes();
+            loc.updated.coords=true;
             loc.updateCalcs(true,true);
             // loc.moveHighlight();
             // loc.updateHeatmap(loc.hmap);
@@ -4396,12 +4408,14 @@ Localisation.prototype.addSettings = function(){
                 loc.skyarr.res = 2.5;
                 loc.lores=false;
                 loc.setSkyarr();
+                loc.updated.coords=true;
                 loc.updateCalcs(true,true);
             }else{
                 // switch to lores
                 loc.skyarr.res = 5;
                 loc.lores=true;
                 loc.setSkyarr();
+                loc.updated.coords=true;
                 loc.updateCalcs(true,true);
             }
         })
