@@ -179,7 +179,7 @@ GWCatalogue.prototype.init = function(){
         lang:"en",
         showerrors:true,
         showxray:false,
-        selectedevent:"GW170814"
+        selectedevent:"GW170817"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
