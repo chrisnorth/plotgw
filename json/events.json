@@ -127,7 +127,7 @@
 	},
 	"data": {
 		"GW150914": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -233,7 +233,7 @@
 			}
 		},
 		"LVT151012": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -339,7 +339,7 @@
 			}
 		},
 		"GW151226": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -445,7 +445,7 @@
 			}
 		},
 		"GW170104": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -551,7 +551,7 @@
 			}
 		},
 		"GW170814": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -655,6 +655,87 @@
 			},
 			"GPS": {
 				"best": 1186741861.5
+			}
+		},
+		"GW170817": {
+			"objType": {
+				"best":"BNS"
+			},
+			"Mratio": {
+				"lim": [
+					0.7,
+					1.0
+				]
+			},
+			"Mchirp": {
+				"err": [
+					0.004,
+					0.002
+				],
+				"best": 1.188
+			},
+			"DL": {
+				"err": [
+					8,
+					14
+				],
+				"best": 40
+			},
+			"Mtotal": {
+				"err": [
+					0.04,
+					0.01
+				],
+				"best": 2.74
+			},
+			"UTC": {
+				"best": "2017-08-17T12:41:04"
+			},
+			"net": {
+				"best": "HLV"
+			},
+			"FAR": {
+				"best": 1.25e-5
+			},
+			"chi": {
+				"lim": [
+					-0.01,
+					0.02
+				]
+			},
+			"Erad": {
+				"lower":0.025
+			},
+			"deltaOmega": {
+				"best": 28
+			},
+			"M1": {
+				"lim": [
+					1.36,
+					1.6
+				]
+			},
+			"rho": {
+				"best": 32.4
+			},
+			"M2": {
+				"lim": [
+					1.17,
+					1.36
+				]
+			},
+			"Mfinal": {
+				"upper": 2.755
+			},
+			"z": {
+				"err": [
+					0.002,
+					0.003
+				],
+				"best": 0.008
+			},
+			"GPS": {
+				"best": 1187008882.43
 			}
 		}
 	},
@@ -785,9 +866,27 @@
 			"023":{
 				"url": "http://dcc.ligo.org/P170814/public/",
 				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119, 141101",
+				"type": "web-data"
+			},
+			"024":{
+                "url": "%domain.losc.events%/GW170814/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
+		},
+		"GW170817": {
+			"025":{
+				"url": "http://dcc.ligo.org/P170817/public/",
+				"text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017)",
 				"type": "web-data"
-			}
+			},
+			"026":{
+                "url": "%domain.losc.events%/GW170817/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
 		}
 	}
 }
