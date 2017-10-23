@@ -127,7 +127,7 @@
 	},
 	"data": {
 		"GW150914": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -233,7 +233,7 @@
 			}
 		},
 		"LVT151012": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -339,7 +339,7 @@
 			}
 		},
 		"GW151226": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -445,7 +445,7 @@
 			}
 		},
 		"GW170104": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
@@ -551,7 +551,7 @@
 			}
 		},
 		"GW170814": {
-			"typeNew": {
+			"objType": {
 				"best":"BBH"
 			},
 			"Mratio": {
