@@ -28,7 +28,7 @@
 "data.chi.name": "Spin inicial efectivo",
 "data.FAR.name": "Tasa de falsas alarmas",
 "data.FAR.unit": "año⁻¹",
-"data.FAR.unit.1per": "1 por",
+"data.FAR.unit.1per": "< 1 por",
 "data.FAR.unit.yr": "año",
 "data.FAR.unit.kyr": "miles de años",
 "data.FAR.unit.Myr": "millones de años",

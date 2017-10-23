@@ -28,7 +28,7 @@
  "data.chi.name": "Effektiver Anfangsdrehimpuls",
  "data.FAR.name": "Falsch-positiv-Rate",
  "data.FAR.unit": "/a",
- "data.FAR.unit.1per": "1 pro",
+ "data.FAR.unit.1per": "< 1 pro",
  "data.FAR.unit.yr": "a",
  "data.FAR.unit.kyr": "ka",
  "data.FAR.unit.Myr": "Ma",
