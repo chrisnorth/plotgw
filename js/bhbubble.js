@@ -776,7 +776,7 @@ BHBubble.prototype.getText = function(d){
     ){
         return "";
     }else{
-        return(bh.getUtf8(d[bh.nameCol]));
+        return(bh.getUtf8(bh.tN(d[bh.nameCol])));
     }
 }
 BHBubble.prototype.getName = function(d){
