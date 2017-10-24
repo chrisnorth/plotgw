@@ -1,7 +1,7 @@
 {
     "section.about":{"_title":"About the language"},
-    "meta.code":{"_title":"en","_text":"The two-letter language code","_type":"string"},
-    "meta.name":{"_title":"Language","_text":"The name of the language in that language, e.g. English, Français, Español, or मानक हिन्दी. It appears in the language menu.","_type":"string"},
+    "meta.code":{"_title":"Language","_text":"The two- or four-letter language code (e.g. en, en-GB, pt-br, zh-hk)","_type":"string"},
+    "meta.name":{"_title":"Language name","_text":"The name of the language in that language, e.g. English, Français, Español, or मानक हिन्दी. It appears in the language menu.","_type":"string"},
     "meta.alignment":{"_title":"left","_text":"The direction that the language goes. Note that right-to-left text is not currently supported.","_type":"select","_options":[{"name":"left to right","value":"left"},{"name":"right to left","value":"right"}]},
     "meta.alphabet":{"_title":"Alphabet","_text":"The alphabet used by the language","_type":"string"},
     "meta.numbersystem":{"_title":"Number system","_text":"The number system used by the language. Note that Non-Arabic numerals are not currently supported in the catalogue plot, but are in the bubble plot.","_type":"string"},
