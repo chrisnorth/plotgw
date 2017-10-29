@@ -1,0 +1,145 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>Gravitational Wave Catalogue</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta property="og:url"           content="http://chrisnorth.github.io/plotgw" />
+    <meta property="og:type"          content="website" />
+    <meta property="og:title"         content="Gravitational Wave Catalogue" />
+    <meta property="og:description"   content="Explore the LIGO catalogue of gravitataional wave binary black holes" />
+    <meta property="og:image"         content="http://chrisnorth.github.io/plotgw/img/screenshot.png" />
+    <!--<link rel="icon" type="image/vnd.microsoft.icon" href="planck_logo.ico" />-->
+    <link rel="icon" type="image/vnd.microsoft.icon" href="img/favicon-32x32.png" />
+    <link rel="stylesheet" href="css/style-d3.css" type="text/css" />
+    <!-- <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script> -->
+    <!-- <script type="application/json" src="json/gwcat.json"></script>
+    <script type="application/json" src="json/test.json"></script> -->
+    <script type="text/javascript" src="js/d3.v3.min.js"></script>
+    <script type="text/javascript" src="js/clipboard-1.7.1.min.js"></script>
+    <script type="text/javascript" src="js/FileSaver.js"></script>
+    <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
+    <!-- Analytics code -->
+    <script type="text/javascript" src="js/analytics.js"></script>
+    <script type="text/javascript" src="js/plotgw-d3.js"></script>
+    <style>
+        body{
+            overflow:auto;
+            margin-left:100px;
+            width:900px;
+            font-size:medium;
+        }
+        h1.extitle{background-color:#ccc;}
+        div.container{
+            display:block;
+            width:100%;
+        }
+        div.procon{
+            float:left;
+            width:300px;
+            display:inline-block;
+            padding-left:10px;
+            padding-right:10px;
+        }
+        div.procon.pro{
+            background-color:#ccf;
+        }
+        div.procon.con{
+            background-color:#fcc;
+        }
+        pre{
+            font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+            margin-bottom: 10px;
+            overflow: auto;
+            width: auto;
+            padding: 5px;
+            background-color: #eee;
+            width: 650px!ie7;
+            padding-bottom: 20px!ie7;
+            max-height: 600px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1 class="extitle">Embedding in iframe</h1>
+        <p>This allows you to include the website (e.g. http://chrisnorth.github.io/plotgw/index.html) in your own page without having to have any of the source files</p>
+        <div class="procon pro">
+            <h3>Advantages</h3>
+            <ul>
+                <li>Doesn't require any direct inclusion of libraries, javascript, css etc.</li>
+                <li>Requires no updating.</li>
+                <li>Good if you only have access to HTML</li>
+            </ul>
+        </div>
+        <div class="procon con">
+            <h3>Disadvantages</h3>
+            <ul>
+                <li>Will change/break whenever the webpage within the iframe breaks/changes</li>
+                <li>You have no control over what's in the iframe</li>
+                <li>Some system managers may ban iframes</li>
+                <li>Requires a web connection</li>
+            </ul>
+        </div>
+        <div style="float:left;width:100%">
+            <h3>Required code</h3>
+            <pre>
+In the page body:
+<code>
+    &lt;iframe src="https://chrisnorth.github.io/plotgw" width="900px" height="600px&gt;&lt;/iframe&gt;
+</code>
+            </pre>
+            <iframe src="https://chrisnorth.github.io/plotgw" width="900px" height="600px"></iframe>
+        </div>
+    </div>
+    <div style="clear:both"></div>
+    <div class="container">
+        <h1 class="extitle">Including directly in your own page</h1>
+        <p></p>
+        <div class="procon pro">
+            <h3>Advantages</h3>
+            <ul>
+                <li>You have full control (in principle) over what's in the included content</li>
+                <li>Won't break/change if something else breaks/changes</li>
+                <li>Requires no web connection if run locally (beware browser security issues)</li>
+            </ul>
+        </div>
+        <div class="procon con">
+            <h3>Disadvantages</h3>
+            <ul>
+                <li>Requires the inclusion of javascript libraries, css etc. in the webpage</li>
+                <li>Will require updating if anything changes</li>
+                <li>Stylying that depends on screen size might look a bit weird odd</li>
+            </ul>
+        </div>
+        <div style="float:left;width:100%">
+            <h3>Required Code</h3>
+            <pre>
+Clone/download the <a href="http://github.com/chrisnorth/plotgw">Github repository</a>
+
+In the page header:
+<code>
+    &lt;link rel="icon" type="image/vnd.microsoft.icon" href="img/favicon-32x32.png" /&gt;
+    &lt;link rel="stylesheet" href="css/style-d3.css" type="text/css" /&gt;
+    &lt;script type="text/javascript" src="js/d3.v3.min.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/clipboard-1.7.1.min.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/FileSaver.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/plotgw-d3.js"&gt;&lt;/script&gt;
+</code>
+In the page body:
+<code>
+    &lt;div id="plotgw-cont" style="width:900px;height:600px;border:1px solid black"&gt;&lt;/div&gt;
+    &lt;script type="text/javascript"&gt;
+        var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
+    &lt;/script&gt;
+</code>
+            </pre>
+        </div>
+        <div style="float:left;width:100%">
+            <div id="plotgw-cont" style="width:900px;height:600px;border:1px solid black"></div>
+            <script type="text/javascript">
+                var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
+            </script>
+        </div>
+    </div>
+</body>
+</html>
