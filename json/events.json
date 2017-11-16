@@ -1,129 +1,41 @@
 {
 	"datadict": {
-		"GPS": {
-			"priority": 4,
-			"sigfig": 12,
-			"name_en": "GPS time",
-			"name": "%data.GPS.name%"
-
-		},
-		"UTC": {
-			"priority": 1,
-			"sigfig": 0,
-			"name_en": "UTC time",
-			"name": "%data.UTC.name%"
-		},
-		"net": {
-			"priority": 4,
-			"sigfig": 0,
-			"name_en": "GW network used",
-			"name": "%data.net.name%"
-		},
-		"rho": {
-			"priority": 3,
-			"sigfig": 3,
-			"name_en": "Signal to Noise Ratio",
-			"name": "%data.rho.name%"
-		},
-		"FAR": {
-			"sigfig": 2,
-			"name": "%data.FAR.name%",
-			"unit_en": "yr^-1",
-			"priority": 1,
-			"name_en": "False alarm rate",
-			"unit": "%data.FAR.unit%"
-		},
-		"M1": {
-			"sigfig": 3,
-			"name": "%data.M1.name%",
-			"unit_en": "Msun",
-			"priority": 1,
-			"name_en": "Primary mass",
-			"unit": "%data.M1.unit%"
-		},
-		"M2": {
-			"sigfig": 3,
-			"name": "%data.M2.name%",
-			"unit_en": "Msun",
-			"priority": 1,
-			"name_en": "Secondary mass",
-			"unit": "%data.M2.unit%"
-		},
-		"Mchirp": {
-			"sigfig": 3,
-			"name": "%data.Mchirp.name%",
-			"unit_en": "Msun",
-			"priority": 3,
-			"name_en": "Chirp mass",
-			"unit": "%data.Mchirp.unit%"
-		},
-		"Mtotal": {
-			"sigfig": 3,
-			"name": "%data.Mtotal.name%",
-			"unit_en": "Msun",
-			"priority": 2,
-			"name_en": "Total mass",
-			"unit": "%data.Mtotal.unit%"
-		},
-		"chi": {
-			"priority": 4,
-			"sigfig": 2,
-			"name_en": "Effective inspiral spin",
-			"name": "%data.chi.name%"
-		},
-		"Mfinal": {
-			"sigfig": 3,
-			"name": "%data.Mfinal.name%",
-			"unit_en": "Msun",
-			"priority": 2,
-			"name_en": "Final mass",
-			"unit": "%data.Mfinal.unit%"
-		},
-		"af": {
-			"priority": 3,
-			"sigfig": 2,
-			"name_en": "Final spin",
-			"name": "%data.af.name%"
-
-		},
-		"Erad": {
-			"sigfig": 2,
-			"name": "%data.Erad.name%",
-			"unit_en": "Msun c^2",
-			"priority": 6,
-			"name_en": "Radiated energy",
-			"unit": "%data.Erad.unit%"
-		},
-		"lpeak": {
-			"sigfig": 2,
-			"name": "%data.lpeak.name%",
-			"unit_en": "10^56 erg s^-1",
-			"priority": 6,
-			"name_en": "Peak luminosity",
-			"unit": "%data.lpeak.unit%"
-		},
-		"DL": {
-			"sigfig": 2,
-			"name": "%data.DL.name%",
-			"unit_en": "Mpc",
-			"priority": 2,
-			"name_en": "Luminosity distance",
-			"unit": "%data.DL.unit%"
-		},
-		"z": {
-			"priority": 2,
-			"sigfig": 2,
-			"name_en": "Source redshift",
-			"name": "%data.z.name%"
-		},
-		"deltaOmega": {
-			"sigfig": 2,
-			"name": "%data.deltaOmega.name%",
-			"unit_en": "deg^2",
-			"priority": 5,
-			"name_en": "Sky localization",
-			"unit": "%data.deltaOmega.unit%"
-		}
+	    "GPS":{"name": "%data.GPS.name%", "priority": 4, "sigfig": 12,
+	         "err": 0,"name_en":"GPS"},
+	    "UTC":{"name": "%data.UTC.name%", "priority": 1, "sigfig": 0,
+	         "type": "varchar", "err": 0,"name_en":"UTC"},
+	    "rho":{"name": "%data.rho.name%", "priority": 3, "sigfig": 3,
+	         "err": 0, "name_en":"Signal to Noise ratio"},
+	    "FAR":{"name": "%data.FAR.name%", "priority": 1, "sigfig": 2,
+	         "unit": "%data.FAR.unit%", "err": 0, "name_en":"False alarm rate", "unit_en":"yr^-1"},
+	    "sigma":{"name": "%data.sigma.name%", "priority": 6, "sigfig": 2,
+	         "err": 0, "name_en":"Significance"},
+	    "M1":{"name": "%data.M1.name%", "priority": 1, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Primary mass", "unit_en":"M_sun"},
+	    "M2":{"name": "%data.M2.name%", "priority": 1, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Secondary mass", "unit_en":"M_sun"},
+	    "Mchirp":{"name": "%data.Mchirp.name%", "priority": 3, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Chirp mass", "unit_en":"M_sun"},
+	    "Mtotal":{"name": "%data.Mtotal.name%","priority": 2, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Total mass", "unit_en":"M_sun"},
+	    "chi":{"name": "%data.chi.name%", "priority": 4, "sigfig": 2,
+	        "err": 2, "name_en":"Effective spin"},
+	    "Mfinal":{"name": "%data.Mfinal.name%", "priority": 2, "sigfig": 3,
+	        "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Final mass", "unit_en":"M_sun"},
+	    "Mratio":{"name": "%data.Mratio.name%", "priority": 2, "sigfig": 3,
+	        "unit":false, "err": 2, "name_en":"Mass ratio"},
+	    "af":{"name": "%data.af.name%", "priority": 3, "sigfig": 2,
+	         "err": 2, "name_en":"Final spin"},
+	    "Erad":{"name": "%data.Erad.name%", "priority": 6, "sigfig": 2,
+	        "unit": "%data.Erad.unit%", "err": 2, "name_en":"Radiated energy", "unit_en":"M_sun c^2"},
+	    "lpeak":{"name": "%data.lpeak.name%", "priority": 6, "sigfig": 2,
+	        "unit": "%data.lpeak.unit%", "err": 2, "name_en":"Peak luminosity", "unit_en":"10^56 erg s^-1"},
+	    "DL":{"name": "%data.DL.name%", "priority": 2, "sigfig": 2,
+	        "unit": "%data.DL.unit%", "err": 2, "name_en":"Luminosity distance", "unit_en":"Mpc"},
+	    "z":{"name": "%data.z.name%","priority": 2, "sigfig": 2,
+	        "err": 2, "name_en":"Redshift"},
+	    "deltaOmega":{"name": "%data.skyArea.name%", "priority": 5, "sigfig": 2,
+	        "unit": "%data.skyArea.unit%", "err": 0, "name_en":"Sky localization area","unit_en":"deg^2"}
 	},
 	"data": {
 		"GW150914": {
@@ -550,6 +462,113 @@
 				"best": 1167559936.6
 			}
 		},
+		"GW170608": {
+			"objType": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.3,
+					0.4
+				],
+				"best": 0.6
+			},
+			"Mchirp": {
+				"err": [
+					0.2,
+					0.2
+				],
+				"best": 7.9
+			},
+			"DL": {
+				"err": [
+					140,
+					140
+				],
+				"best": 340
+			},
+			"Mtotal": {
+				"err": [
+					5,
+					1
+				],
+				"best": 19
+			},
+			"UTC": {
+				"best": "2017-06-18T02:01:16"
+			},
+			"net": {
+				"best": "HL"
+			},
+			"FAR": {
+				"best": 3.33e-4
+			},
+			"chi": {
+				"err": [
+					0.23,
+					0.09
+				],
+				"best": 0.07
+			},
+			"af": {
+				"err": [
+					0.04,
+					0.05
+				],
+				"best": 0.69
+			},
+			"Erad": {
+				"err": [
+					0.07,
+					0.17
+				],
+				"best": 0.85
+			},
+			"deltaOmega": {
+				"best": 520
+			},
+			"lpeak": {
+				"err": [
+					0.5,
+					1.6
+				],
+				"best": 3.4
+			},
+			"M1": {
+				"err": [
+					7,
+					2
+				],
+				"best": 12
+			},
+			"rho": {
+				"best": 13
+			},
+			"M2": {
+				"err": [
+					2,
+					2
+				],
+				"best": 7
+			},
+			"Mfinal": {
+				"err": [
+					4.8,
+					0.9
+				],
+				"best": 18
+			},
+			"z": {
+				"err": [
+					0.03,
+					0.03
+				],
+				"best": 0.07
+			},
+			"GPS": {
+				"best": 1181786494.49
+			}
+		},
 		"GW170814": {
 			"objType": {
 				"best":"BBH"
@@ -655,6 +674,87 @@
 			},
 			"GPS": {
 				"best": 1186741861.5
+			}
+		},
+		"GW170817": {
+			"objType": {
+				"best":"BNS"
+			},
+			"Mratio": {
+				"lim": [
+					0.7,
+					1.0
+				]
+			},
+			"Mchirp": {
+				"err": [
+					0.004,
+					0.002
+				],
+				"best": 1.188
+			},
+			"DL": {
+				"err": [
+					8,
+					14
+				],
+				"best": 40
+			},
+			"Mtotal": {
+				"err": [
+					0.04,
+					0.01
+				],
+				"best": 2.74
+			},
+			"UTC": {
+				"best": "2017-08-17T12:41:04"
+			},
+			"net": {
+				"best": "HLV"
+			},
+			"FAR": {
+				"best": 1.25e-5
+			},
+			"chi": {
+				"lim": [
+					-0.01,
+					0.02
+				]
+			},
+			"Erad": {
+				"lower":0.025
+			},
+			"deltaOmega": {
+				"best": 28
+			},
+			"M1": {
+				"lim": [
+					1.36,
+					1.6
+				]
+			},
+			"rho": {
+				"best": 32.4
+			},
+			"M2": {
+				"lim": [
+					1.17,
+					1.36
+				]
+			},
+			"Mfinal": {
+				"upper": 2.755
+			},
+			"z": {
+				"err": [
+					0.002,
+					0.003
+				],
+				"best": 0.008
+			},
+			"GPS": {
+				"best": 1187008882.43
 			}
 		}
 	},
@@ -781,13 +881,44 @@
                 "type": "web-data"
             }
 		},
-		"GW170814": {
-			"023":{
-				"url": "http://dcc.ligo.org/P170814/public/",
+		"GW170608": {
+			"027":{
+				"url": "https://arxiv.org/abs/1711.05578",
 				"text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017)",
 				"type": "web-data"
-			}
+			},
+			"028":{
+                "url": "%domain.losc.events%/GW170608/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
+		},
+		"GW170814": {
+			"023":{
+				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.141101",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119, 141101",
+				"type": "web-data"
+			},
+			"024":{
+                "url": "%domain.losc.events%/GW170814/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
+		},
+		"GW170817": {
+			"025":{
+				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.161101",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119 161101",
+				"type": "web-data"
+			},
+			"026":{
+                "url": "%domain.losc.events%/GW170817/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
 		}
 	}
 }
