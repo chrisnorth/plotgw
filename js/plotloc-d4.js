@@ -32,7 +32,7 @@ function Localisation(inp){
     console.log('init')
     this.init();
     if(this.debug){console.log('initialised');}
-    this.drawSkyInit();
+    this.dLonwSkyInit();
     if(this.debug){console.log('plotted');}
     window.addEventListener("resize",function(){
 
@@ -81,17 +81,26 @@ Localisation.prototype.init = function(){
         d3.select("#help-outer").append("div")
             .attr("id","help-block-icons").attr("class","panel-block")
         d3.select("#help-block-icons").append("div")
+            .attr("id","help-info-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/info.svg"><div class="panel-cont-text" id="help-info-text"></div>')
+        // d3.select("#help-block-icons").append("div")
+        //     .attr("id","help-share-cont").attr("class","panel-cont")
+        //     .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-settings-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/settings.svg"><div class="panel-cont-text" id="help-settings-text"></div>')
+        d3.select("#help-block-icons").append("div")
             .attr("id","help-help-cont").attr("class","panel-cont")
             .html('<img class="panel-cont-img" src="img/help.svg"><div class="panel-cont-text" id="help-help-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-info-cont").attr("class","panel-cont")
-            .html('<img class="panel-cont-img" src="img/info.svg"><div class="panel-cont-text" id="help-info-text"></div>')
+            .attr("id","help-source-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/source.svg"><div class="panel-cont-text" id="help-source-text"></div>')
         d3.select("#help-block-icons").append("div")
             .attr("id","help-lang-cont").attr("class","panel-cont")
             .html('<img class="panel-cont-img" src="img/lang.svg"><div class="panel-cont-text" id="help-lang-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-share-cont").attr("class","panel-cont")
-            .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
+            .attr("id","help-search-cont").attr("class","panel-cont")
+            .html('<img class="panel-cont-img" src="img/search.svg"><div class="panel-cont-text" id="help-search-text"></div>')
         d3.select("#help-outer").append("div")
             .attr("id","help-close").attr("class","panel-close")
         d3.select("#help-outer").append("div")
@@ -242,40 +251,69 @@ Localisation.prototype.init = function(){
 }
 Localisation.prototype.setSkyarr = function(){
     var loc=this;
-    this.skyarr.dDec=this.skyarr.res;
-    this.skyarr.dRA=this.skyarr.res;
-    this.skyarr.nRA=Math.floor(360./this.skyarr.dRA);
-    this.skyarr.nDec=Math.floor(180./this.skyarr.dDec);
-    this.skyarr.nPix=this.skyarr.nRA*this.skyarr.nDec;
-    this.skyarr.yList=d3.range(-90+this.skyarr.dDec/2.,90+this.skyarr.dDec/2.,this.skyarr.dDec);
-    this.skyarr.dec2i = d3.scaleLinear().domain([-90,90]).range([-0.5,this.skyarr.nDec+0.5])
+    this.skyarr.dLat=this.skyarr.res;
+    this.skyarr.dLon=this.skyarr.res;
+    this.skyarr.nLon=Math.floor(360./this.skyarr.dLon);
+    this.skyarr.nLat=Math.floor(180./this.skyarr.dLat);
+    this.skyarr.nPix=this.skyarr.nLon*this.skyarr.nLat;
+    this.skyarr.yList=d3.range(90-this.skyarr.dLat/2.,-90-this.skyarr.dLat/2.,-this.skyarr.dLat);
+    this.skyarr.lat2i = d3.scaleLinear().domain([90,-90]).range([-0.5,this.skyarr.nLat+0.5])
     // RA needs to run backwards to switch to longitude
-    this.skyarr.xList=d3.range(180-this.skyarr.dRA/2.,-180-this.skyarr.dRA/2.,-this.skyarr.dRA);
-    this.skyarr.ra2i = d3.scaleLinear().domain([180,-180]).range([-0.5,this.skyarr.nRA+0.5])
-    this.skyarr.lon2i = d3.scaleLinear().domain([-180,180]).range([-0.5,this.skyarr.nRA+0.5])
+    this.skyarr.xList=d3.range(180-this.skyarr.dLon/2.,-180-this.skyarr.dLon/2.,-this.skyarr.dLon);
+    // this.skyarr.lon2i = d3.scaleLinear().domain([180,-180]).range([-0.5,this.skyarr.nLon+0.5])
+    this.skyarr.lon2i = d3.scaleLinear().domain([180,-180]).range([-0.5,this.skyarr.nLon+0.5])
     this.skyarr.radec2p = function(ra,dec){
-        ira=Math.max(Math.floor(loc.skyarr.ra2i(ra)),0)
-        idec=Math.max(Math.floor(loc.skyarr.dec2i(dec)),0)
+        ira=Math.max(Math.floor(loc.skyarr.lon2i(ra)),0)
+        idec=Math.max(Math.floor(loc.skyarr.lat2i(dec)),0)
         // console.log(ira,idec)
-        return idec*loc.skyarr.nRA + ira
+        return idec*loc.skyarr.nLon + ira
     }
-    this.skyarr.lonlat2p = function(lon,lat){
+    this.skyarr.lonlat2p = function(lon,lat,rev=false){
         ilon=Math.max(Math.floor(loc.skyarr.lon2i(lon)),0)
-        ilat=Math.max(Math.floor(loc.skyarr.dec2i(lat)),0)
+        ilon = (rev) ? (loc.skyarr.nLon-1) - ilon : ilon;
+        ilat=Math.max(Math.floor(loc.skyarr.lat2i(lat)),0)
         // console.log(ira,idec)
-        return ilat*loc.skyarr.nRA + ilon
+        return ilat*loc.skyarr.nLon + ilon
     }
     // this.src.pix = this.skyarr.radec2p(this.src.ra,this.src.dec);
-    this.skyarr.arr={'lon':[],'lat':[],'vec':[],'pix':[]};
+    this.skyarr.arr={'lon':[],'lat':[],'vec':[],'pix':[],'negvec':[]};
+    this.skyarr.revarr={};
     p=0;
-    for (j in d3.range(0,this.skyarr.nDec)){
-        for (i in d3.range(0,this.skyarr.nRA)){
+    for (j in d3.range(0,this.skyarr.nLat)){
+        for (i in d3.range(0,this.skyarr.nLon)){
             this.skyarr.arr.pix.push(p);
             this.skyarr.arr.lon.push(loc.mod360(this.skyarr.xList[i]));
-            this.skyarr.arr.lat.push(-this.skyarr.yList[j]);
-            this.skyarr.arr.vec.push($V(lb2vec(this.skyarr.arr.lon[p],this.skyarr.arr.lat[p])))
+            this.skyarr.arr.lat.push(this.skyarr.yList[j]);
+            // this.skyarr.arr.vec.push($V(lb2vec(this.skyarr.arr.lon[p],this.skyarr.arr.lat[p])))
+            // this.skyarr.arr.negvec.push($V(lb2vec(-this.skyarr.arr.lon[p],this.skyarr.arr.lat[p])))
             p++;
         }
+    }
+}
+Localisation.prototype.getArray = function(arrname){
+    if (this.world){
+        // console.log('getting un-reversed array for'+arrname);
+        return this.skyarr.arr[arrname];
+    }else{
+        // console.log('getting reversed array for'+arrname);
+        return this.reverseArray(arrname);
+    }
+}
+Localisation.prototype.reverseArray = function(arrname,force=false){
+    // console.log(inparr);
+    p=0;
+    inparr=this.skyarr.arr[arrname];
+    exists = (this.skyarr.revarr[arrname]) ? true : false
+    if ((exists)&&(!force)){
+        return(this.skyarr.revarr[arrname]);
+    }else{
+        console.log('reversing '+arrname)
+        outarr=[];
+        for (p in d3.range(0,this.skyarr.nPix)){
+            outarr.push(inparr[this.skyarr.lonlat2p(this.skyarr.arr.lon[p],this.skyarr.arr.lat[p],rev=true)]);
+        }
+        this.skyarr.revarr[arrname]=outarr;
+        return(outarr);
     }
 }
 Localisation.prototype.getUrlVars = function(){
@@ -654,8 +692,8 @@ Localisation.prototype.det2xy = function(d,pt){
 Localisation.prototype.rect2xy = function(p,pt){
     // convert rectangle position 2 xy on sky
     if (this.world){
-        xy1=loc.skyarr.projEq([(loc.skyarr.arr.lon[p]-loc.skyarr.dRA/2.),loc.skyarr.arr.lat[p]-loc.skyarr.dDec/2.])
-        xy2=loc.skyarr.projEq([(loc.skyarr.arr.lon[p]+loc.skyarr.dRA/2.),loc.skyarr.arr.lat[p]+loc.skyarr.dDec/2.])
+        xy1=loc.skyarr.projEq([(loc.skyarr.arr.lon[p]-loc.skyarr.dLon/2.),loc.skyarr.arr.lat[p]-loc.skyarr.dLat/2.])
+        xy2=loc.skyarr.projEq([(loc.skyarr.arr.lon[p]+loc.skyarr.dLon/2.),loc.skyarr.arr.lat[p]+loc.skyarr.dLat/2.])
         x1=xy1[0]
         y1=xy1[1]
         x2=xy2[0]
@@ -671,8 +709,8 @@ Localisation.prototype.rect2xy = function(p,pt){
         }
         return([xout1,yout1,xout2-xout1,yout2-yout1]);
     }else{
-        xy1=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p]+loc.skyarr.dRA/2.)),loc.skyarr.arr.lat[p]-loc.skyarr.dDec/2.])
-        xy2=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p]-loc.skyarr.dRA/2.)),loc.skyarr.arr.lat[p]+loc.skyarr.dDec/2.])
+        xy1=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p]+loc.skyarr.dLon/2.)),loc.skyarr.arr.lat[p]-loc.skyarr.dLat/2.])
+        xy2=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p]-loc.skyarr.dLon/2.)),loc.skyarr.arr.lat[p]+loc.skyarr.dLat/2.])
         x1=xy1[0]
         y1=xy1[1]
         x2=xy2[0]
@@ -773,7 +811,7 @@ Localisation.prototype.adjCss = function(){
         }
     }
 }
-Localisation.prototype.drawEff = function(){
+Localisation.prototype.dLonwEff = function(){
     // Create eff panel
     // this.panels.info.show=function(){this.showInfo()}
     // this.panels.info.show=function()(this.hideInfo())
@@ -820,7 +858,7 @@ Localisation.prototype.drawEff = function(){
     this.updateLines();
 
     // add labels
-    if (this.redraw){
+    if (this.redLonw){
         d3.selectAll('.labcont').style('height',this.labcontHeight);
         d3.selectAll('.lang-cont').style('height',this.langcontHeight);
     }
@@ -1261,7 +1299,7 @@ Localisation.prototype.updateLines = function(){
     //         .attr("y1",this.yScaleEff(det.r))
     //         .attr("y2",this.yScaleEff(det.r))
     // }else if(resize=="snap"){
-    //     // snap resize (when redrawing eff)
+    //     // snap resize (when redLonwing eff)
     //     this.svgEff.select('g.heff-'+d)
     //         .attr("transform","rotate("+det.psi+")")
     //     this.svgEff.select('g.heff-x-'+d)
@@ -1274,10 +1312,18 @@ Localisation.prototype.updateLines = function(){
 
 };
 Localisation.prototype.updateSourceLabels = function(){
+    d3.select('#lab-radec-txt')
+        .html(this.tl(loc.labels.radec.labstr()));
     d3.select('#lab-ra-txt')
         .html(this.tl(loc.labels.ra.labstr()));
     d3.select('#lab-dec-txt')
         .html(this.tl(loc.labels.dec.labstr()));
+    d3.select('#lab-latlon-txt')
+        .html(this.tl(loc.labels.latlon.labstr()));
+    d3.select('#lab-lat-txt')
+        .html(this.tl(loc.labels.lat.labstr()));
+    d3.select('#lab-lon-txt')
+        .html(this.tl(loc.labels.lon.labstr()));
     d3.select('#lab-utc-txt')
         .html(this.tl(loc.labels.utc.labstr()));
     d3.select('#lab-gmst-txt')
@@ -1320,13 +1366,17 @@ Localisation.prototype.updateCalcs = function(){
     this.processSrcAmp();
     console.log('calcAntFacs...')
     this.calcAntFacs();
-    console.log('calcTimeRings...')
-    this.calcTimeRings()
+    if ((this.updated.srcpos)||(this.updated.network)||(this.updated.coord)){
+        console.log('calcTimeRings...')
+        this.calcTimeRings()
+    }
     // this.calcProbSky();
     // this.updateContoursPr();
     // update markers on map results
     this.moveHighlight();
-    this.updateDetMarkers();
+    if ((this.updated.network)||(this.updated.coord)){
+        this.updateDetMarkers();
+    }
     // update side-panel display
     this.updateDetResults();
     this.updateSourceLabels();
@@ -1334,12 +1384,14 @@ Localisation.prototype.updateCalcs = function(){
     //  update contours and overlays
     if (this.overlays.contoursT.shown){this.updateContoursT();}
     if ((this.updated.network)|(this.hmap!='none')){this.updateHeatmap(this.hmap);}
-    if (this.overlays.contoursTmatch.shown){this.updateContoursTmatch();}
+    // if (this.overlays.contoursTmatch.shown){this.updateContoursTmatch();}
+    if (this.overlays['contoursTall'].shown){this.updateContours('Tall');}
     if (this.overlays['heatmap-Tmatch'].shown){this.updateHeatmap('Tmatch');}
     if (this.overlays['heatmap-Tall'].shown){this.updateHeatmap('Tall');}
 
     // reset updated status
     this.updated.src=false;
+    this.updated.srcpos=false;
     this.updated.network=false;
     this.updated.coord=false;
     this.hideLoading()
@@ -1364,7 +1416,7 @@ Localisation.prototype.moveSrc = function(ra,dec){
             this.src.lat=this.src.dec;
             this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);
         }
-        this.updated.src=true;
+        this.updated.srcpos=true;
         this.updateCalcs();
         // this.processSrcAmp();
         // this.calcAntFacs();
@@ -1459,6 +1511,12 @@ Localisation.prototype.setStyles = function(){
     this.getOpacity = function(d) {return 1}
 
     this.labels = {
+        'radec':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.ra%')+': '+
+            parseInt(loc.src.ra)+'<sup>o</sup> ; '+loc.tl('%text.loc.source.dec%')+': '+
+                parseInt(loc.src.dec)+'<sup>o</sup>')}},
+        'latlon':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.lon%')+': '+
+            parseInt(loc.src.lon)+'<sup>o</sup> ; '+loc.tl('%text.loc.source.lat%')+': '+
+                parseInt(loc.src.lat)+'<sup>o</sup>')}},
         'ra':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.ra%')+': '+
             parseInt(loc.src.ra)+'<sup>o</sup>')}},
         'dec':{'loc':'source','labstr':function(){return(loc.tl('%text.loc.source.dec%')+': '+
@@ -1524,15 +1582,15 @@ Localisation.prototype.makeSky = function(){
     //         this.margin.top + ")")
 
     // add the tooltip area to the webpage
-    if (!this.redraw){
+    if (!this.redLonw){
         this.tooltip = d3.select("#"+this.holderid).append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
     }
 }
 
-Localisation.prototype.drawSkyInit = function(){
-    // initialise graph drawing from data
+Localisation.prototype.dLonwSkyInit = function(){
+    // initialise graph dLonwing from data
     var loc = this;
     loc.loaded=0;
     loc.toLoad=8;
@@ -1735,8 +1793,8 @@ Localisation.prototype.updateAxes = function(){
         .style('stroke','#ccc')
         .style('opacity',1)
 }
-Localisation.prototype.drawSky = function(){
-    // draw graph
+Localisation.prototype.dLonwSky = function(){
+    // dLonw graph
     var loc = this;
     // loc.setSvgScales();
     loc.makeSky();
@@ -1751,7 +1809,7 @@ Localisation.prototype.drawSky = function(){
 
     loc.updateAxes();
 
-    // // draw legend
+    // // dLonw legend
     // loc.legend = loc.svg.selectAll(".legend")
     //   .data(loc.dataDet)
     // .enter().append("g")
@@ -1759,7 +1817,7 @@ Localisation.prototype.drawSky = function(){
     //   .attr("transform", function(d, i) { return "translate(0," +
     //     (i * 24) + ")"; });
     //
-    // // draw legend colored circles
+    // // dLonw legend colored circles
     // loc.legend.append("line")
     //     .attr("x1", loc.margin.left+12)
     //     .attr("y1", loc.margin.top+24)
@@ -1777,7 +1835,7 @@ Localisation.prototype.drawSky = function(){
     //     .style("stroke",function(d){return d.color;})
     //     .attr("opacity",1);
     //
-    // // draw legend text
+    // // dLonw legend text
     // loc.legend.append("text")
     //   .attr("x", loc.margin.left + 36)
     //   .attr("y", loc.margin.top + 21)
@@ -1788,13 +1846,14 @@ Localisation.prototype.drawSky = function(){
 
     loc.overlays = {
       'contoursT':{gid:"g-contoursT",shown:false,opacity:1},
+      'contoursTall':{gid:"g-contoursTall",shown:true,opacity:1},
       'contoursTmatch':{gid:"g-contoursTmatch",shown:false,opacity:1},
       'contoursPr':{gid:"g-contoursPr",shown:false,opacity:1},
       'heatmap-Pr':{gid:"g-heatmap-Pr",shown:false,opacity:1},
       'heatmap-pNet':{gid:"g-heatmap-pNet",shown:(this.hmap=='pNet'),opacity:1,cbar:false},
-      'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet'),opacity:0.9,
+      'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet'),opacity:0.7,
         cbar:true,min:0,max:1,tmin:'0%',tmax:'100%',name:'%text.loc.settings.FNet%'},
-      'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet'),opacity:0.9,
+      'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet'),opacity:0.7,
         cbar:true,min:-1,max:1,tmin:'+',tmax:'x',name:'%text.loc.settings.aNet%'},
       'heatmap-Tmatch':{gid:"g-heatmap-Tmatch",shown:false,opacity:1,cbar:false},
       'heatmap-Tall':{gid:"g-heatmap-Tall",shown:true,opacity:1,cbar:false},
@@ -1839,7 +1898,15 @@ Localisation.prototype.drawSky = function(){
     loc.cbarRng=d3.range(0,1,1/loc.cbarRes)
 
 
-    // draw Heatmap
+    loc.skyarr.Tall.gContour=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['contoursTall'].gid})
+        .attr("class","heatmap")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateContours('Tall')
+    loc.showOverlay('contoursTall')
+
+    // dLonw Heatmap
     // loc.skyarr.FNet={}
     loc.skyarr.FNet.gHeatmap=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['heatmap-FNet'].gid})
@@ -1848,10 +1915,11 @@ Localisation.prototype.drawSky = function(){
         .style("opacity",0)
     loc.skyarr.aNet=loc.skyarr.FNet;
     loc.updateHeatmap(this.hmap)
-    loc.showOverlay('heatmap-'+this.hmap)
+    if ((loc.overlays['heatmap-'+this.hmap])&&(loc.overlays['heatmap-'+this.hmap].shown)){
+        loc.showOverlay('heatmap-'+this.hmap)}
 
     // set projection
-    loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nRA
+    loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nLon
     loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
 
     // add world map
@@ -1912,7 +1980,7 @@ Localisation.prototype.drawSky = function(){
 	    .attr("class", "constellation")
 	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
 
-    // draw Heatmap for all rings
+    // dLonw Heatmap for all rings
     // loc.skyarr['Tall']={}
     loc.skyarr['Tall'].gHeatmap=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['heatmap-Tall'].gid})
@@ -1931,7 +1999,7 @@ Localisation.prototype.drawSky = function(){
     loc.updateHeatmap('Tmatch')
     if(loc.overlays['heatmap-Tmatch'].shown){loc.showOverlay('heatmap-Tmatch')}
 
-    // draw contours (dt)
+    // dLonw contours (dt)
     // loc.gContourT=loc.svg.append("g")
     //     .attr("id",function(){return loc.overlays.contoursT.gid})
     //     .attr("class","contoursT")
@@ -1949,7 +2017,7 @@ Localisation.prototype.drawSky = function(){
 
     // loc.showOverlay('contoursTmatch');
 
-    // draw contours (Pr)
+    // dLonw contours (Pr)
     // loc.gContourPr=loc.svg.append("g")
     //     .attr("id",function(){return loc.overlays.contoursPr.gid})
     //     .attr("class","contoursPr")
@@ -1967,7 +2035,7 @@ Localisation.prototype.drawSky = function(){
     // loc.updateHeatmap("overlay")
     // // loc.showOverlay("heatmap-overlay")
 
-    // draw detectors
+    // dLonw detectors
     detGroup = loc.svg.append("g").attr("class","g-dets")
     loc.updateDetMarkers();
 
@@ -2478,7 +2546,7 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         for (i=-1;i<=1;i++){
             row=[];
             for (j=-1;j<=1;j++){
-                row.push(loc.skyarr.arr.PrCumul[loc.skyarr.radec2p(loc.src.ra+i*loc.skyarr.dRA,loc.src.dec+j*loc.skyarr.dDec)]);
+                row.push(loc.skyarr.arr.PrCumul[loc.skyarr.radec2p(loc.src.ra+i*loc.skyarr.dLon,loc.src.dec+j*loc.skyarr.dLat)]);
             }
             nearVals.push(row);
             nearValsRows.push(Math.max.apply(Math,row))
@@ -2612,13 +2680,110 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         }
     }
 }
+Localisation.prototype.updateContours = function(cname){
+    var loc=this;
+    // loc.skyarr.contour_data = d3.contours()
+    //     .size([loc.skyarr.nLon, loc.skyarr.nLat])
+    //     .thresholds(d3.range(0,loc.Ndet))
+    //     (data)
+    loc.skyarr.fullcontour={type:'Feature',
+        geometry:{type:'Polygon',coordinates:[[
+            [0,loc.skyarr.nLat/2],
+            [loc.skyarr.nLon/2,0],
+            [loc.skyarr.nLon,loc.skyarr.nLat/2],
+            [loc.skyarr.nLon/2,loc.skyarr.nLat/2]
+        ]]}}
+    loc.skyarr.fullcontour={type:'Feature',
+        geometry:{type:'Polygon',coordinates:[[
+            [-180,0],
+            [0,90],
+            [180,0],
+            [0,-90]
+        ]]}}
+    loc.skyarr.projContours=d3.geoEquirectangular()
+        .translate([0,loc.skyHeight])
+        .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullcontour);
+    // loc.skyarr.projContours=d3.geoProjection(function(x,y){return [x,y]})
+    //     .translate([0,loc.skyHeight])
+    //     .scale(300)
+    if (cname=='Tmatch'){
+        arrname='Tmatch';
+    }else if (cname=='Tall'){
+        arrname='Tall';
+        // data=loc.skyarr.arr.Tall;
+    }else{
+        console.log('unknown contour name:',cname)
+        return
+    }
+    // data=loc.getArray(arrname)
+    if (this.world){
+        data=loc.skyarr.arr[arrname];
+    }else{
+        // data=loc.skyarr.arr[arrname];
+        data=loc.reverseArray(arrname);
+    }
+    contColor = d3.scaleSequential(d3.interpolateRdBu).domain([0,5])
+
+    loc.skyarr[cname].contourDataIn = d3.contours()
+        .size([loc.skyarr.nLon, loc.skyarr.nLat])
+        .thresholds(d3.range(0,loc.Ndet))
+        (data)
+    loc.skyarr[cname].contourData=loc.grid2coord(loc.skyarr[cname].contourDataIn)
+    loc.skyarr[cname].contours=d3.select('#'+loc.overlays['contours'+cname].gid)
+        .selectAll(".path-contour-"+cname)
+        .data(loc.skyarr[cname].contourData)
+    loc.skyarr[cname].contours.exit()
+        .transition().duration(500)
+        .style("opacity",0).remove()
+    loc.skyarr[cname].contours
+        .attr("d", d3.geoPath(loc.skyarr.projEq))
+        .attr("class","path-contour-"+cname)
+        .attr("fill", function(d) { return contColor(d.value); });
+    loc.skyarr[cname].contours.enter().append("path")
+      .attr("d", d3.geoPath(loc.skyarr.projEq))
+      .attr("class","path-contour-"+cname)
+      .attr("fill", function(d) { return contColor(d.value); })
+      .style("opacity",1);
+}
+
+Localisation.prototype.grid2coord = function (contIn) {
+    // convert from grid indices to coordinate values
+    var loc=this;
+    for (i in contIn){
+        if (contIn[i].coordinates.length>0){
+            console.log('cont',i,contIn[i],'length',contIn[i].coordinates.length)
+            for (j in d3.range(contIn[i].coordinates.length)){
+                console.log(i,j,contIn[i].coordinates[j],contIn[i].coordinates[j].length)
+                for (k in d3.range(contIn[i].coordinates[j].length)){
+                    coordIn=contIn[i].coordinates[j][k]
+                    console.log(i,j,k,'in ',coordIn,coordIn.length)
+                    for (l in d3.range(contIn[i].coordinates[j][k].length)){
+                        coord=contIn[i].coordinates[j][k][l]
+                        if (loc.world){
+                            contIn[i].coordinates[j][k][l]=[
+                                loc.skyarr.lon2i.invert(coord[0]),
+                                loc.skyarr.lat2i.invert(coord[1])]
+                        }else{
+                            contIn[i].coordinates[j][k][l]=[
+                                loc.skyarr.lon2i.invert(coord[0]),
+                                loc.skyarr.lat2i.invert(coord[1])]
+                        }
+                    }
+                    console.log(i,j,k,'out',contIn[i].coordinates[j][k],contIn[i].coordinates[j][k].length)
+                }
+            }
+        }
+    }
+    return(contIn)
+}
+
 Localisation.prototype.updateContoursT = function(){
     loc.skyarr.fullcontour={type:'Feature',
         geometry:{type:'Polygon',coordinates:[[
-            [0,loc.skyarr.nDec/2],
-            [loc.skyarr.nRA/2,0],
-            [loc.skyarr.nRA,loc.skyarr.nDec/2],
-            [loc.skyarr.nRA/2,loc.skyarr.nDec/2]
+            [0,loc.skyarr.nLat/2],
+            [loc.skyarr.nLon/2,0],
+            [loc.skyarr.nLon,loc.skyarr.nLat/2],
+            [loc.skyarr.nLon/2,loc.skyarr.nLat/2]
         ]]}}
     loc.skyarr.projCont=d3.geoEquirectangular()
         .translate([0,loc.skyHeight])
@@ -2646,12 +2811,12 @@ Localisation.prototype.updateContoursT = function(){
         // loc.gContour.selectAll(".contour-"+dd).remove()
 
         // loc.skyarr.contoursdt=loc.editContours(d3.contours()
-        //     .size([loc.skyarr.nRA,loc.skyarr.nDec])
+        //     .size([loc.skyarr.nLon,loc.skyarr.nLat])
         //     // .size([360,180])
         //     .thresholds(loc.skyarr.dtCont)
         //     (loc.skyarr.arr.dt[dd]),true,dd)
         loc.skyarr[dd].contoursdt=loc.editContours2(d3.contours()
-            .size([loc.skyarr.nRA,loc.skyarr.nDec])
+            .size([loc.skyarr.nLon,loc.skyarr.nLat])
             .thresholds(loc.skyarr.dtCont)
             (loc.skyarr.arr.dt[dd]),true,dd)
         for (c=0;c<loc.skyarr[dd].contoursdt.length;c++){
@@ -2713,7 +2878,7 @@ Localisation.prototype.updateContoursPr = function(){
 
     // loc.gContour.selectAll(".contour-"+dd).remove()
     contoursPr=loc.editContours(d3.contours()
-        .size([loc.skyarr.nRA,loc.skyarr.nDec])
+        .size([loc.skyarr.nLon,loc.skyarr.nLat])
         .thresholds(loc.skyarr.PrCumulCont)
         (loc.skyarr.arr.PrCumul),true,'Pr')
     for (c=0;c<contoursPr.length;c++){
@@ -2767,7 +2932,7 @@ Localisation.prototype.updateContoursTmatch = function(){
 
     // loc.gContour.selectAll(".contour-"+dd).remove()
     contoursTmatch=loc.editContours(d3.contours()
-        .size([loc.skyarr.nRA,loc.skyarr.nDec])
+        .size([loc.skyarr.nLon,loc.skyarr.nLat])
         .thresholds([0.9])
         (loc.skyarr.arr.Tmatch),true,'Tmatch')
     for (c=0;c<contoursTmatch.length;c++){
@@ -2858,7 +3023,7 @@ Localisation.prototype.editContours = function(cont,edit,dd){
                     newCoords=[];
                     z=[[],[],[]]
                     edges=[[0,0],[0,0],[0,0]];
-                    lim=[this.skyarr.nRA,this.skyarr.nDec]
+                    lim=[this.skyarr.nLon,this.skyarr.nLat]
                     for (p in coordIn[j]){
                         z[0]=(coordIn[j][p-1])?coordIn[j][p-1]:[null,null];
                         z[1]=coordIn[j][p];
@@ -2877,7 +3042,7 @@ Localisation.prototype.editContours = function(cont,edit,dd){
                         // else if((edges[1][1]==0)&(edges[1][0]!=0)&((edges[0][0]==0)&(edges[2][0]==0))){
                         //     idxCoords.push(p)
                         // }
-                        // if(!((d[0]<=0)|(d[0]==this.skyarr.nRA)|(d[1]==0)|(d[1]==this.skyarr.nDec))){
+                        // if(!((d[0]<=0)|(d[0]==this.skyarr.nLon)|(d[1]==0)|(d[1]==this.skyarr.nLat))){
                         //     // not at edge
                         //     idxCoords.push(p)
                         // }
@@ -2894,13 +3059,13 @@ Localisation.prototype.editContours = function(cont,edit,dd){
                         // console.log(newCoords[p],newCoords[p+1])
                         p0=p
                         p1=(p==newCoords.length-1)?0:p+1;
-                        if((Math.abs(newCoords[p0][0]-newCoords[p1][0])>loc.skyarr.nRA/4.)|
-                            (Math.abs(newCoords[p0][1]-newCoords[p1][1])>loc.skyarr.nDec/4.)){
+                        if((Math.abs(newCoords[p0][0]-newCoords[p1][0])>loc.skyarr.nLon/4.)|
+                            (Math.abs(newCoords[p0][1]-newCoords[p1][1])>loc.skyarr.nLat/4.)){
                             idx0.push(p+1);
                             console.log('edge at '+(p+1),newCoords[p-1],newCoords[p],newCoords[p+1])
                         }
-                        // if((Math.abs(newCoords[newCoords.length-1][0]-newCoords[0][0])>loc.skyarr.nRA/4.)|
-                        //     (Math.abs(newCoords[newCoords.length-1][1]-newCoords[0][1])>loc.skyarr.nDec/4.)){
+                        // if((Math.abs(newCoords[newCoords.length-1][0]-newCoords[0][0])>loc.skyarr.nLon/4.)|
+                        //     (Math.abs(newCoords[newCoords.length-1][1]-newCoords[0][1])>loc.skyarr.nLat/4.)){
                         // asasfd;
                     }
                     if(idx0.length>0){
@@ -2911,7 +3076,7 @@ Localisation.prototype.editContours = function(cont,edit,dd){
                         // console.log(idx0,newCoords);
                     }else{cont[i].hasEdge=false;}
                     // newCoords=coordIn[j].filter(function(d){
-                    //     isVal= (!((d[0]<=0)|(d[0]==loc.skyarr.nRA)|(d[1]==0)|(d[1]==loc.skyarr.nDec)));
+                    //     isVal= (!((d[0]<=0)|(d[0]==loc.skyarr.nLon)|(d[1]==0)|(d[1]==loc.skyarr.nLat)));
                     //     // if (!isVal){console.log(d[0],d[1])};
                     //     return(isVal)
                     // });
@@ -2948,7 +3113,7 @@ Localisation.prototype.editContours2 = function(cont,edit,dd){
                     console.log('j in ',j,coordIn[j].length,coordIn[j][0])
                     newCoords=[]
                     for (l=0;l<coordIn[j].length;l++){
-                        newCoords.push([loc.mod360(180-(coordIn[j][l][0]*loc.skyarr.dRA)),90-(coordIn[j][l][1]*loc.skyarr.dDec)])
+                        newCoords.push([loc.mod360(180-(coordIn[j][l][0]*loc.skyarr.dLon)),90-(coordIn[j][l][1]*loc.skyarr.dLat)])
                     }
                     coordOut.push(newCoords)
                     console.log('j out ',j,coordOut[j].length,coordOut[j][0])
@@ -3360,6 +3525,14 @@ Localisation.prototype.contourWidth = function(dd){
     return Math.sqrt(0.5)*Math.sqrt(Math.pow(loc.dataDet[loc.di[dd[0]]].sigmaT7 / Math.min(loc.src.det[loc.di[dd[0]]].snr/7,1),2) +
         Math.pow(loc.dataDet[loc.di[dd[1]]].sigmaT7 / Math.min(loc.src.det[loc.di[dd[1]]].snr/7,1),2))*1e-3;
 }
+Localisation.prototype.getRaLon = function (p) {
+    // return longitude if in world map view, or negative longitude in sky view
+    if (this.world){
+        return this.skyarr.arr.lon[p];
+    }else{
+        return (-this.skyarr.arr.lon[p]);
+    }
+};
 Localisation.prototype.calcDetTimes = function(){
     // calculate arrival times at detectors from all sky pixels
     if (!this.skyarr.arr.hasOwnProperty('Ti')){this.skyarr.arr.Ti={};}
@@ -3415,21 +3588,32 @@ Localisation.prototype.calcDetTimes = function(){
 }
 Localisation.prototype.calcTimeRings = function(){
     if (!this.skyarr.arr.hasOwnProperty('Tmatch')){
-        this.skyarr.arr.Tmatch=[];
-        this.skyarr.arr.Tall=[];
+        Tmatch=[];
+        Tall=[];
+        // this.skyarr.arr.Tmatch=[];
+        // this.skyarr.arr.Tall=[];
         for (p in this.skyarr.arr.pix){
-            this.skyarr.arr.Tmatch.push(1);
-            this.skyarr.arr.Tall.push(0);}
+            Tmatch.push(1);
+            Tall.push(0);
+            // this.skyarr.arr.Tmatch.push(1);
+            // this.skyarr.arr.Tall.push(0);
+        }
     }
     if (this.Ndet<2){
         for (p in this.skyarr.arr.pix){
-            this.skyarr.arr.Tmatch[p]=0;
-            this.skyarr.arr.Tall[p]=0;
+            Tmatch[p]=0;
+            Tall[p]=0;
+            // this.skyarr.arr.Tmatch[p]=0;
+            // this.skyarr.arr.Tall[p]=0;
         }
     }else{
-        for (p in this.skyarr.arr.pix){
-            this.skyarr.arr.Tmatch[p]=1;
-            this.skyarr.arr.Tall[p]=0;
+        for (p in d3.range(this.skyarr.nPix)){
+            // if (this.world){p=p0;}
+            // else{p=this.skyarr.lonlat2p(this.skyarr.arr.lon[p0],this.skyarr.arr.lat[p0],rev=true);}
+            Tmatch[p]=1;
+            Tall[p]=0;
+            // this.skyarr.arr.Tmatch[p]=1;
+            // this.skyarr.arr.Tall[p]=0;
             for (i in this.dOn){
                 for (j in this.dOn){
                     if (this.dOn[j]>this.dOn[i]){
@@ -3437,68 +3621,81 @@ Localisation.prototype.calcTimeRings = function(){
                         dtp=this.skyarr.arr.dt[dd][p]
                         Tm=Math.exp(-Math.pow((dtp-this.src.dt[dd])/(4*this.contourWidth(dd)),2));
                         Ta=(Math.abs(dtp-this.src.dt[dd])<this.contourWidth(dd))?1:0
-                        this.skyarr.arr.Tmatch[p]*=Tm;
-                        this.skyarr.arr.Tall[p]+=Ta;
+                        Tmatch[p]*=Tm;
+                        Tall[p]+=Ta;
+                        // this.skyarr.arr.Tmatch[p]*=Tm;
+                        // this.skyarr.arr.Tall[p]+=Ta;
                     }
                 }
             }
         }
     }
+    // if (this.world){
+    //     this.skyarr.arr.Tmatch=Tmatch;
+    //     this.skyarr.arr.Tall=Tall;
+    // }else{
+    //     this.skyarr.revarr.Tmatch=Tmatch;
+    //     this.skyarr.revarr.Tall=Tall;
+    // }
+    this.skyarr.arr.Tmatch=Tmatch;
+    this.skyarr.arr.Tall=Tall;
+    this.reverseArray('Tmatch',force=true);
+    this.reverseArray('Tall',force=true);
 }
-Localisation.prototype.calcProbSky = function(){
-    // calculate probability all over sky
-    // var loc=this;
-    // *** storing for debugging purposes *** //
-    this.skyarr.arr.vec_src=[]
-    this.skyarr.arr.vec_srcT=[]
-    this.skyarr.arr.logP=[]
-    // *** end of debugging purpuses *** //
-    this.skyarr.arr.Pr=[]
-    this.skyarr.arr.PrCumul=[]
-    // console.log('maxpNet',this.skyarr.maxpNet,this.skyarr.arr.pNet);
-    PrTot=0
-
-    for (p=0;p<this.skyarr.nPix;p++){
-        vec_src=$M(this.src.vec).add($M(this.skyarr.arr.vec[p]).multiply(-1));
-        vec_srcT=$M(vec_src).transpose();
-        if (this.Ndet>=2){
-            logP=vec_srcT.multiply(this.net.M).multiply(vec_src).elements[0];
-        }else{
-            logP=0.1;
-        }
-        Pr=Math.exp(-0.5*logP);
-        // *** storing for debugging purposes *** //
-        this.skyarr.arr.vec_src.push(vec_src)
-        this.skyarr.arr.vec_srcT.push(vec_srcT)
-        this.skyarr.arr.logP.push(logP)
-        // *** end of debugging purpuses *** //
-        this.skyarr.arr.Pr.push(Pr)
-        PrTot+=Pr;
-    }
-    // normalise Pr
-    PrTotNew=0;
-    for (p=0;p<this.skyarr.nPix;p++){
-        this.skyarr.arr.Pr[p]/=PrTot;
-    }
-    // this.skyarr.arr.Pr.forEach(function(d){console.log(d,d/PrTot);d=d/PrTot;PrTotNew+=d})
-    // order pixels by probability
-    this.skyarr.orderPix=this.skyarr.arr.pix.sort(function(a,b){
-        return loc.skyarr.arr.Pr[b] - loc.skyarr.arr.Pr[a]
-    })
-    // calculate cumulative porbability for each pixel
-    cumul=0;
-    for (p=0;p<this.skyarr.nPix;p++){
-        cumul+=this.skyarr.arr.Pr[this.skyarr.orderPix[p]];
-        this.skyarr.arr.PrCumul[this.skyarr.orderPix[p]]=cumul;
-    }
-    if (!this.skyarr.hasOwnProperty('Pr')){this.skyarr.Pr={}};
-    this.skyarr.Pr.min=Math.min.apply(Math,this.skyarr.arr.Pr);
-    this.skyarr.Pr.max=Math.max.apply(Math,this.skyarr.arr.Pr);
-
-    return
-    // console.log('min/max Pr',this.skyarr.Pr.max,this.skyarr.Pr.max)
-
-}
+// Localisation.prototype.calcProbSky = function(){
+//     // calculate probability all over sky
+//     // var loc=this;
+//     // *** storing for debugging purposes *** //
+//     this.skyarr.arr.vec_src=[]
+//     this.skyarr.arr.vec_srcT=[]
+//     this.skyarr.arr.logP=[]
+//     // *** end of debugging purpuses *** //
+//     this.skyarr.arr.Pr=[]
+//     this.skyarr.arr.PrCumul=[]
+//     // console.log('maxpNet',this.skyarr.maxpNet,this.skyarr.arr.pNet);
+//     PrTot=0
+//
+//     for (p=0;p<this.skyarr.nPix;p++){
+//         vec_src=$M(this.src.vec).add($M(this.skyarr.arr.vec[p]).multiply(-1));
+//         vec_srcT=$M(vec_src).transpose();
+//         if (this.Ndet>=2){
+//             logP=vec_srcT.multiply(this.net.M).multiply(vec_src).elements[0];
+//         }else{
+//             logP=0.1;
+//         }
+//         Pr=Math.exp(-0.5*logP);
+//         // *** storing for debugging purposes *** //
+//         this.skyarr.arr.vec_src.push(vec_src)
+//         this.skyarr.arr.vec_srcT.push(vec_srcT)
+//         this.skyarr.arr.logP.push(logP)
+//         // *** end of debugging purpuses *** //
+//         this.skyarr.arr.Pr.push(Pr)
+//         PrTot+=Pr;
+//     }
+//     // normalise Pr
+//     PrTotNew=0;
+//     for (p=0;p<this.skyarr.nPix;p++){
+//         this.skyarr.arr.Pr[p]/=PrTot;
+//     }
+//     // this.skyarr.arr.Pr.forEach(function(d){console.log(d,d/PrTot);d=d/PrTot;PrTotNew+=d})
+//     // order pixels by probability
+//     this.skyarr.orderPix=this.skyarr.arr.pix.sort(function(a,b){
+//         return loc.skyarr.arr.Pr[b] - loc.skyarr.arr.Pr[a]
+//     })
+//     // calculate cumulative porbability for each pixel
+//     cumul=0;
+//     for (p=0;p<this.skyarr.nPix;p++){
+//         cumul+=this.skyarr.arr.Pr[this.skyarr.orderPix[p]];
+//         this.skyarr.arr.PrCumul[this.skyarr.orderPix[p]]=cumul;
+//     }
+//     if (!this.skyarr.hasOwnProperty('Pr')){this.skyarr.Pr={}};
+//     this.skyarr.Pr.min=Math.min.apply(Math,this.skyarr.arr.Pr);
+//     this.skyarr.Pr.max=Math.max.apply(Math,this.skyarr.arr.Pr);
+//
+//     return
+//     // console.log('min/max Pr',this.skyarr.Pr.max,this.skyarr.Pr.max)
+//
+// }
 Localisation.prototype.filterSky = function (filtVal,type,threshold) {
     var loc=this;
     if (!loc.skyarr.hasOwnProperty(filtVal)){loc.skyarr[filtVal]={}}
@@ -3527,17 +3724,18 @@ Localisation.prototype.filterSky = function (filtVal,type,threshold) {
         })
     }else if(filtVal=='Tmatch'){
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(loc.skyarr.arr.Tmatch[d]>threshold)
+            return(loc.skyarr.arr['Tmatch'][d]>threshold)
         });
     }else if(filtVal=='Tall'){
         filtPix=this.skyarr.arr.pix.filter(function(d){
-            return(loc.skyarr.arr.Tall[d]>threshold)
+            return(loc.skyarr.arr['Tall'][d]>threshold)
         });
     }
     // get limits of filtered Data
     this.skyarr[filtVal][type+'filtData']=[]
+    filtArr=this.skyarr.arr[filtVal];
     for (p=0;p<filtPix.length;p++){
-        this.skyarr[filtVal][type+'filtData'].push(this.skyarr.arr[filtVal][filtPix[p]])
+        this.skyarr[filtVal][type+'filtData'].push(filtArr[filtPix[p]])
     }
     this.skyarr[filtVal][type+'minFilt']=Math.min.apply(Math,this.skyarr[filtVal][type+'filtData']);
     this.skyarr[filtVal][type+'maxFilt']=Math.max.apply(Math,this.skyarr[filtVal][type+'filtData']);
@@ -3689,6 +3887,12 @@ Localisation.prototype.addHelp = function(){
         .html(this.tl("%text.loc.help.info%"));
     d3.select("#help-lang-text")
         .html(this.tl("%text.loc.help.lang%"));
+    d3.select("#help-source-text")
+        .html(this.tl("%text.loc.help.source%"));
+    d3.select("#help-search-text")
+        .html(this.tl("%text.loc.help.search%"));
+    d3.select("#help-settings-text")
+        .html(this.tl("%text.loc.help.settings%"));
     d3.select("#help-share-text")
         .html(this.tl("%text.loc.help.share%"));
     if (this.portrait){
@@ -3920,6 +4124,7 @@ Localisation.prototype.selectEvent = function(e){
     if(this.world){this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);}
     else{this.src.pix=this.skyarr.lonlat2p(this.src.lon,this.src.lat);}
     this.updated.src=true;
+    this.updated.srcpos=true;
     this.updated.coord=true;
     this.updated.network=true;
     this.updateCalcs();
@@ -4035,20 +4240,28 @@ Localisation.prototype.addSource = function(){
     }
     d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont')
-        .attr('id','lab-ra')
+        .attr('id','lab-radec')
         .style('height',loc.labcontHeight)
     .append("div")
         .attr('class','labtext source')
-        .attr('id','lab-ra-txt')
-        .html(this.tl(loc.labels.ra.labstr()));
-    d3.select('#source-info-cont').append("div")
-        .attr('class','icon labcont')
-        .attr('id','lab-dec')
-        .style('height',loc.labcontHeight)
-    .append("div")
-        .attr('class','labtext source')
-        .attr('id','lab-dec-txt')
-        .html(this.tl(loc.labels.dec.labstr()));
+        .attr('id','lab-radec-txt')
+        .html(this.tl(loc.labels.radec.labstr()));
+    // d3.select('#source-info-cont').append("div")
+    //     .attr('class','icon labcont')
+    //     .attr('id','lab-ra')
+    //     .style('height',loc.labcontHeight)
+    // .append("div")
+    //     .attr('class','labtext source')
+    //     .attr('id','lab-ra-txt')
+    //     .html(this.tl(loc.labels.ra.labstr()));
+    // d3.select('#source-info-cont').append("div")
+    //     .attr('class','icon labcont')
+    //     .attr('id','lab-dec')
+    //     .style('height',loc.labcontHeight)
+    // .append("div")
+    //     .attr('class','labtext source')
+    //     .attr('id','lab-dec-txt')
+    //     .html(this.tl(loc.labels.dec.labstr()));
     d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont')
         .attr('id','lab-utc')
@@ -4065,6 +4278,31 @@ Localisation.prototype.addSource = function(){
         .attr('class','labtext source')
         .attr('id','lab-gmst-txt')
         .html(this.tl(loc.labels.gmst.labstr()));
+    d3.select('#source-info-cont').append("div")
+        .attr('class','icon labcont')
+        .attr('id','lab-latlon')
+        .style('height',loc.labcontHeight)
+    .append("div")
+        .attr('class','labtext source')
+        .attr('id','lab-latlon-txt')
+        .html(this.tl(loc.labels.latlon.labstr()));
+    // d3.select('#source-info-cont').append("div")
+    //     .attr('class','icon labcont')
+    //     .attr('id','lab-lon')
+    //     .style('height',loc.labcontHeight)
+    // .append("div")
+    //     .attr('class','labtext source')
+    //     .attr('id','lab-lon-txt')
+    //     .html(this.tl(loc.labels.lon.labstr()));
+    // d3.select('#source-info-cont').append("div")
+    //     .attr('class','icon labcont')
+    //     .attr('id','lab-lat')
+    //     .style('height',loc.labcontHeight)
+    // .append("div")
+    //     .attr('class','labtext source')
+    //     .attr('id','lab-lat-txt')
+    //     .html(this.tl(loc.labels.lat.labstr()));
+
     // position angle slider
     posangcont=d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont labcont-full')
@@ -4089,7 +4327,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",loc.src.posang)
     .on("input",function(){
         loc.src.posang=this.value;
-        this.updated.src=true;
+        loc.updated.src=true;
         loc.updateCalcs()
         console.log(loc.src['h+'],loc.src['hx'],Math.sqrt(Math.pow(loc.src['h+'],2)+Math.pow(loc.src['hx'],2)))
     })
@@ -4101,6 +4339,7 @@ Localisation.prototype.addSource = function(){
         .append("div")
         .attr("class","slider-label slider-label-right")
         .html("180<sup>o</sup>");
+
     // inclination slider
     inccont=d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont labcont-full')
@@ -4125,7 +4364,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",loc.src.inc)
     .on("input",function(){
         loc.src.inc=this.value;
-        this.updated.src=true;
+        loc.updated.src=true;
         loc.updateCalcs()
     })
     inccont.select(".slider-outer")
@@ -4136,6 +4375,7 @@ Localisation.prototype.addSource = function(){
         .append("div")
         .attr("class","slider-label slider-label-right")
         .html("180<sup>o</sup>");
+
     // amplitude slider
     ampcont=d3.select('#source-info-cont').append("div")
         .attr('class','icon labcont labcont-full')
@@ -4160,7 +4400,7 @@ Localisation.prototype.addSource = function(){
         .attr("value",Math.log10(loc.src.amp)*10)
     .on("input",function(){
         loc.src.amp=Math.pow(10,this.value/10);
-        loc.updated.src=true;
+        loc.updated.srcpos=true;
         loc.updateCalcs()
     })
     ampcont.select(".slider-outer")
@@ -4343,7 +4583,7 @@ Localisation.prototype.addSettings = function(){
 
     timingTmatch=d3.select('#settings-timing-cont').append("div")
         .attr('class','icon settingscont')
-        .attr('id','lab-timing-FNet')
+        .attr('id','lab-timing-Tmatch')
     timingTmatch.append("label")
         .attr("class","settings-switch")
         .attr("id","det-switch-Tmatch")
@@ -4362,6 +4602,28 @@ Localisation.prototype.addSettings = function(){
         .attr('id','lab-timing-Tmatch-txt')
         .html(loc.tl('<span class="settings-name">%text.loc.settings.Tmatch%</span>'+
             '<span class="settings-desc">%text.loc.settings.Tmatch.desc%</span>'));
+
+    timingTallCont=d3.select('#settings-timing-cont').append("div")
+        .attr('class','icon settingscont')
+        .attr('id','lab-timing-Tall-cont')
+    timingTallCont.append("label")
+        .attr("class","settings-switch")
+        .attr("id","det-switch-Tall-cont")
+        .html(function(){
+                return "<input type='checkbox' "+((loc.overlays['contoursTall'].shown)?"checked":"")+">"+
+                    "<span class='det-slider round'></span>"})
+        .on("mousedown",function(){
+            if (loc.overlays['contoursTall'].shown){
+                loc.hideOverlay('contoursTall')
+            }else{
+                loc.showOverlay('contoursTall')
+            }
+        })
+    timingTallCont.append("div")
+        .attr('class','labtext settings')
+        .attr('id','lab-timing-Tall-cont-txt')
+        .html(loc.tl('<span class="settings-name">%text.loc.settings.dth% Contour</span>'+
+            '<span class="settings-desc">%text.loc.settings.dt.desc% (Contour)</span>'));
 
     timingdt=d3.select('#settings-timing-cont').append("div")
         .attr('class','icon settingscont')
@@ -4610,8 +4872,8 @@ Localisation.prototype.hideTooltipManual = function(){
 Localisation.prototype.makePlot = function(){
     // make plot (calls other function)
     this.setLang();
-    this.drawSky();
-    this.drawEff();
+    this.dLonwSky();
+    this.dLonwEff();
     // this.addButtons();
     this.addHelp();
     this.addLang(false);
@@ -4625,7 +4887,7 @@ Localisation.prototype.makePlot = function(){
     if (this.event!=''){this.selectEvent(this.event)}
 }
 Localisation.prototype.replot = function(){
-    // remove plots and redraw (e.g. on window resize)
+    // remove plots and redLonw (e.g. on window resize)
     var loc=this;
     // console.log(loc.effName);
     // remove elements
@@ -4633,8 +4895,8 @@ Localisation.prototype.replot = function(){
     d3.select("div#svg-container").remove()
     d3.selectAll(".graph-icon").remove()
     // d3.selectAll("div.labcont").remove()
-    // redraw graph and eff
-    this.redraw=true;
+    // redLonw graph and eff
+    this.redLonw=true;
     this.setScales();
     this.setLang();
     if (this.world){
@@ -4646,13 +4908,13 @@ Localisation.prototype.replot = function(){
             .translate([0,this.skyHeight/2])
             .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skymap)
     }
-    this.drawSky();
-    this.drawEff();
+    this.dLonwSky();
+    this.dLonwEff();
     this.addHelp();
     this.adjCss();
     this.updateSourceLabels();
     this.setPanel(this.getPanel());
-    this.redraw=false;
+    this.redLonw=false;
     // gwcat.initButtons();
 }
 // define fly-in & fly-out
