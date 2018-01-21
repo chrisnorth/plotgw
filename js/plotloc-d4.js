@@ -1381,6 +1381,9 @@ Localisation.prototype.updateCalcs = function(){
     this.updateDetResults();
     this.updateSourceLabels();
     this.updateLines();
+    if (this.updated.time){
+        this.setContourProj();
+    }
     //  update contours and overlays
     if (this.overlays.contoursT.shown){this.updateContoursT();}
     if ((this.updated.network)|(this.hmap!='none')){this.updateHeatmap(this.hmap);}
@@ -1394,6 +1397,7 @@ Localisation.prototype.updateCalcs = function(){
     this.updated.srcpos=false;
     this.updated.network=false;
     this.updated.coord=false;
+    this.updated.time=false;
     this.hideLoading()
     // this.uncloseContours();
 }
@@ -2680,6 +2684,18 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         }
     }
 }
+Localisation.prototype.setContourProj = function(){
+    if (this.world){
+        this.skyarr.projContours=d3.geoEquirectangular()
+            .translate([0,loc.skyHeight/2])
+            .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skyarr.fullglobe)
+    }else{
+        this.skyarr.projContours=d3.geoEquirectangular()
+            .translate([0,this.skyHeight/2])
+            .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skymap)
+            .rotate([-this.mod360(this.src.gmst*15),0,0]);
+    }
+}
 Localisation.prototype.updateContours = function(cname){
     var loc=this;
     // loc.skyarr.contour_data = d3.contours()
@@ -2700,12 +2716,15 @@ Localisation.prototype.updateContours = function(cname){
             [180,0],
             [0,-90]
         ]]}}
-    loc.skyarr.projContours=d3.geoEquirectangular()
-        .translate([0,loc.skyHeight])
-        .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullcontour);
+
+    // loc.skyarr.projContours=d3.geoEquirectangular()
+    //     .translate([0,loc.skyHeight])
+    //     .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullcontour)
+    //     .rotate([90,0,0]);
     // loc.skyarr.projContours=d3.geoProjection(function(x,y){return [x,y]})
     //     .translate([0,loc.skyHeight])
     //     .scale(300)
+    loc.setContourProj();
     if (cname=='Tmatch'){
         arrname='Tmatch';
     }else if (cname=='Tall'){
@@ -2719,7 +2738,6 @@ Localisation.prototype.updateContours = function(cname){
     if (this.world){
         data=loc.skyarr.arr[arrname];
     }else{
-        // data=loc.skyarr.arr[arrname];
         data=loc.reverseArray(arrname);
     }
     contColor = d3.scaleSequential(d3.interpolateRdBu).domain([0,5])
@@ -2736,11 +2754,11 @@ Localisation.prototype.updateContours = function(cname){
         .transition().duration(500)
         .style("opacity",0).remove()
     loc.skyarr[cname].contours
-        .attr("d", d3.geoPath(loc.skyarr.projEq))
+        .attr("d", d3.geoPath(loc.skyarr.projContours))
         .attr("class","path-contour-"+cname)
         .attr("fill", function(d) { return contColor(d.value); });
     loc.skyarr[cname].contours.enter().append("path")
-      .attr("d", d3.geoPath(loc.skyarr.projEq))
+      .attr("d", d3.geoPath(loc.skyarr.projContours))
       .attr("class","path-contour-"+cname)
       .attr("fill", function(d) { return contColor(d.value); })
       .style("opacity",1);
@@ -2777,204 +2795,204 @@ Localisation.prototype.grid2coord = function (contIn) {
     return(contIn)
 }
 
-Localisation.prototype.updateContoursT = function(){
-    loc.skyarr.fullcontour={type:'Feature',
-        geometry:{type:'Polygon',coordinates:[[
-            [0,loc.skyarr.nLat/2],
-            [loc.skyarr.nLon/2,0],
-            [loc.skyarr.nLon,loc.skyarr.nLat/2],
-            [loc.skyarr.nLon/2,loc.skyarr.nLat/2]
-        ]]}}
-    loc.skyarr.projCont=d3.geoEquirectangular()
-        .translate([0,loc.skyHeight])
-        .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullcontour)//.rotate([d2r(180),0,0])
-    console.log(loc.src.dt,loc.skyarr.arr.dt);
-    for (dd in loc.src.dt){
-        loc.skyarr[dd]={}
-        // loc.skyarr.dtCont=[
-        //     Math.min(loc.src.dt[dd]-5e-4,loc.skyarr.mindt[dd]),
-        //     loc.src.dt[dd],
-        //     Math.max(loc.src.dt[dd]+5e-4,loc.skyarr.maxdt[dd])]
-        dii=loc.di[dd[0]];
-        dij=loc.di[dd[1]];
-        contWidth=this.contourWidth(dd)
-        console.log('contour Width',dd,contWidth)
-        loc.skyarr.dtCont=[
-            Math.max(loc.src.dt[dd]-(contWidth),loc.skyarr.mindt[dd]+5.e-6),
-            loc.src.dt[dd],
-            Math.min(loc.src.dt[dd]+(contWidth),loc.skyarr.maxdt[dd]-5.e-6)]
-        loc.skyarr.colCont = d3.scaleOrdinal().range([loc.dataDet[loc.di[dd[0]]].color,'#000',loc.dataDet[loc.di[dd[1]]].color])
-        loc.skyarr.opCont = d3.scaleOrdinal().range([0.7,0,0.7])
-        opMult=loc.dStatus[dd[0]]*loc.dStatus[dd[1]]
-        // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
-
-        // loc.gContour.selectAll(".contour-"+dd).remove()
-
-        // loc.skyarr.contoursdt=loc.editContours(d3.contours()
-        //     .size([loc.skyarr.nLon,loc.skyarr.nLat])
-        //     // .size([360,180])
-        //     .thresholds(loc.skyarr.dtCont)
-        //     (loc.skyarr.arr.dt[dd]),true,dd)
-        loc.skyarr[dd].contoursdt=loc.editContours2(d3.contours()
-            .size([loc.skyarr.nLon,loc.skyarr.nLat])
-            .thresholds(loc.skyarr.dtCont)
-            (loc.skyarr.arr.dt[dd]),true,dd)
-        for (c=0;c<loc.skyarr[dd].contoursdt.length;c++){
-            path=d3.geoPath().projection(loc.skyarr.projI)(loc.skyarr[dd].contoursdt[c]);
-            if (loc.skyarr[dd].contoursdt[c].hasEdge){
-                loc.skyarr[dd].contoursdt[c].path=path.replace('Z','');
-            }else{
-                loc.skyarr[dd].contoursdt[c].path=path;
-            }
-        }
-        loc.skyarr[dd].dtcontours = loc.gContourT.selectAll(".contourT-"+dd)
-            .data(loc.skyarr[dd].contoursdt)
-        loc.skyarr[dd].dtcontours.exit()
-            .transition().duration(500)
-            .style("opacity",0).remove()
-        loc.skyarr[dd].dtcontours
-            .transition().duration(500).ease(d3.easeExp)
-            .attr("d", d3.geoPath().projection(loc.skyarr.projEq))
-            .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
-        loc.skyarr[dd].dtcontours.enter().append("path")
-            // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
-            .style("fill-opacity",0)
-            .style("stroke",function(d){return loc.skyarr.colCont(d.value)})
-            .style("stroke-width","3")
-            .attr("class","contourT contourT-"+dd)
-            // .attr("d", function(d){return d.path})
-            .attr("d",d3.geoPath().projection(loc.skyarr.projEq))
-            // .on("mouseover",function(d){
-            //     loc.tooltip
-            //        .style("opacity", .9);
-            //     loc.tooltip.html(loc.tttextHmap(d))
-            //        .style("left", (d3.event.pageX + 10) + "px")
-            //        .style("top", (d3.event.pageY-10) + "px")
-            //        .style("width","auto")
-            //        .style("height","auto");
-            // })
-            // .on("mouseout", function(d) {
-            //     loc.tooltip.style("opacity", 0);
-            // })
-            .transition().duration(500).ease(d3.easeExp)
-            .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
-
-
-        // .merge(loc.skyarr[dd].dtcontours)
-        // loc.skyarr[dd].dtcontours.select("path")
-        //     .attr("d",function(d){console.log(this);})
-        // }
-    }
-}
-Localisation.prototype.updateContoursPr = function(){
-    var loc=this;
-    console.log(loc.src.Pr,loc.skyarr.arr.Pr);
-    loc.skyarr['Pr'].filtPix=loc.filterSky('Pr','cont',0.2);
-
-    loc.skyarr.PrCumulCont=[0.1]
-    loc.skyarr.PrCumulColCont = d3.scaleOrdinal().range(['#000'])
-    loc.skyarr.PrCumulOpCont = d3.scaleOrdinal().range([1])
-    // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
-
-    // loc.gContour.selectAll(".contour-"+dd).remove()
-    contoursPr=loc.editContours(d3.contours()
-        .size([loc.skyarr.nLon,loc.skyarr.nLat])
-        .thresholds(loc.skyarr.PrCumulCont)
-        (loc.skyarr.arr.PrCumul),true,'Pr')
-    for (c=0;c<contoursPr.length;c++){
-        path=d3.geoPath().projection(loc.skyarr.projI)(contoursPr[c]);
-        if (contoursPr[c].hasEdge){
-            contoursPr[c].path=path.replace('Z','');
-        }else{
-            contoursPr[c].path=path;
-        }
-    }
-    loc.skyarr.Pr.Prcontours = loc.gContourPr.selectAll(".contour-Pr")
-        .data(contoursPr)
-    loc.skyarr.Pr.Prcontours.exit()
-        .transition().duration(500)
-        .style("opacity",0).remove()
-    loc.skyarr.Pr.Prcontours
-        .transition().duration(500).ease(d3.easeExp)
-        .attr("d", function(d){return d.path})
-        .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
-    loc.skyarr.Pr.Prcontours.enter().append("path")
-        // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
-        .style("fill-opacity",0)
-        .style("stroke",function(d){return loc.skyarr.PrCumulColCont(d.value)})
-        .style("stroke-width","3")
-        .attr("class","contourPr contour-Pr")
-        .attr("d", d3.geoPath(loc.skyarr.projI))
-        // .on("mouseover",function(d){
-        //     loc.tooltip
-        //        .style("opacity", .9);
-        //     loc.tooltip.html(loc.tttextHmap(d))
-        //        .style("left", (d3.event.pageX + 10) + "px")
-        //        .style("top", (d3.event.pageY-10) + "px")
-        //        .style("width","auto")
-        //        .style("height","auto");
-        // })
-        // .on("mouseout", function(d) {
-        //     loc.tooltip.style("opacity", 0);
-        // })
-        .transition().duration(500).ease(d3.easeExp)
-        .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
-        // .merge(loc.skyarr[dd].dtcontours)
-}
-Localisation.prototype.updateContoursTmatch = function(){
-    var loc=this;
-    console.log(loc.src.Pr,loc.skyarr.arr.Pr);
-    loc.skyarr.Tmatch.filtPix=loc.filterSky('Tmatch','cont',0.5);
-
-    loc.skyarr.Tmatch.colCont = d3.scaleOrdinal().range(['#fff'])
-    loc.skyarr.Tmatch.opCont = d3.scaleOrdinal().range([1])
-    // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
-
-    // loc.gContour.selectAll(".contour-"+dd).remove()
-    contoursTmatch=loc.editContours(d3.contours()
-        .size([loc.skyarr.nLon,loc.skyarr.nLat])
-        .thresholds([0.9])
-        (loc.skyarr.arr.Tmatch),true,'Tmatch')
-    for (c=0;c<contoursTmatch.length;c++){
-        path=d3.geoPath().projection(loc.skyarr.projI)(contoursTmatch[c]);
-        if (contoursTmatch[c].hasEdge){
-            contoursTmatch[c].path=path.replace('Z','');
-        }else{
-            contoursTmatch[c].path=path;
-        }
-    }
-    loc.skyarr.Tmatch.Tmatchcontours = loc.gContourTmatch.selectAll(".contour-Tmatch")
-        .data(contoursTmatch)
-    loc.skyarr.Tmatch.Tmatchcontours.exit()
-        .transition().duration(500)
-        .style("opacity",0).remove()
-    loc.skyarr.Tmatch.Tmatchcontours
-        .transition().duration(500).ease(d3.easeExp)
-        .attr("d", function(d){return d.path})
-        .style("stroke-opacity",function(d){return (loc.skyarr.Tmatch.opCont(d.value))})
-    loc.skyarr.Tmatch.Tmatchcontours.enter().append("path")
-        // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
-        .style("fill-opacity",0)
-        .style("stroke",function(d){return loc.skyarr.Tmatch.colCont(d.value)})
-        .style("stroke-width","3")
-        .attr("class","contourTmatch contour-Tmatch")
-        .attr("d", d3.geoPath(loc.skyarr.projI))
-        // .on("mouseover",function(d){
-        //     loc.tooltip
-        //        .style("opacity", .9);
-        //     loc.tooltip.html(loc.tttextHmap(d))
-        //        .style("left", (d3.event.pageX + 10) + "px")
-        //        .style("top", (d3.event.pageY-10) + "px")
-        //        .style("width","auto")
-        //        .style("height","auto");
-        // })
-        // .on("mouseout", function(d) {
-        //     loc.tooltip.style("opacity", 0);
-        // })
-        .transition().duration(500).ease(d3.easeExp)
-        .style("stroke-opacity",function(d){return (loc.skyarr.Tmatch.opCont(d.value))})
-        // .merge(loc.skyarr[dd].dtcontours)
-}
+// Localisation.prototype.updateContoursT = function(){
+//     loc.skyarr.fullcontour={type:'Feature',
+//         geometry:{type:'Polygon',coordinates:[[
+//             [0,loc.skyarr.nLat/2],
+//             [loc.skyarr.nLon/2,0],
+//             [loc.skyarr.nLon,loc.skyarr.nLat/2],
+//             [loc.skyarr.nLon/2,loc.skyarr.nLat/2]
+//         ]]}}
+//     loc.skyarr.projCont=d3.geoEquirectangular()
+//         .translate([0,loc.skyHeight])
+//         .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullcontour)//.rotate([d2r(180),0,0])
+//     console.log(loc.src.dt,loc.skyarr.arr.dt);
+//     for (dd in loc.src.dt){
+//         loc.skyarr[dd]={}
+//         // loc.skyarr.dtCont=[
+//         //     Math.min(loc.src.dt[dd]-5e-4,loc.skyarr.mindt[dd]),
+//         //     loc.src.dt[dd],
+//         //     Math.max(loc.src.dt[dd]+5e-4,loc.skyarr.maxdt[dd])]
+//         dii=loc.di[dd[0]];
+//         dij=loc.di[dd[1]];
+//         contWidth=this.contourWidth(dd)
+//         console.log('contour Width',dd,contWidth)
+//         loc.skyarr.dtCont=[
+//             Math.max(loc.src.dt[dd]-(contWidth),loc.skyarr.mindt[dd]+5.e-6),
+//             loc.src.dt[dd],
+//             Math.min(loc.src.dt[dd]+(contWidth),loc.skyarr.maxdt[dd]-5.e-6)]
+//         loc.skyarr.colCont = d3.scaleOrdinal().range([loc.dataDet[loc.di[dd[0]]].color,'#000',loc.dataDet[loc.di[dd[1]]].color])
+//         loc.skyarr.opCont = d3.scaleOrdinal().range([0.7,0,0.7])
+//         opMult=loc.dStatus[dd[0]]*loc.dStatus[dd[1]]
+//         // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
+//
+//         // loc.gContour.selectAll(".contour-"+dd).remove()
+//
+//         // loc.skyarr.contoursdt=loc.editContours(d3.contours()
+//         //     .size([loc.skyarr.nLon,loc.skyarr.nLat])
+//         //     // .size([360,180])
+//         //     .thresholds(loc.skyarr.dtCont)
+//         //     (loc.skyarr.arr.dt[dd]),true,dd)
+//         loc.skyarr[dd].contoursdt=loc.editContours2(d3.contours()
+//             .size([loc.skyarr.nLon,loc.skyarr.nLat])
+//             .thresholds(loc.skyarr.dtCont)
+//             (loc.skyarr.arr.dt[dd]),true,dd)
+//         for (c=0;c<loc.skyarr[dd].contoursdt.length;c++){
+//             path=d3.geoPath().projection(loc.skyarr.projI)(loc.skyarr[dd].contoursdt[c]);
+//             if (loc.skyarr[dd].contoursdt[c].hasEdge){
+//                 loc.skyarr[dd].contoursdt[c].path=path.replace('Z','');
+//             }else{
+//                 loc.skyarr[dd].contoursdt[c].path=path;
+//             }
+//         }
+//         loc.skyarr[dd].dtcontours = loc.gContourT.selectAll(".contourT-"+dd)
+//             .data(loc.skyarr[dd].contoursdt)
+//         loc.skyarr[dd].dtcontours.exit()
+//             .transition().duration(500)
+//             .style("opacity",0).remove()
+//         loc.skyarr[dd].dtcontours
+//             .transition().duration(500).ease(d3.easeExp)
+//             .attr("d", d3.geoPath().projection(loc.skyarr.projEq))
+//             .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
+//         loc.skyarr[dd].dtcontours.enter().append("path")
+//             // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
+//             .style("fill-opacity",0)
+//             .style("stroke",function(d){return loc.skyarr.colCont(d.value)})
+//             .style("stroke-width","3")
+//             .attr("class","contourT contourT-"+dd)
+//             // .attr("d", function(d){return d.path})
+//             .attr("d",d3.geoPath().projection(loc.skyarr.projEq))
+//             // .on("mouseover",function(d){
+//             //     loc.tooltip
+//             //        .style("opacity", .9);
+//             //     loc.tooltip.html(loc.tttextHmap(d))
+//             //        .style("left", (d3.event.pageX + 10) + "px")
+//             //        .style("top", (d3.event.pageY-10) + "px")
+//             //        .style("width","auto")
+//             //        .style("height","auto");
+//             // })
+//             // .on("mouseout", function(d) {
+//             //     loc.tooltip.style("opacity", 0);
+//             // })
+//             .transition().duration(500).ease(d3.easeExp)
+//             .style("stroke-opacity",function(d){return (loc.skyarr.opCont(d.value)*opMult)})
+//
+//
+//         // .merge(loc.skyarr[dd].dtcontours)
+//         // loc.skyarr[dd].dtcontours.select("path")
+//         //     .attr("d",function(d){console.log(this);})
+//         // }
+//     }
+// }
+// Localisation.prototype.updateContoursPr = function(){
+//     var loc=this;
+//     console.log(loc.src.Pr,loc.skyarr.arr.Pr);
+//     loc.skyarr['Pr'].filtPix=loc.filterSky('Pr','cont',0.2);
+//
+//     loc.skyarr.PrCumulCont=[0.1]
+//     loc.skyarr.PrCumulColCont = d3.scaleOrdinal().range(['#000'])
+//     loc.skyarr.PrCumulOpCont = d3.scaleOrdinal().range([1])
+//     // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
+//
+//     // loc.gContour.selectAll(".contour-"+dd).remove()
+//     contoursPr=loc.editContours(d3.contours()
+//         .size([loc.skyarr.nLon,loc.skyarr.nLat])
+//         .thresholds(loc.skyarr.PrCumulCont)
+//         (loc.skyarr.arr.PrCumul),true,'Pr')
+//     for (c=0;c<contoursPr.length;c++){
+//         path=d3.geoPath().projection(loc.skyarr.projI)(contoursPr[c]);
+//         if (contoursPr[c].hasEdge){
+//             contoursPr[c].path=path.replace('Z','');
+//         }else{
+//             contoursPr[c].path=path;
+//         }
+//     }
+//     loc.skyarr.Pr.Prcontours = loc.gContourPr.selectAll(".contour-Pr")
+//         .data(contoursPr)
+//     loc.skyarr.Pr.Prcontours.exit()
+//         .transition().duration(500)
+//         .style("opacity",0).remove()
+//     loc.skyarr.Pr.Prcontours
+//         .transition().duration(500).ease(d3.easeExp)
+//         .attr("d", function(d){return d.path})
+//         .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
+//     loc.skyarr.Pr.Prcontours.enter().append("path")
+//         // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
+//         .style("fill-opacity",0)
+//         .style("stroke",function(d){return loc.skyarr.PrCumulColCont(d.value)})
+//         .style("stroke-width","3")
+//         .attr("class","contourPr contour-Pr")
+//         .attr("d", d3.geoPath(loc.skyarr.projI))
+//         // .on("mouseover",function(d){
+//         //     loc.tooltip
+//         //        .style("opacity", .9);
+//         //     loc.tooltip.html(loc.tttextHmap(d))
+//         //        .style("left", (d3.event.pageX + 10) + "px")
+//         //        .style("top", (d3.event.pageY-10) + "px")
+//         //        .style("width","auto")
+//         //        .style("height","auto");
+//         // })
+//         // .on("mouseout", function(d) {
+//         //     loc.tooltip.style("opacity", 0);
+//         // })
+//         .transition().duration(500).ease(d3.easeExp)
+//         .style("stroke-opacity",function(d){return (loc.skyarr.PrCumulOpCont(d.value))})
+//         // .merge(loc.skyarr[dd].dtcontours)
+// }
+// Localisation.prototype.updateContoursTmatch = function(){
+//     var loc=this;
+//     console.log(loc.src.Pr,loc.skyarr.arr.Pr);
+//     loc.skyarr.Tmatch.filtPix=loc.filterSky('Tmatch','cont',0.5);
+//
+//     loc.skyarr.Tmatch.colCont = d3.scaleOrdinal().range(['#fff'])
+//     loc.skyarr.Tmatch.opCont = d3.scaleOrdinal().range([1])
+//     // console.log(dd,loc.dStatus[dd[0]],loc.dStatus[dd[1]],opMult)
+//
+//     // loc.gContour.selectAll(".contour-"+dd).remove()
+//     contoursTmatch=loc.editContours(d3.contours()
+//         .size([loc.skyarr.nLon,loc.skyarr.nLat])
+//         .thresholds([0.9])
+//         (loc.skyarr.arr.Tmatch),true,'Tmatch')
+//     for (c=0;c<contoursTmatch.length;c++){
+//         path=d3.geoPath().projection(loc.skyarr.projI)(contoursTmatch[c]);
+//         if (contoursTmatch[c].hasEdge){
+//             contoursTmatch[c].path=path.replace('Z','');
+//         }else{
+//             contoursTmatch[c].path=path;
+//         }
+//     }
+//     loc.skyarr.Tmatch.Tmatchcontours = loc.gContourTmatch.selectAll(".contour-Tmatch")
+//         .data(contoursTmatch)
+//     loc.skyarr.Tmatch.Tmatchcontours.exit()
+//         .transition().duration(500)
+//         .style("opacity",0).remove()
+//     loc.skyarr.Tmatch.Tmatchcontours
+//         .transition().duration(500).ease(d3.easeExp)
+//         .attr("d", function(d){return d.path})
+//         .style("stroke-opacity",function(d){return (loc.skyarr.Tmatch.opCont(d.value))})
+//     loc.skyarr.Tmatch.Tmatchcontours.enter().append("path")
+//         // .attr("d", d3.geoPath(d3.geoEquirectangular().scale(loc.skyarr.contourScale)))
+//         .style("fill-opacity",0)
+//         .style("stroke",function(d){return loc.skyarr.Tmatch.colCont(d.value)})
+//         .style("stroke-width","3")
+//         .attr("class","contourTmatch contour-Tmatch")
+//         .attr("d", d3.geoPath(loc.skyarr.projI))
+//         // .on("mouseover",function(d){
+//         //     loc.tooltip
+//         //        .style("opacity", .9);
+//         //     loc.tooltip.html(loc.tttextHmap(d))
+//         //        .style("left", (d3.event.pageX + 10) + "px")
+//         //        .style("top", (d3.event.pageY-10) + "px")
+//         //        .style("width","auto")
+//         //        .style("height","auto");
+//         // })
+//         // .on("mouseout", function(d) {
+//         //     loc.tooltip.style("opacity", 0);
+//         // })
+//         .transition().duration(500).ease(d3.easeExp)
+//         .style("stroke-opacity",function(d){return (loc.skyarr.Tmatch.opCont(d.value))})
+//         // .merge(loc.skyarr[dd].dtcontours)
+// }
 Localisation.prototype.showContoursT = function(){
     d3.select('#g-contoursT')
         .transition().duration(500)
@@ -4124,6 +4142,7 @@ Localisation.prototype.selectEvent = function(e){
     if(this.world){this.src.pix=this.skyarr.radec2p(this.src.ra,this.src.dec);}
     else{this.src.pix=this.skyarr.lonlat2p(this.src.lon,this.src.lat);}
     this.updated.src=true;
+    this.updated.time=true;
     this.updated.srcpos=true;
     this.updated.coord=true;
     this.updated.network=true;
@@ -4902,11 +4921,11 @@ Localisation.prototype.replot = function(){
     if (this.world){
         this.skyarr.projEq=d3.geoEquirectangular()
             .translate([0,loc.skyHeight/2])
-            .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skyarr.fullglobe)//.rotate([d2r(180),0,0])
+            .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skyarr.fullglobe);
     }else{
         this.skyarr.projEq=d3.geoEquirectangular()
             .translate([0,this.skyHeight/2])
-            .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skymap)
+            .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skymap);
     }
     this.dLonwSky();
     this.dLonwEff();
