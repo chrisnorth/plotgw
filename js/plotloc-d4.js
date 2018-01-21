@@ -32,7 +32,7 @@ function Localisation(inp){
     console.log('init')
     this.init();
     if(this.debug){console.log('initialised');}
-    this.dLonwSkyInit();
+    this.drawSkyInit();
     if(this.debug){console.log('plotted');}
     window.addEventListener("resize",function(){
 
@@ -155,7 +155,8 @@ Localisation.prototype.init = function(){
         utc:new Date(),
         // gmst:0,
         srcamp:1e-21,
-        hmap:'FNet',
+        hmap:'none',
+        bg:'FNet',
         res:2.5,
         world:false,
         event:''
@@ -169,7 +170,13 @@ Localisation.prototype.init = function(){
             colHeat:function(p){
                 val=loc.skyarr.arr.FNet[p];
                 return loc.skyarr.FNet.colHeatScale(val);
-            }
+            },
+            colCont:function(d){
+                scale=d3.scaleSequential(d3.interpolateInferno).domain([0, 1]);
+                return scale(d);
+            },
+            opCont:function(d){return 1;},
+            thresholdCont:function(){return d3.range(0,1,0.05);}
         },
         aNet:{
             hmapthreshold:5,
@@ -178,26 +185,64 @@ Localisation.prototype.init = function(){
             colHeat:function(p){
                 val=Math.log10(loc.skyarr.arr.aNet[p]);
                 return loc.skyarr.aNet.colHeatScale(val);
-            }
+            },
+            colCont:function(d){
+                scale=d3.scaleSequential(d3.interpolateRdBu).domain([-1,1]);
+                return scale(d);
+            },
+            opCont:function(d){return 1;},
+            thresholdCont:function(){return d3.range(-1,1,0.1);}
         },
         Tmatch:{
             hmapthreshold:0.5,
             opHeat:function(d){
-                if (loc.Ndet<=1){return 0}
-                else{ return d3.scaleLinear().range([0,1])
-                .domain([0.5,1]).clamp(true)(d)}
+                if (loc.Ndet<=1){
+                    return 0
+                }else{
+                    return d3.scaleLinear().range([0,1])
+                        .domain([0.5,1]).clamp(true)(d);
+                }
             },
-            colHeat:function(d){return "#f0f";}
+            colHeat:function(d){return "#f0f";},
+            colCont:function(d){
+                scale=d3.scaleSequential(d3.interpolateGreens).domain([0,1]);
+                return scale(d);
+            },
+            opCont:function(d){
+                if (loc.Ndet<=1){return 0}
+                else{
+                    return d3.scaleLinear().range([0,1])
+                        .domain([0.5,1]).clamp(true)(d);
+                }
+            },
+            thresholdCont:function(){return d3.range(0.25,1,0.05);}
         },
         Tall:{
             hmapthreshold:0.5,
             opHeat:function(d){
                 if (loc.Ndet<=1){return 0}
-                else if (loc.Ndet==2){return 0.7}
-                else{ return d3.scaleLinear().range([0,1])
-                .domain([0.2,0.5*loc.Ndet*(loc.Ndet-1)]).clamp(true)(d)}
+                else if (loc.Ndet==2){
+                    return 0.7
+                }else{
+                    return d3.scaleLinear().range([0,1])
+                        .domain([0.2,0.5*loc.Ndet*(loc.Ndet-1)]).clamp(true)(d);
+                }
             },
-            colHeat:function(d){return "#0ff";}
+            colHeat:function(d){return "#0ff";},
+            colCont:function(d){
+                scale=d3.scaleSequential(d3.interpolateBlues).domain([0,loc.Ndet]);
+                return scale(d);
+            },
+            opCont:function(d){
+                if (loc.Ndet<=1){return 0}
+                else if (loc.Ndet==2){
+                    return 0.7;
+                }else{
+                    return d3.scaleLinear().range([0,1])
+                        .domain([0.2,0.5*loc.Ndet*(loc.Ndet-1)]).clamp(true)(d);
+                }
+            },
+            thresholdCont:function(){return d3.range(0.25,loc.Ndet,0.05);}
         },
         pNet:{
             hmapthreshold:5,
@@ -215,6 +260,7 @@ Localisation.prototype.init = function(){
     this.src.phase = (this.urlVars.phase) ? parseFloat(this.urlVars.phase) : this.defaults.phase;
     this.skyarr.res=(this.urlVars.res) ? parseFloat(this.urlVars.res) : this.defaults.res;
     this.hmap = (this.urlVars.hmap) ? this.urlVars.hmap : this.defaults.hmap;
+    this.bg = (this.urlVars.bg) ? this.urlVars.bg : this.defaults.bg;
     this.world = (this.urlVars.world) ? this.urlVars.world : this.defaults.world;
     this.event = (this.urlVars.event) ? this.urlVars.event : this.defaults.event;
 
@@ -811,7 +857,7 @@ Localisation.prototype.adjCss = function(){
         }
     }
 }
-Localisation.prototype.dLonwEff = function(){
+Localisation.prototype.drawEff = function(){
     // Create eff panel
     // this.panels.info.show=function(){this.showInfo()}
     // this.panels.info.show=function()(this.hideInfo())
@@ -858,7 +904,7 @@ Localisation.prototype.dLonwEff = function(){
     this.updateLines();
 
     // add labels
-    if (this.redLonw){
+    if (this.redraw){
         d3.selectAll('.labcont').style('height',this.labcontHeight);
         d3.selectAll('.lang-cont').style('height',this.langcontHeight);
     }
@@ -1299,7 +1345,7 @@ Localisation.prototype.updateLines = function(){
     //         .attr("y1",this.yScaleEff(det.r))
     //         .attr("y2",this.yScaleEff(det.r))
     // }else if(resize=="snap"){
-    //     // snap resize (when redLonwing eff)
+    //     // snap resize (when redrawing eff)
     //     this.svgEff.select('g.heff-'+d)
     //         .attr("transform","rotate("+det.psi+")")
     //     this.svgEff.select('g.heff-x-'+d)
@@ -1389,6 +1435,9 @@ Localisation.prototype.updateCalcs = function(){
     if ((this.updated.network)|(this.hmap!='none')){this.updateHeatmap(this.hmap);}
     // if (this.overlays.contoursTmatch.shown){this.updateContoursTmatch();}
     if (this.overlays['contoursTall'].shown){this.updateContours('Tall');}
+    if (this.overlays['contoursTmatch'].shown){this.updateContours('Tmatch');}
+    if (this.overlays['contoursFNet'].shown){this.updateContours('FNet');}
+    if (this.overlays['contoursaNet'].shown){this.updateContours('aNet');}
     if (this.overlays['heatmap-Tmatch'].shown){this.updateHeatmap('Tmatch');}
     if (this.overlays['heatmap-Tall'].shown){this.updateHeatmap('Tall');}
 
@@ -1586,15 +1635,15 @@ Localisation.prototype.makeSky = function(){
     //         this.margin.top + ")")
 
     // add the tooltip area to the webpage
-    if (!this.redLonw){
+    if (!this.redraw){
         this.tooltip = d3.select("#"+this.holderid).append("div")
             .attr("class", "tooltip")
             .style("opacity", 0);
     }
 }
 
-Localisation.prototype.dLonwSkyInit = function(){
-    // initialise graph dLonwing from data
+Localisation.prototype.drawSkyInit = function(){
+    // initialise graph drawing from data
     var loc = this;
     loc.loaded=0;
     loc.toLoad=8;
@@ -1797,8 +1846,8 @@ Localisation.prototype.updateAxes = function(){
         .style('stroke','#ccc')
         .style('opacity',1)
 }
-Localisation.prototype.dLonwSky = function(){
-    // dLonw graph
+Localisation.prototype.drawSky = function(){
+    // draw graph
     var loc = this;
     // loc.setSvgScales();
     loc.makeSky();
@@ -1813,7 +1862,7 @@ Localisation.prototype.dLonwSky = function(){
 
     loc.updateAxes();
 
-    // // dLonw legend
+    // // draw legend
     // loc.legend = loc.svg.selectAll(".legend")
     //   .data(loc.dataDet)
     // .enter().append("g")
@@ -1821,7 +1870,7 @@ Localisation.prototype.dLonwSky = function(){
     //   .attr("transform", function(d, i) { return "translate(0," +
     //     (i * 24) + ")"; });
     //
-    // // dLonw legend colored circles
+    // // draw legend colored circles
     // loc.legend.append("line")
     //     .attr("x1", loc.margin.left+12)
     //     .attr("y1", loc.margin.top+24)
@@ -1839,7 +1888,7 @@ Localisation.prototype.dLonwSky = function(){
     //     .style("stroke",function(d){return d.color;})
     //     .attr("opacity",1);
     //
-    // // dLonw legend text
+    // // draw legend text
     // loc.legend.append("text")
     //   .attr("x", loc.margin.left + 36)
     //   .attr("y", loc.margin.top + 21)
@@ -1851,16 +1900,18 @@ Localisation.prototype.dLonwSky = function(){
     loc.overlays = {
       'contoursT':{gid:"g-contoursT",shown:false,opacity:1},
       'contoursTall':{gid:"g-contoursTall",shown:true,opacity:1},
+      'contoursFNet':{gid:"g-contoursFNet",shown:true,opacity:0.7},
+      'contoursaNet':{gid:"g-contoursaNet",shown:false,opacity:0.7},
       'contoursTmatch':{gid:"g-contoursTmatch",shown:false,opacity:1},
       'contoursPr':{gid:"g-contoursPr",shown:false,opacity:1},
       'heatmap-Pr':{gid:"g-heatmap-Pr",shown:false,opacity:1},
       'heatmap-pNet':{gid:"g-heatmap-pNet",shown:(this.hmap=='pNet'),opacity:1,cbar:false},
-      'heatmap-FNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='FNet'),opacity:0.7,
+      'heatmap-FNet':{gid:"g-heatmap-FNet",shown:false,opacity:0.7,
         cbar:true,min:0,max:1,tmin:'0%',tmax:'100%',name:'%text.loc.settings.FNet%'},
       'heatmap-aNet':{gid:"g-heatmap-FNet",shown:(this.hmap=='aNet'),opacity:0.7,
         cbar:true,min:-1,max:1,tmin:'+',tmax:'x',name:'%text.loc.settings.aNet%'},
       'heatmap-Tmatch':{gid:"g-heatmap-Tmatch",shown:false,opacity:1,cbar:false},
-      'heatmap-Tall':{gid:"g-heatmap-Tall",shown:true,opacity:1,cbar:false},
+      'heatmap-Tall':{gid:"g-heatmap-Tall",shown:false,opacity:1,cbar:false},
       'overlay':{gid:"g-overlay",shown:false,opacity:0,cbar:false},
       'worldmap':{gid:"worldmap",shown:true,opacity:0.7,cbar:false},
       'bounds':{gid:"skymap-bounds",shown:true,opacity:0.7,cbar:false},
@@ -1904,27 +1955,52 @@ Localisation.prototype.dLonwSky = function(){
 
     loc.skyarr.Tall.gContour=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['contoursTall'].gid})
-        .attr("class","heatmap")
+        .attr("class","g-contours")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
         .style("opacity",0)
     loc.updateContours('Tall')
-    loc.showOverlay('contoursTall')
+    if(loc.overlays['contoursTall'].shown){loc.showOverlay('contoursTall');}
 
-    // dLonw Heatmap
-    // loc.skyarr.FNet={}
-    loc.skyarr.FNet.gHeatmap=loc.svg.append("g")
-        .attr("id",function(){return loc.overlays['heatmap-FNet'].gid})
-        .attr("class","heatmap")
+    loc.skyarr.Tmatch.gContour=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['contoursTmatch'].gid})
+        .attr("class","g-contours")
         .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
         .style("opacity",0)
-    loc.skyarr.aNet=loc.skyarr.FNet;
-    loc.updateHeatmap(this.hmap)
-    if ((loc.overlays['heatmap-'+this.hmap])&&(loc.overlays['heatmap-'+this.hmap].shown)){
-        loc.showOverlay('heatmap-'+this.hmap)}
+    loc.updateContours('Tmatch')
+    if(loc.overlays['contoursTall'].shown){loc.showOverlay('contoursTmatch');}
 
-    // set projection
-    loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nLon
-    loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
+    loc.skyarr.FNet.gContour=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['contoursFNet'].gid})
+        .attr("class","g-contours")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateContours('FNet')
+    if(loc.overlays['contoursFNet'].shown){loc.showOverlay('contoursFNet');}
+
+    loc.skyarr.aNet.gContour=loc.svg.append("g")
+        .attr("id",function(){return loc.overlays['contoursaNet'].gid})
+        .attr("class","g-contours")
+        .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+        .style("opacity",0)
+    loc.updateContours('aNet');
+    if(loc.overlays['contoursaNet'].shown){loc.showOverlay('contoursaNet');}
+    // loc.showOverlay('contoursFNet')
+
+    // // draw Heatmap
+    // // loc.skyarr.FNet={}
+    // loc.skyarr.FNet.gHeatmap=loc.svg.append("g")
+    //     .attr("id",function(){return loc.overlays['heatmap-FNet'].gid})
+    //     .attr("class","heatmap")
+    //     .attr("transform", "translate("+loc.margin.left+","+loc.margin.top+")")
+    //     .style("opacity",0)
+    // loc.skyarr.aNet=loc.skyarr.FNet;
+    // loc.updateHeatmap(this.hmap)
+    // if ((loc.overlays['heatmap-'+this.hmap])&&(loc.overlays['heatmap-'+this.hmap].shown)){
+    //     loc.showOverlay('heatmap-'+this.hmap)}
+
+    // set projection (OBSOLETE)
+    // loc.skyarr.contourScale=(loc.svgWidth-loc.margin.left-loc.margin.right)/loc.skyarr.nLon
+    // loc.skyarr.projI=d3.geoIdentity().scale(loc.skyarr.contourScale)
 
     // add world map
     worldmap = loc.svg.append("g")
@@ -1984,7 +2060,7 @@ Localisation.prototype.dLonwSky = function(){
 	    .attr("class", "constellation")
 	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
 
-    // dLonw Heatmap for all rings
+    // draw Heatmap for all rings
     // loc.skyarr['Tall']={}
     loc.skyarr['Tall'].gHeatmap=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['heatmap-Tall'].gid})
@@ -2003,7 +2079,7 @@ Localisation.prototype.dLonwSky = function(){
     loc.updateHeatmap('Tmatch')
     if(loc.overlays['heatmap-Tmatch'].shown){loc.showOverlay('heatmap-Tmatch')}
 
-    // dLonw contours (dt)
+    // draw contours (dt)
     // loc.gContourT=loc.svg.append("g")
     //     .attr("id",function(){return loc.overlays.contoursT.gid})
     //     .attr("class","contoursT")
@@ -2021,7 +2097,7 @@ Localisation.prototype.dLonwSky = function(){
 
     // loc.showOverlay('contoursTmatch');
 
-    // dLonw contours (Pr)
+    // draw contours (Pr)
     // loc.gContourPr=loc.svg.append("g")
     //     .attr("id",function(){return loc.overlays.contoursPr.gid})
     //     .attr("class","contoursPr")
@@ -2039,7 +2115,7 @@ Localisation.prototype.dLonwSky = function(){
     // loc.updateHeatmap("overlay")
     // // loc.showOverlay("heatmap-overlay")
 
-    // dLonw detectors
+    // draw detectors
     detGroup = loc.svg.append("g").attr("class","g-dets")
     loc.updateDetMarkers();
 
@@ -2685,6 +2761,7 @@ Localisation.prototype.updateHeatmap = function(dataIn){
     }
 }
 Localisation.prototype.setContourProj = function(){
+    // set the projection used by contour plots
     if (this.world){
         this.skyarr.projContours=d3.geoEquirectangular()
             .translate([0,loc.skyHeight/2])
@@ -2698,38 +2775,17 @@ Localisation.prototype.setContourProj = function(){
 }
 Localisation.prototype.updateContours = function(cname){
     var loc=this;
-    // loc.skyarr.contour_data = d3.contours()
-    //     .size([loc.skyarr.nLon, loc.skyarr.nLat])
-    //     .thresholds(d3.range(0,loc.Ndet))
-    //     (data)
-    loc.skyarr.fullcontour={type:'Feature',
-        geometry:{type:'Polygon',coordinates:[[
-            [0,loc.skyarr.nLat/2],
-            [loc.skyarr.nLon/2,0],
-            [loc.skyarr.nLon,loc.skyarr.nLat/2],
-            [loc.skyarr.nLon/2,loc.skyarr.nLat/2]
-        ]]}}
-    loc.skyarr.fullcontour={type:'Feature',
-        geometry:{type:'Polygon',coordinates:[[
-            [-180,0],
-            [0,90],
-            [180,0],
-            [0,-90]
-        ]]}}
 
-    // loc.skyarr.projContours=d3.geoEquirectangular()
-    //     .translate([0,loc.skyHeight])
-    //     .fitExtent([[0,0],[loc.skyWidth,loc.skyHeight]],loc.skyarr.fullcontour)
-    //     .rotate([90,0,0]);
-    // loc.skyarr.projContours=d3.geoProjection(function(x,y){return [x,y]})
-    //     .translate([0,loc.skyHeight])
-    //     .scale(300)
     loc.setContourProj();
+
     if (cname=='Tmatch'){
         arrname='Tmatch';
     }else if (cname=='Tall'){
         arrname='Tall';
-        // data=loc.skyarr.arr.Tall;
+    }else if (cname=='FNet'){
+        arrname='FNet';
+    }else if (cname=='aNet'){
+        arrname='aNet';
     }else{
         console.log('unknown contour name:',cname)
         return
@@ -2740,11 +2796,10 @@ Localisation.prototype.updateContours = function(cname){
     }else{
         data=loc.reverseArray(arrname);
     }
-    contColor = d3.scaleSequential(d3.interpolateRdBu).domain([0,5])
-
+    // old threshold d3.range(0.1,loc.Ndet,0.1)
     loc.skyarr[cname].contourDataIn = d3.contours()
         .size([loc.skyarr.nLon, loc.skyarr.nLat])
-        .thresholds(d3.range(0,loc.Ndet))
+        .thresholds(loc.skyarr[cname].thresholdCont())
         (data)
     loc.skyarr[cname].contourData=loc.grid2coord(loc.skyarr[cname].contourDataIn)
     loc.skyarr[cname].contours=d3.select('#'+loc.overlays['contours'+cname].gid)
@@ -2756,11 +2811,11 @@ Localisation.prototype.updateContours = function(cname){
     loc.skyarr[cname].contours
         .attr("d", d3.geoPath(loc.skyarr.projContours))
         .attr("class","path-contour-"+cname)
-        .attr("fill", function(d) { return contColor(d.value); });
+        .attr("fill", function(d) { return loc.skyarr[cname].colCont(d.value); });
     loc.skyarr[cname].contours.enter().append("path")
       .attr("d", d3.geoPath(loc.skyarr.projContours))
       .attr("class","path-contour-"+cname)
-      .attr("fill", function(d) { return contColor(d.value); })
+      .attr("fill", function(d) { return loc.skyarr[cname].colCont(d.value); })
       .style("opacity",1);
 }
 
@@ -2769,12 +2824,9 @@ Localisation.prototype.grid2coord = function (contIn) {
     var loc=this;
     for (i in contIn){
         if (contIn[i].coordinates.length>0){
-            console.log('cont',i,contIn[i],'length',contIn[i].coordinates.length)
             for (j in d3.range(contIn[i].coordinates.length)){
-                console.log(i,j,contIn[i].coordinates[j],contIn[i].coordinates[j].length)
                 for (k in d3.range(contIn[i].coordinates[j].length)){
                     coordIn=contIn[i].coordinates[j][k]
-                    console.log(i,j,k,'in ',coordIn,coordIn.length)
                     for (l in d3.range(contIn[i].coordinates[j][k].length)){
                         coord=contIn[i].coordinates[j][k][l]
                         if (loc.world){
@@ -2787,7 +2839,6 @@ Localisation.prototype.grid2coord = function (contIn) {
                                 loc.skyarr.lat2i.invert(coord[1])]
                         }
                     }
-                    console.log(i,j,k,'out',contIn[i].coordinates[j][k],contIn[i].coordinates[j][k].length)
                 }
             }
         }
@@ -3540,7 +3591,7 @@ Localisation.prototype.calcAntFacsSkyAmpPhase = function(){
     // console.log('min/max pNet',this.skyarr.aNet.min,this.skyarr.aNet.max);
 };
 Localisation.prototype.contourWidth = function(dd){
-    return Math.sqrt(0.5)*Math.sqrt(Math.pow(loc.dataDet[loc.di[dd[0]]].sigmaT7 / Math.min(loc.src.det[loc.di[dd[0]]].snr/7,1),2) +
+    return 2*Math.sqrt(0.5)*Math.sqrt(Math.pow(loc.dataDet[loc.di[dd[0]]].sigmaT7 / Math.min(loc.src.det[loc.di[dd[0]]].snr/7,1),2) +
         Math.pow(loc.dataDet[loc.di[dd[1]]].sigmaT7 / Math.min(loc.src.det[loc.di[dd[1]]].snr/7,1),2))*1e-3;
 }
 Localisation.prototype.getRaLon = function (p) {
@@ -4507,87 +4558,91 @@ Localisation.prototype.addSettings = function(){
             .style("font-size",(2.5*this.ysc)+"em")
     }
 
-    heatmapcont=d3.select("#settings-heatmap-cont")
-    d3.select('#settings-heatmap-cont').append("div")
+    bgcont=d3.select("#settings-bg-cont")
+    d3.select('#settings-bg-cont').append("div")
         .attr('class','icon settingscont')
-        .attr('id','lab-heatmap-FNet')
+        .attr('id','lab-bg-FNet')
     .append("div")
         .attr('class','labtext settings')
-        .attr('id','lab-heatmap-text')
+        .attr('id','lab-bg-text')
         .html(loc.tl('<span class="settings-desc">%text.loc.settings.heatmap.text%</span>'));
 
-    hmapFNet=d3.select('#settings-heatmap-cont').append("div")
+    bgFNet=d3.select('#settings-bg-cont').append("div")
         .attr('class','icon settingscont')
-        .attr('id','lab-heatmap-FNet')
-    hmapFNet.append("label")
+        .attr('id','lab-bg-FNet')
+    bgFNet.append("label")
         .attr("class","settings-switch")
         .attr("id",function(d){return "det-switch-FNet"})
         .html(function(){
-                return "<input type='checkbox' "+((loc.hmap=='FNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
+                return "<input type='checkbox' "+((loc.bg=='FNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
         .on("mousedown",function(){
-            console.log('toggling',this,this.id.split('-')[2],loc.hmap);
-            if (loc.hmap=='FNet'){
+            console.log('toggling',this,this.id.split('-')[2],loc.bg);
+            if (loc.overlays['contoursFNet'].shown){
                 // turn off overlay
                 console.log('FNet > none');
-                loc.hideOverlay('heatmap-FNet')
-                loc.hmap='none';
+                loc.hideOverlay('contoursFNet')
                 loc.colourWorldMap();
-            }else if(loc.hmap=='none'){
+                loc.bg='none';
+            }else if(loc.bg=='none'){
                 // turn on overlay
                 console.log('none > FNet');
-                loc.hmap='FNet';
-                loc.showOverlay('heatmap-FNet');
-                loc.updateHeatmap(loc.hmap);
+                loc.showOverlay('contoursFNet');
+                loc.updateContours('FNet');
                 loc.uncolourWorldMap();
+                loc.bg='FNet';
             }else{
                 // switch overlay from aNet to FNet
                 console.log('aNet > FNet');
-                loc.hmap='FNet';
+                loc.showOverlay('contoursFNet');
+                loc.hideOverlay('contoursaNet');
                 d3.select('#det-switch-aNet > input').property("checked",false)
-                loc.updateHeatmap(loc.hmap);
+                loc.updateContours('FNet');
+                loc.bg='FNet';
             }
         })
-    hmapFNet.append("div")
+    bgFNet.append("div")
         .attr('class','labtext settings')
-        .attr('id','lab-heatmap-FNet-txt')
+        .attr('id','lab-bg-FNet-txt')
         .html(loc.tl('<span class="settings-name">%text.loc.settings.FNet%</span>'+
             '<span class="settings-desc">%text.loc.settings.FNet.desc%</span>'));
 
-    hmapaNet=d3.select('#settings-heatmap-cont').append("div")
+    bgaNet=d3.select('#settings-bg-cont').append("div")
         .attr('class','icon settingscont')
-        .attr('id','lab-heatmap-aNet')
-    hmapaNet.append("label")
+        .attr('id','lab-bg-aNet')
+    bgaNet.append("label")
         .attr("class","settings-switch")
         .attr("id",function(d){return "det-switch-aNet"})
         .html(function(){
-                return "<input type='checkbox' "+((loc.hmap=='aNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
+                return "<input type='checkbox' "+((loc.bg=='aNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
         .on("mousedown",function(){
-            console.log('toggling',this,this.id.split('-')[2],loc.hmap);
-            if (loc.hmap=='aNet'){
+            console.log('toggling',this,this.id.split('-')[2],loc.bg);
+            if (loc.overlays['contoursaNet'].shown){
                 console.log('aNet > none');
                 // turn off overlay
-                loc.hideOverlay('heatmap-aNet')
-                loc.hmap='none';
+                loc.hideOverlay('contoursaNet');
                 loc.colourWorldMap();
-            }else if (loc.hmap=='none'){
+                loc.bg='none';
+            }else if (loc.bg=='none'){
                 // turn on overlay
                 console.log('none > aNet');
-                loc.showOverlay('heatmap-aNet');
-                loc.hmap='aNet';
-                loc.updateHeatmap(loc.hmap);
+                loc.showOverlay('contoursaNet');
+                loc.updateContours('aNet');
                 loc.uncolourWorldMap();
+                loc.bg='aNet';
             }else{
                 // switch from FNet to aNet
                 console.log('FNet > aNet',d3.select('#det-switch-FNet > input').property("checked"));
-                loc.hmap='aNet';
+                loc.showOverlay('contoursaNet');
+                loc.hideOverlay('contoursFNet');
                 d3.select('#det-switch-FNet > input').property("checked",false);
-                console.log(d3.select('#det-switch-FNet > input').property("checked"));
-                loc.updateHeatmap(loc.hmap);
+                // console.log(d3.select('#det-switch-FNet > input').property("checked"));
+                loc.updateContours('aNet');
+                loc.bg='aNet';
             }
         })
-    hmapaNet.append("div")
+    bgaNet.append("div")
         .attr('class','labtext settings')
-        .attr('id','lab-heatmap-aNet-txt')
+        .attr('id','lab-bg-aNet-txt')
         .html(loc.tl('<span class="settings-name">%text.loc.settings.aNet%</span>'+
             '<span class="settings-desc">%text.loc.settings.aNet.desc%</span>'));
 
@@ -4607,13 +4662,14 @@ Localisation.prototype.addSettings = function(){
         .attr("class","settings-switch")
         .attr("id","det-switch-Tmatch")
         .html(function(){
-                return "<input type='checkbox' "+((loc.overlays['heatmap-Tmatch'].shown)?"checked":"")+">"+
+                return "<input type='checkbox' "+((loc.overlays['contoursTmatch'].shown)?"checked":"")+">"+
                     "<span class='det-slider round'></span>"})
         .on("mousedown",function(){
-            if (loc.overlays['heatmap-Tmatch'].shown){
-                loc.hideOverlay('heatmap-Tmatch')
+            if (loc.overlays['contoursTmatch'].shown){
+                loc.hideOverlay('contoursTmatch');
             }else{
-                loc.showOverlay('heatmap-Tmatch')
+                loc.showOverlay('contoursTmatch');
+                loc.updateContours('Tmatch');
             }
         })
     timingTmatch.append("div")
@@ -4622,10 +4678,10 @@ Localisation.prototype.addSettings = function(){
         .html(loc.tl('<span class="settings-name">%text.loc.settings.Tmatch%</span>'+
             '<span class="settings-desc">%text.loc.settings.Tmatch.desc%</span>'));
 
-    timingTallCont=d3.select('#settings-timing-cont').append("div")
+    timingTall=d3.select('#settings-timing-cont').append("div")
         .attr('class','icon settingscont')
         .attr('id','lab-timing-Tall-cont')
-    timingTallCont.append("label")
+    timingTall.append("label")
         .attr("class","settings-switch")
         .attr("id","det-switch-Tall-cont")
         .html(function(){
@@ -4633,38 +4689,39 @@ Localisation.prototype.addSettings = function(){
                     "<span class='det-slider round'></span>"})
         .on("mousedown",function(){
             if (loc.overlays['contoursTall'].shown){
-                loc.hideOverlay('contoursTall')
+                loc.hideOverlay('contoursTall');
             }else{
-                loc.showOverlay('contoursTall')
+                loc.showOverlay('contoursTall');
+                loc.updateContours('Tall');
             }
         })
-    timingTallCont.append("div")
+    timingTall.append("div")
         .attr('class','labtext settings')
         .attr('id','lab-timing-Tall-cont-txt')
-        .html(loc.tl('<span class="settings-name">%text.loc.settings.dth% Contour</span>'+
+        .html(loc.tl('<span class="settings-name">%text.loc.settings.dt% Contour</span>'+
             '<span class="settings-desc">%text.loc.settings.dt.desc% (Contour)</span>'));
 
-    timingdt=d3.select('#settings-timing-cont').append("div")
-        .attr('class','icon settingscont')
-        .attr('id','lab-timing-dt')
-    timingdt.append("label")
-        .attr("class","settings-switch")
-        .attr("id","det-switch-dt")
-        .html(function(){
-                return "<input type='checkbox' "+((loc.overlays['heatmap-Tall'].shown)?"checked":"")+">"+
-                    "<span class='det-slider round'></span>"})
-        .on("mousedown",function(){
-            if (loc.overlays['heatmap-Tall'].shown){
-                loc.hideOverlay('heatmap-Tall')
-            }else{
-                loc.showOverlay('heatmap-Tall')
-            }
-        })
-    timingdt.append("div")
-        .attr('class','labtext settings')
-        .attr('id','lab-timing-dt-txt')
-        .html(loc.tl('<span class="settings-name">%text.loc.settings.dt%</span>'+
-            '<span class="settings-desc">%text.loc.settings.dt.desc%</span>'));
+    // timingdt=d3.select('#settings-timing-cont').append("div")
+    //     .attr('class','icon settingscont')
+    //     .attr('id','lab-timing-dt')
+    // timingdt.append("label")
+    //     .attr("class","settings-switch")
+    //     .attr("id","det-switch-dt")
+    //     .html(function(){
+    //             return "<input type='checkbox' "+((loc.overlays['heatmap-Tall'].shown)?"checked":"")+">"+
+    //                 "<span class='det-slider round'></span>"})
+    //     .on("mousedown",function(){
+    //         if (loc.overlays['heatmap-Tall'].shown){
+    //             loc.hideOverlay('heatmap-Tall')
+    //         }else{
+    //             loc.showOverlay('heatmap-Tall')
+    //         }
+    //     })
+    // timingdt.append("div")
+    //     .attr('class','labtext settings')
+    //     .attr('id','lab-timing-dt-txt')
+    //     .html(loc.tl('<span class="settings-name">%text.loc.settings.dt%</span>'+
+    //         '<span class="settings-desc">%text.loc.settings.dt.desc%</span>'));
 
     coordscont=d3.select("#settings-coords-cont")
     d3.select('#settings-coords-cont').append("div")
@@ -4684,7 +4741,7 @@ Localisation.prototype.addSettings = function(){
         .html(function(){
                 return "<input type='checkbox' "+((loc.world)?"checked":"")+">"+"<span class='det-slider round'></span>"})
         .on("mousedown",function(){
-            console.log('toggling',this,this.id.split('-')[2],loc.hmap);
+            console.log('toggling',this,this.id.split('-')[2],loc.bg);
             if (loc.world){
                 // switch to sky
                 loc.world=false;
@@ -4694,7 +4751,7 @@ Localisation.prototype.addSettings = function(){
             }
             loc.svg.select("#worldmap").style("opacity",function(){return (loc.world)?1:0;})
             loc.svg.select("#skymap").style("opacity",function(){return (loc.world)?0:1;})
-            if(loc.hmap=='none'){loc.colourWorldMap()}else{loc.uncolourWorldMap()}
+            if(loc.bg=='none'){loc.colourWorldMap()}else{loc.uncolourWorldMap()}
             loc.updateAxes();
             loc.updated.coord=true;
             loc.updateCalcs();
@@ -4719,7 +4776,7 @@ Localisation.prototype.addSettings = function(){
         .html(function(){
                 return "<input type='checkbox' "+((loc.lores)?"checked":"")+">"+"<span class='det-slider round'></span>"})
         .on("mousedown",function(){
-            console.log('toggling',this,this.id.split('-')[2],loc.hmap);
+            console.log('toggling',this,this.id.split('-')[2],loc.bg);
             if (loc.lores){
                 // switch to hires
                 loc.skyarr.res = 2.5;
@@ -4767,11 +4824,11 @@ Localisation.prototype.showSettings = function(){
         .style("width",document.getElementById('infoouter').offsetWidth-2)
         .style("height",document.getElementById('infoouter').offsetHeight-22);
     if (this.portrait){
-        document.getElementById('settings-heatmap-cont').classList.add('bottom')
+        document.getElementById('settings-bg-cont').classList.add('bottom')
         document.getElementById('settings-timing-cont').classList.add('bottom')
         document.getElementById('settings-coords-cont').classList.add('bottom')
     }else{
-        document.getElementById('settings-heatmap-cont').classList.remove('bottom')
+        document.getElementById('settings-bg-cont').classList.remove('bottom')
         document.getElementById('settings-timing-cont').classList.remove('bottom')
         document.getElementById('settings-coords-cont').classList.remove('bottom')
     }
@@ -4891,8 +4948,8 @@ Localisation.prototype.hideTooltipManual = function(){
 Localisation.prototype.makePlot = function(){
     // make plot (calls other function)
     this.setLang();
-    this.dLonwSky();
-    this.dLonwEff();
+    this.drawSky();
+    this.drawEff();
     // this.addButtons();
     this.addHelp();
     this.addLang(false);
@@ -4906,7 +4963,7 @@ Localisation.prototype.makePlot = function(){
     if (this.event!=''){this.selectEvent(this.event)}
 }
 Localisation.prototype.replot = function(){
-    // remove plots and redLonw (e.g. on window resize)
+    // remove plots and redraw (e.g. on window resize)
     var loc=this;
     // console.log(loc.effName);
     // remove elements
@@ -4914,8 +4971,8 @@ Localisation.prototype.replot = function(){
     d3.select("div#svg-container").remove()
     d3.selectAll(".graph-icon").remove()
     // d3.selectAll("div.labcont").remove()
-    // redLonw graph and eff
-    this.redLonw=true;
+    // redraw graph and eff
+    this.redraw=true;
     this.setScales();
     this.setLang();
     if (this.world){
@@ -4927,13 +4984,13 @@ Localisation.prototype.replot = function(){
             .translate([0,this.skyHeight/2])
             .fitExtent([[0,0],[this.skyWidth,this.skyHeight]],this.skymap);
     }
-    this.dLonwSky();
-    this.dLonwEff();
+    this.drawSky();
+    this.drawEff();
     this.addHelp();
     this.adjCss();
     this.updateSourceLabels();
     this.setPanel(this.getPanel());
-    this.redLonw=false;
+    this.redraw=false;
     // gwcat.initButtons();
 }
 // define fly-in & fly-out
