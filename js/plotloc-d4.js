@@ -205,7 +205,7 @@ Localisation.prototype.init = function(){
             },
             colHeat:function(d){return "#f0f";},
             colCont:function(d){
-                scale=d3.scaleSequential(d3.interpolateGreens).domain([0,1]);
+                scale=d3.scaleSequential(d3.interpolateGreens).domain([2,0]);
                 return scale(d);
             },
             opCont:function(d){
@@ -230,7 +230,7 @@ Localisation.prototype.init = function(){
             },
             colHeat:function(d){return "#0ff";},
             colCont:function(d){
-                scale=d3.scaleSequential(d3.interpolateBlues).domain([0,loc.Ndet]);
+                scale=d3.scaleSequential(d3.interpolateBlues).domain([loc.Ndet,0]);
                 return scale(d);
             },
             opCont:function(d){
