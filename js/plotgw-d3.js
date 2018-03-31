@@ -2054,6 +2054,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.xvar,true));
+    // axis icon is div in SVG container (not SVG element)
     gw.graphcont.append("div")
         .attr("class", "x-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -2091,6 +2092,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .text(gw.getLabelUnit(gw.yvar,true));
+    // axis icon is div in SVG container (not SVG element)
     gw.graphcont.append("div")
         .attr("class", "y-axis axis-icon")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -2867,7 +2869,7 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .transition()
             .duration(750)
             .text(gw.getLabelUnit(gw.xvar,true));
-        gw.svgcont.select("#x-axis-icon")
+        gw.graphcont.select("#x-axis-icon")
             .attr("src",gw.getIcon(gw.xvar));
         gw.svg.select(".y-axis-line.axis-line")
             .transition()
@@ -2906,10 +2908,12 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
         if (gw.columns[gw.yvar].errcode==""){
             yMin = (d3.min(data, gw.yValue)<0) ? d3.min(data, gw.yValue) - yBorder : 0;
-            gw.yScale.domain([yMin, d3.max(data, gw.yValue)+yBorder]);
+            yMax = d3.max(data, gw.yValue)+yBorder;
+            gw.yScale.domain([yMin, yMax]);
         }else{
             yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
-            gw.yScale.domain([yMin, d3.max(data, gw.yErrP)+yBorder]);
+            yMax = d3.max(data, gw.yErrP)+yBorder;
+            gw.yScale.domain([yMin, yMax]);
         }
         gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
         // Select the section we want to apply our changes to
@@ -2942,13 +2946,13 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .transition()
             .duration(750)
             .text(gw.getLabelUnit(gw.yvar,true));
-        gw.svgcont.select("#y-axis-icon")
+        gw.graphcont.select("#y-axis-icon")
             .attr("src",gw.getIcon(gw.yvar));
         gw.svg.select(".x-axis-line.axis-line")
             .transition()
             .duration(750)
             .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
-            .attr("opacity",gw.yAxLineOp);
+            .attr("opacity",gw.xAxLineOp);
         data.forEach(function(d){
             if (d.name==gw.sketchName){
                 gw.svg.select("#highlight")
