@@ -1,5 +1,5 @@
 {
-    "text.loc.page.title":"Gravitational Wave Localisation",
+    "text.loc.page.title":"Gravitational Wave Localisation (UNDER DEVELOPMENT)",
     "text.loc.page.loading":"Loading...",
     "text.loc.map.rightasc":"Right Ascension",
     "text.loc.map.declination":"Declination",
@@ -56,6 +56,9 @@
     "text.loc.help.info":"Show the network results",
     "text.loc.help.lang":"Change the language the web-app is shown in",
     "text.loc.help.share": "Share the web-app to friends and/or followers",
+    "text.loc.help.source": "View/change the source properties",
+    "text.loc.help.settings": "Change the coordinate, overlay and view options",
+    "text.loc.help.search": "Set the location and time for a specific event",
     "text.loc.lang.title": "Language",
     "text.loc.lang.text": "Chose your language from the options below",
     "text.loc.lang.langcredit":"Translation credit",
