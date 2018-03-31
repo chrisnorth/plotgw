@@ -1900,7 +1900,7 @@ Localisation.prototype.drawSky = function(){
     loc.overlays = {
       'contoursT':{gid:"g-contoursT",shown:false,opacity:1},
       'contoursTall':{gid:"g-contoursTall",shown:true,opacity:1},
-      'contoursFNet':{gid:"g-contoursFNet",shown:true,opacity:0.7},
+      'contoursFNet':{gid:"g-contoursFNet",shown:false,opacity:0.7},
       'contoursaNet':{gid:"g-contoursaNet",shown:false,opacity:0.7},
       'contoursTmatch':{gid:"g-contoursTmatch",shown:false,opacity:1},
       'contoursPr':{gid:"g-contoursPr",shown:false,opacity:1},
@@ -4574,7 +4574,7 @@ Localisation.prototype.addSettings = function(){
         .attr("class","settings-switch")
         .attr("id",function(d){return "det-switch-FNet"})
         .html(function(){
-                return "<input type='checkbox' "+((loc.bg=='FNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
+                return "<input type='checkbox' "+((loc.overlays['contoursFNet'].shown)?"checked":"")+">"+"<span class='det-slider round'></span>"})
         .on("mousedown",function(){
             console.log('toggling',this,this.id.split('-')[2],loc.bg);
             if (loc.overlays['contoursFNet'].shown){
@@ -4613,7 +4613,7 @@ Localisation.prototype.addSettings = function(){
         .attr("class","settings-switch")
         .attr("id",function(d){return "det-switch-aNet"})
         .html(function(){
-                return "<input type='checkbox' "+((loc.bg=='aNet')?"checked":"")+">"+"<span class='det-slider round'></span>"})
+                return "<input type='checkbox' "+((loc.overlays['contoursaNet'].shown)?"checked":"")+">"+"<span class='det-slider round'></span>"})
         .on("mousedown",function(){
             console.log('toggling',this,this.id.split('-')[2],loc.bg);
             if (loc.overlays['contoursaNet'].shown){
