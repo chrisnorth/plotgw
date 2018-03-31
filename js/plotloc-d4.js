@@ -3688,7 +3688,7 @@ Localisation.prototype.calcTimeRings = function(){
                     if (this.dOn[j]>this.dOn[i]){
                         if (this.skyarr.arr.dt[i+j]){dd=i+j}else{dd=j+i}
                         dtp=this.skyarr.arr.dt[dd][p]
-                        Tm=Math.exp(-Math.pow((dtp-this.src.dt[dd])/(4*this.contourWidth(dd)),2));
+                        Tm=Math.exp(-Math.pow((dtp-this.src.dt[dd])/(2*this.contourWidth(dd)),2));
                         Ta=(Math.abs(dtp-this.src.dt[dd])<this.contourWidth(dd))?1:0
                         Tmatch[p]*=Tm;
                         Tall[p]+=Ta;
