@@ -16,7 +16,7 @@ function GWCatalogue(inp){
     var gw=this;
     this.getUrlVars();
     this.date = new Date();
-    if ((this.date.getMonth()==2)&&(this.date.getDate()==31)){this.doAprilFool=true;}
+    if ((this.date.getMonth()==3)&&(this.date.getDate()==1)){this.doAprilFool=true;}
     if (this.urlVars["ha"]){this.doAprilFool=true;}
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
