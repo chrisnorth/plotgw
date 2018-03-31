@@ -15,6 +15,9 @@ function GWCatalogue(inp){
     // this.init()
     var gw=this;
     this.getUrlVars();
+    this.date = new Date();
+    if ((this.date.getMonth()==2)&&(this.date.getDate()==31)){this.doAprilFool=true;}
+    if (this.urlVars["ha"]){this.doAprilFool=true;}
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
     if ((inp)&&(inp.clearhtml)){
@@ -37,6 +40,150 @@ function GWCatalogue(inp){
     });
     return this;
 }
+
+GWCatalogue.prototype.aprilFool = function(){
+    this.addApril();
+    this.showApril();
+    if ((this.showerrors)){this.toggleErrors();}
+}
+GWCatalogue.prototype.addApril = function(){
+    var gw=this;
+    if (d3.select("#april-outer").empty()){
+        if(this.debug){console.log('adding april-outer')}
+        d3.select('#'+this.holderid).insert("div","#options-outer + *")
+            .attr("id","april-outer").attr("class","panel-outer")
+        d3.select("#april-outer").append("div")
+            .attr("id","april-title").attr("class","panel-title")
+        d3.select("#april-outer").append("div")
+            .attr("id","april-block-text").attr("class","panel-block")
+        d3.select("#april-outer").append("div")
+            .attr("id","april-close").attr("class","panel-close")
+        d3.select("#april-outer").append("div")
+            .attr("id","april-block-text").attr("class","panel-text")
+            .html('<div class="panel-text" id="help-text"></div>')
+        gwcat.switchZ=function(){
+            oldXvar = gw.xvar;
+            newXvar = "Mfinal";
+            document.getElementById("button-divx-"+oldXvar).classList.remove("down");
+            document.getElementById("button-divx-"+newXvar).classList.add("down");
+            oldYvar = gw.yvar;
+            newYvar = "z";
+            document.getElementById("button-divy-"+oldYvar).classList.remove("down");
+            document.getElementById("button-divy-"+newYvar).classList.add("down");
+            // gw.updateYaxis(newYvar);
+            gw.updateBothaxes(newXvar,newYvar);
+        }
+        gwcat.switchM=function(){
+            oldXvar = gw.xvar;
+            newXvar = "M1";
+            document.getElementById("button-divx-"+oldXvar).classList.remove("down");
+            document.getElementById("button-divx-"+newXvar).classList.add("down");
+            oldYvar = gw.yvar;
+            newYvar = "M2";
+            document.getElementById("button-divy-"+oldYvar).classList.remove("down");
+            document.getElementById("button-divy-"+newYvar).classList.add("down");
+            // gw.updateYaxis(newYvar);
+            gw.updateBothaxes(newXvar,newYvar);
+        }
+        gwcat.resetApril=function(){
+            url=gw.makeUrl({'ha':false,'err':true});
+            window.location.href=url;
+        }
+    }
+    // add april icon to panel
+    d3.select("#april-title")
+        .html(this.tl("%text.plotgw.april.title%"))
+    d3.select("#april-block-text")
+        .html(this.tl("%text.plotgw.april.text%"));
+
+    d3.select("#april-close").on("click",function(){gw.hideApril();});
+    // d3.select("#help-tech")
+    //     .html(this.tl("%text.plotgw.help.about%%text.plotgw.help.tech%"));
+    if (this.portrait){
+        d3.select('.april-title')
+            .style("font-size",(5.0*this.xsc)+"em")
+        d3.selectAll('.april-cont-text')
+            .style("font-size",(2.0*this.xsc)+"em")
+        d3.selectAll('.april-text')
+            .style("font-size",(2.0*this.xsc)+"em")
+    }else{
+        d3.select('.april-title')
+            .style("font-size",(2.5*this.ysc)+"em")
+        d3.selectAll('.april-cont-text')
+            .style("font-size",(1.2*this.ysc)+"em")
+        d3.selectAll('.april-text')
+            .style("font-size",(1.2*this.ysc)+"em")
+    }
+}
+GWCatalogue.prototype.showApril = function(){
+    //show options
+    if (this.optionsOn){this.hideOptions();}
+    if (this.langOn){this.hideLang();}
+    if (this.helpOn){this.hideHelp();}
+    this.aprilOn=true;
+    // fade in semi-transparent background layer (greys out image)
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style({"opacity":0.5});
+    // this.helpbg.style("height","100%");
+    //fade in infopanel
+    this.aprilouter = d3.select('#april-outer')
+    this.aprilouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    // this.infopanel.html(this.iptext(d));
+    this.aprilouter.style("left", document.getElementById('infoouter').offsetLeft-1)
+        .style("top", document.getElementById('infoouter').offsetTop-1)
+        .style("width",document.getElementById('infoouter').offsetWidth-2)
+        .style("height",document.getElementById('infoouter').offsetHeight-22);
+    if (this.portrait){
+        document.getElementById('april-block-text').classList.add('bottom')
+    }else{
+        document.getElementById('april-block-text').classList.remove('bottom')
+    }
+    if (!d3.select("#april-icon").empty()){document.getElementById("april-icon").classList.remove("hidden");}
+    document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
+}
+GWCatalogue.prototype.hideApril = function(d) {
+    // hide options box
+    this.aprilOn=false;
+    // fade out infopanel
+    this.aprilouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.aprilouter.style("top","200%");
+    // fade out semi-transparent background
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style("opacity",0);
+    // this.helpbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
+    //add April button
+    if (d3.select("#april-icon").empty()){
+        this.graphcont.append("div")
+            .attr("id","april-icon")
+            .attr("class","graph-icon hidden")
+            .style({"right":gw.margin.right+7*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+            .on("mouseover",function(){
+                gw.showTooltipManual("%tooltip.plotgw.april%");
+            })
+            .on("mouseout",function(){
+                gw.hideTooltipManual();
+            }).append("img")
+            .attr("src","img/april.svg")
+            .attr("class","hidden")
+            .attr("id","april-img")
+            .on("click",function(){gw.showApril();gw.hideTooltipManual();});
+        d3.select("#april-bg").on("click",function(){gw.hideApril();});
+    }
+
+    document.getElementById("info-icon").classList.remove("hidden");
+    document.getElementById("april-icon").classList.add("hidden");
+    this.updateUrl();
+}
+
 GWCatalogue.prototype.init = function(){
     // created HTML of not included
     if (d3.select("#fb-root").empty()){
@@ -216,7 +363,10 @@ GWCatalogue.prototype.init = function(){
             'show':function(){gw.showHelp()}},
         'lang':{'status':false,
             'hide':function(){gw.hideLang()},
-            'show':function(){gw.showLang()}}
+            'show':function(){gw.showLang()}},
+        'april':{'status':false,
+            'hide':function(){gw.hideApril()},
+            'show':function(){gw.showApril()}}
     }
     if (this.urlVars.panel){
         for (p in this.panels){
@@ -258,6 +408,9 @@ GWCatalogue.prototype.makeUrl = function(newKeys,full){
         "lang":[this.lang,this.defaults.lang],
         "err":[this.showerrors,this.defaults.showerrors],
         "event":[this.selectedevent,""],
+    }
+    if (this.doAprilFool){
+        allKeys["ha"]=[this.doAprilFool,false]
     }
     for (key in allKeys){
         if (this.debug){console.log(key,allKeys[key]);}
@@ -308,6 +461,7 @@ GWCatalogue.prototype.setPanel = function(panel){
     if (panel=="options"){this.showOptions();}
     else if(panel=="help"){this.showHelp();}
     else if(panel=="lang"){this.showLang();}
+    else if(panel=="april"){this.showApril();}
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
     // translate text given dict
@@ -1713,7 +1867,8 @@ GWCatalogue.prototype.drawGraphInit = function(){
 
     gw.fileInDataDictDefault="json/datadict.json";
     gw.fileInDataDict = (gw.urlVars.dictFile) ? gw.urlVars.dictFile : gw.fileInDataDictDefault
-    gw.fileInEventsDefault="json/events.json";
+    gw.fileInEventsDefault=(gw.doAprilFool)?"json/events0104.json":"json/events.json";
+    // gw.fileInEventsDefault="json/events0104.json";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault
     gw.fileInXrayDefault="csv/bhcat_xray.csv";
     gw.fileInXray = (gw.urlVars.xrayFile) ? gw.urlVars.xrayFile : gw.fileInXrayDefault
@@ -2536,12 +2691,14 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("id","search-img")
         .on("click",function(){gw.showSearch();gw.hideTooltipManual();});
     gw.data.forEach(function(d){
-        d3.select('#search-outer').append("div")
+        if (d.objType.best!="BBHApril"){
+            d3.select('#search-outer').append("div")
             .attr("class","popup-list-item search-list-item")
             .attr("id","search-list-"+d.name)
             .html(d.name)
             .on("click",function(){
                 if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);}gw.hideSearch();})
+            }
         // if (gw.selectedevent==d.name){
         //     document.getElementById("search-list-"+d.name).classList.add("current")
         // }else{
@@ -2550,6 +2707,7 @@ GWCatalogue.prototype.drawGraph = function(){
     })
     d3.select("#search-bg").on("click",function(){gw.hideSearch();});
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
+
     console.log(gw.selectedevent); 
     // //add download button
     // this.graphcont.append("div")
@@ -2968,6 +3126,111 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
     gw.updateUrl()
     // window.history.pushState({},null,gw.makeUrl());
 }
+GWCatalogue.prototype.updateBothaxes = function(xvarNew,yvarNew) {
+    // update x-xais to xvarNew
+    // set global variable
+    this.xvar = xvarNew;
+    this.yvar = yvarNew;
+    var gw=this;
+    var data=gw.data;
+    // d3.csv("csv/gwcat.csv", function(error, data) {
+
+        // change string (from CSV) into number format
+        // data.forEach(gw.formatData);
+
+        // don't want dots overlapping axis, so add in buffer to data domain
+        // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
+        xBorder= (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2
+        if (gw.columns[gw.xvar].errcode==""){
+            xMin = (d3.min(data, gw.xValue)<0) ? d3.min(data, gw.xValue) - xBorder : 0;
+            xMax = d3.max(data, gw.xValue)+xBorder;
+            gw.xScale.domain([xMin, xMax]);
+        }else{
+            xMin = (d3.min(data, gw.xErrM)<0) ? d3.min(data, gw.xErrM) - xBorder : 0;
+            xMax = d3.max(data, gw.xErrP)+xBorder;
+            gw.xScale.domain([xMin, xMax]);
+        }
+        gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
+
+        yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
+        if (gw.columns[gw.yvar].errcode==""){
+            yMin = (d3.min(data, gw.yValue)<0) ? d3.min(data, gw.yValue) - yBorder : 0;
+            yMax = d3.max(data, gw.yValue)+yBorder;
+            gw.yScale.domain([yMin, yMax]);
+        }else{
+            yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
+            yMax = d3.max(data, gw.yErrP)+yBorder;
+            gw.yScale.domain([yMin, yMax]);
+        }
+        gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
+
+        // Select the section we want to apply our changes to
+        var svg = d3.select("body").transition();
+
+        // Move the dots
+        gw.svg.selectAll(".dot")   // change the line
+            .transition()
+            .duration(750)
+            .attr("cx", gw.xMap)
+            .attr("cy", gw.yMap)
+            .style("opacity",this.dotOp);
+        gw.svg.selectAll(".xraydot")   // change the line
+            .transition()
+            .duration(750)
+            .attr("cx", gw.xMap)
+            .attr("cy", gw.yMap)
+            .attr("opacity",function(d){return gw.getOpacity(d)})
+
+        gw.svg.select(".x-axis.axis")
+            .transition()
+            .duration(750)
+            .call(gw.xAxis);
+            //   .forceX([0]);
+        gw.svg.select(".x-axis.axis-label")
+            .transition()
+            .duration(750)
+            .text(gw.getLabelUnit(gw.xvar,true));
+        gw.graphcont.select("#x-axis-icon")
+            .attr("src",gw.getIcon(gw.xvar));
+        gw.svg.select(".y-axis-line.axis-line")
+            .transition()
+            .duration(750)
+            .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
+            .attr("opacity",gw.yAxLineOp);
+        // change the y axis
+        gw.svg.select(".y-axis.axis")
+            .transition()
+            .duration(750)
+            .call(gw.yAxis);
+        gw.svg.selectAll(".y-axis.axis-label")
+            .transition()
+            .duration(750)
+            .text(gw.getLabelUnit(gw.yvar,true));
+        gw.graphcont.select("#y-axis-icon")
+            .attr("src",gw.getIcon(gw.yvar));
+        gw.svg.select(".x-axis-line.axis-line")
+            .transition()
+            .duration(750)
+            .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
+            .attr("opacity",gw.xAxLineOp);
+
+        data.forEach(function(d){
+            if (d.name==gw.sketchName){
+                gw.svg.select("#highlight")
+                    .transition()
+                    .duration(750)
+                    .attr("cx", gw.xMap(d))
+                    .attr("cy", gw.yMap(d))
+                    .style("opacity",gw.dotOp(d));
+            }
+        });
+        // Update error bars
+        gw.updateErrors();
+    // });
+    gw.updateUrl();
+    // window.history.pushState({},null,gw.makeUrl());
+}
+
 GWCatalogue.prototype.addOptions = function(){
     // add options boxetc.
     // console.log("add options");
@@ -3080,6 +3343,7 @@ GWCatalogue.prototype.showOptions = function(){
     //show options
     if (this.helpOn){this.hideHelp()}
     if (this.langOn){this.hideLang()}
+    if (this.alrilOn){this.hideApril()}
     this.optionsOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -3168,6 +3432,7 @@ GWCatalogue.prototype.showHelp = function(){
     //show options
     if (this.optionsOn){this.hideOptions();}
     if (this.langOn){this.hideLang();}
+    if (this.aprilOn){this.hideApril();}
     this.helpOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -3288,6 +3553,7 @@ GWCatalogue.prototype.showLang = function(){
     //show options
     if (this.optionsOn){this.hideOptions();}
     if (this.helpOn){this.hideHelp();}
+    if (this.aprilOn){this.hideApril();}
     this.langOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -3467,6 +3733,7 @@ GWCatalogue.prototype.makePlot = function(){
     this.addOptions();
     this.addHelp();
     this.addLang(false);
+    if(this.doAprilFool){this.aprilFool();}
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
