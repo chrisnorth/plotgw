@@ -17,7 +17,8 @@ function GWCatalogue(inp){
     this.getUrlVars();
     this.date = new Date();
     if ((this.date.getMonth()==3)&&(this.date.getDate()==1)){this.doAprilFool=true;}
-    if (this.urlVars["ha"]){this.doAprilFool=true;}
+    if (this.urlVars["ha"]=="true"){this.doAprilFool=true;}
+    if (this.urlVars["ha"]=="false"){this.doAprilFool=false;}
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
     if ((inp)&&(inp.clearhtml)){
@@ -86,7 +87,7 @@ GWCatalogue.prototype.addApril = function(){
             gw.updateBothaxes(newXvar,newYvar);
         }
         gwcat.resetApril=function(){
-            url=gw.makeUrl({'ha':false,'err':true});
+            url=gw.makeUrl({'ha':"false",'err':true});
             window.location.href=url;
         }
     }
