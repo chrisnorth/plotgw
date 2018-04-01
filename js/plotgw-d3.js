@@ -118,7 +118,7 @@ GWCatalogue.prototype.addApril = function(){
             .attr("id","april-popup-outer").attr("class","popup-outer")
         d3.select('#april-popup-outer').append("div")
             .attr("id","popup-block-title").attr("class","popup-title")
-            .html("<p>You have followed a link to a page that was published on 1 April 2018 (<a href=''>April Fools' Day</a>). Continue at your own risk.</p><p>To visit the normal site <a id='zswitch' href='#' onclick='gwcat.resetApril();return false;'>click here</a>.")
+            .html("<p>You have followed a link to a page that was published on 1 April 2018 (<a href=https://en.wikipedia.org/wiki/April_Fools%27_Day'>April Fools' Day</a>). Continue at your own risk.</p><p>To visit the normal site <a id='zswitch' href='#' onclick='gwcat.resetApril();return false;'>click here</a>.")
         d3.select('#april-popup-outer').append("div")
             .attr("id","april-popup-close").attr("class","popup-close")
     }
