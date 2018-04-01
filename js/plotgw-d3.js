@@ -16,10 +16,11 @@ function GWCatalogue(inp){
     var gw=this;
     this.getUrlVars();
     this.date = new Date();
-    if ((this.date.getMonth()==3)&&(this.date.getDate()==1)){this.doAprilFool=true}
+    if ((this.date.getMonth()==3)&&(this.date.getDate()==1)){this.doAprilFool=true;this.afterApril=false}
     else{this.doAprilFool=false;this.afterApril=true;}
     if (this.urlVars["ha"]=="true"){this.doAprilFool=true;}
     if (this.urlVars["ha"]=="false"){this.doAprilFool=false;}
+
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
     if ((inp)&&(inp.clearhtml)){
@@ -46,6 +47,9 @@ function GWCatalogue(inp){
 GWCatalogue.prototype.aprilFool = function(){
     this.addApril();
     this.showApril();
+    if (this.afterApril){
+        this.showAprilPopup();
+    }
     if ((this.showerrors)){this.toggleErrors();}
 }
 GWCatalogue.prototype.addApril = function(){
@@ -103,6 +107,24 @@ GWCatalogue.prototype.addApril = function(){
         d3.select("#april-block-after")
             .html("You are reading this after 1 April 2018. This is an archived page. <a id='zswitch' href='#' onclick='gwcat.resetApril();return false;'>Revert to normal.</a>").style("color","red")
     }
+    if (d3.select('#april-popup-bg').empty()){
+        if(this.debug){console.log('adding april-popup-bg')}
+        d3.select('#'+this.holderid).insert("div","#lang-outer + *")
+            .attr("id","april-popup-bg").attr("class","popup-bg")
+    }
+    if (d3.select('#april-popup-outer').empty()){
+        if(this.debug){console.log('adding april-popup-outer')}
+        d3.select('#'+this.holderid).insert("div","#april-popup-bg + *")
+            .attr("id","april-popup-outer").attr("class","popup-outer")
+        d3.select('#april-popup-outer').append("div")
+            .attr("id","popup-block-title").attr("class","popup-title")
+            .html("<p>You have followed a link to a page that was published on 1 April 2018 (<a href=''>April Fools' Day</a>). Continue at your own risk.</p><p>To visit the normal site <a id='zswitch' href='#' onclick='gwcat.resetApril();return false;'>click here</a>.")
+        d3.select('#april-popup-outer').append("div")
+            .attr("id","april-popup-close").attr("class","popup-close")
+    }
+    d3.select("#april-popup-bg").on("click",function(){gw.hideAprilPopup();});
+    d3.select("#april-popup-close").on("click",function(){gw.hideAprilPopup();});
+
     this.langdict["tooltip.plotgw.april"]="April Fool!";
 
     d3.select("#april-close").on("click",function(){gw.hideApril();});
@@ -191,6 +213,34 @@ GWCatalogue.prototype.hideApril = function(d) {
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("april-icon").classList.add("hidden");
     this.updateUrl();
+}
+
+GWCatalogue.prototype.showAprilPopup = function(){
+    //show share pot
+    var gw=this;
+    d3.select("#april-popup-bg").style("height","100%").style("display","block").style("opacity",0.9);
+    aprilpopupouter=d3.select('#april-popup-outer')
+    aprilpopupouter.transition()
+       .duration(500)
+       .style("opacity",1)
+       .style("max-height",document.getElementById('svg-container').offsetHeight);;
+    aprilpopupouter.style("top",
+            document.getElementById('graphcontainer').offsetTop+
+            document.getElementById('graphcontainer').offsetHeight*0.1)
+        .style("left",
+            document.getElementById('graphcontainer').offsetLeft+
+            document.getElementById('graphcontainer').offsetWidth*0.1)
+        .style("width",document.getElementById('graphcontainer').offsetWidth*0.8)
+        .style("height",document.getElementById('graphcontainer').offsetHeight*0.8)
+}
+GWCatalogue.prototype.hideAprilPopup = function(){
+    //show share pot
+    d3.select('#april-popup-bg').style("height",0).style("display","none");
+    d3.select('#april-popup-outer').transition()
+       .duration(500)
+       .style("opacity",0)
+       .style("max-height",0);
+
 }
 
 GWCatalogue.prototype.init = function(){
