@@ -16,7 +16,8 @@ function GWCatalogue(inp){
     var gw=this;
     this.getUrlVars();
     this.date = new Date();
-    if ((this.date.getMonth()==3)&&(this.date.getDate()==1)){this.doAprilFool=true;}
+    if ((this.date.getMonth()==3)&&(this.date.getDate()==1)){this.doAprilFool=true}
+    else{this.doAprilFool=false;this.afterApril=true;}
     if (this.urlVars["ha"]=="true"){this.doAprilFool=true;}
     if (this.urlVars["ha"]=="false"){this.doAprilFool=false;}
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
@@ -58,6 +59,8 @@ GWCatalogue.prototype.addApril = function(){
         d3.select("#april-outer").append("div")
             .attr("id","april-block-text").attr("class","panel-block")
         d3.select("#april-outer").append("div")
+            .attr("id","april-block-after").attr("class","panel-block")
+        d3.select("#april-outer").append("div")
             .attr("id","april-close").attr("class","panel-close")
         d3.select("#april-outer").append("div")
             .attr("id","april-block-text").attr("class","panel-text")
@@ -93,9 +96,14 @@ GWCatalogue.prototype.addApril = function(){
     }
     // add april icon to panel
     d3.select("#april-title")
-        .html(this.tl("%text.plotgw.april.title%"))
+        .html("1 April 2018 Update")
     d3.select("#april-block-text")
-        .html(this.tl("%text.plotgw.april.text%"));
+            .html("<p>Following the full analysis of the LIGO data, and with a commitment to open data, it is only fair that the full collection of detections are released to the public. The data are published here as of 1 April 2018.</p><p>To fully appreciate the significance of this data release, it is suggested that you look at the detections in <a id='zswitch' href='#' onclick='gwcat.switchZ();return false;'>redshift space</a>, as well as in <a id='mswitch' href='#' onclick='gwcat.switchM();return false;'>mass space</a>.</p><p>The justification for this data release, which is not endorsed by the LIGO Scientific Collaboration or the Virgo Collaboration, is available <a href='https://en.wikipedia.org/wiki/April_Fools%27_Day'>here</a>.</p><p>You can also return to the <a id='zswitch' href='#' onclick='gwcat.resetApril();return false;'>official data release</a>.</p>");
+    if (this.afterApril){
+        d3.select("#april-block-after")
+            .html("You are reading this after 1 April 2018. This is an archived page. <a id='zswitch' href='#' onclick='gwcat.resetApril();return false;'>Revert to normal.</a>").style("color","red")
+    }
+    this.langdict["tooltip.plotgw.april"]="April Fool!";
 
     d3.select("#april-close").on("click",function(){gw.hideApril();});
     // d3.select("#help-tech")
