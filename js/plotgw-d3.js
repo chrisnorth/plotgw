@@ -403,6 +403,7 @@ GWCatalogue.prototype.init = function(){
         "en":{code:"en",name:"English"},
         "es":{code:"es",name:"Español"},
         "fr":{code:"fr",name:"Français"},
+        "it":{code:"it",name:"Italiano"},
         "pl":{code:"pl",name:"Polski"},
         // "en-GB":{code:"en-GB",name:"English"},
         // "de2":{code:"de",name:"Deutsch (de)"},
