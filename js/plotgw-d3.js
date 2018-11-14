@@ -1565,7 +1565,7 @@ GWCatalogue.prototype.formatData = function(d,cols){
             if ((d[col].err)&&(d[col].err.length==2)){
                 d[col].errv =
                     [d[col].best+d[col].err[0],
-                    d[col].best-d[col].err[1]];
+                    d[col].best+d[col].err[1]];
                 d[col].errtype='normal';
             }else if ((d[col].lim)&&(d[col].lim.length==2)){
                 d[col].errv =
@@ -1761,7 +1761,14 @@ GWCatalogue.prototype.drawGraphInit = function(){
                     if(this.debug){console.log('linkIn',e,linkIn)}
                     newlinks[e]={}
                     for (l in linkIn){
+                        if (linkIn[l].type.search('primarypub')>=0){
+                            newlinks[e]['DetPaper']={
+                                text:linkIn[l].text,
+                                url:linkIn[l].url,
+                                type:'paper'}
+                        }
                         if (linkIn[l].text.search('Paper')>=0){
+                            // keeping for compatibility
                             newlinks[e]['DetPaper']={
                                 text:linkIn[l].text,
                                 url:linkIn[l].url,
