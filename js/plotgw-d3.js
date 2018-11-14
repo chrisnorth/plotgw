@@ -66,42 +66,43 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding infoouter')}
         d3.select("#"+this.holderid).insert("div","#graphcontainer + *")
             .attr("id","infoouter")
-            .html('<div id="sketchcontainer"></div><div id="labcontainer"></div><div id="select-next" class="select-event select-next"></div><div id="select-previous" class="select-event select-previous"></div>')
+            .attr("class","colourise")
+            .html('<div id="sketchcontainer" class="colourise"></div><div id="labcontainer" class="colourise"></div><div id="select-next" class="select-event select-next colourise"></div><div id="select-previous" class="select-event select-previous colourise"></div>')
     }
     if (d3.select("#options-outer").empty()){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
-            .attr("id","options-outer").attr("class","panel-outer")
-            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="options-close" class="panel-close"></div></div>')
+            .attr("id","options-outer").attr("class","panel-outer colourise")
+            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>')
     }
     if (d3.select("#help-outer").empty()){
         if(this.debug){console.log('adding help-outer')}
         d3.select('#'+this.holderid).insert("div","#options-outer + *")
-            .attr("id","help-outer").attr("class","panel-outer")
+            .attr("id","help-outer").attr("class","panel-outer colourise")
         d3.select("#help-outer").append("div")
             .attr("id","help-title").attr("class","panel-title")
         d3.select("#help-outer").append("div")
             .attr("id","help-block-icons").attr("class","panel-block")
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-help-cont").attr("class","panel-cont")
+            .attr("id","help-help-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/help.svg"><div class="panel-cont-text" id="help-help-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-info-cont").attr("class","panel-cont")
+            .attr("id","help-info-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/info.svg"><div class="panel-cont-text" id="help-info-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-settings-cont").attr("class","panel-cont")
+            .attr("id","help-settings-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/settings.svg"><div class="panel-cont-text" id="help-settings-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-lang-cont").attr("class","panel-cont")
+            .attr("id","help-lang-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/lang.svg"><div class="panel-cont-text" id="help-lang-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-errors-cont").attr("class","panel-cont")
+            .attr("id","help-errors-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/errors.svg"><div class="panel-cont-text" id="help-errors-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-share-cont").attr("class","panel-cont")
+            .attr("id","help-share-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
         d3.select("#help-block-icons").append("div")
-            .attr("id","help-search-cont").attr("class","panel-cont")
+            .attr("id","help-search-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/search.svg"><div class="panel-cont-text" id="help-search-text"></div>')
         d3.select("#help-outer").append("div")
             .attr("id","help-close").attr("class","panel-close")
@@ -112,7 +113,7 @@ GWCatalogue.prototype.init = function(){
     if (d3.select('#lang-outer').empty()){
         if(this.debug){console.log('adding lang-outer')}
         d3.select('#'+this.holderid).insert("div","#help-outer + *")
-            .attr("id","lang-outer").attr("class","panel-outer")
+            .attr("id","lang-outer").attr("class","panel-outer colourise")
         d3.select("#lang-outer").append("div")
             .attr("id","lang-title").attr("class","panel-title")
         d3.select("#lang-outer").append("div")
@@ -125,12 +126,12 @@ GWCatalogue.prototype.init = function(){
     if (d3.select('#share-bg').empty()){
         if(this.debug){console.log('adding share-bg')}
         d3.select('#'+this.holderid).insert("div","#lang-outer + *")
-            .attr("id","share-bg").attr("class","popup-bg")
+            .attr("id","share-bg").attr("class","popup-bg colourise")
     }
     if (d3.select('#share-outer').empty()){
         if(this.debug){console.log('adding share-outer')}
         d3.select('#'+this.holderid).insert("div","#share-bg + *")
-            .attr("id","share-outer").attr("class","popup-outer")
+            .attr("id","share-outer").attr("class","popup-outer colourise")
         d3.select('#share-outer').append("div")
             .attr("id","share-block-icon-twitter").attr("class","popup-button")
             .html('<a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>')
@@ -151,18 +152,18 @@ GWCatalogue.prototype.init = function(){
     if (d3.select('#search-bg').empty()){
         if(this.debug){console.log('adding search-bg')}
         d3.select('#'+this.holderid).insert("div","#search-outer + *")
-            .attr("id","search-bg").attr("class","popup-bg")
+            .attr("id","search-bg").attr("class","popup-bg colourise")
     }
     if (d3.select('#search-outer').empty()){
         if(this.debug){console.log('adding search-outer')}
         d3.select('#'+this.holderid).insert("div","#search-bg + *")
-            .attr("id","search-outer").attr("class","popup-outer")
+            .attr("id","search-outer").attr("class","popup-outer colourise")
             .html('<div id="search-close" class="popup-close"></div>')
     }
     if (d3.select('#tooltipSk').empty()){
         if(this.debug){console.log('adding tooltip')}
         d3.select('#'+this.holderid).insert("div","#search-outer + *")
-            .attr("id","tooltipSk").attr("class","tooltip")
+            .attr("id","tooltipSk").attr("class","tooltip colourise")
     }
     var clipboard = new Clipboard('#copy-button');
     clipboard.on('success',function(e){
@@ -225,6 +226,7 @@ GWCatalogue.prototype.init = function(){
             }else{this.panels[p].status=false}
         }
     }
+
 }
 GWCatalogue.prototype.getUrlVars = function(){
     // Get URL and query variables
@@ -1116,25 +1118,25 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("id", "gradBH");
     this.gradBH.append("stop")
         .attr("offset", "0%")
-        .attr("stop-color", this.colBH[0]);
+        .attr("stop-color", this.getCol('BH')[0]);
     this.gradBH.append("stop")
         .attr("offset", "80%")
-        .attr("stop-color", this.colBH[0]);
+        .attr("stop-color", this.getCol('BH')[0]);
     this.gradBH.append("stop")
         .attr("offset", "100%")
-        .attr("stop-color", this.colBH[1]);
+        .attr("stop-color", this.getCol('BH')[1]);
     this.gradShadow = this.svgSketch.append("defs")
       .append("radialGradient")
         .attr("id", "gradShadow");
     this.gradShadow.append("stop")
         .attr("offset", "0%")
-        .attr("stop-color", this.colShadow[0]);
+        .attr("stop-color", this.getCol('shadow')[0]);
     this.gradShadow.append("stop")
         .attr("offset", "25%")
-        .attr("stop-color", this.colShadow[0]);
+        .attr("stop-color", this.getCol('shadow')[0]);
     this.gradShadow.append("stop")
         .attr("offset", "100%")
-        .attr("stop-color", this.colShadow[1]);
+        .attr("stop-color", this.getCol('shadow')[1]);
 
     if (this.redraw){
         // console.log('redrawing masses');
@@ -1187,14 +1189,14 @@ GWCatalogue.prototype.drawSketch = function(){
     this.sketchTitle = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.1))
-        .attr("class","sketch-title panel-title")
+        .attr("class","sketch-title panel-title colourise "+gw.getColClass())
         .attr("text-anchor","middle")
         .style("font-size",fs+"em")
         .html(this.tl("%text.plotgw.information.title%"));
     this.sketchTitleHint = this.svgSketch.append("text")
         .attr("x",this.xScaleSk(0.5))
         .attr("y",this.yScaleSk(0.2))
-        .attr("class","sketch-subtitle pabel-subtitle")
+        .attr("class","sketch-subtitle panel-subtitle colourise "+gw.getColClass())
         .attr("text-anchor","middle")
         .style("font-size",(0.75*fs)+"em")
         .html(this.tl("%text.plotgw.information.subtitle%"));
@@ -1476,11 +1478,52 @@ GWCatalogue.prototype.updateSketch = function(d){
 GWCatalogue.prototype.setStyles = function(){
     // setup colours and linestyles
     var gw=this
+
+    // initialise colours
+    this.colourList = {
+        'light':{'class':'col-white','default':true,
+            'fg':'#000','bg':'#fff',
+            'line':'#000','text':'#000',
+            'grid':'#555','err':'#555',
+            'BH':["rgba(0,0,0,1)","rgba(0,0,0,0)"],
+            'shadow':["rgba(128,128,128,1)","rgba(192,192,192,0)"],
+            'dotfill':["#1f77b4", "#ff7f0e","#999999"],
+            'dotline':["#000","#555","#555"],
+            'axis':"rgb(100,100,100)",
+            'highlight':'#f00',
+            'tick':'#ccc'
+        },
+        'dark':{'class':'col-black','default':false,
+            'fg':'#fff','bg':'#000',
+            'line':'#fff','text':'#fff',
+            'grid':'#ccc','err':'#ccc',
+            'BH':["rgba(255,255,255,1)","rgba(255,255,255,0)"],
+            'shadow':["rgba(128,128,128,1)","rgba(64,64,64,0)"],
+            'dotfill':["#1f77b4", "#ff7f0e","#999999"],
+            'dotline':["#fff","#555","#555"],
+            'axis':"rgb(200,200,200)",
+            'highlight':'#f00',
+            'tick':'#555'
+        }
+    }
+    if (!this.colScheme){this.colScheme='light'}
+    this.getCol = function(col){
+        if ((this.colourList[this.colScheme][col])){
+            return(this.colourList[this.colScheme][col])
+        }else{
+            return('')
+        }
+    }
+    this.getColClass = function(){
+        if (!this.colourList[this.colScheme].default){
+            return this.colourList[this.colScheme].class
+        }else{return ''}
+    }
     this.cValue = function(d) {return d.type;};
     this.color1 = d3.scale.category10();
     this.styleDomains = (this.showxray) ? ['GW','LVT','xray'] : ['GW','LVT'];
-    this.color = d3.scale.ordinal().range(["#1f77b4", "#ff7f0e","#999999"]).domain(this.styleDomains);
-    this.linestyles = d3.scale.ordinal().range(["#000","#555","#555"]).domain(this.styleDomains);
+    this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
+    this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
     this.linedashes = d3.scale.ordinal().range([0,3,0]).domain(this.styleDomains);
     this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
     this.getOpacity = function(d) {return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.type) : 0)}
@@ -1489,13 +1532,13 @@ GWCatalogue.prototype.setStyles = function(){
     //         return true
     //     }else{return false}
     // }
-    this.colorErr = "#555";
+    // this.colorErr = this.getCol('err');
     this.swErr = 2;
     this.opErr = 0.7;
 
     // set colours
-    this.colBH = ["rgba(0,0,0,1)","rgba(0,0,0,0)"];
-    this.colShadow = ["rgba(128,128,128,1)","rgba(192,192,192,0)"];
+    // this.colBH = this.getCol('BH');
+    // this.colShadow = this.getCol('shadow');
 }
 GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
@@ -1678,7 +1721,7 @@ GWCatalogue.prototype.makeGraph = function(){
     // add the tooltip area to the webpage
     if (!this.redraw){
         this.tooltip = d3.select("#"+this.holderid).append("div")
-            .attr("class", "tooltip")
+            .attr("class", "tooltip colourise")
             .style("opacity", 0);
     }
 }
@@ -2012,6 +2055,34 @@ GWCatalogue.prototype.setLang = function(){
     d3.select('#facebook-share-button').attr('title',this.tl('%text.gen.share.fb%'))
     d3.select('#twitter-share-button').attr('title',this.tl('%text.gen.share.twitter%'))
 }
+GWCatalogue.prototype.setColour = function(newScheme){
+    var gw=this;
+    var oldScheme=this.colScheme;
+    if (!this.colourList[newScheme]){
+        console.log('ERROR: Unknown colour scheme:',newScheme);
+        return;
+    }else{console.log('Setting colour scheme from',oldScheme,'to',newScheme);}
+    colEls=d3.selectAll('.colourise')[0]
+    colEls.forEach(function(el){
+        console.log('colourising',el.id,el.classList)
+        if (!(gw.colourList[oldScheme].default)){
+            console.log('removing old class:',gw.colourList[oldScheme].class);
+            el.classList.remove(gw.colourList[oldScheme].class);
+        }else{
+            console.log('old scheme',oldScheme,'is default')
+        }
+        if ((!(gw.colourList[newScheme].default))){
+            console.log('adding new class:',gw.colourList[newScheme].class);
+            el.classList.add(gw.colourList[newScheme].class);
+        }else{
+            console.log('new scheme',newScheme,'is default')
+        }
+    });
+    this.colScheme=newScheme;
+    this.setStyles();
+    this.replot();
+    return;
+}
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
     var gw = this;
@@ -2041,7 +2112,7 @@ GWCatalogue.prototype.drawGraph = function(){
 
     // x-axis
     gw.svg.append("g")
-        .attr("class", "x-axis axis")
+        .attr("class", "x-axis axis colourise "+gw.getColClass())
         .attr("transform", "translate("+gw.margin.left+"," +
             (gw.margin.top + gw.graphHeight) + ")");
     gw.svg.append("line")
@@ -2049,8 +2120,8 @@ GWCatalogue.prototype.drawGraph = function(){
             gw.margin.top+")")
         .attr("class","x-axis-line axis-line")
         .attr("x1",0).attr("x2",gw.graphWidth)
-        .attr("y1",0).attr("y2",0)
-        .style("stroke","rgb(100,100,100)").attr("stroke-width",5)
+        .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
+        .style("stroke",gw.getCol('axis')).attr("stroke-width",5)
         .attr("opacity",gw.xAxLineOp);
     gw.svg.select(".x-axis.axis").call(gw.xAxis)
     gw.svg.select(".x-axis.axis").append("text")
@@ -2060,9 +2131,10 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y", 1.2*(1+gw.scl)+"em")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
+        .style("fill",gw.getCol('text'))
         .text(gw.getLabelUnit(gw.xvar,true));
     gw.graphcont.append("div")
-        .attr("class", "x-axis axis-icon")
+        .attr("class", "x-axis axis-icon colourise "+gw.getColClass())
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("right", gw.margin.right)
         .style("bottom", (gw.margin.bottom+(15*gw.scl)))
@@ -2073,20 +2145,21 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("src",gw.getIcon(gw.xvar));
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
-        .style("font-size",(0.8*(1+gw.scl))+"em");
+        .style("font-size",(0.8*(1+gw.scl))+"em")
+        .style("fill",gw.getCol('text'));
 
     // y-axis
     gw.svg.append("g")
-        .attr("class", "y-axis axis")
+        .attr("class", "y-axis axis colourise "+gw.getColClass())
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")");
     gw.svg.append("line")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
         .attr("class","y-axis-line axis-line")
-        .attr("x1",0).attr("x2",0)
+        .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
         .attr("y1",0).attr("y2",gw.graphHeight)
-        .style("stroke","rgb(100,100,100)").attr("stroke-width",5)
+        .style("stroke",gw.getCol('axis')).attr("stroke-width",5)
         .attr("opacity",gw.yAxLineOp);
     gw.svg.select(".y-axis.axis").call(gw.yAxis)
     gw.svg.select(".y-axis.axis").append("text")
@@ -2097,9 +2170,10 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("dy", (-20*(1+gw.scl))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
+        .style("fill",gw.getCol('text'))
         .text(gw.getLabelUnit(gw.yvar,true));
     gw.graphcont.append("div")
-        .attr("class", "y-axis axis-icon")
+        .attr("class", "y-axis axis-icon colourise "+gw.getColClass())
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
         .style("top", gw.margin.top)
         .style("left", (gw.margin.left-(40*gw.scl))/2.)
@@ -2110,10 +2184,11 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("src",gw.getIcon(gw.yvar));
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
-        .style("font-size",(0.8*(1+gw.scl))+"em");
+        .style("font-size",(0.8*(1+gw.scl))+"em")
+        .style("fill",gw.getCol('text'));
 
     d3.selectAll('.tick > line')
-            .style('stroke','#ccc')
+            .style('stroke',gw.getCol('tick'))
             .style('opacity',1)
 
     // draw x-ray dots
@@ -2166,7 +2241,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrM)
         .attr("y1",gw.yMap).attr("y2",gw.yMap)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add top of x error bar
@@ -2176,7 +2251,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMapErrPouter).attr("x2",gw.xMapErrP)
         .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     errX.append("line")
@@ -2185,7 +2260,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMapErrP).attr("x2",gw.xMapErrPouter)
         .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add bottom of x error bar
@@ -2195,7 +2270,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMapErrMouter).attr("x2",gw.xMapErrM)
         .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     errX.append("line")
@@ -2204,7 +2279,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMapErrM).attr("x2",gw.xMapErrMouter)
         .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
 
@@ -2221,7 +2296,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMap).attr("x2",gw.xMap)
         .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrM)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add top of y error bar
@@ -2231,7 +2306,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.yMapErrX0).attr("x2",gw.xMap)
         .attr("y1",gw.yMapErrPouter).attr("y2",gw.yMapErrP)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     errY.append("line")
@@ -2240,7 +2315,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMap).attr("x2",gw.yMapErrX1)
         .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrPouter)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     // add bottom of y error bar
@@ -2250,7 +2325,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.yMapErrX0).attr("x2",gw.xMap)
         .attr("y1",gw.yMapErrMouter).attr("y2",gw.yMapErrM)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
     errY.append("line")
@@ -2259,7 +2334,7 @@ GWCatalogue.prototype.drawGraph = function(){
         //     gw.margin.top+")")
         .attr("x1",gw.xMap).attr("x2",gw.yMapErrX1)
         .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrMouter)
-        .attr("stroke",gw.colorErr)
+        .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
         .attr("opacity",gw.opErr);
 
@@ -2272,7 +2347,7 @@ GWCatalogue.prototype.drawGraph = function(){
             gw.margin.top+")")
         .style("fill","white")
         .style("fill-opacity",0)
-        .style("stroke","red")
+        .style("stroke",gw.getCol('highlight'))
         .style("stroke-width",3)
     .append("circle")
         .attr("id","highlight")
@@ -2371,7 +2446,7 @@ GWCatalogue.prototype.drawGraph = function(){
     this.optionsouter = d3.select('#options-outer')
     this.graphcont.append("div")
         .attr("id","options-icon")
-        .attr("class",optionsClass)
+        .attr("class",optionsClass+" colourise "+gw.getColClass())
         .style({"right":gw.margin.right+gw.margin.top+10,"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
@@ -2402,7 +2477,7 @@ GWCatalogue.prototype.drawGraph = function(){
     infoClass = ((!this.optionsOn)&(!this.helpOn)&(!this.langOn)) ? "graph-icon" : "graph-icon hidden";
     this.graphcont.append("div")
         .attr("id","info-icon")
-        .attr("class",infoClass)
+        .attr("class",infoClass+" colourise "+gw.getColClass())
         .style({"right":gw.margin.right,"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
@@ -2429,7 +2504,7 @@ GWCatalogue.prototype.drawGraph = function(){
     this.helpouter = d3.select('#help-outer')
     this.graphcont.append("div")
         .attr("id","help-icon")
-        .attr("class",helpClass)
+        .attr("class",helpClass+" colourise "+gw.getColClass())
         .style({"right":gw.margin.right+2*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
@@ -2459,7 +2534,7 @@ GWCatalogue.prototype.drawGraph = function(){
     this.langouter = d3.select('#lang-outer')
     this.graphcont.append("div")
         .attr("id","lang-icon")
-        .attr("class",langClass)
+        .attr("class",langClass+" colourise "+gw.getColClass())
         .style({"right":gw.margin.right+3*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
         .on("mouseover", function(d) {
               gw.tooltip.transition()
@@ -2490,7 +2565,7 @@ GWCatalogue.prototype.drawGraph = function(){
     // errordivClass = (this.showerrors) ? "graph-icon" : "graph-icon hidden";
     this.graphcont.append("div")
         .attr("id","errors-icon")
-        .attr("class","graph-icon"+((this.showerrors) ? "" : " hidden"))
+        .attr("class","graph-icon"+((this.showerrors) ? "" : " hidden")+" colourise "+gw.getColClass())
         .style({"right":gw.margin.right+4*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
             if (gw.showerrors){
@@ -2510,7 +2585,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add share button
     this.graphcont.append("div")
         .attr("id","share-icon")
-        .attr("class","graph-icon hidden")
+        .attr("class","graph-icon hidden colourise "+gw.getColClass())
         .style({"right":gw.margin.right+5*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
             gw.showTooltipManual("%tooltip.plotgw.share%");
@@ -2528,7 +2603,7 @@ GWCatalogue.prototype.drawGraph = function(){
     //add search button
     this.graphcont.append("div")
         .attr("id","search-icon")
-        .attr("class","graph-icon hidden")
+        .attr("class","graph-icon hidden colourise "+gw.getColClass())
         .style({"right":gw.margin.right+6*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
             gw.showTooltipManual("%tooltip.plotgw.search%");
@@ -2874,8 +2949,8 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .transition()
             .duration(750)
             .text(gw.getLabelUnit(gw.xvar,true));
-        gw.svgcont.select("#x-axis-icon")
-            .attr("src",gw.getIcon(gw.xvar));
+        // gw.svgcont.select("#x-axis-icon")
+        //     .attr("src",gw.getIcon(gw.xvar));
         gw.svg.select(".y-axis-line.axis-line")
             .transition()
             .duration(750)
@@ -2955,7 +3030,7 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .transition()
             .duration(750)
             .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
-            .attr("opacity",gw.yAxLineOp);
+            .attr("opacity",gw.xAxLineOp);
         data.forEach(function(d){
             if (d.name==gw.sketchName){
                 gw.svg.select("#highlight")
@@ -3041,6 +3116,22 @@ GWCatalogue.prototype.addOptions = function(){
         }
     }
 
+    // add Display buttons
+    var divdisp= document.getElementById('display-options');
+    var  colList=document.createElement('select');
+    colList.name = 'colSelect';
+    colList.id = 'colSelect';
+    for (c in this.colourList){
+        colOpt=document.createElement('option');
+        colOpt.value=c;
+        colOpt.innerHTML=c;
+        colList.appendChild(colOpt);
+    }
+    colList.onchange = function(){
+        console.log(this,this.value)
+        gw.setColour(this.value)
+    }
+    divdisp.appendChild(colList);
     // gw.langs={
     //     "en":{code:"en",name:"English (en)"},
     //     "fr":{code:"fr",name:"Francais (fr)"},
@@ -3102,9 +3193,11 @@ GWCatalogue.prototype.showOptions = function(){
     if (this.portrait){
         document.getElementById('options-x').classList.add('bottom')
         document.getElementById('options-y').classList.add('bottom')
+        document.getElementById('display-options').classList.add('bottom')
     }else{
         document.getElementById('options-x').classList.remove('bottom')
         document.getElementById('options-y').classList.remove('bottom')
+        document.getElementById('display-options').classList.remove('bottom')
     }
     document.getElementById("options-icon").classList.remove("hidden");
     document.getElementById("info-icon").classList.add("hidden");
@@ -3238,7 +3331,7 @@ GWCatalogue.prototype.addLang = function(replot){
     }
     for (lang in this.langs){
         langdiv = document.createElement('div');
-        langdiv.className = 'panel-cont lang-cont';
+        langdiv.className = 'panel-cont lang-cont colourise';
         if (lang==gw.lang){
             langdiv.classList.add('current')
         }
