@@ -179,14 +179,12 @@ GWCatalogue.prototype.init = function(){
         panel:"info",
         lang:"en",
         showerrors:true,
-        showxray:false,
         selectedevent:"GW170814"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
     this.showerrors = (this.urlVars.err) ? this.urlVars.err : this.defaults.showerrors;
     this.showerrors = (this.showerrors=="false") ? false : true;
-    this.showxray = (this.urlVars.xray) ? this.urlVars.xray : this.defaults.showxray;
     this.selectedevent = (this.urlVars.event) ? this.urlVars.event : this.defaults.selectedevent;
     this.setStyles();
     this.sketchName="None";
@@ -1521,18 +1519,13 @@ GWCatalogue.prototype.setStyles = function(){
     }
     this.cValue = function(d) {return d.type;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = (this.showxray) ? ['GW','LVT','xray'] : ['GW','LVT'];
+    this.styleDomains = ['GW','LVT'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
     this.linedashes = d3.scale.ordinal().range([0,3,0]).domain(this.styleDomains);
     this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
     this.getOpacity = function(d) {return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.type) : 0)}
-    // this.xrayShown = function(d) {
-    //     if ((gw.xrayCols.hasOwnProperty(gw.xvar))&&(gw.xrayCols.hasOwnProperty(gw.yvar))&&(gw.showxray)){
-    //         return true
-    //     }else{return false}
-    // }
-    // this.colorErr = this.getCol('err');
+
     this.swErr = 2;
     this.opErr = 0.7;
 
@@ -1548,13 +1541,6 @@ GWCatalogue.prototype.tttext = function(d){
         ": "+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
     "<span class='ttsec'>"+this.tl(this.columns[this.yvar].name) +
         ": "+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
-}
-GWCatalogue.prototype.tttextXray = function(d){
-    // graph tooltip text
-    if (this.debug){console.log(d["name"],this.columns[this.xvar].name,d[this.xvar].strnoerr,this.columns[this.yvar].name,d[this.yvar].strnoerr)}
-    return "<span class='ttname'>"+d["name"]+"</span>"+
-    "<span class='ttpri'>"+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
-    "<span class='ttsec'>"+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
 }
 GWCatalogue.prototype.orderData = function(order='GPS'){
     this.data=this.data.sort(function(a,b){
@@ -1645,56 +1631,6 @@ GWCatalogue.prototype.formatData = function(d,cols){
         // console.log(col,d[col]);
     }
 }
-// GWCatalogue.prototype.formatDataXray = function(d,cols){
-//     // generate new columns
-//     if (this.debug){console.log('formatData',d.name);}
-//     var gw=this;
-//     gw.xrayCols=['M1','M2'];
-//     gw.xrayCols={
-//         M1:{icon:"img/primass.svg",avail:true,type:'src',
-//             strfn:function(d){
-//                 return("%text.plotgw.bhmass%<br/>"+(d.M1.best)+" %data.M1.unit%");}
-//             },
-//         M2:{icon:"img/secmass.svg",avail:true,type:'src',
-//             strfn:function(d){
-//                 return("%text.plotgw.compmass%<br/>"+(d.M2.best)+" %data.M2.unit%");}
-//         }
-//     }
-//     for (col in gw.xrayCols){
-//         // console.log(col,gw.columns[col].type);
-//         if (gw.xrayCols[col].type=="derived"){
-//             d[col]={}
-//             if (gw.xrayCols[col].bestfn){d[col].best=gw.xrayCols[col].bestfn(d);}
-//             if ((gw.xrayCols[col].errfn)&&(d[col].err)){d[col].err=gw.columns[col].errfn(d);}
-//             // console.log('new column',col,d[col])
-//         }else{
-//             // console.log('existing column',col,d[col])
-//         }
-//         if (d[col]){
-//             if ((d[col].err)&&(d[col].err.length==2)){
-//                 d[col].errv =
-//                     [d[col].best+d[col].err[0],
-//                     d[col].best-d[col].err[1]];
-//             }else if (typeof d[col].best=="number"){
-//                 d[col].errv =[d[col].best,d[col].best];
-//             }
-//             if (gw.xrayCols[col].strfn){
-//                 d[col].str=gw.xrayCols[col].strfn(d);
-//                 if ((gw.xrayCols[col].strfnnoerr)&&(d[col].err)){
-//                     d[col].strnoerr=gw.xrayCols[col].strfnnoerr(d);
-//                 }else{
-//                     d[col].strnoerr=gw.xrayCols[col].strfn(d);
-//                 }
-//             }else{
-//                 d[col].str=(d[col].err) ? gw.stdlabel(d,col) : gw.stdlabelNoErr(d,col);
-//                 d[col].strnoerr = gw.stdlabelNoErr(d,col);
-//             }
-//         }
-//         // console.log(col,d[col])
-//         // console.log(col,d[col])
-//         // console.log(col,d[col]);
-//     }
-// }
 GWCatalogue.prototype.makeGraph = function(){
     // create graph
     // console.log('makeGraph');
@@ -1758,8 +1694,6 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.fileInDataDict = (gw.urlVars.dictFile) ? gw.urlVars.dictFile : gw.fileInDataDictDefault
     gw.fileInEventsDefault="json/events.json";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault
-    gw.fileInXrayDefault="csv/bhcat_xray.csv";
-    gw.fileInXray = (gw.urlVars.xrayFile) ? gw.urlVars.xrayFile : gw.fileInXrayDefault
 
     // if (gw.urlVars.lang){
     //     lang=gw.urlVars.lang;
@@ -1903,32 +1837,12 @@ GWCatalogue.prototype.drawGraphInit = function(){
             // if(gw.debug){console.log('plotted');}
         }
     });
-    // read in Xray data
-    // d3.csv(gw.fileInXray, function(error, dataIn){
-    //     if (error){alert("Fatal error loading input file: '"+gw.fileInXray+"'. Sorry!")}
-    //     gw.dataXray = dataIn;
-    //     for (i in gw.dataXray){
-    //         d=gw.dataXray[i];
-    //         d.M1={best:d.massBH};
-    //         d.M2={best:d.compMass};
-    //         d.D2={best:d.distance};
-    //         d.type='xray';
-    //     }
-    //     gw.loaded++;
-    //     if (gw.debug){console.log('loaded: '+gw.inputFileXray)}
-    //     //call next functions
-    //     if (gw.loaded==gw.toLoad){
-    //         gw.whenLoaded();
-    //     }else{
-    //         if (gw.debug){console.log('not ready yet')}
-    //     }
-    // })
+
 }
 GWCatalogue.prototype.whenLoaded = function(){
     var gw=this;
     gw.setColumns(gw.datadict);
     gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-    // gw.dataXray.forEach(function(d){gw.formatDataXray(d,gw.columns)});
     // order Data
     gw.orderData();
     gw.makePlot();
@@ -2036,8 +1950,7 @@ GWCatalogue.prototype.setLang = function(){
     d3.select("#options-y > .panel-title")
         .html(this.tl('%text.plotgw.vertical-axis%'))
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
-        LVT:this.tl('%text.plotgw.legend.candidates%'),
-        xray:this.tl('%text.bub.legend.xray%')}
+        LVT:this.tl('%text.plotgw.legend.candidates%')}
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
@@ -2191,41 +2104,6 @@ GWCatalogue.prototype.drawGraph = function(){
             .style('stroke',gw.getCol('tick'))
             .style('opacity',1)
 
-    // draw x-ray dots
-    // if (this.showxray){
-    // xrayGroup = gw.svg.append("g").attr("class","g-xray")
-    // xrayGroup.selectAll(".xraydot")
-    //     .data(gw.dataXray)
-    // .enter().append("circle")
-    //     .attr("class", "xraydot")
-    //     .attr("transform", "translate("+gw.margin.left+","+
-    //         gw.margin.top+")")
-    //     .attr("r", Math.min(10.,7/gw.sksc))
-    //     .attr("cx", gw.xMap)
-    //     .attr("cy", gw.yMap)
-    //     .attr("cursor","default")
-    //     .attr("opacity",function(d){return gw.getOpacity(d)})
-    // //   .style("fill", function(d) { return color(cValue(d));})
-    //     .style("fill", function(d){return gw.color(gw.cValue(d));})
-    //     .style("stroke",function(d){return gw.linestyles(d.type);})
-    //     .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
-    //     .style("stroke-width",Math.min(5,2./gw.sksc))
-    //     .on("mouseover", function(d) {
-    //         gw.tooltip.transition()
-    //            .duration(200)
-    //            .style("opacity", .9);
-    //         gw.tooltip.html(gw.tttextXray(d))
-    //            .style("left", (d3.event.pageX + 10) + "px")
-    //            .style("top", (d3.event.pageY-10) + "px")
-    //            .style("width","auto")
-    //            .style("height","auto");
-    //     })
-    //     .on("mouseout", function(d) {
-    //         gw.tooltip.transition()
-    //            .duration(500)
-    //            .style("opacity", 0);
-    //     })
-    // }
 
     // add x error bar
     errorGroup = gw.svg.append("g").attr("class","g-errors")
@@ -2431,14 +2309,6 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
-
-    // hide/show xray legend dot
-    // if(gw.xrayShown()){
-    //     d3.select('.legend.xray')
-    //         .transition().duration(750).attr("opacity",1)
-    // }else{
-    //     d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
-    // }
 
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
@@ -2927,18 +2797,6 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
             .duration(750)
             .attr("cx", gw.xMap)
             .style("opacity",this.dotOp);
-        gw.svg.selectAll(".xraydot")   // change the line
-            .transition()
-            .duration(750)
-            .attr("cx", gw.xMap)
-            .attr("opacity",function(d){return gw.getOpacity(d)})
-        // hide/show xray legend dot
-        // if(gw.xrayShown()){
-        //     d3.select('.legend.xray')
-        //         .transition().duration(750).attr("opacity",1)
-        // }else{
-        //     d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
-        // }
         // change the x axis
         gw.svg.select(".x-axis.axis")
             .transition()
@@ -3003,18 +2861,6 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
             .duration(750)
             .attr("cy", gw.yMap)
             .style("opacity",this.dotOp);
-        gw.svg.selectAll(".xraydot")   // change the line
-            .transition()
-            .duration(750)
-            .attr("cy", gw.yMap)
-            .attr("opacity",function(d){return gw.getOpacity(d)})
-        // hide/show xray legend dots
-        // if(gw.xrayShown()){
-        //     d3.select('.legend.xray')
-        //         .transition().duration(750).attr("opacity",1)
-        // }else{
-        //     d3.select('.legend.xray').transition().duration(750).attr("opacity",0)
-        // }
         // change the y axis
         gw.svg.select(".y-axis.axis")
             .transition()
@@ -3603,6 +3449,3 @@ GWCatalogue.prototype.replot = function(){
     gwcat.redraw=false;
     // gwcat.initButtons();
 }
-// define fly-in & fly-out
-
-//labels to add and keep updated
