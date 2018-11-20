@@ -1688,8 +1688,8 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.lengOn=false;
     gw.toLoad=3;
-    gw.fileInCatDefault="gwcat/data/events.json";
-    gw.fileInCat = (gw.urlVars.catFile) ? gw.urlVars.catFile : gw.fileInCatDefault;
+    gw.fileInEventsDefault="gwcat/data/events.json";
+    gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault;
 
     // // pre-GWCat
     // gw.toLoad=4;
@@ -1818,7 +1818,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     }
 
     if(this.debug){console.log('loading GWCat');}
-    catIn = new GWCat(eventsCallback,{'fileIn':gw.fileInCat})
+    catIn = new GWCat(eventsCallback,{'fileIn':gw.fileInEvents})
 
     // // pre-GWCat
     // if(this.debug){console.log('loading standard');}
