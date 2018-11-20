@@ -2428,6 +2428,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("dy", ".35em")
       .attr("font-size","1.2em")
       .style("text-anchor", "start")
+      .style("fill",gw.getCol('text'))
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
 
     //add options icon
