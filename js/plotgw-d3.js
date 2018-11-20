@@ -21,7 +21,6 @@ function GWCatalogue(inp){
         if(this.debug){console.log('clearing current html from '+gw.holderid)}
         d3.select('#'+gw.holderid).html('')
     }
-
     //set default language from browser
     this.langIn = (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
     //set lang from query (if present)
@@ -1684,16 +1683,20 @@ GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
     gw.loaded=0;
-    gw.toLoad=4;
     gw.data=[];
     gw.optionsOn=false;
     gw.helpOn=false;
     gw.lengOn=false;
+    gw.toLoad=3;
+    gw.fileInCatDefault="gwcat/data/events.json";
+    gw.fileInCat = (gw.urlVars.catFile) ? gw.urlVars.catFile : gw.fileInCatDefault;
 
-    gw.fileInDataDictDefault="json/datadict.json";
-    gw.fileInDataDict = (gw.urlVars.dictFile) ? gw.urlVars.dictFile : gw.fileInDataDictDefault
-    gw.fileInEventsDefault="json/events.json";
-    gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault
+    // // pre-GWCat
+    // gw.toLoad=4;
+    // gw.fileInDataDictDefault="json/datadict.json";
+    // gw.fileInDataDict = (gw.urlVars.dictFile) ? gw.urlVars.dictFile : gw.fileInDataDictDefault
+    // gw.fileInEventsDefault="json/events.json";
+    // gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault
 
     // if (gw.urlVars.lang){
     //     lang=gw.urlVars.lang;
@@ -1703,22 +1706,23 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.loadLang(this.langIn)
     // gw.langdict_default = gw.loadLang(gw.langDefault,true);
 
-    d3.json(gw.fileInEvents, function(error, dataIn) {
-        if (error){
-            console.log('events error:',error,dataIn);
-            alert("Fatal error loading input file: '"+gw.fileInEvents+"'. Sorry!");
-        }else{
-            if (this.debug){console.log("dataIn (events:)",dataIn)}
-        }
+    eventsCallback = function (){
+        // console.log('loaded');
+        this.loaded++;
+        // return
+        var dataIn=this;
+        if (gw.debug){console.log("dataIn (events:)",dataIn)}
         gw.loaded++;
         if (gw.debug){console.log('dataIn.links',dataIn.links)}
-        if (dataIn.datadict){
+        if (this.datadict){
+            gw.datadict=this.datadict;
             //uses LOSC format (has datadict), so need to convert
             gw.dataFormat='losc';
-            if (this.debug){console.log('converting from LOSC format');}
+            if (gw.debug){console.log('converting from LOSC format');}
             newlinks={}
             for (e in dataIn.data){
-                if(this.debug){console.log(e,dataIn.data[e])}
+                // console.log(e,dataIn.data[e]);
+                if(gw.debug){console.log(e,dataIn.data[e])}
                 // // convert events to required format
                 // ev=dataIn.events[e];
                 // dataIn.data[e]={};
@@ -1732,10 +1736,10 @@ GWCatalogue.prototype.drawGraphInit = function(){
                 //     }
                 // }
                 // convert links to required format
-                if(this.debug){console.log(e,dataIn.links)}
+                if(gw.debug){console.log(e,dataIn.links)}
                 if (dataIn.links[e]){
                     linkIn=dataIn.links[e];
-                    if(this.debug){console.log('linkIn',e,linkIn)}
+                    if(gw.debug){console.log('linkIn',e,linkIn)}
                     newlinks[e]={}
                     for (l in linkIn){
                         if (linkIn[l].type.search('primarypub')>=0){
@@ -1776,7 +1780,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
                                 type:'web'}
                         }
                     }
-                    if(this.debug){console.log('links',e,newlinks[e])}
+                    if(gw.debug){console.log('links',e,newlinks[e])}
                 }
             }
             dataIn.links=newlinks;
@@ -1786,17 +1790,8 @@ GWCatalogue.prototype.drawGraphInit = function(){
         }
         if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
         for (e in dataIn.data){
-            dataIn.data[e].name=e;
-            if (dataIn.data[e].type){
-                dataIn.data[e].type=dataIn.data[e].type.best
-            }else{
-                if (e[0]=='G'){t='GW'}
-                else if (e[0]=='L'){t='LVT'}
-                else{t=''}
-                dataIn.data[e].type=t;
-            }
-            if (e[0]=='G'){c='GW'}
-            else if (e[0]=='L'){c='LVT'}
+            if (dataIn.data[e].name[0]=='G'){c='GW'}
+            else if (dataIn.data[e].name[0]=='L'){c='LVT'}
             else{c=''}
             dataIn.data[e].conf=c;
             if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
@@ -1820,23 +1815,148 @@ GWCatalogue.prototype.drawGraphInit = function(){
             // gw.makePlot();
             // if(gw.debug){console.log('plotted');}
         }
-    });
-    d3.json(gw.fileInDataDict, function(error, dataIn) {
-        if (error){
-            alert("Fatal error loading input file: '"+gw.fileInDataDict+"'. Sorry!")
-        }
-        gw.loaded++;
-        // if(gw.debug){console.log((dataIn),(dataIn.datadict))}
-        gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
-        if((gw.debug)&&(dataIn)){console.log('datadict:',gw.datadict,dataIn);}
-        if (gw.loaded==gw.toLoad){
-            gw.whenLoaded();
-            // gw.setColumns(gw.datadict);
-            // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-            // gw.makePlot();
-            // if(gw.debug){console.log('plotted');}
-        }
-    });
+    }
+
+    if(this.debug){console.log('loading GWCat');}
+    catIn = new GWCat(eventsCallback,{'fileIn':gw.fileInCat})
+
+    // // pre-GWCat
+    // if(this.debug){console.log('loading standard');}
+    // d3.json(gw.fileInEvents, function(error, dataIn) {
+    //     if (error){
+    //         console.log('events error:',error,dataIn);
+    //         alert("Fatal error loading input file: '"+gw.fileInEvents+"'. Sorry!");
+    //     }else{
+    //         if (this.debug){console.log("dataIn (events:)",dataIn)}
+    //     }
+    //     gw.loaded++;
+    //     if (gw.debug){console.log('dataIn.links',dataIn.links)}
+    //     if (dataIn.datadict){
+    //         //uses LOSC format (has datadict), so need to convert
+    //         gw.dataFormat='losc';
+    //         if (this.debug){console.log('converting from LOSC format');}
+    //         newlinks={}
+    //         for (e in dataIn.data){
+    //             if(this.debug){console.log(e,dataIn.data[e])}
+    //             // // convert events to required format
+    //             // ev=dataIn.events[e];
+    //             // dataIn.data[e]={};
+    //             // for (c in ev){
+    //             //     if (typeof ev[c]=="number"){
+    //             //         dataIn.data[e][c]={best:ev[c]}
+    //             //     }else if (typeof ev[c]=="object"){
+    //             //         dataIn.data[e][c]={best:ev[c][0],err:[ev[c][1],ev[c][2]]}
+    //             //     }else{
+    //             //         dataIn.data[e][c]={best:ev[c]}
+    //             //     }
+    //             // }
+    //             // convert links to required format
+    //             if(this.debug){console.log(e,dataIn.links)}
+    //             if (dataIn.links[e]){
+    //                 linkIn=dataIn.links[e];
+    //                 if(this.debug){console.log('linkIn',e,linkIn)}
+    //                 newlinks[e]={}
+    //                 for (l in linkIn){
+    //                     if (linkIn[l].type.search('primarypub')>=0){
+    //                         newlinks[e]['DetPaper']={
+    //                             text:linkIn[l].text,
+    //                             url:linkIn[l].url,
+    //                             type:'paper'}
+    //                     }
+    //                     if (linkIn[l].text.search('Paper')>=0){
+    //                         // keeping for compatibility
+    //                         newlinks[e]['DetPaper']={
+    //                             text:linkIn[l].text,
+    //                             url:linkIn[l].url,
+    //                             type:'paper'}
+    //                     }
+    //                     else if (linkIn[l].text.search('Open Data page')>=0){
+    //                         newlinks[e]['LOSCData']={
+    //                             text:linkIn[l].text,
+    //                             url:linkIn[l].url,
+    //                             type:'web-data'}
+    //                     }
+    //                     else if (linkIn[l].text.search('GraceDB page')>=0){
+    //                         newlinks[e]['GraceDB']={
+    //                             text:linkIn[l].text,
+    //                             url:linkIn[l].url,
+    //                             type:'web-data'}
+    //                     }
+    //                     else if (linkIn[l].text.search('Final Skymap')>=0){
+    //                         newlinks[e]['SkyMapFile']={
+    //                             text:linkIn[l].text,
+    //                             url:linkIn[l].url,
+    //                             type:'file'}
+    //                     }
+    //                     else if (linkIn[l].text.search('Skymap View')>=0){
+    //                         newlinks[e]['SkyMapAladin']={
+    //                             text:linkIn[l].text,
+    //                             url:linkIn[l].url,
+    //                             type:'web'}
+    //                     }
+    //                 }
+    //                 if(this.debug){console.log('links',e,newlinks[e])}
+    //             }
+    //         }
+    //         dataIn.links=newlinks;
+    //     }else{
+    //         gw.dataFormat='std';
+    //         newlinks=false;
+    //     }
+    //     if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
+    //     for (e in dataIn.data){
+    //         console.log(e,dataIn.data[e],dataIn.data[e].type);
+    //         dataIn.data[e].name=e;
+    //         if (dataIn.data[e].type){
+    //             dataIn.data[e].type=dataIn.data[e].type.best
+    //         }else{
+    //             if (dataIn.data[e].name[0]=='G'){t='GW'}
+    //             else if (dataIn.data[e].name[0]=='L'){t='LVT'}
+    //             else{t=''}
+    //             dataIn.data[e].type=t;
+    //         }
+    //         if (dataIn.data[e].name[0]=='G'){c='GW'}
+    //         else if (dataIn.data[e].name[0]=='L'){c='LVT'}
+    //         else{c=''}
+    //         dataIn.data[e].conf=c;
+    //         if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
+    //             link=dataIn.links[e].LOSCData;
+    //             link.url=link.url;
+    //             dataIn.data[e].link=link;
+    //         }
+    //         if ((dataIn.links[e]) && (dataIn.links[e].DetPaper)){
+    //             ref=dataIn.links[e].DetPaper;
+    //             ref.url=ref.url;
+    //             dataIn.data[e].ref=ref;
+    //             if(gw.debug){console.log(dataIn.data[e].name,ref)}
+    //         }
+    //         gw.data.push(dataIn.data[e]);
+    //     }
+    //     if(gw.debug){console.log('data pre-format:',gw.data);}
+    //     if (gw.loaded==gw.toLoad){
+    //         gw.whenLoaded();
+    //         // gw.setColumns(gw.datadict);
+    //         // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+    //         // gw.makePlot();
+    //         // if(gw.debug){console.log('plotted');}
+    //     }
+    // });
+    // d3.json(gw.fileInDataDict, function(error, dataIn) {
+    //     if (error){
+    //         alert("Fatal error loading input file: '"+gw.fileInDataDict+"'. Sorry!")
+    //     }
+    //     gw.loaded++;
+    //     // if(gw.debug){console.log((dataIn),(dataIn.datadict))}
+    //     gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
+    //     if((gw.debug)&&(dataIn)){console.log('datadict:',gw.datadict,dataIn);}
+    //     if (gw.loaded==gw.toLoad){
+    //         gw.whenLoaded();
+    //         // gw.setColumns(gw.datadict);
+    //         // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+    //         // gw.makePlot();
+    //         // if(gw.debug){console.log('plotted');}
+    //     }
+    // });
 
 }
 GWCatalogue.prototype.whenLoaded = function(){
