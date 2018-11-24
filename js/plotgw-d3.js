@@ -122,9 +122,20 @@ GWCatalogue.prototype.init = function(){
         d3.select("#lang-outer").append("div")
             .attr("id","lang-close").attr("class","panel-close")
     }
+    if (d3.select('#filter-outer').empty()){
+        if(this.debug){console.log('adding lang-outer')}
+        d3.select('#'+this.holderid).insert("div","#help-outer + *")
+            .attr("id","filter-outer").attr("class","panel-outer colourise")
+        d3.select("#filter-outer").append("div")
+            .attr("id","filter-title").attr("class","panel-title")
+        d3.select("#filter-outer").append("div")
+            .attr("id","filter-block").attr("class","panel-block panel-block-full")
+        d3.select("#filter-outer").append("div")
+            .attr("id","filter-close").attr("class","panel-close")
+    }
     if (d3.select('#share-bg').empty()){
         if(this.debug){console.log('adding share-bg')}
-        d3.select('#'+this.holderid).insert("div","#lang-outer + *")
+        d3.select('#'+this.holderid).insert("div","#filter-outer + *")
             .attr("id","share-bg").attr("class","popup-bg colourise")
     }
     if (d3.select('#share-outer').empty()){
@@ -202,6 +213,16 @@ GWCatalogue.prototype.init = function(){
         // "fr2":{code:"fr",name:"Francais (fr)"},
     }
 
+    this.filters = {
+        "m1":{name:'%data.M1.name%',step:10,type:'slider',
+            "min": { "label": "", "unit": "%data.M1.unit%", "default": 0, "value": 0 },
+            "max": { "label": "", "unit": "%data.M1.unit%", "default": 50, "value": 50 }
+        },
+        "m2":{name:'%data.M2.name%',type:'slider',
+            "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
+            "max": { "label": "", "unit": "%data.M2.unit%", "default": 50, "value": 50 }
+        }
+    }
     this.panels = {
         'info':{'status':true,
             'hide':function(){gw.hideInfo()},
@@ -214,7 +235,10 @@ GWCatalogue.prototype.init = function(){
             'show':function(){gw.showHelp()}},
         'lang':{'status':false,
             'hide':function(){gw.hideLang()},
-            'show':function(){gw.showLang()}}
+            'show':function(){gw.showLang()}},
+        'filter':{'status':false,
+            'hide':function(){gw.hideFilter()},
+            'show':function(){gw.showFilter()}}
     }
     if (this.urlVars.panel){
         for (p in this.panels){
@@ -721,6 +745,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         //this.labcontWidth="45%";
         this.labcontHeight="20%";
         this.langcontHeight="10%";
+        this.filtcontHeight="10%";
         // info.style.top = "50%";
         // info.style.left = "0%";
     }else{
@@ -742,6 +767,7 @@ GWCatalogue.prototype.scaleWindow = function(){
         //this.labcontWidth="45%";
         this.labcontHeight="10%";
         this.langcontHeight="5%";
+        this.filtcontHeight="5%";
         // info.style.top = "";
         // info.style.left = "";
     }
@@ -2573,11 +2599,42 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("id","errors-img")
         .on("click",function(){gw.toggleErrors();gw.hideTooltipManual();});
 
+    // add filter button
+    filterClass = (this.filterOn) ? "graph-icon" : "graph-icon hidden";
+    this.filterouter = d3.select('#filter-outer')
+    this.graphcont.append("div")
+        .attr("id","filter-icon")
+        .attr("class",filterClass+" colourise "+gw.getColClass())
+        .style({"right":gw.margin.right+5*(gw.margin.top+10),"top":0,"width":40*gw.ysc,"height":40*gw.ysc})
+        .on("mouseover", function(d) {
+              gw.tooltip.transition()
+                 .duration(200)
+                 .style("opacity", .9);
+              gw.tooltip.html(gw.tl('%tooltip.plotgw.showfilter%'))
+                 .style("left", (d3.event.pageX + 10) + "px")
+                 .style("top", (d3.event.pageY-10) + "px")
+                 .style("width","auto")
+                 .style("height","auto");
+        })
+        .on("mouseout", function(d) {
+            gw.tooltip.transition()
+                 .duration(500)
+                 .style("opacity", 0);
+          //   document.getElementById("sketchcontainer").style.opacity=0.;
+        }).append("img")
+        .attr("src","img/filter.svg")
+        .on("click",function(){console.log('showing filter panel');gw.showFilter();});
+    // this.langbg.on("click",function(){gw.hideLang();});
+    this.filterouter
+        .style("top","200%");
+    this.filterouter.select("#filter-close")
+        .on("click",function(){gw.hideFilter();});
+
     //add share button
     this.graphcont.append("div")
         .attr("id","share-icon")
         .attr("class","graph-icon hidden colourise "+gw.getColClass())
-        .style({"right":gw.margin.right+5*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .style({"right":gw.margin.right+6*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
             gw.showTooltipManual("%tooltip.plotgw.share%");
         })
@@ -2595,7 +2652,7 @@ GWCatalogue.prototype.drawGraph = function(){
     this.graphcont.append("div")
         .attr("id","search-icon")
         .attr("class","graph-icon hidden colourise "+gw.getColClass())
-        .style({"right":gw.margin.right+6*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .style({"right":gw.margin.right+7*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
         .on("mouseover",function(){
             gw.showTooltipManual("%tooltip.plotgw.search%");
         })
@@ -3141,6 +3198,7 @@ GWCatalogue.prototype.showOptions = function(){
     //show options
     if (this.helpOn){this.hideHelp()}
     if (this.langOn){this.hideLang()}
+    if (this.filterOn){this.hideFilter();}
     this.optionsOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -3231,6 +3289,7 @@ GWCatalogue.prototype.showHelp = function(){
     //show options
     if (this.optionsOn){this.hideOptions();}
     if (this.langOn){this.hideLang();}
+    if (this.filterOn){this.hideFilter();}
     this.helpOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -3351,6 +3410,7 @@ GWCatalogue.prototype.showLang = function(){
     //show options
     if (this.optionsOn){this.hideOptions();}
     if (this.helpOn){this.hideHelp();}
+    if (this.filterOn){this.hideFilter();}
     this.langOn=true;
     // fade in semi-transparent background layer (greys out image)
     // this.optionsbg.transition()
@@ -3393,6 +3453,174 @@ GWCatalogue.prototype.hideLang = function(d) {
     // d3.selectAll(".info").attr("opacity",0);
     document.getElementById("info-icon").classList.remove("hidden");
     document.getElementById("lang-icon").classList.add("hidden");
+    this.updateUrl();
+}
+GWCatalogue.prototype.addFilter = function(replot){
+    // add filters to panel
+    var gw=this;
+
+    function getRange(key){
+		var a = gw.filters[key];
+		var range = {};
+		var values = [0,0];
+		var dates;
+		if(typeof a.min['default']==="number") range.min = a.min['default'];
+		else{
+			if(a.format=='date'){
+				if(!dates) dates = getDateRange();
+				range.min = (dates[0]).getTime();
+			}
+		}
+		if(typeof a.max['default']==="number") range.max = a.max['default'];
+		else{
+			if(a.format=='date'){
+				if(!dates) dates = getDateRange();
+				range.max = (dates[1]).getTime();
+			}
+		}
+		// Set the starting values to either a specified value or the range default
+		values[0] = (typeof a.min.value==="number" ? a.min.value : range.min);
+		values[1] = (typeof a.max.value==="number" ? a.max.value : range.max);
+		return {'range':range,'values':values };
+	}
+
+    function buildSlider(attr){
+		if(!attr) return {};
+		if(!attr.values) return {};
+		if(attr.el.length != 1) return {};
+        console.log('bs',this)
+        this.values = attr.values;
+		this.range = attr.range;
+		this.step = (attr.step||1);
+		this.connect = (this.values.length==2) ? true : false;
+		this.el = attr.el;
+
+		var inputs = { 'start': this.values, 'step': this.step, 'range': this.range, 'connect': this.connect };
+		this.slider = noUiSlider.create(this.el.select('.slider')[0][0], inputs);
+
+		var _slider = this;
+		this.slider.on('update', function(values, handle) {
+			var value = values[handle];
+			var change = false;
+			if(_slider.values[handle] != parseFloat(value)) change = true;
+			_slider.values[handle] = parseFloat(value);
+			var min = _slider.values[0];
+			var max = _slider.values[1];
+			if(attr.format && attr.format=='date'){
+				min = (new Date(min)).toISOString().substr(0,10);
+				max = (new Date(max)).toISOString().substr(0,10);
+			}
+			if(_slider.el.select('.min').length > 0) _slider.el.select('.min').html(min);
+			if(_slider.el.select('.max').length > 0) _slider.el.select('.max').html(max);
+		});
+		this.slider.on('set',function(){
+            console.log('updating filter ',this)
+			// gw.updateFilters();
+		});
+		return this;
+	}
+
+    d3.select("#filter-title")
+        .html(this.tl("%text.plotgw.filter.title%"))
+        d3.select("#filter-text")
+            .html(this.tl("%text.plotgw.filter.text%"));
+    if (this.portrait){
+        d3.select('#filter-title')
+            .style("font-size",(5.0*this.xsc)+"em")
+    }else{
+        d3.select('#filter-title')
+            .style("font-size",(2.5*this.ysc)+"em")
+    }
+    if (replot){
+        d3.selectAll('.filter-cont').remove()
+    }
+    for (filt in this.filters){
+        console.log(filt,this.filters[filt])
+        a=this.filters[filt]
+        filtdiv = document.createElement('div');
+        filtdiv.className = 'panel-cont filter-cont colourise';
+        filtdiv.style.height = gw.filtcontHeight;
+        filtdiv.setAttribute("id",'filt_'+filt+'_cont');
+        filticondiv = document.createElement('div');
+        filticondiv.className='panel-cont-icon'
+        filticondiv.setAttribute("id",'lang_'+lang+'_icon');
+        filticondiv.innerHTML =filt;
+
+        filtdiv.appendChild(filticondiv);
+        // langdiv.onmouseover = function(e){
+        //     gw.showTooltip(e,this.id.split("icon")[0])}
+        // labimgdiv.onmouseout = function(){gw.hideTooltip()};
+        filttxtdiv = document.createElement('div');
+        filttxtdiv.className = 'panel-cont-text panel-filt';
+        filttxtdiv.setAttribute("id",'filt-'+filt+'-filt');
+        filttxtdiv.style.height = "100%";
+        filttxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
+        // filttxtdiv.innerHTML = gw.filters[filt].name;
+        // langtxtdiv.onmouseover = function(e){
+        //     gw.showTooltip(e,"%meta.translator%","manual")}
+        // langtxtdiv.onmouseout = function(){gw.hideTooltip()};
+        filttxtdiv.innerHTML += '<div class="slider"></div><span class="min">'+a.min['default']+'</span> &rarr; <span class="max"></span>'+(a.max.unit ? '<span lang="'+a.max.unit+'" class="translatable">'+this.tl(a.max.unit)+'</span>':'');
+        filtdiv.appendChild(filttxtdiv);
+        // document.getElementById('lang_'+lang+'_icon').style.lineHeight =
+        //     parseInt(document.getElementById('lang_'+lang+'_cont').offsetHeight)+"px";
+        document.getElementById('filter-block').appendChild(filtdiv);
+
+        filtdata=getRange(filt)
+        filtdata.step = (gw.filters[filt].step||1);
+		filtdata.format = (gw.filters[filt].format||"");
+        filtdata.el=d3.select('#filt-'+filt+'-filt');
+        gw.filters[filt].slider = new buildSlider(filtdata)
+
+    }
+}
+
+GWCatalogue.prototype.showFilter = function(){
+    //show options
+    if (this.optionsOn){this.hideOptions();}
+    if (this.helpOn){this.hideHelp();}
+    if (this.langOn){this.hideLang();}
+    this.filterOn=true;
+    // fade in semi-transparent background layer (greys out image)
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style({"opacity":0.5});
+    // this.langbg.style("height","100%");
+    //fade in infopanel
+    this.filterouter = d3.select('#filter-outer')
+    this.filterouter.transition()
+       .duration(500)
+       .style("opacity",1);
+    // set contents and position of infopanel
+    // this.infopanel.html(this.iptext(d));
+    this.filterouter.style("left", document.getElementById('infoouter').offsetLeft-1)
+        .style("top", document.getElementById('infoouter').offsetTop-1)
+        .style("width",document.getElementById('infoouter').offsetWidth-2)
+        .style("height",document.getElementById('infoouter').offsetHeight-22);
+    if (this.portrait){
+        document.getElementById('filter-block').classList.add('bottom')
+    }else{
+        document.getElementById('filter-block').classList.remove('bottom')
+    }
+    document.getElementById("filter-icon").classList.remove("hidden");
+    document.getElementById("info-icon").classList.add("hidden");
+    this.updateUrl();
+}
+GWCatalogue.prototype.hideFilter = function(d) {
+    // hide options box
+    this.filterOn=false;
+    // fade out infopanel
+    this.filterouter.transition()
+        .duration(500).style("opacity", 0);
+    // move infopanel out of page
+    this.filterouter.style("top","200%");
+    // fade out semi-transparent background
+    // this.optionsbg.transition()
+    //   .duration(500)
+    //   .style("opacity",0);
+    // this.langbg.style("height",0);
+    // d3.selectAll(".info").attr("opacity",0);
+    document.getElementById("info-icon").classList.remove("hidden");
+    document.getElementById("filter-icon").classList.add("hidden");
     this.updateUrl();
 }
 GWCatalogue.prototype.showShare = function(){
@@ -3530,6 +3758,7 @@ GWCatalogue.prototype.makePlot = function(){
     this.addOptions();
     this.addHelp();
     this.addLang(false);
+    this.addFilter();
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
     this.setPanel(panel);
     this.adjCss();
