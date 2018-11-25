@@ -221,7 +221,16 @@ GWCatalogue.prototype.init = function(){
         "m2":{name:'%data.M2.name%',type:'slider',
             "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
             "max": { "label": "", "unit": "%data.M2.unit%", "default": 50, "value": 50 }
-        }
+        },
+        "obsrun": {
+    		"label": "text.gwviewer.filter.observingrun",
+    		"type":"checkbox",
+    		"options":[
+    			{"id": "filt-o1", "label":"%text.plotgw.filter.observingrun.O1%", "checked": true, "value": "O1" },
+    			{"id": "filt-o2", "label":"%text.plotgw.filter.observingrun.O2%", "checked": true, "value": "O2" },
+    			{"id": "filt-o3", "label":"%text.plotgw.filter.observingrun.O3%", "checked": false, "value": "O3" }
+    		]
+	    }
     }
     this.panels = {
         'info':{'status':true,
@@ -3559,21 +3568,58 @@ GWCatalogue.prototype.addFilter = function(replot){
         // langtxtdiv.onmouseover = function(e){
         //     gw.showTooltip(e,"%meta.translator%","manual")}
         // langtxtdiv.onmouseout = function(){gw.hideTooltip()};
-        filttxtdiv.innerHTML += '<div class="slider"></div><span class="min">'+a.min['default']+'</span> &rarr; <span class="max"></span>'+(a.max.unit ? '<span lang="'+a.max.unit+'" class="translatable">'+this.tl(a.max.unit)+'</span>':'');
+        if (a.type=="slider"){
+            filttxtdiv.innerHTML += '<div class="slider"></div><span class="min">'+a.min['default']+'</span> &rarr; <span class="max"></span>'+(a.max.unit ? '<span lang="'+a.max.unit+'" class="translatable">'+this.tl(a.max.unit)+'</span>':'');
+        }else if (a.type=="checkbox"){
+            for (var i = 0; i < a.options.length; i++){
+                filttxtdiv.innerHTML += '<input type="checkbox" name="'+a.options[i].id+'" id="'+a.options[i].id+'"'+(a.options[i].checked ? ' checked="checked"':'')+'></input><label for="'+a.options[i].id+'">'+this.tl(a.options[i].label)+'</label>'
+            }
+        }
         filtdiv.appendChild(filttxtdiv);
         // document.getElementById('lang_'+lang+'_icon').style.lineHeight =
         //     parseInt(document.getElementById('lang_'+lang+'_cont').offsetHeight)+"px";
         document.getElementById('filter-block').appendChild(filtdiv);
 
-        filtdata=getRange(filt)
-        filtdata.step = (gw.filters[filt].step||1);
-		filtdata.format = (gw.filters[filt].format||"");
-        filtdata.el=d3.select('#filt-'+filt+'-filt');
-        gw.filters[filt].slider = new buildSlider(filtdata)
+        if (a.type=="slider"){
+            filtdata=getRange(filt)
+            filtdata.step = (a.step||1);
+    		filtdata.format = (a.format||"");
+            filtdata.el=d3.select('#filt-'+filt+'-filt');
+            a.slider = new buildSlider(filtdata)
+        }else{
+
+        }
 
     }
 }
+GWCatalogue.prototype.updateFilter = function () {
+    var gw = this;
+    for(filt in this.filters){
+		if(this.filters[filt].type == "slider"){
+			if(!this.filters[filt].slider){
+				this.filters[filt].slider = {}
+				console.log(filt,this.filters[filt].slider.values)
+			}
+		}else if(this.filters[filt].type == "checkbox"){
+			for(var i = 0; i < this.filters[filt].options.length; i++){
+				if(d3.select('#'+this.filters[filt].options[i].id)[0].length > 0){
+					this.filters[filt].options[i].checked = d3.select('#'+this.filters[filt].options[i].id)[0][0].checked
+				}
+			}
+		}
+	}
 
+    function inRange(i,key,range){
+		if(!gw.cat.data[i][key]) return true;
+		var valrange = [gw.cat.getMinVal(gw.cat.dataOrder[i],key),gw.cat.getMaxVal(gw.cat.dataOrder[i],key)];
+		if(gw.filters[key].format=="date"){
+			valrange[0] = (new Date(valrange[0])).getTime();
+			valrange[1] = (new Date(valrange[1])).getTime();
+		}
+		if((valrange[0] >= range[0] && valrange[0] <= range[1]) || valrange[1] >= range[0] && valrange[1] <= range[1]) return true;
+		return false;
+	}
+};
 GWCatalogue.prototype.showFilter = function(){
     //show options
     if (this.optionsOn){this.hideOptions();}
