@@ -46,6 +46,7 @@
  "data.z.name": "Source redshift",
  "data.skyArea.name": "Sky Localization",
  "data.skyArea.unit": "deg²",
+ "data.obsrun.name": "Observing Run",
  "text.gen.lsc": "LIGO Scientific Collaboration",
  "text.gen.lvc": "LIGO-Virgo Collaboration",
  "text.gen.gravwave": "Gravitational wave",

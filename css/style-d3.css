@@ -383,7 +383,7 @@ button.down{
     height:20%;
     cursor:pointer;
 }
-.option button img, .option img{
+.option button img, .option img, .filter-icon img{
     width:90%;
 }
 .option.down{
@@ -467,6 +467,27 @@ button.down{
 .lang-cont .panel-cont-icon{
     padding-top:5%;
     padding-bottom:5%;
+}
+.filt-cont{
+    text-align:center;
+}
+.filter-cont{
+    width:100%;
+    margin-bottom:20px;
+}
+.filt-cont-label,.filt-cont{
+    margin-left:4%;
+    width:100%;
+}
+.filt-cont-label{
+    margin-bottom: 10px;
+}
+.filt-cont-label img{
+    width:10%;
+}
+.filt-cont-label span{
+    padding-left:5%;
+    font-size: 1.3em;
 }
 .lang-cont.current .panel-cont-icon{
     background-color:yellow;

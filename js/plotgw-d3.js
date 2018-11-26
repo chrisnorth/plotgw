@@ -214,15 +214,16 @@ GWCatalogue.prototype.init = function(){
     }
 
     this.filters = {
-        "m1":{name:'%data.M1.name%',step:10,type:'slider',
+        "M1":{"name":'%data.M1.name%',"step":10,"type":'slider',
             "min": { "label": "", "unit": "%data.M1.unit%", "default": 0, "value": 0 },
             "max": { "label": "", "unit": "%data.M1.unit%", "default": 50, "value": 50 }
         },
-        "m2":{name:'%data.M2.name%',type:'slider',
+        "M2":{"name":'%data.M2.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
             "max": { "label": "", "unit": "%data.M2.unit%", "default": 50, "value": 50 }
         },
         "obsrun": {
+            "name":'%data.obsrun.name%',
     		"label": "text.gwviewer.filter.observingrun",
     		"type":"checkbox",
     		"options":[
@@ -533,6 +534,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             }
         },
         sigma:{avail:false,type:'src'},
+        obsrun:{avail:false,type:'src'},
         rho:{icon:"img/snr.svg",avail:true,type:'src'},
         deltaOmega:{avail:false,type:'src'},
         Erad:{avail:true,icon:"img/energyrad.svg",
@@ -1011,7 +1013,7 @@ GWCatalogue.prototype.setScales = function(){
             // .innerTickSize(-(this.relw[1]-this.relw[0])*this.graphWidth);
             .innerTickSize(-this.graphWidth);
 
-    this.dotOp = function(d) {return ((d[gw.xvar])&&(d[gw.yvar])) ? 1 : 0}
+    this.dotOp = function(d) {return ((d[gw.xvar])&&(d[gw.yvar])&&(d.active)) ? 1 : 0}
     ///////////////////////////////////////////////////////////////////////////
     // Set sketch scales
     ///////////////////////////////////////////////////////////////////////////
@@ -1577,12 +1579,12 @@ GWCatalogue.prototype.tttext = function(d){
         ": "+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
 }
 GWCatalogue.prototype.orderData = function(order='GPS'){
-    this.data=this.data.sort(function(a,b){
+    this.cat.data=this.cat.data.sort(function(a,b){
         return b[order].best - a[order].best
     });
     var dataOrder=[];
-    this.data.forEach(function(d){dataOrder.push(d.name);});
-    this.dataOrder=dataOrder;
+    this.cat.data.forEach(function(d){dataOrder.push(d.name);});
+    this.cat.dataOrder=dataOrder;
 }
 GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
@@ -1718,7 +1720,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     // initialise graph drawing from data
     var gw = this;
     gw.loaded=0;
-    gw.data=[];
+    // gw.data=[];
     gw.optionsOn=false;
     gw.helpOn=false;
     gw.lengOn=false;
@@ -1745,35 +1747,22 @@ GWCatalogue.prototype.drawGraphInit = function(){
         // console.log('loaded');
         this.loaded++;
         // return
-        var dataIn=this;
-        if (gw.debug){console.log("dataIn (events:)",dataIn)}
+        // var dataIn=this;
+        if (gw.debug){console.log("dataIn (events:)",this)}
         gw.loaded++;
-        if (gw.debug){console.log('dataIn.links',dataIn.links)}
+        if (gw.debug){console.log('dataIn.links',this.links)}
         if (this.datadict){
-            gw.datadict=this.datadict;
+            // gw.datadict=this.datadict;
             //uses LOSC format (has datadict), so need to convert
             gw.dataFormat='losc';
             if (gw.debug){console.log('converting from LOSC format');}
             newlinks={}
-            for (e in dataIn.data){
-                // console.log(e,dataIn.data[e]);
-                if(gw.debug){console.log(e,dataIn.data[e])}
-                // // convert events to required format
-                // ev=dataIn.events[e];
-                // dataIn.data[e]={};
-                // for (c in ev){
-                //     if (typeof ev[c]=="number"){
-                //         dataIn.data[e][c]={best:ev[c]}
-                //     }else if (typeof ev[c]=="object"){
-                //         dataIn.data[e][c]={best:ev[c][0],err:[ev[c][1],ev[c][2]]}
-                //     }else{
-                //         dataIn.data[e][c]={best:ev[c]}
-                //     }
-                // }
-                // convert links to required format
-                if(gw.debug){console.log(e,dataIn.links)}
-                if (dataIn.links[e]){
-                    linkIn=dataIn.links[e];
+            for (e in this.data){
+                // console.log(e,this.data[e]);
+                if(gw.debug){console.log(e,this.data[e])}
+                if(gw.debug){console.log(e,this.links)}
+                if (this.links[e]){
+                    linkIn=this.links[e];
                     if(gw.debug){console.log('linkIn',e,linkIn)}
                     newlinks[e]={}
                     for (l in linkIn){
@@ -1818,186 +1807,44 @@ GWCatalogue.prototype.drawGraphInit = function(){
                     if(gw.debug){console.log('links',e,newlinks[e])}
                 }
             }
-            dataIn.links=newlinks;
+            this.links=newlinks;
         }else{
             gw.dataFormat='std';
             newlinks=false;
         }
-        if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
-        for (e in dataIn.data){
-            if (dataIn.data[e].name[0]=='G'){c='GW'}
-            else if (dataIn.data[e].name[0]=='L'){c='LVT'}
+        if (gw.debug){console.log('dataIn.links',this.links,newlinks)}
+        for (e in this.data){
+            if (this.data[e].name[0]=='G'){c='GW'}
+            else if (this.data[e].name[0]=='L'){c='LVT'}
             else{c=''}
-            dataIn.data[e].conf=c;
-            if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
-                link=dataIn.links[e].LOSCData;
+            this.data[e].conf=c;
+            if ((this.links[e]) && (this.links[e].LOSCData)){
+                link=this.links[e].LOSCData;
                 link.url=link.url;
-                dataIn.data[e].link=link;
+                this.data[e].link=link;
             }
-            if ((dataIn.links[e]) && (dataIn.links[e].DetPaper)){
-                ref=dataIn.links[e].DetPaper;
+            if ((this.links[e]) && (this.links[e].DetPaper)){
+                ref=this.links[e].DetPaper;
                 ref.url=ref.url;
-                dataIn.data[e].ref=ref;
-                if(gw.debug){console.log(dataIn.data[e].name,ref)}
+                this.data[e].ref=ref;
+                if(gw.debug){console.log(this.data[e].name,ref)}
             }
-            gw.data.push(dataIn.data[e]);
+            // gw.data.push(this.data[e]);
         }
-        if(gw.debug){console.log('data pre-format:',gw.data);}
+        if(gw.debug){console.log('data pre-format:',gw.cat.data);}
         if (gw.loaded==gw.toLoad){
             gw.whenLoaded();
-            // gw.setColumns(gw.datadict);
-            // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-            // gw.makePlot();
-            // if(gw.debug){console.log('plotted');}
         }
     }
 
     if(this.debug){console.log('loading GWCat');}
-    catIn = new GWCat(eventsCallback,{'fileIn':gw.fileInEvents})
-
-    // // pre-GWCat
-    // if(this.debug){console.log('loading standard');}
-    // d3.json(gw.fileInEvents, function(error, dataIn) {
-    //     if (error){
-    //         console.log('events error:',error,dataIn);
-    //         alert("Fatal error loading input file: '"+gw.fileInEvents+"'. Sorry!");
-    //     }else{
-    //         if (this.debug){console.log("dataIn (events:)",dataIn)}
-    //     }
-    //     gw.loaded++;
-    //     if (gw.debug){console.log('dataIn.links',dataIn.links)}
-    //     if (dataIn.datadict){
-    //         //uses LOSC format (has datadict), so need to convert
-    //         gw.dataFormat='losc';
-    //         if (this.debug){console.log('converting from LOSC format');}
-    //         newlinks={}
-    //         for (e in dataIn.data){
-    //             if(this.debug){console.log(e,dataIn.data[e])}
-    //             // // convert events to required format
-    //             // ev=dataIn.events[e];
-    //             // dataIn.data[e]={};
-    //             // for (c in ev){
-    //             //     if (typeof ev[c]=="number"){
-    //             //         dataIn.data[e][c]={best:ev[c]}
-    //             //     }else if (typeof ev[c]=="object"){
-    //             //         dataIn.data[e][c]={best:ev[c][0],err:[ev[c][1],ev[c][2]]}
-    //             //     }else{
-    //             //         dataIn.data[e][c]={best:ev[c]}
-    //             //     }
-    //             // }
-    //             // convert links to required format
-    //             if(this.debug){console.log(e,dataIn.links)}
-    //             if (dataIn.links[e]){
-    //                 linkIn=dataIn.links[e];
-    //                 if(this.debug){console.log('linkIn',e,linkIn)}
-    //                 newlinks[e]={}
-    //                 for (l in linkIn){
-    //                     if (linkIn[l].type.search('primarypub')>=0){
-    //                         newlinks[e]['DetPaper']={
-    //                             text:linkIn[l].text,
-    //                             url:linkIn[l].url,
-    //                             type:'paper'}
-    //                     }
-    //                     if (linkIn[l].text.search('Paper')>=0){
-    //                         // keeping for compatibility
-    //                         newlinks[e]['DetPaper']={
-    //                             text:linkIn[l].text,
-    //                             url:linkIn[l].url,
-    //                             type:'paper'}
-    //                     }
-    //                     else if (linkIn[l].text.search('Open Data page')>=0){
-    //                         newlinks[e]['LOSCData']={
-    //                             text:linkIn[l].text,
-    //                             url:linkIn[l].url,
-    //                             type:'web-data'}
-    //                     }
-    //                     else if (linkIn[l].text.search('GraceDB page')>=0){
-    //                         newlinks[e]['GraceDB']={
-    //                             text:linkIn[l].text,
-    //                             url:linkIn[l].url,
-    //                             type:'web-data'}
-    //                     }
-    //                     else if (linkIn[l].text.search('Final Skymap')>=0){
-    //                         newlinks[e]['SkyMapFile']={
-    //                             text:linkIn[l].text,
-    //                             url:linkIn[l].url,
-    //                             type:'file'}
-    //                     }
-    //                     else if (linkIn[l].text.search('Skymap View')>=0){
-    //                         newlinks[e]['SkyMapAladin']={
-    //                             text:linkIn[l].text,
-    //                             url:linkIn[l].url,
-    //                             type:'web'}
-    //                     }
-    //                 }
-    //                 if(this.debug){console.log('links',e,newlinks[e])}
-    //             }
-    //         }
-    //         dataIn.links=newlinks;
-    //     }else{
-    //         gw.dataFormat='std';
-    //         newlinks=false;
-    //     }
-    //     if (gw.debug){console.log('dataIn.links',dataIn.links,newlinks)}
-    //     for (e in dataIn.data){
-    //         console.log(e,dataIn.data[e],dataIn.data[e].type);
-    //         dataIn.data[e].name=e;
-    //         if (dataIn.data[e].type){
-    //             dataIn.data[e].type=dataIn.data[e].type.best
-    //         }else{
-    //             if (dataIn.data[e].name[0]=='G'){t='GW'}
-    //             else if (dataIn.data[e].name[0]=='L'){t='LVT'}
-    //             else{t=''}
-    //             dataIn.data[e].type=t;
-    //         }
-    //         if (dataIn.data[e].name[0]=='G'){c='GW'}
-    //         else if (dataIn.data[e].name[0]=='L'){c='LVT'}
-    //         else{c=''}
-    //         dataIn.data[e].conf=c;
-    //         if ((dataIn.links[e]) && (dataIn.links[e].LOSCData)){
-    //             link=dataIn.links[e].LOSCData;
-    //             link.url=link.url;
-    //             dataIn.data[e].link=link;
-    //         }
-    //         if ((dataIn.links[e]) && (dataIn.links[e].DetPaper)){
-    //             ref=dataIn.links[e].DetPaper;
-    //             ref.url=ref.url;
-    //             dataIn.data[e].ref=ref;
-    //             if(gw.debug){console.log(dataIn.data[e].name,ref)}
-    //         }
-    //         gw.data.push(dataIn.data[e]);
-    //     }
-    //     if(gw.debug){console.log('data pre-format:',gw.data);}
-    //     if (gw.loaded==gw.toLoad){
-    //         gw.whenLoaded();
-    //         // gw.setColumns(gw.datadict);
-    //         // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-    //         // gw.makePlot();
-    //         // if(gw.debug){console.log('plotted');}
-    //     }
-    // });
-    // d3.json(gw.fileInDataDict, function(error, dataIn) {
-    //     if (error){
-    //         alert("Fatal error loading input file: '"+gw.fileInDataDict+"'. Sorry!")
-    //     }
-    //     gw.loaded++;
-    //     // if(gw.debug){console.log((dataIn),(dataIn.datadict))}
-    //     gw.datadict = (dataIn.datadict) ? dataIn.datadict : dataIn;
-    //     if((gw.debug)&&(dataIn)){console.log('datadict:',gw.datadict,dataIn);}
-    //     if (gw.loaded==gw.toLoad){
-    //         gw.whenLoaded();
-    //         // gw.setColumns(gw.datadict);
-    //         // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
-    //         // gw.makePlot();
-    //         // if(gw.debug){console.log('plotted');}
-    //     }
-    // });
+    gw.cat = new GWCat(eventsCallback,{'fileIn':gw.fileInEvents})
 
 }
 GWCatalogue.prototype.whenLoaded = function(){
     var gw=this;
-    gw.setColumns(gw.datadict);
-    gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+    gw.setColumns(gw.cat.datadict);
+    gw.cat.data.forEach(function(d){gw.formatData(d,gw.columns)});
     // order Data
     gw.orderData();
     gw.makePlot();
@@ -2047,7 +1894,7 @@ GWCatalogue.prototype.loadLang = function(lang){
         if (reload){
             if (gw.debug){console.log('reloaded language',gw.lang);}
             // gw.setLang();
-            gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            gw.cat.data.forEach(function(d){gw.formatData(d,gw.columns)});
             gw.replot();
             d3.select(".lang-cont.current").classed("current",false);
             d3.select("#lang_"+gw.lang+"_cont").classed("current",true);
@@ -2057,8 +1904,8 @@ GWCatalogue.prototype.loadLang = function(lang){
             // gw.setLang();
             if (gw.loaded==gw.toLoad){
                 gw.whenLoaded();
-                // gw.setColumns(gw.datadict);
-                // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+                // gw.setColumns(gw.cat.datadict);
+                // gw.cat.data.forEach(function(d){gw.formatData(d,gw.columns)});
                 // gw.makePlot();
                 // if(gw.debug){console.log('plotted');}
             }
@@ -2084,8 +1931,8 @@ GWCatalogue.prototype.loadLangDefault = function(){
         gw.loaded++;
         if (gw.loaded==gw.toLoad){
             gw.whenLoaded();
-            // gw.setColumns(gw.datadict);
-            // gw.data.forEach(function(d){gw.formatData(d,gw.columns)});
+            // gw.setColumns(gw.cat.datadict);
+            // gw.cat.data.forEach(function(d){gw.formatData(d,gw.columns)});
             // gw.makePlot();
             // if(gw.debug){console.log('plotted');}
         }
@@ -2156,11 +2003,11 @@ GWCatalogue.prototype.drawGraph = function(){
     var gw = this;
     // gw.setSvgScales();
     gw.makeGraph();
-    data = gw.data;
+    data = gw.cat.data;
     if(this.debug){console.log('plotting ',gw.xvar,' vs ',gw.yvar);}
     // console.log(this.graphHeight);
     // console.log('drawGraph');
-    // console.log('this.data',this.data);
+    // console.log('this.cat.data',this.cat.data);
 
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
@@ -2672,7 +2519,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class","hidden")
         .attr("id","search-img")
         .on("click",function(){gw.showSearch();gw.hideTooltipManual();});
-    gw.data.forEach(function(d){
+    gw.cat.data.forEach(function(d){
         d3.select('#search-outer').append("div")
             .attr("class","popup-list-item search-list-item")
             .attr("id","search-list-"+d.name)
@@ -2711,25 +2558,25 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
             // ev is a string which is a number
             evnum=parseInt(ev)
             if (evnum<0){
-                evnum=gw.dataOrder.length + evnum
+                evnum=gw.cat.dataOrder.length + evnum
             }
-            evnum=evnum % gw.dataOrder.length
+            evnum=evnum % gw.cat.dataOrder.length
         }else{
             // ev is a string which is not a number
-            evnum=gw.dataOrder.indexOf(ev)
+            evnum=gw.cat.dataOrder.indexOf(ev)
         }
-        if (evnum>=0){d=gw.data[evnum]}else{d=null}
+        if (evnum>=0){d=gw.cat.data[evnum]}else{d=null}
     }else if(typeof ev == "number"){
         // ev is a number
         evnum=ev
         if (evnum<0){
-            evnum=gw.dataOrder.length + evnum
+            evnum=gw.cat.dataOrder.length + evnum
         }
-        evnum=evnum % gw.dataOrder.length
-        d=gw.data[evnum]
+        evnum=evnum % gw.cat.dataOrder.length
+        d=gw.cat.data[evnum]
     }else{
         // evname is an event object
-        evnum=gw.dataOrder.indexOf(ev.name)
+        evnum=gw.cat.dataOrder.indexOf(ev.name)
         d=ev;
     }
     if (d){
@@ -2779,17 +2626,18 @@ GWCatalogue.prototype.selectNext = function(dir=1){
 GWCatalogue.prototype.moveHighlight = function(d){
     // move highlight circle
     var gw=this;
+    if (!d) {return {}}
     if ((this.sketchName==d["name"])){
         // fade out
         gw.svg.select("#highlight")
             .transition().duration(500)
-            .style("opacity",0);
+            .style("opacity",gw.dotOp(d));
     }else{
         // fade in and move
         gw.svg.select("#highlight")
             .transition().duration(500)
             .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
-            .style("opacity",1);
+            .style("opacity",gw.dotOp(d));
     }
 }
 GWCatalogue.prototype.initHighlight = function(d){
@@ -2805,7 +2653,7 @@ GWCatalogue.prototype.updateErrors = function(){
     if ((this.columns[this.xvar]["errcode"]=="")||(!this.showerrors)){
         // remove x-errors
         errX=this.svg.selectAll(".errorX-g")
-            .data(this.data)
+            .data(this.cat.data)
         errX.selectAll('.errorX')
             .transition()
             .duration(750)
@@ -2827,7 +2675,7 @@ GWCatalogue.prototype.updateErrors = function(){
     }else{
         // add/update x-errors
         errX=this.svg.selectAll(".errorX-g")
-            .data(this.data)
+            .data(this.cat.data)
         errX.selectAll(".errorXline")
             .transition()
             .duration(750)
@@ -2862,7 +2710,7 @@ GWCatalogue.prototype.updateErrors = function(){
     if ((this.columns[this.yvar]["errcode"]=="")||(!this.showerrors)){
         // remove y-errors
         errY=this.svg.selectAll(".errorY-g")
-            .data(this.data)
+            .data(this.cat.data)
         errY.selectAll('.errorY')
             .transition()
             .duration(750)
@@ -2896,7 +2744,7 @@ GWCatalogue.prototype.updateErrors = function(){
     }else{
         // add/update y-errors
         errY=this.svg.selectAll(".errorY-g")
-            .data(this.data)
+            .data(this.cat.data)
         errY.selectAll('.errorYline')
             .transition()
             .duration(750)
@@ -2953,9 +2801,9 @@ GWCatalogue.prototype.toggleErrors = function(){
 GWCatalogue.prototype.updateXaxis = function(xvarNew) {
     // update x-xais to xvarNew
     // set global variable
-    this.xvar = xvarNew;
+    this.xvar = (xvarNew) ? xvarNew : this.xvar;
     var gw=this;
-    var data=gw.data;
+    var data=gw.cat.data;
     // d3.csv("csv/gwcat.csv", function(error, data) {
 
         // change string (from CSV) into number format
@@ -3021,8 +2869,8 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
     // update y-axis to yvarNew
     // set global variable
     var gw=this;
-    var data=gw.data;
-    this.yvar = yvarNew;
+    var data=gw.cat.data;
+    this.yvar = (yvarNew) ? yvarNew : this.yvar;
 
     // d3.csv("csv/gwcat.csv", function(error, data) {
 
@@ -3524,7 +3372,7 @@ GWCatalogue.prototype.addFilter = function(replot){
 		});
 		this.slider.on('set',function(){
             console.log('updating filter ',this)
-			// gw.updateFilters();
+			gw.updateFilters();
 		});
 		return this;
 	}
@@ -3544,32 +3392,32 @@ GWCatalogue.prototype.addFilter = function(replot){
         d3.selectAll('.filter-cont').remove()
     }
     for (filt in this.filters){
-        console.log(filt,this.filters[filt])
         a=this.filters[filt]
+        console.log(filt,this.filters[filt],a)
         filtdiv = document.createElement('div');
-        filtdiv.className = 'panel-cont filter-cont colourise';
-        filtdiv.style.height = gw.filtcontHeight;
+        filtdiv.className = 'filter-cont colourise';
+        // filtdiv.style.height = gw.filtcontHeight;
         filtdiv.setAttribute("id",'filt_'+filt+'_cont');
         filticondiv = document.createElement('div');
-        filticondiv.className='panel-cont-icon'
-        filticondiv.setAttribute("id",'lang_'+lang+'_icon');
-        filticondiv.innerHTML =filt;
+        filticondiv.className='filt-cont-label'
+        filticondiv.setAttribute("id",'filt_'+filt+'_label');
+        filticondiv.innerHTML = '<img src="'+gw.getIcon(filt)+'"></img><span class="filter-text">'+this.tl(a.name)+'</>';
 
         filtdiv.appendChild(filticondiv);
         // langdiv.onmouseover = function(e){
         //     gw.showTooltip(e,this.id.split("icon")[0])}
         // labimgdiv.onmouseout = function(){gw.hideTooltip()};
         filttxtdiv = document.createElement('div');
-        filttxtdiv.className = 'panel-cont-text panel-filt';
+        filttxtdiv.className = 'filt-cont';
         filttxtdiv.setAttribute("id",'filt-'+filt+'-filt');
-        filttxtdiv.style.height = "100%";
+        // filttxtdiv.style.height = "100%";
         filttxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
         // filttxtdiv.innerHTML = gw.filters[filt].name;
         // langtxtdiv.onmouseover = function(e){
         //     gw.showTooltip(e,"%meta.translator%","manual")}
         // langtxtdiv.onmouseout = function(){gw.hideTooltip()};
         if (a.type=="slider"){
-            filttxtdiv.innerHTML += '<div class="slider"></div><span class="min">'+a.min['default']+'</span> &rarr; <span class="max"></span>'+(a.max.unit ? '<span lang="'+a.max.unit+'" class="translatable">'+this.tl(a.max.unit)+'</span>':'');
+            filttxtdiv.innerHTML += '<div class="slider"></div><span class="min">'+a.min['default']+'</span> &rarr; <span class="max"></span>'+(a.max.unit ? '<span lang="'+a.max.unit+'">'+this.tl(a.max.unit)+'</span>':'');
         }else if (a.type=="checkbox"){
             for (var i = 0; i < a.options.length; i++){
                 filttxtdiv.innerHTML += '<input type="checkbox" name="'+a.options[i].id+'" id="'+a.options[i].id+'"'+(a.options[i].checked ? ' checked="checked"':'')+'></input><label for="'+a.options[i].id+'">'+this.tl(a.options[i].label)+'</label>'
@@ -3579,22 +3427,24 @@ GWCatalogue.prototype.addFilter = function(replot){
         // document.getElementById('lang_'+lang+'_icon').style.lineHeight =
         //     parseInt(document.getElementById('lang_'+lang+'_cont').offsetHeight)+"px";
         document.getElementById('filter-block').appendChild(filtdiv);
-
         if (a.type=="slider"){
             filtdata=getRange(filt)
             filtdata.step = (a.step||1);
     		filtdata.format = (a.format||"");
             filtdata.el=d3.select('#filt-'+filt+'-filt');
             a.slider = new buildSlider(filtdata)
-        }else{
-
         }
-
     }
+    document.getElementById("filter-block").addEventListener("change",function(){
+        console.log('filter change',gw,this);
+        gw.updateFilters();
+    })
+    gw.updateFilters();
 }
-GWCatalogue.prototype.updateFilter = function () {
+GWCatalogue.prototype.updateFilters = function () {
     var gw = this;
     for(filt in this.filters){
+        console.log(filt);
 		if(this.filters[filt].type == "slider"){
 			if(!this.filters[filt].slider){
 				this.filters[filt].slider = {}
@@ -3619,6 +3469,48 @@ GWCatalogue.prototype.updateFilter = function () {
 		if((valrange[0] >= range[0] && valrange[0] <= range[1]) || valrange[1] >= range[0] && valrange[1] <= range[1]) return true;
 		return false;
 	}
+    function isChecked(i,key){
+		if(!gw.cat.data[i][key]) return true;
+		var best = gw.cat.getBest(gw.cat.dataOrder[i],key);
+		var good = 0;
+		for(var o = 0; o < gw.filters[key].options.length; o++){
+			if(gw.filters[key].options[o].checked){
+				if(gw.filters[key].options[o].contains){
+					// The string contains this option
+					if(best.indexOf(gw.filters[key].options[o].value) >= 0) good++;
+				}else{
+					if(best == gw.filters[key].options[o].value) return true;
+				}
+			}
+		}
+		if(good == 0) return false;
+		return true;
+	}
+
+    var active;
+	// Loop over each event
+	for(var i = 0; i < this.cat.data.length; i++){
+		active = true;
+		for(key in this.filters){
+			a = this.filters[key];
+			//console.log(key,a.type)
+			if(a.type == "slider"){
+				// Process each slider
+				//console.log(key,inRange(i,key,this.filters[key].slider.values))
+				if(!inRange(i,key,a.slider.values)) active = false;
+				//if(!active) console.log(i,key)
+			}else if(a.type == "checkbox"){
+				if(!isChecked(i,key)) active = false;
+			}
+			console.log(gw.cat.dataOrder[i],key,active)
+		}
+		this.cat.data[i].active = active;
+	}
+    this.updateXaxis();
+    this.updateYaxis();
+    this.updateErrors();
+    this.moveHighlight();
+	return this;
 };
 GWCatalogue.prototype.showFilter = function(){
     //show options
@@ -3835,7 +3727,7 @@ GWCatalogue.prototype.replot = function(){
     // if (this.optionsOn){this.showOptions();}
     // if (this.helpOn){this.showHelp();}
     // if (this.langOn){this.showLang();}
-    this.data.forEach(function(d){
+    this.cat.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.sketchName){
             // console.log('resize:',d.name,gw.sketchName);
