@@ -1891,7 +1891,7 @@ GWCatalogue.prototype.loadLang = function(lang){
             }else if (gw.langshort!=gw.lang){
                 if(gw.debug){console.log('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');}
                 if (gw.urlVars.lang){
-                    alert('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');
+                    console.log('Error loading language '+gw.lang+'. Displaying '+gw.langshort+' instead');
                     gw.updateUrl();
                     window.location.replace({},null,gw.makeUrl({'lang':gw.defaults.lang}));
                 }
