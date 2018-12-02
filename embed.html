@@ -19,6 +19,7 @@
     <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
     <!-- Analytics code -->
     <script type="text/javascript" src="js/analytics.js"></script>
+    <script type="text/javascript" src="gwcat/js/gwcat.js"></script>
     <script type="text/javascript" src="js/plotgw-d3.js"></script>
     <style>
         body{
@@ -123,6 +124,7 @@ In the page header:
     &lt;script type="text/javascript" src="js/d3.v3.min.js"&gt;&lt;/script&gt;
     &lt;script type="text/javascript" src="js/clipboard-1.7.1.min.js"&gt;&lt;/script&gt;
     &lt;script type="text/javascript" src="js/FileSaver.js"&gt;&lt;/script&gt;
+    &lt;script type="text/javascript" src="js/gwcat.js"&gt;&lt;/script&gt;
     &lt;script type="text/javascript" src="js/plotgw-d3.js"&gt;&lt;/script&gt;
 </code>
 In the page body:
@@ -137,7 +139,7 @@ In the page body:
         <div style="float:left;width:100%">
             <div id="plotgw-cont" style="width:900px;height:600px;border:1px solid black"></div>
             <script type="text/javascript">
-                var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
+                var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':true})
             </script>
         </div>
     </div>
