@@ -683,12 +683,12 @@ GWCatalogue.prototype.setColumns = function(datadict){
             strfn:function(d){
                 if ((d.opendata)&&(d.opendata.url)){
                     return gw.tl("<a target='_blank' href='"+ d.opendata.url+
-                        "' title='"+d.opendata.text+"'>%text.gen.losc%</a>");
+                        "'>%text.gen.gwosc%</a>");
                 }else{
                     return(gw.labBlank);
                 }
             },
-            name:'%tooltip.plotgw.losc%',
+            name:'%tooltip.plotgw.gwosc%',
             icon:"img/data.svg"},
         paper:{
             type:'derived',
@@ -1773,9 +1773,9 @@ GWCatalogue.prototype.drawGraphInit = function(){
         if (gw.debug){console.log('dataIn.links',this.links)}
         if (this.datadict){
             // gw.datadict=this.datadict;
-            //uses LOSC format (has datadict), so need to convert
-            gw.dataFormat='losc';
-            if (gw.debug){console.log('converting from LOSC format');}
+            //uses GWOSC format (has datadict), so need to convert
+            gw.dataFormat='gwosc';
+            if (gw.debug){console.log('converting from GWOSC format');}
             newlinks={}
             for (e in this.data){
                 // console.log(e,this.data[e]);
@@ -1800,7 +1800,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
                                 type:'paper'}
                         }
                         else if (linkIn[l].text.search('Open Data page')>=0){
-                            newlinks[e]['LOSCData']={
+                            newlinks[e]['GWOSCData']={
                                 text:linkIn[l].text,
                                 url:linkIn[l].url,
                                 type:'web-data'}
@@ -1838,8 +1838,8 @@ GWCatalogue.prototype.drawGraphInit = function(){
             else if (this.data[e].name[0]=='L'){c='LVT'}
             else{c=''}
             this.data[e].conf=c;
-            if ((this.links[e]) && (this.links[e].LOSCData)){
-                link=this.links[e].LOSCData;
+            if ((this.links[e]) && (this.links[e].GWOSCData)){
+                link=this.links[e].GWOSCData;
                 link.url=link.url;
                 this.data[e].link=link;
             }
