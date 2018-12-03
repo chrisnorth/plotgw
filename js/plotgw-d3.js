@@ -1757,17 +1757,8 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.toLoad=3;
     gw.fileInEventsDefault="gwcat/data/events.json";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault;
-
-    // // pre-GWCat
-    // gw.toLoad=4;
-    // gw.fileInDataDictDefault="json/datadict.json";
-    // gw.fileInDataDict = (gw.urlVars.dictFile) ? gw.urlVars.dictFile : gw.fileInDataDictDefault
-    // gw.fileInEventsDefault="json/events.json";
-    // gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault
-
-    // if (gw.urlVars.lang){
-    //     lang=gw.urlVars.lang;
-    // }else{lang=gw.defaults.lang}
+    gw.fileInGwoscDefault="gwcat/data/gwosc.json";
+    gw.fileInGwosc = (gw.urlVars.gwoscFile) ? gw.urlVars.gwoscFile : gw.fileInGwoscDefault;
 
     gw.loadLangDefault()
     gw.loadLang(this.langIn)
@@ -1869,7 +1860,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
 
     if(this.debug){console.log('loading GWCat');}
     if (gw.datasrc=='gwosc'){
-        gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:'json/gwosc.json',debug:this.debug});
+        gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:gw.fileInGwosc,debug:this.debug});
     }else{
         gw.cat = new GWCat(eventsCallback,{'fileIn':gw.fileInEvents});
     }
