@@ -524,6 +524,15 @@ GWCatalogue.prototype.setColumns = function(datadict){
         z:{avail:true,icon:"img/redshift.svg",
             border:0.01,type:'src'},
         UTC:{avail:false,type:'src',strfn:function(d){return('')}},
+        UTCdate:{avail:true,type:'derived',
+            depfn:function(d){return (d.UTC)},
+            namefn:function(){return(gw.columns.UTC.name)},
+            convfn:['UTC',function(x){return new Date(x)}],
+            sigfig:0,
+            err:0,
+            icon:"img/time.svg",
+            type:"date"
+        },
         FAR:{avail:false,type:'src',icon:"img/dice.svg",
             strfn:function(d){
                 if (1/d.FAR.best<1000){
@@ -822,6 +831,7 @@ GWCatalogue.prototype.scaleWindow = function(){
 
 }
 GWCatalogue.prototype.setScales = function(){
+    console.log('Setting scales')
     //define scales
     this.scaleWindow();
     var gw=this;
@@ -852,7 +862,7 @@ GWCatalogue.prototype.setScales = function(){
     // this.sksc=this.scl
 
     //graph size & position
-    this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left: 35*(1+this.xsc)}
+    this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left: 45*(1+this.xsc)}
     this.graphWidth =
         this.fullGraphWidth - this.margin.left - this.margin.right;
     this.graphHeight =
@@ -871,8 +881,7 @@ GWCatalogue.prototype.setScales = function(){
         else if (d[gw.xvar].upper!=null){return d[gw.xvar].upper};
     } // data -> value
     // value -> display
-    this.xScale = d3.scale.linear().domain([0,100])
-        .range([0, this.graphWidth])
+    this.xScale = d3.scale.linear().range([0, this.graphWidth])
         // data -> display
     this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
     // x error bars
@@ -2023,6 +2032,21 @@ GWCatalogue.prototype.setColour = function(newScheme){
     this.replot();
     return;
 }
+GWCatalogue.prototype.getMinMax = function(p,border=0){
+    var gw = this;
+    var dminmax=[Infinity,-Infinity]
+    for (i=0;i<gw.cat.data.length;i++){
+        if (gw.cat.data[i].active!=false){
+            dminmax[0] = Math.min(gw.cat.getMinVal(gw.cat.data[i].name,p),dminmax[0])
+            dminmax[1] = Math.max(gw.cat.getMaxVal(gw.cat.data[i].name,p),dminmax[1])
+        }
+    }
+    dminmax[0] = (dminmax[0]>0)&&(dminmax[0]<border) ? dminmax[0] : dminmax[0]-border
+    dminmax[0] = (gw.axiszero) ? 0 : dminmax[0]-border;
+    dminmax[1] = dminmax[1]+border;
+    // if (gw.axiszero)
+    return dminmax;
+}
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
     var gw = this;
@@ -2038,12 +2062,16 @@ GWCatalogue.prototype.drawGraph = function(){
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
     xBorder = (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2;
-    xMin = (d3.min(data, gw.xErrM)<0)||(!gw.axiszero) ? d3.min(data, gw.xErrM) - xBorder : 0;
-    xMax = d3.max(data, gw.xErrP)+xBorder;
+    // [xMin,xMax]=gw.getMinMax(gw.xvar,xBorder);
+    xMin = (d3.min(data,gw.xErrM)<0)||(!gw.axiszero) ? d3.min(data,gw.xErrM) - xBorder : 0;
+    xMax = d3.max(data,gw.xErrP)+xBorder;
+    // xMax = d3.max(data, gw.xErrP)+xBorder;
     gw.xScale.domain([xMin, xMax]);
+
     yBorder = (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2;
-    yMin = (d3.min(data, gw.yErrM)<0)||(!gw.axiszero) ? d3.min(data, gw.yErrM) - yBorder : 0;
-    yMax = d3.max(data, gw.yErrP)+yBorder;
+    // [yMin,yMax]=gw.getMinMax(gw.yvar,yBorder);
+    yMin = (d3.min(data,gw.yErrM)<0)||(!gw.axiszero) ? d3.min(data,gw.yErrM) - yBorder : 0;
+    yMax = d3.max(data,gw.yErrP)+yBorder;
     gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
     if(this.debug){console.log('xy Ranges',xMin,xMax,yMin,yMax)}
@@ -2107,7 +2135,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("transform", "rotate(-90)")
         .attr("y", 6)
         .attr("x",-gw.graphHeight/2)
-        .attr("dy", (-20*(1+gw.scl))+"px")
+        .attr("dy", (-30*(1+gw.scl))+"px")
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .style("fill",gw.getCol('text'))
@@ -2841,12 +2869,14 @@ GWCatalogue.prototype.updateXaxis = function(xvarNew) {
 
         // don't want dots overlapping axis, so add in buffer to data domain
         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        xBorder= (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2
+        xBorder= (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2;
         if (gw.columns[gw.xvar].errcode==""){
+            // [xMin,xMax]=gw.getMinMax(this.xvar,xBorder);
             xMin = (d3.min(data, gw.xValue)<0)||(!gw.axiszero) ? d3.min(data, gw.xValue) - xBorder : 0;
             xMax = d3.max(data, gw.xValue)+xBorder;
             gw.xScale.domain([xMin, xMax]);
         }else{
+            // [xMin,xMax]=gw.getMinMax(this.xvar,xBorder);
             xMin = (d3.min(data, gw.xErrM)<0)||(!gw.axiszero) ? d3.min(data, gw.xErrM) - xBorder : 0;
             xMax = d3.max(data, gw.xErrP)+xBorder;
             gw.xScale.domain([xMin, xMax]);
@@ -2911,11 +2941,16 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
         yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
         if (gw.columns[gw.yvar].errcode==""){
+            // [yMin,yMax]=this.getMinMax(this.yvar,yBorder);
             yMin = (d3.min(data, gw.yValue)<0)||(!gw.axiszero) ? d3.min(data, gw.yValue) - yBorder : 0;
             gw.yScale.domain([yMin, d3.max(data, gw.yValue)+yBorder]);
+            gw.yScale.domain([yMin,yMax]);
+
         }else{
+            // [yMin,yMax]=this.getMinMax(this.yvar,yBorder);
             yMin = (d3.min(data, gw.yErrM)<0)||(!gw.axiszero) ? d3.min(data, gw.yErrM) - yBorder : 0;
             gw.yScale.domain([yMin, d3.max(data, gw.yErrP)+yBorder]);
+            gw.yScale.domain([yMin,yMax]);
         }
         gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
         // Select the section we want to apply our changes to
@@ -3048,7 +3083,7 @@ GWCatalogue.prototype.addOptions = function(){
     divdisp.appendChild(colList);
 
     d3.select("#display-options").append('div')
-        .style('display',"none")
+        .style('display','none')
         .html('<input type="checkbox" name="filterr" id="axiszero"'+(gw.axiszero ? ' checked="checked"':'')+'></input><label for="axiszero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
         .on("change",function(){
             gw.axiszero=d3.select('#axiszero')[0][0].checked;
