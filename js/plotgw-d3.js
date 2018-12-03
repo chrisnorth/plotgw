@@ -16,7 +16,7 @@ function GWCatalogue(inp){
     var gw=this;
     this.getUrlVars();
     if (this.urlVars.datasrc){this.datasrc=this.urlVars.datasrc}
-    else{this.datasrc = (inp)&&(inp.datasrc) ? inp.datasrc : "local"}
+    else{this.datasrc = (inp)&&(inp.datasrc) ? inp.datasrc : "gwosc"}
 
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
@@ -1868,7 +1868,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
 
     if(this.debug){console.log('loading GWCat');}
     if (gw.datasrc=='gwosc'){
-        gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:'dev/gwosc.json',debug:this.debug});
+        gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:'json/gwosc.json',debug:this.debug});
     }else{
         gw.cat = new GWCat(eventsCallback,{'fileIn':gw.fileInEvents});
     }
