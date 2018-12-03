@@ -234,7 +234,6 @@ GWCatalogue.prototype.init = function(){
         },
         "obsrun": {
             "name":'%data.obsrun.name%',
-    		"label": "text.gwviewer.filter.observingrun",
     		"type":"checkbox",
     		"options":[
     			{"id": "filt-o1", "label":"%text.plotgw.filter.observingrun.O1%", "checked": true, "value": "O1" },
@@ -1545,6 +1544,7 @@ GWCatalogue.prototype.setStyles = function(){
     // initialise colours
     this.colourList = {
         'light':{'class':'col-white','default':true,
+            'label':'%text.plotgw.colour.light%',
             'fg':'#000','bg':'#fff',
             'line':'#000','text':'#000',
             'grid':'#555','err':'#555',
@@ -1557,6 +1557,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#ccc'
         },
         'dark':{'class':'col-black','default':false,
+            'label':'%text.plotgw.colour.dark%',
             'fg':'#fff','bg':'#000',
             'line':'#fff','text':'#fff',
             'grid':'#ccc','err':'#ccc',
@@ -1981,10 +1982,28 @@ GWCatalogue.prototype.setLang = function(){
             this.langdict[k]=this.langdictDefault[k];
         }
     }
+
     d3.select("#options-x > .panel-title")
         .html(this.tl('%text.plotgw.horizontal-axis%'))
     d3.select("#options-y > .panel-title")
         .html(this.tl('%text.plotgw.vertical-axis%'))
+    d3.select("#display-options > .panel-title")
+        .html(this.tl('%text.plotgw.display%'))
+    d3.select("#options-colour")
+        .html(this.tl('%text.plotgw.colour%'))
+    for (c in this.colourList){
+        d3.select('#colour-'+c).html(this.tl(this.colourList[c].label));
+    }
+    d3.select("#filterr > label")
+        .html(this.tl('%text.plotgw.filter.errpr%'))
+    d3.select("#filter-title")
+        .html(this.tl("%text.plotgw.filter.title%"));
+    d3.select("#filter-text")
+        .html(this.tl("%text.plotgw.filter.text%"));
+    for (f in this.filters){
+        d3.select('#filt_'+f+'_label > .filter-text')
+            .html(this.tl(this.filters[f].name));
+    }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
         LVT:this.tl('%text.plotgw.legend.candidates%')}
     d3.select('#lang-title')
@@ -3066,13 +3085,15 @@ GWCatalogue.prototype.addOptions = function(){
 
     // add Display buttons
     var divdisp= document.getElementById('display-options');
+    divdisp.innerHTML+='<span id="options-colour">'+this.tl('%text.plotgw.colour%')+'</span>';
     var colList=document.createElement('select');
     colList.name = 'colSelect';
     colList.id = 'colSelect';
     for (c in this.colourList){
         colOpt=document.createElement('option');
         colOpt.value=c;
-        colOpt.innerHTML=c;
+        colOpt.id="colour-"+c;
+        colOpt.innerHTML=this.tl(this.colourList[c].label);
         colList.appendChild(colOpt);
     }
     colList.onchange = function(){
@@ -3419,9 +3440,9 @@ GWCatalogue.prototype.addFilter = function(replot){
 	}
 
     d3.select("#filter-title")
-        .html(this.tl("%text.plotgw.filter.title%"))
-        d3.select("#filter-text")
-            .html(this.tl("%text.plotgw.filter.text%"));
+        .html(this.tl("%text.plotgw.filter.title%"));
+    d3.select("#filter-text")
+        .html(this.tl("%text.plotgw.filter.text%"));
     d3.select("#filter-options")
         .html('<input type="checkbox" name="filterr" id="filterr"'+(gw.filterr ? ' checked="checked"':'')+'></input><label for="filterr">'+this.tl('%text.plotgw.filter.error%')+'</label>')
         .on("change",function(){
@@ -3449,7 +3470,6 @@ GWCatalogue.prototype.addFilter = function(replot){
         filticondiv.className='filt-cont-label'
         filticondiv.setAttribute("id",'filt_'+filt+'_label');
         filticondiv.innerHTML = '<img src="'+gw.getIcon(filt)+'"></img><span class="filter-text">'+this.tl(a.name)+'</>';
-
         filtdiv.appendChild(filticondiv);
         // langdiv.onmouseover = function(e){
         //     gw.showTooltip(e,this.id.split("icon")[0])}
@@ -3748,6 +3768,7 @@ GWCatalogue.prototype.makePlot = function(){
     this.drawSketch();
     // this.addButtons();
     this.addOptions();
+    // this.addFilters();
     this.addHelp();
     this.addLang(false);
     this.addFilter();
