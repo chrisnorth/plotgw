@@ -2799,8 +2799,8 @@ GWCatalogue.prototype.drawGraph = function(){
             .attr("id","search-list-"+d.name)
             .html(d.name)
             .on("click",function(){
-                if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);}gw.hideSearch();})
-            }
+                if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);gw.hideSearch();}
+            });
         // if (gw.selectedevent==d.name){
         //     document.getElementById("search-list-"+d.name).classList.add("current")
         // }else{
