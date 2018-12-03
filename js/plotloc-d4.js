@@ -152,7 +152,49 @@ Localisation.prototype.init = function(){
         event:''
     }
     this.src={}
-    this.skyarr={}
+    this.skyarr={
+        FNet:{
+            hmapthreshold:5,
+            opHeat:function(d){return 1;},
+            colHeatScale:d3.scaleSequential(d3.interpolateInferno).domain([0, 1]),
+            colHeat:function(p){
+                val=loc.skyarr.arr.FNet[p];
+                return loc.skyarr.FNet.colHeatScale(val);
+            }
+        },
+        aNet:{
+            hmapthreshold:5,
+            opHeat:function(d){return 1;},
+            colHeatScale:d3.scaleSequential(d3.interpolateRdBu).domain([-1,1]),
+            colHeat:function(p){
+                val=Math.log10(loc.skyarr.arr.aNet[p]);
+                return loc.skyarr.aNet.colHeatScale(val);
+            }
+        },
+        Tmatch:{
+            hmapthreshold:0.5,
+            opHeat:function(d){
+                if (loc.Ndet<=1){return 0}
+                else{ return d3.scaleLinear().range([0,1])
+                .domain([0.5,1]).clamp(true)(d)}
+            },
+            colHeat:function(d){return "#f0f";}
+        },
+        Tall:{
+            hmapthreshold:0.5,
+            opHeat:function(d){
+                if (loc.Ndet<=1){return 0}
+                else if (loc.Ndet==2){return 0.7}
+                else{ return d3.scaleLinear().range([0,1])
+                .domain([0.2,0.5*loc.Ndet*(loc.Ndet-1)]).clamp(true)(d)}
+            },
+            colHeat:function(d){return "#0ff";}
+        },
+        pNet:{
+            hmapthreshold:5,
+            opHeat:d3.scaleLinear().range([0,1]).domain([0,1])
+        }
+    }
     this.src.ra = (this.urlVars.ra) ? parseFloat(this.urlVars.ra) : this.defaults.ra;
     this.src.dec = (this.urlVars.dec) ? parseFloat(this.urlVars.dec) : this.defaults.dec;
     this.src.posang = (this.urlVars.posang) ? parseFloat(this.urlVars.posang) : this.defaults.posang;
@@ -629,8 +671,8 @@ Localisation.prototype.rect2xy = function(p,pt){
         }
         return([xout1,yout1,xout2-xout1,yout2-yout1]);
     }else{
-        xy1=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p])-loc.skyarr.dRA/2.),loc.skyarr.arr.lat[p]-loc.skyarr.dDec/2.])
-        xy2=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p])+loc.skyarr.dRA/2.),loc.skyarr.arr.lat[p]+loc.skyarr.dDec/2.])
+        xy1=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p]+loc.skyarr.dRA/2.)),loc.skyarr.arr.lat[p]-loc.skyarr.dDec/2.])
+        xy2=loc.skyarr.projEq([-(loc.lon2raDisp(loc.skyarr.arr.lon[p]-loc.skyarr.dRA/2.)),loc.skyarr.arr.lat[p]+loc.skyarr.dDec/2.])
         x1=xy1[0]
         y1=xy1[1]
         x2=xy2[0]
@@ -639,11 +681,12 @@ Localisation.prototype.rect2xy = function(p,pt){
         xout2=Math.max(x1,x2)
         yout1=Math.min(y1,y2)
         yout2=Math.max(y1,y2)
-        if (xout2-xout1>loc.svgWidth/2.){
+        if (xout2-xout1>=loc.svgWidth/2.){
             // rectangle wraps around edge
             xout1=Math.max(x1,x2);
             xout2=Math.min(x1,x2)+(loc.svgWidth-loc.margin.left-loc.margin.right);
         }
+        // if (xout1==loc.svgWidth)
         return([xout1,yout1,xout2-xout1,yout2-yout1]);
     }
 }
@@ -1797,7 +1840,7 @@ Localisation.prototype.drawSky = function(){
 
 
     // draw Heatmap
-    loc.skyarr.FNet={}
+    // loc.skyarr.FNet={}
     loc.skyarr.FNet.gHeatmap=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['heatmap-FNet'].gid})
         .attr("class","heatmap")
@@ -1870,7 +1913,7 @@ Localisation.prototype.drawSky = function(){
 	    .attr("d", d3.geoPath().projection(loc.skyarr.projEq));
 
     // draw Heatmap for all rings
-    loc.skyarr['Tall']={}
+    // loc.skyarr['Tall']={}
     loc.skyarr['Tall'].gHeatmap=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['heatmap-Tall'].gid})
         .attr("class","heatmap")
@@ -1879,7 +1922,7 @@ Localisation.prototype.drawSky = function(){
     loc.updateHeatmap('Tall')
     if(loc.overlays['heatmap-Tall'].shown){loc.showOverlay('heatmap-Tall')}
 
-    loc.skyarr['Tmatch']={}
+    // loc.skyarr['Tmatch']={}
     loc.skyarr['Tmatch'].gHeatmap=loc.svg.append("g")
         .attr("id",function(){return loc.overlays['heatmap-Tmatch'].gid})
         .attr("class","heatmap")
@@ -2442,49 +2485,50 @@ Localisation.prototype.updateHeatmap = function(dataIn){
         }
         this.skyarr.Pr.srcThresh=Math.max.apply(Math,nearValsRows);
         loc.skyarr.Pr.hmapthreshold=Math.max(0.1,this.skyarr.Pr.srcThresh);
-    }else if (dataIn=="pNet"){
-        loc.skyarr.pNet.hmapthreshold=5;
-        loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1])
-            .domain([0,1])
-    }else if (dataIn=="FNet"){
-        loc.skyarr.FNet.hmapthreshold=5;
-        loc.skyarr[dataIn].opHeat=function(d){return 1;};
-        // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
-        loc.skyarr[dataIn].colHeatScale=d3.scaleSequential(d3.interpolateInferno).domain([0, 1]);
-        loc.skyarr[dataIn].colHeat=function(p){
-            val=loc.skyarr.arr[dataIn][p];
-            return loc.skyarr[dataIn].colHeatScale(val);
-        }
-    }else if (dataIn=="aNet"){
-        loc.skyarr.FNet.hmapthreshold=5;
-        loc.skyarr[dataIn].opHeat=function(d){return 1;};
-        // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
-        loc.skyarr[dataIn].colHeatScale=d3.scaleSequential(d3.interpolateRdBu).domain([-1,1]);
-        loc.skyarr[dataIn].colHeat=function(p){
-            val=Math.log10(loc.skyarr.arr[dataIn][p]);
-            return loc.skyarr[dataIn].colHeatScale(val);
-        }
-    }else if (dataIn=="Tmatch"){
-        loc.skyarr.Tmatch.hmapthreshold=0.5;
-        loc.skyarr[dataIn].opHeat=function(d){
-            if (loc.Ndet<=1){return 0}
-            else{ return d3.scaleLinear().range([0,1])
-            .domain([0.5,1]).clamp(true)(d)}
-        }
-        loc.skyarr[dataIn].colHeat=function(d){return "#fff";};
-    }else if (dataIn=="Tall"){
-        loc.skyarr.Tall.hmapthreshold=0.5;
-        loc.skyarr.Tall.opHeat=function(d){
-            if (loc.Ndet<=1){return 0}
-            else if (loc.Ndet==2){return 0.7}
-            else{ return d3.scaleLinear().range([0,1])
-            .domain([0.2,0.5*loc.Ndet*(loc.Ndet-1)]).clamp(true)(d)}
-        }
-        loc.skyarr.Tall.colHeat=function(d){return "#fff";};
-    }else if (dataIn=="overlay"){
-        loc.skyarr.overlay.opHeat=function(d){return 0;};
-        loc.skyarr.overlay.colHeat=function(d){return "#fff";};
     }
+    // }else if (dataIn=="pNet"){
+    //     loc.skyarr.pNet.hmapthreshold=5;
+    //     loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1])
+    //         .domain([0,1])
+    // }else if (dataIn=="FNet"){
+    //     loc.skyarr.FNet.hmapthreshold=5;
+    //     loc.skyarr[dataIn].opHeat=function(d){return 1;};
+    //     // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
+    //     loc.skyarr[dataIn].colHeatScale=d3.scaleSequential(d3.interpolateInferno).domain([0, 1]);
+    //     loc.skyarr[dataIn].colHeat=function(p){
+    //         val=loc.skyarr.arr[dataIn][p];
+    //         return loc.skyarr[dataIn].colHeatScale(val);
+    //     }
+    // }else if (dataIn=="aNet"){
+    //     loc.skyarr.FNet.hmapthreshold=5;
+    //     loc.skyarr[dataIn].opHeat=function(d){return 1;};
+    //     // loc.skyarr[dataIn].opHeat=d3.scaleLinear().range([0,1]).domain([0,1])
+    //     loc.skyarr[dataIn].colHeatScale=d3.scaleSequential(d3.interpolateRdBu).domain([-1,1]);
+    //     loc.skyarr[dataIn].colHeat=function(p){
+    //         val=Math.log10(loc.skyarr.arr[dataIn][p]);
+    //         return loc.skyarr[dataIn].colHeatScale(val);
+    //     }
+    // }else if (dataIn=="Tmatch"){
+    //     loc.skyarr.Tmatch.hmapthreshold=0.5;
+    //     loc.skyarr[dataIn].opHeat=function(d){
+    //         if (loc.Ndet<=1){return 0}
+    //         else{ return d3.scaleLinear().range([0,1])
+    //         .domain([0.5,1]).clamp(true)(d)}
+    //     }
+    //     loc.skyarr[dataIn].colHeat=function(d){return "#f0f";};
+    // }else if (dataIn=="Tall"){
+    //     loc.skyarr.Tall.hmapthreshold=0.5;
+    //     loc.skyarr.Tall.opHeat=function(d){
+    //         if (loc.Ndet<=1){return 0}
+    //         else if (loc.Ndet==2){return 0.7}
+    //         else{ return d3.scaleLinear().range([0,1])
+    //         .domain([0.2,0.5*loc.Ndet*(loc.Ndet-1)]).clamp(true)(d)}
+    //     }
+    //     loc.skyarr.Tall.colHeat=function(d){return "#0ff";};
+    // }else if (dataIn=="overlay"){
+    //     loc.skyarr.overlay.opHeat=function(d){return 0;};
+    //     loc.skyarr.overlay.colHeat=function(d){return "#fff";};
+    // }
     if (dataIn=="overlay"){
         loc.skyarr[dataIn].hmapfiltPix=loc.skyarr.arr.pix;
     }else if ((dataIn=="FNet")|(dataIn=="aNet")){

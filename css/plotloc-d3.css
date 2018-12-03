@@ -626,15 +626,15 @@ input:checked + .det-slider:before {
     fill:#009600;
 }
 .constellation{
-    stroke:#f0f;
+    stroke:#fff;
     stroke-width:1px;
 }
 .constlines{
-    stroke:#0ff;
+    stroke:#fff;
     stroke-width:1px;
 }
 .constname{
-    fill:#ff0;
+    fill:#fff;
     fill-opacity:1;
 }
 #cbar-outer{

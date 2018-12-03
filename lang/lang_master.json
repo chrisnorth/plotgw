@@ -1,7 +1,7 @@
 {
     "section.about":{"_title":"About the language"},
-    "meta.code":{"_title":"en","_text":"The two-letter language code","_type":"string"},
-    "meta.name":{"_title":"Language","_text":"The name of the language in that language, e.g. English, Français, Español, or मानक हिन्दी. It appears in the language menu.","_type":"string"},
+    "meta.code":{"_title":"Language","_text":"The two- or four-letter language code (e.g. en, en-GB, pt-br, zh-hk)","_type":"string"},
+    "meta.name":{"_title":"Language name","_text":"The name of the language in that language, e.g. English, Français, Español, or मानक हिन्दी. It appears in the language menu.","_type":"string"},
     "meta.alignment":{"_title":"left","_text":"The direction that the language goes. Note that right-to-left text is not currently supported.","_type":"select","_options":[{"name":"left to right","value":"left"},{"name":"right to left","value":"right"}]},
     "meta.alphabet":{"_title":"Alphabet","_text":"The alphabet used by the language","_type":"string"},
     "meta.numbersystem":{"_title":"Number system","_text":"The number system used by the language. Note that Non-Arabic numerals are not currently supported in the catalogue plot, but are in the bubble plot.","_type":"string"},
@@ -63,7 +63,7 @@
     "text.gen.gravwave":{"_title":"Gravitational wave","_text":"Currently not in use","_type":"string"},
     "text.gen.bbh":{"_title":"binary black hole","_text":"Currently not in use","_type":"string"},
     "text.gen.bns":{"_title":"binary neutron star","_text":"Currently not in use","_type":"string"},
-    "text.gen.losc":{"_title":"LOSC","_text":"Displayed as text/link to LOSC name","_type":"string"},
+    "text.gen.gwosc":{"_title":"GWOSC","_text":"Displayed as text/link to GWOSC name","_type":"string"},
     "text.gen.paper":{"_title":"Publication","_text":"Displayed as text/link to publication","_type":"string"},
     "text.gen.close":{"_title":"Close","_text":"Text for close buttons","_type":"string"},
     "text.gen.help":{"_title":"Help","_text":"Text for 'Help' buttons/menus","_type":"string"},
@@ -108,7 +108,7 @@
     "text.plotgw.lang.text":{"_title":"Language panel text","_text":"Text displayed in language panel","_type":"textarea","_height":"2em"},
 
     "section.plotgw.tooltip":{"_title":"Tootips in catalogue plot"},
-    "tooltip.plotgw.losc":{"_title":"Tooltip: LOSC","_text":"Tooltip text for LOSC link","_type":"string"},
+    "tooltip.plotgw.gwosc":{"_title":"Tooltip: GWOSC","_text":"Tooltip text for GWOSC link","_type":"string"},
     "tooltip.plotgw.paper":{"_title":"Tooltip: Publication","_text":"Tooltip text for publication link","_type":"string"},
     "tooltip.plotgw.switchunits":{"_title":"Tooltip: switching units","_text":"Tooltip text for 'switch units' button","_type":"string"},
     "tooltip.plotgw.toggleerrors":{"_title":"Tootltip: toggle errors","_text":"Tooltip text for errors button","_type":"string"},
@@ -197,8 +197,8 @@
     "share.bub.twitter.hashtag":{"_title":"Tweet hashtag","_text":"Default hashtag to include in tweet","_type":"string"},
 
     "section.domains":{"_title":"Web domains for building links","_text":"Included in case there are language-specific versions in the future."},
-    "domain.losc":{"_title":"LOSC domain","_text":"Top-level domain for LOSC","_type":"string","_usedef":true},
-    "domain.losc.events":{"_title":"LOSC events page","_text":"Domain for LOSC events page. Individual event data links use this","_type":"string","_usedef":true},
-    "domain.losc.store":{"_title":"LOSC store page","_text":"Domain for LOSC data store","_type":"string","_usedef":true},
+    "domain.gwosc":{"_title":"GWOSC domain","_text":"Top-level domain for GWOSC","_type":"string","_usedef":true},
+    "domain.gwosc.events":{"_title":"GWOSC events page","_text":"Domain for GWOSC events page. Individual event data links use this","_type":"string","_usedef":true},
+    "domain.gwosc.store":{"_title":"GWOSC store page","_text":"Domain for GWOSC data store","_type":"string","_usedef":true},
     "domain.gracedb.events":{"_title":"GraceDB events page","_text":"Domain for GraceDB events link", "_type":"string","_usedef":true}
 }
