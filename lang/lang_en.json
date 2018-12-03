@@ -102,6 +102,7 @@
  "tooltip.plotgw.showinfo": "Show Information Panel",
  "tooltip.plotgw.showhelp": "Show Help Panel",
  "tooltip.plotgw.showlang": "Change language",
+ "tooltip.plotgw.showfilter": "Filter data",
  "tooltip.plotgw.share": "Share",
  "tooltip.plotgw.search": "Search",
  "tooltip.plotgw.nextevent": "Next event",
