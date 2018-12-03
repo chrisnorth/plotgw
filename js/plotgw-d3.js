@@ -25,11 +25,14 @@ function GWCatalogue(inp){
         d3.select('#'+gw.holderid).html('')
     }
     //set default language from browser
-    this.langIn = (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "";
+    this.langIn = "en";
+    // this.langIn = (navigator) ? (navigator.userLanguage||navigator.systemLanguage||navigator.language||browser.language) : "en";
+    // console.log('browser language: '+this.langIn)
     //set lang from query (if present)
     if((inp)&&(inp.lang)&&(typeof inp.lang=="string")) this.langIn = inp.lang;
     // set language from urlVars (if present)
     this.langIn = ((this.urlVars.lang)&&(typeof this.urlVars.lang=="string")) ? this.urlVars.lang : this.langIn
+    // console.log('initial language: '+this.langIn)
     this.init();
     if(this.debug){console.log('initialised');}
     this.drawGraphInit();
@@ -41,6 +44,7 @@ function GWCatalogue(inp){
 }
 GWCatalogue.prototype.init = function(){
     // created HTML of not included
+    d3.select('#nojs').style('display','none')
     if (d3.select("#fb-root").empty()){
         d3.select("#"+this.holderid).insert("div",":first-child")
             .attr("id","fb-root")
@@ -830,7 +834,7 @@ GWCatalogue.prototype.scaleWindow = function(){
 
 }
 GWCatalogue.prototype.setScales = function(){
-    console.log('Setting scales')
+    if(this.debug){console.log('Setting scales');}
     //define scales
     this.scaleWindow();
     var gw=this;
@@ -1753,7 +1757,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     // gw.data=[];
     gw.optionsOn=false;
     gw.helpOn=false;
-    gw.lengOn=false;
+    gw.langOn=false;
     gw.toLoad=3;
     gw.fileInEventsDefault="gwcat/data/events.json";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault;
@@ -2597,7 +2601,7 @@ GWCatalogue.prototype.drawGraph = function(){
     })
     d3.select("#search-bg").on("click",function(){gw.hideSearch();});
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
-    console.log(gw.selectedevent); 
+    if(gw.debug){console.log('selected:',gw.selectedevent);}
     // //add download button
     // this.graphcont.append("div")
     //     .attr("id","save-icon")
@@ -3398,7 +3402,6 @@ GWCatalogue.prototype.addFilter = function(replot){
 		if(!attr) return {};
 		if(!attr.values) return {};
 		if(attr.el.length != 1) return {};
-        console.log('bs',this)
         this.values = attr.values;
 		this.range = attr.range;
 		this.step = (attr.step||1);
@@ -3424,8 +3427,7 @@ GWCatalogue.prototype.addFilter = function(replot){
 			if(_slider.el.select('.max').length > 0) _slider.el.select('.max').html(max);
 		});
 		this.slider.on('set',function(){
-            console.log('updating filter ',this)
-			gw.updateFilters();
+            gw.updateFilters();
 		});
 		return this;
 	}
@@ -3452,7 +3454,6 @@ GWCatalogue.prototype.addFilter = function(replot){
     }
     for (filt in this.filters){
         a=this.filters[filt]
-        console.log(filt,this.filters[filt],a)
         filtdiv = document.createElement('div');
         filtdiv.className = 'filter-cont colourise';
         // filtdiv.style.height = gw.filtcontHeight;
@@ -3493,11 +3494,10 @@ GWCatalogue.prototype.addFilter = function(replot){
             a.slider = new buildSlider(filtdata)
         }
     }
-    document.getElementById("filter-options").addEventListener("change",function(){
-        console.log('filter errors',gw,this);
-    })
+    // document.getElementById("filter-options").addEventListener("change",function(){
+    //     console.log('filter errors',gw,this);
+    // })
     document.getElementById("filter-block").addEventListener("change",function(){
-        console.log('filter change',gw,this);
         gw.updateFilters();
     })
     gw.updateFilters();
@@ -3505,11 +3505,10 @@ GWCatalogue.prototype.addFilter = function(replot){
 GWCatalogue.prototype.updateFilters = function () {
     var gw = this;
     for(filt in this.filters){
-        console.log(filt);
+        if(gw.debug){console.log('updating filter: ',filt);}
 		if(this.filters[filt].type == "slider"){
 			if(!this.filters[filt].slider){
 				this.filters[filt].slider = {}
-				console.log(filt,this.filters[filt].slider.values)
 			}
 		}else if(this.filters[filt].type == "checkbox"){
 			for(var i = 0; i < this.filters[filt].options.length; i++){
@@ -3567,7 +3566,6 @@ GWCatalogue.prototype.updateFilters = function () {
 			}else if(a.type == "checkbox"){
 				if(!isChecked(i,key)) active = false;
 			}
-			console.log(gw.cat.dataOrder[i],key,active)
 		}
 		this.cat.data[i].active = active;
 	}

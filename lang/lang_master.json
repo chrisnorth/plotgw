@@ -131,6 +131,7 @@
     "tooltip.plotgw.showinfo":{"_title":"Tooltip: info button","_text":"Tooltip text for info button","_type":"string"},
     "tooltip.plotgw.showhelp":{"_title":"Tooltip: help button","_text":"Tooltip text for help button","_type":"string"},
     "tooltip.plotgw.showlang":{"_title":"Tooltip: language button","_text":"Tooltip text for language button","_type":"string"},
+    "tooltip.plotgw.showfilter":{"_title":"Tooltip: filter button","_text":"Tooltip text for filter button","_type":"string"},
     "tooltip.plotgw.share":{"_title":"Tooltip: share button","_text":"Tooltip text for share button","_type":"string"},
     "tooltip.plotgw.search":{"_title":"Tooltip: search button","_text":"Tooltip text for search button","_type":"string"},
     "tooltip.plotgw.nextevent":{"_title":"Tooltip: next button","_text":"Tooltip text for previous event button","_type":"string"},
