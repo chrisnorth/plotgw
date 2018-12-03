@@ -5,7 +5,7 @@
 	    "UTC":{"name": "%data.UTC.name%", "priority": 1, "sigfig": 0,
 	         "type": "varchar", "err": 0,"name_en":"UTC"},
 	    "rho":{"name": "%data.rho.name%", "priority": 3, "sigfig": 3,
-	         "err": 0, "name_en":"Signal to Noise ratio"},
+	         "err": 0, "name_en":"Signal to Noise ratio (Network)"},
 	    "FAR":{"name": "%data.FAR.name%", "priority": 1, "sigfig": 2,
 	         "unit": "%data.FAR.unit%", "err": 0, "name_en":"False alarm rate", "unit_en":"yr^-1"},
 	    "sigma":{"name": "%data.sigma.name%", "priority": 6, "sigfig": 2,
@@ -19,7 +19,7 @@
 	    "Mtotal":{"name": "%data.Mtotal.name%","priority": 2, "sigfig": 3,
 	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Total mass", "unit_en":"M_sun"},
 	    "chi":{"name": "%data.chi.name%", "priority": 4, "sigfig": 2,
-	        "err": 2, "name_en":"Effective spin"},
+	        "err": 2, "name_en":"Effective inspiral spin"},
 	    "Mfinal":{"name": "%data.Mfinal.name%", "priority": 2, "sigfig": 3,
 	        "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Final mass", "unit_en":"M_sun"},
 	    "Mratio":{"name": "%data.Mratio.name%", "priority": 2, "sigfig": 3,
@@ -35,17 +35,22 @@
 	    "z":{"name": "%data.z.name%","priority": 2, "sigfig": 2,
 	        "err": 2, "name_en":"Redshift"},
 	    "deltaOmega":{"name": "%data.skyArea.name%", "priority": 5, "sigfig": 2,
-	        "unit": "%data.skyArea.unit%", "err": 0, "name_en":"Sky localization area","unit_en":"deg^2"}
+	        "unit": "%data.skyArea.unit%", "err": 0, "name_en":"Sky localization area","unit_en":"deg^2"},
+		"obsrun":{"name": "%data.obsrun.name%","priority":5, "sigfig":0,"err":0,"name_en":"Observing run"},
+		"net":{"name": "%data.net.name","priority":5, "sigfig":0,"err":0,"name_en":"Detector network"}
 	},
 	"data": {
 		"GW150914": {
 			"objType": {
 				"best":"BBH"
 			},
+			"obsrun":{
+				"best":"O1"
+			},
 			"Mratio": {
 				"err": [
 					0.17,
-					0.2],
+					-0.2],
 				"best": 0.81
 			},
 			"UTC": {
@@ -57,21 +62,21 @@
 			"Erad": {
 				"err": [
 					0.5,
-					0.4
+					-0.4
 				],
 				"best": 3.0
 			},
 			"Mtotal": {
 				"err": [
 					4.1,
-					3.4
+					-3.4
 				],
 				"best": 65.3
 			},
 			"af": {
 				"err": [
 					0.05,
-					0.06
+					-0.06
 				],
 				"best": 0.68
 			},
@@ -81,7 +86,7 @@
 			"chi": {
 				"err": [
 					0.14,
-					0.14
+					-0.14
 				],
 				"best": -0.06
 			},
@@ -91,14 +96,14 @@
 			"lpeak": {
 				"err": [
 					0.5,
-					0.4
+					-0.4
 				],
 				"best": 3.6
 			},
 			"M1": {
 				"err": [
 					5.2,
-					3.8
+					-3.8
 				],
 				"best": 36.2
 			},
@@ -108,35 +113,35 @@
 			"M2": {
 				"err": [
 					3.7,
-					4.4
+					-4.4
 				],
 				"best": 29.1
 			},
 			"Mfinal": {
 				"err": [
 					3.7,
-					3.1
+					-3.1
 				],
 				"best": 62.3
 			},
 			"Mchirp": {
 				"err": [
 					1.8,
-					1.5
+					-1.5
 				],
 				"best": 28.1
 			},
 			"z": {
 				"err": [
 					0.03,
-					0.04
+					-0.04
 				],
 				"best": 0.09
 			},
 			"DL": {
 				"err": [
 					150,
-					180
+					-180
 				],
 				"best": 420
 			},
@@ -148,10 +153,13 @@
 			"objType": {
 				"best":"BBH"
 			},
+			"obsrun":{
+				"best":"O1"
+			},
 			"Mratio": {
 				"err": [
 					0.38,
-					0.37],
+					-0.37],
 				"best": 0.57
 			},
 			"UTC": {
@@ -163,21 +171,21 @@
 			"Erad": {
 				"err": [
 					0.3,
-					0.4
+					-0.4
 				],
 				"best": 1.5
 			},
 			"Mtotal": {
 				"err": [
 					13,
-					4
+					-4
 				],
 				"best": 37
 			},
 			"af": {
 				"err": [
 					0.09,
-					0.1
+					-0.1
 				],
 				"best": 0.66
 			},
@@ -187,7 +195,7 @@
 			"chi": {
 				"err": [
 					0.3,
-					0.2
+					-0.2
 				],
 				"best": 0.0
 			},
@@ -197,14 +205,14 @@
 			"lpeak": {
 				"err": [
 					0.8,
-					1.8
+					-1.8
 				],
 				"best": 3.1
 			},
 			"M1": {
 				"err": [
 					18,
-					6
+					-6
 				],
 				"best": 23
 			},
@@ -214,35 +222,35 @@
 			"M2": {
 				"err": [
 					4,
-					5
+					-5
 				],
 				"best": 13
 			},
 			"Mfinal": {
 				"err": [
 					14,
-					4
+					-4
 				],
 				"best": 35
 			},
 			"Mchirp": {
 				"err": [
 					1.4,
-					1.1
+					-1.1
 				],
 				"best": 15.1
 			},
 			"z": {
 				"err": [
 					0.09,
-					0.09
+					-0.09
 				],
 				"best": 0.2
 			},
 			"DL": {
 				"err": [
 					500,
-					500
+					-500
 				],
 				"best": 1000
 			},
@@ -254,10 +262,13 @@
 			"objType": {
 				"best":"BBH"
 			},
+			"obsrun":{
+				"best":"O1"
+			},
 			"Mratio": {
 				"err": [
 					0.40,
-					0.29],
+					-0.29],
 				"best": 0.52
 			},
 			"UTC": {
@@ -269,21 +280,21 @@
 			"Erad": {
 				"err": [
 					0.1,
-					0.2
+					-0.2
 				],
 				"best": 1.0
 			},
 			"Mtotal": {
 				"err": [
 					5.9,
-					1.7
+					-1.7
 				],
 				"best": 21.8
 			},
 			"af": {
 				"err": [
 					0.06,
-					0.06
+					-0.06
 				],
 				"best": 0.74
 			},
@@ -293,7 +304,7 @@
 			"chi": {
 				"err": [
 					0.2,
-					0.1
+					-0.1
 				],
 				"best": 0.21
 			},
@@ -303,14 +314,14 @@
 			"lpeak": {
 				"err": [
 					0.8,
-					1.6
+					-1.6
 				],
 				"best": 3.3
 			},
 			"M1": {
 				"err": [
 					8.3,
-					3.7
+					-3.7
 				],
 				"best": 14.2
 			},
@@ -320,35 +331,35 @@
 			"M2": {
 				"err": [
 					2.3,
-					2.3
+					-2.3
 				],
 				"best": 7.5
 			},
 			"Mfinal": {
 				"err": [
 					6.1,
-					1.7
+					-1.7
 				],
 				"best": 20.8
 			},
 			"Mchirp": {
 				"err": [
 					0.3,
-					0.3
+					-0.3
 				],
 				"best": 8.9
 			},
 			"z": {
 				"err": [
 					0.03,
-					0.04
+					-0.04
 				],
 				"best": 0.09
 			},
 			"DL": {
 				"err": [
 					180,
-					190
+					-190
 				],
 				"best": 440
 			},
@@ -360,30 +371,33 @@
 			"objType": {
 				"best":"BBH"
 			},
+			"obsrun":{
+				"best":"O2"
+			},
 			"Mratio": {
 				"err": [
 					0.32,
-					0.26],
+					-0.26],
 				"best": 0.62
 			},
 			"Mchirp": {
 				"err": [
 					2.4,
-					2.7
+					-2.7
 				],
 				"best": 21.1
 			},
 			"DL": {
 				"err": [
 					450,
-					390
+					-390
 				],
 				"best": 880
 			},
 			"Mtotal": {
 				"err": [
 					5.9,
-					5.0
+					-5.0
 				],
 				"best": 50.7
 			},
@@ -399,21 +413,21 @@
 			"chi": {
 				"err": [
 					0.21,
-					0.3
+					-0.3
 				],
 				"best": -0.12
 			},
 			"af": {
 				"err": [
 					0.09,
-					0.2
+					-0.2
 				],
 				"best": 0.64
 			},
 			"Erad": {
 				"err": [
 					0.6,
-					0.7
+					-0.7
 				],
 				"best": 2.0
 			},
@@ -423,14 +437,14 @@
 			"lpeak": {
 				"err": [
 					0.7,
-					1.3
+					-1.3
 				],
 				"best": 3.1
 			},
 			"M1": {
 				"err": [
 					8.4,
-					6.0
+					-6.0
 				],
 				"best": 31.2
 			},
@@ -440,21 +454,21 @@
 			"M2": {
 				"err": [
 					5.3,
-					5.9
+					-5.9
 				],
 				"best": 19.4
 			},
 			"Mfinal": {
 				"err": [
 					5.7,
-					4.6
+					-4.6
 				],
 				"best": 48.7
 			},
 			"z": {
 				"err": [
 					0.08,
-					0.07
+					-0.07
 				],
 				"best": 0.18
 			},
@@ -466,36 +480,39 @@
 			"objType": {
 				"best":"BBH"
 			},
+			"obsrun":{
+				"best":"O2"
+			},
 			"Mratio": {
 				"err": [
 					0.3,
-					0.4
+					-0.4
 				],
 				"best": 0.6
 			},
 			"Mchirp": {
 				"err": [
 					0.2,
-					0.2
+					-0.2
 				],
 				"best": 7.9
 			},
 			"DL": {
 				"err": [
 					140,
-					140
+					-140
 				],
 				"best": 340
 			},
 			"Mtotal": {
 				"err": [
 					5,
-					1
+					-1
 				],
 				"best": 19
 			},
 			"UTC": {
-				"best": "2017-06-08T02:01:16"
+				"best": "2017-06-18T02:01:16"
 			},
 			"net": {
 				"best": "HL"
@@ -506,21 +523,21 @@
 			"chi": {
 				"err": [
 					0.23,
-					0.09
+					-0.09
 				],
 				"best": 0.07
 			},
 			"af": {
 				"err": [
 					0.04,
-					0.05
+					-0.05
 				],
 				"best": 0.69
 			},
 			"Erad": {
 				"err": [
 					0.07,
-					0.17
+					-0.17
 				],
 				"best": 0.85
 			},
@@ -530,14 +547,14 @@
 			"lpeak": {
 				"err": [
 					0.5,
-					1.6
+					-1.6
 				],
 				"best": 3.4
 			},
 			"M1": {
 				"err": [
 					7,
-					2
+					-2
 				],
 				"best": 12
 			},
@@ -547,21 +564,21 @@
 			"M2": {
 				"err": [
 					2,
-					2
+					-2
 				],
 				"best": 7
 			},
 			"Mfinal": {
 				"err": [
 					4.8,
-					0.9
+					-0.9
 				],
 				"best": 18
 			},
 			"z": {
 				"err": [
 					0.03,
-					0.03
+					-0.03
 				],
 				"best": 0.07
 			},
@@ -573,31 +590,34 @@
 			"objType": {
 				"best":"BBH"
 			},
+			"obsrun":{
+				"best":"O2"
+			},
 			"Mratio": {
 				"err": [
 					0.18,
-					0.22
+					-0.22
 				],
 				"best": 0.82
 			},
 			"Mchirp": {
 				"err": [
 					1.4,
-					1.1
+					-1.1
 				],
 				"best": 24.1
 			},
 			"DL": {
 				"err": [
 					130,
-					210
+					-210
 				],
 				"best": 540
 			},
 			"Mtotal": {
 				"err": [
 					3.4,
-					2.7
+					-2.7
 				],
 				"best": 55.9
 			},
@@ -613,21 +633,21 @@
 			"chi": {
 				"err": [
 					0.12,
-					0.12
+					-0.12
 				],
 				"best": 0.06
 			},
 			"af": {
 				"err": [
 					0.07,
-					0.05
+					-0.05
 				],
 				"best": 0.7
 			},
 			"Erad": {
 				"err": [
 					0.4,
-					0.3
+					-0.3
 				],
 				"best": 2.7
 			},
@@ -637,14 +657,14 @@
 			"lpeak": {
 				"err": [
 					0.5,
-					0.5
+					-0.5
 				],
 				"best": 3.7
 			},
 			"M1": {
 				"err": [
 					5.7,
-					3.0
+					-3.0
 				],
 				"best": 30.5
 			},
@@ -654,21 +674,21 @@
 			"M2": {
 				"err": [
 					2.8,
-					4.2
+					-4.2
 				],
 				"best": 25.3
 			},
 			"Mfinal": {
 				"err": [
 					3.2,
-					2.5
+					-2.5
 				],
 				"best": 53.2
 			},
 			"z": {
 				"err": [
 					0.03,
-					0.04
+					-0.04
 				],
 				"best": 0.11
 			},
@@ -680,6 +700,9 @@
 			"objType": {
 				"best":"BNS"
 			},
+			"obsrun":{
+				"best":"O2"
+			},
 			"Mratio": {
 				"lim": [
 					0.7,
@@ -689,21 +712,21 @@
 			"Mchirp": {
 				"err": [
 					0.004,
-					0.002
+					-0.002
 				],
 				"best": 1.188
 			},
 			"DL": {
 				"err": [
 					8,
-					14
+					-14
 				],
 				"best": 40
 			},
 			"Mtotal": {
 				"err": [
 					0.04,
-					0.01
+					-0.01
 				],
 				"best": 2.74
 			},
@@ -749,7 +772,7 @@
 			"z": {
 				"err": [
 					0.002,
-					0.003
+					-0.003
 				],
 				"best": 0.008
 			},
@@ -759,166 +782,166 @@
 		}
 	},
 	"links": {
-		"GW150914": {
-			"003": {
+		"GW150914": [
+			{
 				"url": "https://gracedb.ligo.org/events/view/G184098",
 				"text": "GraceDB page",
 				"type": "web-data"
 			},
-			"002": {
+			{
 				"url": "https://losc.ligo.org/events/GW150914/",
 				"text": "Open Data page",
-				"type": "web-data"
+				"type": "open-data"
 			},
-			"001": {
+			{
 				"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102",
 				"text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2016) Phys. Rev. Lett. 116, 061102",
-				"type": "web-data"
+				"type": "pub"
 			},
-			"005": {
+			{
 				"url": "https://losc.ligo.org/s/skymapViewer/aladin/index.html#GW150914:LALI",
 				"text": "Skymap Viewer",
 				"type": "web-data"
 			},
-			"004": {
+			{
 				"url": "https://losc.ligo.org/s/events/GW150914/P1500227/LALInference_skymap.fits.gz",
 				"text": "Final Skymap",
 				"type": "web-data"
 			}
-		},
-		"LVT151012": {
-			"011": {
+		],
+		"LVT151012": [
+			{
 				"url":"https://doi.org/10.1103/PhysRevX.6.041015",
 				"text": "PRX Paper",
 				"citation": "LIGO Scientific Collaboration & Virgo Collaboration, 2016, Phys. Rev. X 6 041015",
-				"type": "web-data"
+				"type": "pub"
 			},
-			"010": {
+			{
 				"url": "https://losc.ligo.org/s/skymapViewer/aladin/index.html#LVT151012:LAL1",
 				"text": "Skymap Viewer",
 				"type": "web-data"
 			},
-			"009": {
+			{
 				"url": "https://losc.ligo.org/s/events/LVT151012/P1500227/LALInference_skymap1.fits.gz",
 				"text": "Final Skymap",
 				"type": "web-data"
 			},
-			"008": {
+			{
 				"url": "https://gracedb.ligo.org/events/view/G192004",
 				"text": "GraceDB page",
 				"type": "web-data"
 			},
-			"007": {
+			{
 				"url": "https://gracedb.ligo.org/events/view/G192005",
 				"text": "GraceDB page",
 				"type": "web-data"
 			},
-			"006": {
+			{
 				"url": "https://losc.ligo.org/events/LVT151012/",
 				"text": "Open Data page",
-				"type": "web-data"
+				"type": "open-data"
 			}
-		},
-		"GW151226": {
-			"012": {
+		],
+		"GW151226": [
+			{
 				"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.241103",
 				"text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2016) Phys. Rev. Lett. 116, 241103",
-				"type": "web-data"
+				"type": "pub"
 			},
-			"013": {
+			{
 				"url": "https://losc.ligo.org/events/GW151226/",
 				"text": "Open Data page",
-				"type": "web-data"
+				"type": "open-data"
 			},
-			"014": {
+			{
 				"url": "https://gracedb.ligo.org/events/view/G211117",
 				"text": "GraceDB page",
 				"type": "web-data"
 			},
-			"015": {
+			{
 				"url": "https://gracedb.ligo.org/events/view/G211182",
 				"text": "GraceDB page",
 				"type": "web-data"
 			},
-			"016": {
+			{
 				"url": "https://losc.ligo.org/s/events/GW151226/P1500227/LALInference_skymap_2.fits.gz",
 				"text": "Final Skymap",
 				"type": "web-data"
 			},
-			"017": {
+			{
 				"url": "https://losc.ligo.org/s/skymapViewer/aladin/index.html#GW151226:LALI2",
 				"text": "Skymap Viewer",
 				"type": "web-data"
 			}
-		},
-		"GW170104": {
-			"022":{
+		],
+		"GW170104": [
+			{
                 "url": "https://journals.aps.org/pri/abstract/10.1103/PhysRevLett.118.221101",
                 "text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 118, 221101",
-                "type": "web-data"
+                "type": "pub"
             },
-			"021":{
-                "url": "%domain.losc.events%/GW170104/",
+			{
+                "url": "https://losc.ligo.org/events/GW170104/",
                 "text": "Open Data page",
-                "type":"web-data"
+                "type":"open-data"
             },
-			"020":{
-                "url": "%domain.gracedb.events%/view/G268556",
+			{
+                "url": "https://gracedb.ligo.org/events/view/G268556",
                 "text": "GraceDB page",
                 "type": "web-data"
             },
-			"019":{
-                "url": "%domain.losc.store%/events/GW170104/P1500227/LALInference_skymap.fits.gz",
+			{
+                "url": "https://losc.ligo.org/s/events/events/GW170104/P1500227/LALInference_skymap.fits.gz",
                 "text": "Final Skymap",
                 "type": "web-data"
             },
-			"018":{
-                "url": "%domain.losc.store%/skymapViewer/aladin/index.html#GW170104:LALI",
+			{
+                "url": "https://losc.ligo.org/s/events/skymapViewer/aladin/index.html#GW170104:LALI",
                 "text": "Skymap Viewer",
                 "type": "web-data"
             }
-		},
-		"GW170608": {
-			"027":{
+		],
+		"GW170608": [
+			{
 				"url": "https://arxiv.org/abs/1711.05578",
 				"text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017)",
-				"type": "web-data"
+				"type": "pub"
 			},
-			"028":{
-                "url": "%domain.losc.events%/GW170608/",
+			{
+                "url": "https://losc.ligo.org/events/GW170608/",
                 "text": "Open Data page",
-                "type":"web-data"
+                "type":"open-data"
             }
-		},
-		"GW170814": {
-			"023":{
+		],
+		"GW170814": [
+			{
 				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.141101",
 				"text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119, 141101",
-				"type": "web-data"
+				"type": "pub"
 			},
-			"024":{
-                "url": "%domain.losc.events%/GW170814/",
+			{
+                "url": "https://losc.ligo.org/events/GW170814/",
                 "text": "Open Data page",
-                "type":"web-data"
+                "type":"open-data"
             }
-		},
-		"GW170817": {
-			"025":{
+		],
+		"GW170817": [
+			{
 				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.161101",
 				"text": "PRL Paper",
 				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119 161101",
-				"type": "web-data"
+				"type": "pub"
 			},
-			"026":{
-                "url": "%domain.losc.events%/GW170817/",
+			{
+                "url": "https://losc.ligo.org/events/GW170817/",
                 "text": "Open Data page",
-                "type":"web-data"
+                "type":"open-data"
             }
-		}
+		]
 	}
 }

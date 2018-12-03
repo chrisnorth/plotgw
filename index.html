@@ -9,6 +9,7 @@
     <meta property="og:image"         content="http://chrisnorth.github.io/plotgw/img/screenshot.png" />
     <!--<link rel="icon" type="image/vnd.microsoft.icon" href="planck_logo.ico" />-->
     <link rel="icon" type="image/vnd.microsoft.icon" href="img/favicon-32x32.png" />
+    <link rel="stylesheet" href="css/nouislider.min.css">
     <link rel="stylesheet" href="css/style-d3.css" type="text/css" />
     <!-- <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script> -->
     <!-- <script type="application/json" src="json/gwcat.json"></script>
@@ -16,109 +17,15 @@
     <script type="text/javascript" src="js/d3.v3.min.js"></script>
     <script type="text/javascript" src="js/clipboard-1.7.1.min.js"></script>
     <script type="text/javascript" src="js/FileSaver.js"></script>
+    <script type="text/javascript" src="js/nouislider.min.js"></script>
     <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
     <!-- Analytics code -->
     <script type="text/javascript" src="js/analytics.js"></script>
+    <script type="text/javascript" src="gwcat/js/gwcat.js"></script>
     <script type="text/javascript" src="js/plotgw-d3.js"></script>
 </head>
-<body>
+<body class="colourise">
     <div id="plotgw-cont" class="plotgw-container">
-        <!-- <div id="fb-root"></div>
-        <script>(function(d, s, id) {
-          var js, fjs = d.getElementsByTagName(s)[0];
-          if (d.getElementById(id)) return;
-          js = d.createElement(s); js.id = id;
-          js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.9";
-          fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'facebook-jssdk'));</script>
-        <div id="hdr">
-            <h1 id="page-title">LIGO Compact Binary Catalogue</h1>
-        </div>
-        <div id="graphcontainer">
-        </div>
-        <div id="infoouter">
-            <div id="sketchcontainer"></div>
-            <div id="labcontainer"></div>
-            <div id="select-next" class="select-event select-next"></div>
-            <div id="select-previous" class="select-event select-previous"></div>
-            <div id="search-btn" class="dropdown"></div>
-        </div>
-        <div id="options-outer" class="panel-outer">
-            <div id="options-x" class="options-box">
-                <div class="panel-title">Horizontal axis</div>
-                <div class="options-buttons" id="x-buttons"></div>
-            </div>
-            <div id="options-y" class="options-box">
-                <div class="panel-title">Vertical axis</div>
-                <div class="options-buttons" id="y-buttons"></div>
-            </div>
-            <div id="options-close" class="panel-close"></div>
-        </div>
-        <div id="help-outer" class="panel-outer">
-            <div id="help-title" class="panel-title"></div>
-            <div class="panel-block" id="help-block-icons">
-                <div class="panel-cont" id="help-help-cont">
-                    <img class="panel-cont-img" src="img/help.svg">
-                    <div class="panel-cont-text" id="help-help-text">help</div>
-                </div>
-                <div class="panel-cont" id="help-info-cont">
-                    <img class="panel-cont-img" src="img/info.svg">
-                    <div class="panel-cont-text" id="help-info-text">info</div>
-                </div>
-                <div class="panel-cont" id="help-settings-cont">
-                    <img class="panel-cont-img" src="img/settings.svg">
-                    <div class="panel-cont-text" id="help-settings-text">settings</div>
-                </div>
-                <div class="panel-cont" id="help-lang-cont">
-                    <img class="panel-cont-img" src="img/lang.svg">
-                    <div class="panel-cont-text" id="help-lang-text">language</div>
-                </div>
-                <div class="panel-cont" id="help-errors-cont">
-                    <img class="panel-cont-img" src="img/errors.svg">
-                    <div class="panel-cont-text" id="help-errors-text">errors</div>
-                </div>
-                <div class="panel-cont" id="help-share-cont">
-                    <img class="panel-cont-img" src="img/share.svg">
-                    <div class="panel-cont-text" id="help-share-text">share</div>
-                </div>
-                <div class="panel-cont" id="help-search-cont">
-                    <img class="panel-cont-img" src="img/search.svg">
-                    <div class="panel-cont-text" id="help-search-text">share</div>
-                </div>
-            </div>
-            <div class="panel-block" id="help-block-text">
-                <div class="panel-text" id="help-text"></div>
-            </div>
-
-            <div id="help-close" class="panel-close"></div>
-        </div>
-        <div id="lang-outer" class="panel-outer">
-            <div id="lang-title" class="panel-title"></div>
-            <div class="panel-block panel-block-full" id="lang-block-icons">
-                <div class="panel-text" id="lang-text"></div>
-            </div>
-            <div id="lang-close" class="panel-close"></div>
-        </div>
-        <div class="popup-bg" id="share-bg"></div>
-        <div class="popup-outer" id="share-outer">
-            <div class="popup-button" id="share-block-icon-twitter">
-                <a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a>
-                <script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-            </div>
-            <div class="popup-button" id="share-block-icon-fb">
-                <div class="fb-share-button" data-href="http://chrisnorth.github.io/plotgw" data-layout="button" data-size="small" data-mobile-iframe="true"><a id="facebook-share-button" class="fb-xfbml-parse-ignore" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=http%3A%2F%2Fchrisnorth.github.io%2Fplotgw&amp;src=sdkpreparse">Share</a></div>
-            </div>
-            <div class="popup-button" id="share-block-icon-copy">
-                <button id="copy-button" data-clipboard-text="URL" title="Copy link to clipboard"><img src="img/copy.svg"></button>
-                <span id='copy-conf'>&#x2713</span>
-            </div>
-            <div id="share-close" class="popup-close"></div>
-        </div>
-        <div class="popup-bg" id="search-bg"></div>
-        <div class="popup-outer" id="search-outer">
-            <div id="search-close" class="popup-close"></div>
-        </div>
-        <div class="tooltip" id="tooltipSk"></div> -->
     </div>
     <script type="text/javascript">
     var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
