@@ -789,14 +789,14 @@
 				"type": "web-data"
 			},
 			{
-				"url": "https://losc.ligo.org/events/GW150914/",
+				"url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW150914/",
 				"text": "Open Data page",
 				"type": "open-data"
 			},
 			{
-				"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102",
-				"text": "PRL Paper",
-				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2016) Phys. Rev. Lett. 116, 061102",
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
 				"type": "pub"
 			},
 			{
@@ -810,11 +810,11 @@
 				"type": "web-data"
 			}
 		],
-		"LVT151012": [
+		"GW151012": [
 			{
-				"url":"https://doi.org/10.1103/PhysRevX.6.041015",
-				"text": "PRX Paper",
-				"citation": "LIGO Scientific Collaboration & Virgo Collaboration, 2016, Phys. Rev. X 6 041015",
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
 				"type": "pub"
 			},
 			{
@@ -838,20 +838,20 @@
 				"type": "web-data"
 			},
 			{
-				"url": "https://losc.ligo.org/events/LVT151012/",
+				"url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/LVT151012/",
 				"text": "Open Data page",
 				"type": "open-data"
 			}
 		],
 		"GW151226": [
 			{
-				"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.241103",
-				"text": "PRL Paper",
-				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2016) Phys. Rev. Lett. 116, 241103",
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
 				"type": "pub"
 			},
 			{
-				"url": "https://losc.ligo.org/events/GW151226/",
+				"url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW151226/",
 				"text": "Open Data page",
 				"type": "open-data"
 			},
@@ -878,13 +878,13 @@
 		],
 		"GW170104": [
 			{
-                "url": "https://journals.aps.org/pri/abstract/10.1103/PhysRevLett.118.221101",
-                "text": "PRL Paper",
-				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 118, 221101",
-                "type": "pub"
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
+				"type": "pub"
             },
 			{
-                "url": "https://losc.ligo.org/events/GW170104/",
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170104/",
                 "text": "Open Data page",
                 "type":"open-data"
             },
@@ -906,39 +906,91 @@
 		],
 		"GW170608": [
 			{
-				"url": "https://arxiv.org/abs/1711.05578",
-				"text": "PRL Paper",
-				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017)",
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
 				"type": "pub"
 			},
 			{
-                "url": "https://losc.ligo.org/events/GW170608/",
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170608/",
+                "text": "Open Data page",
+                "type":"open-data"
+            }
+		],
+		"GW170729": [
+			{
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
+				"type": "pub"
+			},
+			{
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170729/",
+                "text": "Open Data page",
+                "type":"open-data"
+            }
+		],
+		"GW170809": [
+			{
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
+				"type": "pub"
+			},
+			{
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170809/",
                 "text": "Open Data page",
                 "type":"open-data"
             }
 		],
 		"GW170814": [
 			{
-				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.141101",
-				"text": "PRL Paper",
-				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119, 141101",
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
 				"type": "pub"
 			},
 			{
-                "url": "https://losc.ligo.org/events/GW170814/",
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170814/",
                 "text": "Open Data page",
                 "type":"open-data"
             }
 		],
 		"GW170817": [
 			{
-				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.161101",
-				"text": "PRL Paper",
-				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119 161101",
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
 				"type": "pub"
 			},
 			{
-                "url": "https://losc.ligo.org/events/GW170817/",
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170817/",
+                "text": "Open Data page",
+                "type":"open-data"
+            }
+		],
+		"GW170818": [
+			{
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
+				"type": "pub"
+			},
+			{
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170818/",
+                "text": "Open Data page",
+                "type":"open-data"
+            }
+		],
+		"GW170823": [
+			{
+				"url": "https://dcc.ligo.org/LIGO-P1800307/public",
+				"text": "O2 catalog paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2018) (submitted)",
+				"type": "pub"
+			},
+			{
+                "url": "https://www.gw-openscience.org/catalog/GWTC-1-confident/single/GW170823/",
                 "text": "Open Data page",
                 "type":"open-data"
             }
