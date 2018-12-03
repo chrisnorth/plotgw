@@ -15,6 +15,7 @@
     "data.time.name":{"_title":"Time of detection","_text":"data name","_type":"string"},
     "data.rho.name":{"_title":"Signal to Noise Ratio","_text":"data name","_type":"string"},
     "data.sigma.name":{"_title":"Sigma","_text":"data name","_type":"string"},
+    "data.obsrun.name":{"_title":"Observing Run","_text":"data name","_type":"string"},
 
     "subsection.data.masses":{"_subtitle":"Masses and spins"},
     "data.M1.name":{"_title":"Primary mass","_text":"data name","_type":"string"},
@@ -89,6 +90,11 @@
     "subsection.plotgw.options":{"_subtitle":"Options panel"},
     "text.plotgw.horizontal-axis":{"_title":"Horizontal Axis","_text":"Heading on options pane for changing the horizontal axis variable","_type":"string"},
     "text.plotgw.vertical-axis":{"_title":"Vertical Axis","_text":"Heading on options pane for changing the vertical axis variable","_type":"string"},
+    "text.plotgw.display":{"_title":"Display","_text":"Heading on options pane for display options","_type":"string"},
+    "text.plotgw.colour":{"_title":"Colour Scheme Label","_text":"Label for colour scheme selector","_type":"string"},
+    "text.plotgw.colour.light":{"_title":"Light Colour Scheme","_text":"Label for light colour scheme","_type":"string"},
+    "text.plotgw.colour.dark":{"_title":"Dark Colour Scheme","_text":"Label for dark colour scheme","_type":"string"},
+    "text.plotgw.axiszero":{"_title":"Axis Zero label","_text":"Label for check box to zpecify whether axes include zero","_type":"string"},
 
     "subsection.plotgw.help":{"_subtitle":"Help panel"},
     "text.plotgw.help.title":{"_title":"Help panel title","_text":"Panel title","_type":"string"},
@@ -106,6 +112,13 @@
     "subsection.plotgw.lang":{"_subtitle":"Language panel"},
     "text.plotgw.lang.title":{"_title":"Language panel title","_text":"Title of panel for changing the language","_type":"string"},
     "text.plotgw.lang.text":{"_title":"Language panel text","_text":"Text displayed in language panel","_type":"textarea","_height":"2em"},
+
+    "subsection.plotgw.lang":{"_subtitle":"Language panel"},
+    "text.plotgw.filter.title":{"_title":"Filter panel title","_text":"Title of panel for filtering data","_type":"string"},
+    "text.plotgw.filter.error":{"_title":"Filter panel error checkbox","_text":"Label for checkbox to set whether errors are included in filter parameters","_type":"string"},
+    "text.plotgw.filter.observingrun.O1":{"_title":"Filter panel error checkbox","_text":"Label for O1","_type":"string","_usedef":true},
+    "text.plotgw.filter.observingrun.O2":{"_title":"Filter panel error checkbox","_text":"Label for O2","_type":"string","_usedef":true},
+    "text.plotgw.filter.observingrun.O3":{"_title":"Filter panel error checkbox","_text":"Label for O3","_type":"string","_usedef":true},
 
     "section.plotgw.tooltip":{"_title":"Tootips in catalogue plot"},
     "tooltip.plotgw.gwosc":{"_title":"Tooltip: GWOSC","_text":"Tooltip text for GWOSC link","_type":"string"},
