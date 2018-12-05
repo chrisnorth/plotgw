@@ -626,13 +626,18 @@ GWCatalogue.prototype.stdlabel = function(d,src){
         if ((d[src].errtype)&&((d[src].errtype=='normal')||(d[src].errtype=='lim'))){
             // if(gw.debug){console.log(d.name,src,d[src],d[src].errtype)}
             sigfig=gw.columns[src].sigfig
-            eneg=d[src].errv[1].toPrecision(sigfig)
-            epos=d[src].errv[0].toPrecision(sigfig)
+            eneg=gw.cat.getMinVal(d.name,src).toPrecision(sigfig)
+            epos=gw.cat.getMaxVal(d.name,src).toPrecision(sigfig)
+            // eneg=d[src].errv[1].toPrecision(sigfig)
+            // epos=d[src].errv[0].toPrecision(sigfig)
             if (d[src].errv[1]!=d[src].errv[0]){
                 while (eneg==epos){
+                    // need more precision to show range
                     sigfig+=1
-                    eneg=d[src].errv[1].toPrecision(sigfig)
-                    epos=d[src].errv[0].toPrecision(sigfig)
+                    eneg=gw.cat.getMinVal(d.name,src).toPrecision(sigfig)
+                    epos=gw.cat.getMaxVal(d.name,src).toPrecision(sigfig)
+                    // eneg=d[src].errv[1].toPrecision(sigfig)
+                    // epos=d[src].errv[0].toPrecision(sigfig)
                 }
             }
             txt=parseFloat(eneg)+'&ndash;'+parseFloat(epos)
