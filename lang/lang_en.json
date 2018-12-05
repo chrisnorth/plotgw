@@ -69,6 +69,7 @@
  "text.plotgw.information.title": "Information Panel",
  "text.plotgw.information.subtitle": "Click on datapoints for more information",
  "text.plotgw.horizontal-axis": "Horizontal Axis",
+ "text.plotgw.vertical-axis": "Vertical Axis",
  "text.plotgw.display": "Display",
  "text.plotgw.colour": "Colour Scheme",
  "text.plotgw.colour.light": "Light",
