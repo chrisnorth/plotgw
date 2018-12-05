@@ -1408,8 +1408,7 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
     }else if(resize=="snap"){
         // snap resize (when redrawing sketch)
         this.svgSketch.select('circle.bh-'+bh)
-            .attr("r",this.scaleRadius(
-                d[bh].best,d.Mfinal.best))
+            .attr("r",this.scaleRadius(d[bh]))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
             .attr("rx",this.scaleRadius(d[bh]))
@@ -3926,7 +3925,7 @@ GWCatalogue.prototype.replot = function(){
     // if (this.langOn){this.showLang();}
     this.cat.data.forEach(function(d){
         // gwcat.formatData;
-        if (d.name==gw.sketchName){
+        if (d.name==gw.selectedevent){
             // console.log('resize:',d.name,gw.sketchName);
             gw.updateSketch(d);
         }
