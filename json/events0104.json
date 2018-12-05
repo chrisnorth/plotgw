@@ -1,0 +1,1663 @@
+{
+	"datadict": {
+	    "GPS":{"name": "%data.GPS.name%", "priority": 4, "sigfig": 12,
+	         "err": 0,"name_en":"GPS"},
+	    "UTC":{"name": "%data.UTC.name%", "priority": 1, "sigfig": 0,
+	         "type": "varchar", "err": 0,"name_en":"UTC"},
+	    "rho":{"name": "%data.rho.name%", "priority": 3, "sigfig": 3,
+	         "err": 0, "name_en":"Signal to Noise ratio"},
+	    "FAR":{"name": "%data.FAR.name%", "priority": 1, "sigfig": 2,
+	         "unit": "%data.FAR.unit%", "err": 0, "name_en":"False alarm rate", "unit_en":"yr^-1"},
+	    "sigma":{"name": "%data.sigma.name%", "priority": 6, "sigfig": 2,
+	         "err": 0, "name_en":"Significance"},
+	    "M1":{"name": "%data.M1.name%", "priority": 1, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Primary mass", "unit_en":"M_sun"},
+	    "M2":{"name": "%data.M2.name%", "priority": 1, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Secondary mass", "unit_en":"M_sun"},
+	    "Mchirp":{"name": "%data.Mchirp.name%", "priority": 3, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Chirp mass", "unit_en":"M_sun"},
+	    "Mtotal":{"name": "%data.Mtotal.name%","priority": 2, "sigfig": 3,
+	         "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Total mass", "unit_en":"M_sun"},
+	    "chi":{"name": "%data.chi.name%", "priority": 4, "sigfig": 2,
+	        "err": 2, "name_en":"Effective spin"},
+	    "Mfinal":{"name": "%data.Mfinal.name%", "priority": 2, "sigfig": 3,
+	        "unit": "%data.mass.unit.msun%", "err": 2, "name_en":"Final mass", "unit_en":"M_sun"},
+	    "Mratio":{"name": "%data.Mratio.name%", "priority": 2, "sigfig": 3,
+	        "unit":false, "err": 2, "name_en":"Mass ratio"},
+	    "af":{"name": "%data.af.name%", "priority": 3, "sigfig": 2,
+	         "err": 2, "name_en":"Final spin"},
+	    "Erad":{"name": "%data.Erad.name%", "priority": 6, "sigfig": 2,
+	        "unit": "%data.Erad.unit%", "err": 2, "name_en":"Radiated energy", "unit_en":"M_sun c^2"},
+	    "lpeak":{"name": "%data.lpeak.name%", "priority": 6, "sigfig": 2,
+	        "unit": "%data.lpeak.unit%", "err": 2, "name_en":"Peak luminosity", "unit_en":"10^56 erg s^-1"},
+	    "DL":{"name": "%data.DL.name%", "priority": 2, "sigfig": 2,
+	        "unit": "%data.DL.unit%", "err": 2, "name_en":"Luminosity distance", "unit_en":"Mpc"},
+	    "z":{"name": "%data.z.name%","priority": 2, "sigfig": 2,
+	        "err": 2, "name_en":"Redshift"},
+	    "deltaOmega":{"name": "%data.skyArea.name%", "priority": 5, "sigfig": 2,
+	        "unit": "%data.skyArea.unit%", "err": 0, "name_en":"Sky localization area","unit_en":"deg^2"}
+	},
+	"data": {
+		"GW150914": {
+			"objType": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.17,
+					0.2],
+				"best": 0.81
+			},
+			"UTC": {
+				"best": "2015-09-14T09:50:45"
+			},
+			"net": {
+				"best": "HL"
+			},
+			"Erad": {
+				"err": [
+					0.5,
+					0.4
+				],
+				"best": 3.0
+			},
+			"Mtotal": {
+				"err": [
+					4.1,
+					3.4
+				],
+				"best": 65.3
+			},
+			"af": {
+				"err": [
+					0.05,
+					0.06
+				],
+				"best": 0.68
+			},
+			"FAR": {
+				"best": 6e-07
+			},
+			"chi": {
+				"err": [
+					0.14,
+					0.14
+				],
+				"best": -0.06
+			},
+			"deltaOmega": {
+				"best": 230
+			},
+			"lpeak": {
+				"err": [
+					0.5,
+					0.4
+				],
+				"best": 3.6
+			},
+			"M1": {
+				"err": [
+					5.2,
+					3.8
+				],
+				"best": 36.2
+			},
+			"rho": {
+				"best": 23.7
+			},
+			"M2": {
+				"err": [
+					3.7,
+					4.4
+				],
+				"best": 29.1
+			},
+			"Mfinal": {
+				"err": [
+					3.7,
+					3.1
+				],
+				"best": 62.3
+			},
+			"Mchirp": {
+				"err": [
+					1.8,
+					1.5
+				],
+				"best": 28.1
+			},
+			"z": {
+				"err": [
+					0.03,
+					0.04
+				],
+				"best": 0.09
+			},
+			"DL": {
+				"err": [
+					150,
+					180
+				],
+				"best": 420
+			},
+			"GPS": {
+				"best": 1126259462.0
+			}
+		},
+		"LVT151012": {
+			"objType": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.38,
+					0.37],
+				"best": 0.57
+			},
+			"UTC": {
+				"best": "2015-10-12T09:54:43.44"
+			},
+			"net": {
+				"best": "HL"
+			},
+			"Erad": {
+				"err": [
+					0.3,
+					0.4
+				],
+				"best": 1.5
+			},
+			"Mtotal": {
+				"err": [
+					13,
+					4
+				],
+				"best": 37
+			},
+			"af": {
+				"err": [
+					0.09,
+					0.1
+				],
+				"best": 0.66
+			},
+			"FAR": {
+				"best": 0.37
+			},
+			"chi": {
+				"err": [
+					0.3,
+					0.2
+				],
+				"best": 0.0
+			},
+			"deltaOmega": {
+				"best": 1600
+			},
+			"lpeak": {
+				"err": [
+					0.8,
+					1.8
+				],
+				"best": 3.1
+			},
+			"M1": {
+				"err": [
+					18,
+					6
+				],
+				"best": 23
+			},
+			"rho": {
+				"best": 9.7
+			},
+			"M2": {
+				"err": [
+					4,
+					5
+				],
+				"best": 13
+			},
+			"Mfinal": {
+				"err": [
+					14,
+					4
+				],
+				"best": 35
+			},
+			"Mchirp": {
+				"err": [
+					1.4,
+					1.1
+				],
+				"best": 15.1
+			},
+			"z": {
+				"err": [
+					0.09,
+					0.09
+				],
+				"best": 0.2
+			},
+			"DL": {
+				"err": [
+					500,
+					500
+				],
+				"best": 1000
+			},
+			"GPS": {
+				"best": 1128678900.44
+			}
+		},
+		"GW151226": {
+			"objType": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.40,
+					0.29],
+				"best": 0.52
+			},
+			"UTC": {
+				"best": "2015-12-26T03:38:53.65"
+			},
+			"net": {
+				"best": "HL"
+			},
+			"Erad": {
+				"err": [
+					0.1,
+					0.2
+				],
+				"best": 1.0
+			},
+			"Mtotal": {
+				"err": [
+					5.9,
+					1.7
+				],
+				"best": 21.8
+			},
+			"af": {
+				"err": [
+					0.06,
+					0.06
+				],
+				"best": 0.74
+			},
+			"FAR": {
+				"best": 6e-07
+			},
+			"chi": {
+				"err": [
+					0.2,
+					0.1
+				],
+				"best": 0.21
+			},
+			"deltaOmega": {
+				"best": 850
+			},
+			"lpeak": {
+				"err": [
+					0.8,
+					1.6
+				],
+				"best": 3.3
+			},
+			"M1": {
+				"err": [
+					8.3,
+					3.7
+				],
+				"best": 14.2
+			},
+			"rho": {
+				"best": 13.0
+			},
+			"M2": {
+				"err": [
+					2.3,
+					2.3
+				],
+				"best": 7.5
+			},
+			"Mfinal": {
+				"err": [
+					6.1,
+					1.7
+				],
+				"best": 20.8
+			},
+			"Mchirp": {
+				"err": [
+					0.3,
+					0.3
+				],
+				"best": 8.9
+			},
+			"z": {
+				"err": [
+					0.03,
+					0.04
+				],
+				"best": 0.09
+			},
+			"DL": {
+				"err": [
+					180,
+					190
+				],
+				"best": 440
+			},
+			"GPS": {
+				"best": 1135136350.65
+			}
+		},
+		"GW170104": {
+			"objType": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.32,
+					0.26],
+				"best": 0.62
+			},
+			"Mchirp": {
+				"err": [
+					2.4,
+					2.7
+				],
+				"best": 21.1
+			},
+			"DL": {
+				"err": [
+					450,
+					390
+				],
+				"best": 880
+			},
+			"Mtotal": {
+				"err": [
+					5.9,
+					5.0
+				],
+				"best": 50.7
+			},
+			"UTC": {
+				"best": "2017-01-04T10:11:58.60"
+			},
+			"net": {
+				"best": "HL"
+			},
+			"FAR": {
+				"best": 1.4e-05
+			},
+			"chi": {
+				"err": [
+					0.21,
+					0.3
+				],
+				"best": -0.12
+			},
+			"af": {
+				"err": [
+					0.09,
+					0.2
+				],
+				"best": 0.64
+			},
+			"Erad": {
+				"err": [
+					0.6,
+					0.7
+				],
+				"best": 2.0
+			},
+			"deltaOmega": {
+				"best": 1200
+			},
+			"lpeak": {
+				"err": [
+					0.7,
+					1.3
+				],
+				"best": 3.1
+			},
+			"M1": {
+				"err": [
+					8.4,
+					6.0
+				],
+				"best": 31.2
+			},
+			"rho": {
+				"best": 13.0
+			},
+			"M2": {
+				"err": [
+					5.3,
+					5.9
+				],
+				"best": 19.4
+			},
+			"Mfinal": {
+				"err": [
+					5.7,
+					4.6
+				],
+				"best": 48.7
+			},
+			"z": {
+				"err": [
+					0.08,
+					0.07
+				],
+				"best": 0.18
+			},
+			"GPS": {
+				"best": 1167559936.6
+			}
+		},
+		"GW170608": {
+			"objType": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.3,
+					0.4
+				],
+				"best": 0.6
+			},
+			"Mchirp": {
+				"err": [
+					0.2,
+					0.2
+				],
+				"best": 7.9
+			},
+			"DL": {
+				"err": [
+					140,
+					140
+				],
+				"best": 340
+			},
+			"Mtotal": {
+				"err": [
+					5,
+					1
+				],
+				"best": 19
+			},
+			"UTC": {
+				"best": "2017-06-08T02:01:16"
+			},
+			"net": {
+				"best": "HL"
+			},
+			"FAR": {
+				"best": 3.33e-4
+			},
+			"chi": {
+				"err": [
+					0.23,
+					0.09
+				],
+				"best": 0.07
+			},
+			"af": {
+				"err": [
+					0.04,
+					0.05
+				],
+				"best": 0.69
+			},
+			"Erad": {
+				"err": [
+					0.07,
+					0.17
+				],
+				"best": 0.85
+			},
+			"deltaOmega": {
+				"best": 520
+			},
+			"lpeak": {
+				"err": [
+					0.5,
+					1.6
+				],
+				"best": 3.4
+			},
+			"M1": {
+				"err": [
+					7,
+					2
+				],
+				"best": 12
+			},
+			"rho": {
+				"best": 13
+			},
+			"M2": {
+				"err": [
+					2,
+					2
+				],
+				"best": 7
+			},
+			"Mfinal": {
+				"err": [
+					4.8,
+					0.9
+				],
+				"best": 18
+			},
+			"z": {
+				"err": [
+					0.03,
+					0.03
+				],
+				"best": 0.07
+			},
+			"GPS": {
+				"best": 1181786494.49
+			}
+		},
+		"GW170814": {
+			"objType": {
+				"best":"BBH"
+			},
+			"Mratio": {
+				"err": [
+					0.18,
+					0.22
+				],
+				"best": 0.82
+			},
+			"Mchirp": {
+				"err": [
+					1.4,
+					1.1
+				],
+				"best": 24.1
+			},
+			"DL": {
+				"err": [
+					130,
+					210
+				],
+				"best": 540
+			},
+			"Mtotal": {
+				"err": [
+					3.4,
+					2.7
+				],
+				"best": 55.9
+			},
+			"UTC": {
+				"best": "2017-08-14T10:30:43"
+			},
+			"net": {
+				"best": "HLV"
+			},
+			"FAR": {
+				"best": 3.7e-5
+			},
+			"chi": {
+				"err": [
+					0.12,
+					0.12
+				],
+				"best": 0.06
+			},
+			"af": {
+				"err": [
+					0.07,
+					0.05
+				],
+				"best": 0.7
+			},
+			"Erad": {
+				"err": [
+					0.4,
+					0.3
+				],
+				"best": 2.7
+			},
+			"deltaOmega": {
+				"best": 60
+			},
+			"lpeak": {
+				"err": [
+					0.5,
+					0.5
+				],
+				"best": 3.7
+			},
+			"M1": {
+				"err": [
+					5.7,
+					3.0
+				],
+				"best": 30.5
+			},
+			"rho": {
+				"best": 18.3
+			},
+			"M2": {
+				"err": [
+					2.8,
+					4.2
+				],
+				"best": 25.3
+			},
+			"Mfinal": {
+				"err": [
+					3.2,
+					2.5
+				],
+				"best": 53.2
+			},
+			"z": {
+				"err": [
+					0.03,
+					0.04
+				],
+				"best": 0.11
+			},
+			"GPS": {
+				"best": 1186741861.5
+			}
+		},
+		"GW170817": {
+			"objType": {
+				"best":"BNS"
+			},
+			"Mratio": {
+				"lim": [
+					0.7,
+					1.0
+				]
+			},
+			"Mchirp": {
+				"err": [
+					0.004,
+					0.002
+				],
+				"best": 1.188
+			},
+			"DL": {
+				"err": [
+					8,
+					14
+				],
+				"best": 40
+			},
+			"Mtotal": {
+				"err": [
+					0.04,
+					0.01
+				],
+				"best": 2.74
+			},
+			"UTC": {
+				"best": "2017-08-17T12:41:04"
+			},
+			"net": {
+				"best": "HLV"
+			},
+			"FAR": {
+				"best": 1.25e-5
+			},
+			"chi": {
+				"lim": [
+					-0.01,
+					0.02
+				]
+			},
+			"Erad": {
+				"lower":0.025
+			},
+			"deltaOmega": {
+				"best": 28
+			},
+			"M1": {
+				"lim": [
+					1.36,
+					1.6
+				]
+			},
+			"rho": {
+				"best": 32.4
+			},
+			"M2": {
+				"lim": [
+					1.17,
+					1.36
+				]
+			},
+			"Mfinal": {
+				"upper": 2.755
+			},
+			"z": {
+				"err": [
+					0.002,
+					0.003
+				],
+				"best": 0.008
+			},
+			"GPS": {
+				"best": 1187008882.43
+			}
+		},
+		"GW180104a":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":5
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":10
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:00"
+			},
+			"GPS":{
+				"best": 1206576018
+			},
+			"z":{
+				"best":0.3
+			}
+		},
+		"GW180104b":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":5
+			},
+			"M2":{
+				"best":26
+			},
+			"Mfinal":{
+				"best":10
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:01"
+			},
+			"GPS":{
+				"best": 1206576019
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104c":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":5
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":10
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:02"
+			},
+			"GPS":{
+				"best": 1206576020
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104d2":{
+			"objType":{
+	  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":6.5
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":14
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:03"
+			},
+			"GPS":{
+				"best": 1206576021
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104d3":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":8
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":16
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:03"
+			},
+			"GPS":{
+				"best": 1206576021
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104d4":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":8
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":16
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:03"
+			},
+			"GPS":{
+				"best": 1206576021
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104d":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":8
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":16
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:03"
+			},
+			"GPS":{
+				"best": 1206576021
+			},
+			"z":{
+				"best":0.3
+			}
+		},
+		"GW180104e":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":6.5
+			},
+			"M2":{
+				"best":26
+			},
+			"Mfinal":{
+				"best":12
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:04"
+			},
+			"GPS":{
+				"best": 1206576022
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104f":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":12
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":24
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:05"
+			},
+			"GPS":{
+				"best": 1206576023
+			},
+			"z":{
+				"best":0.3
+			}
+		},
+		"GW180104g":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":10
+			},
+			"M2":{
+				"best":26
+			},
+			"Mfinal":{
+				"best":21
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:06"
+			},
+			"GPS":{
+				"best": 1206576024
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104h":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":12
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":24
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:07"
+			},
+			"GPS":{
+				"best": 1206576027
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104i":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":14
+			},
+			"M2":{
+				"best":26
+			},
+			"Mfinal":{
+				"best":27
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104f2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":10.5
+			},
+			"M2":{
+				"best":28
+			},
+			"Mfinal":{
+				"best":22
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:05"
+			},
+			"GPS":{
+				"best": 1206576023
+			},
+			"z":{
+				"best":0.28
+			}
+		},
+		"GW180104g2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"objType":{
+				"best":"BBHApril"
+			},
+			"M1":{
+				"best":10.5
+			},
+			"M2":{
+				"best":24
+			},
+			"Mfinal":{
+				"best":21
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:06"
+			},
+			"GPS":{
+				"best": 1206576024
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104h2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":13.5
+			},
+			"M2":{
+				"best":28
+			},
+			"Mfinal":{
+				"best":26
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:07"
+			},
+			"GPS":{
+				"best": 1206576027
+			},
+			"z":{
+				"best":0.28
+			}
+		},
+		"GW180104i2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":13.5
+			},
+			"M2":{
+				"best":24
+			},
+			"Mfinal":{
+				"best":27
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104j":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":17
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":33
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:05"
+			},
+			"GPS":{
+				"best": 1206576023
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104k":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":15
+			},
+			"M2":{
+				"best":26
+			},
+			"Mfinal":{
+				"best":31
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:06"
+			},
+			"GPS":{
+				"best": 1206576024
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104l":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":17
+			},
+			"M2":{
+				"best":22
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:07"
+			},
+			"Mfinal":{
+				"best":35
+			},
+			"GPS":{
+				"best": 1206576027
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104m":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":19
+			},
+			"M2":{
+				"best":26
+			},
+			"Mfinal":{
+				"best":37
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104j2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":15.5
+			},
+			"M2":{
+				"best":28
+			},
+			"Mfinal":{
+				"best":31
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:05"
+			},
+			"GPS":{
+				"best": 1206576023
+			},
+			"z":{
+				"best":0.3
+			}
+		},
+		"GW180104k2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":15.5
+			},
+			"M2":{
+				"best":24
+			},
+			"Mfinal":{
+				"best":31
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:06"
+			},
+			"GPS":{
+				"best": 1206576024
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104l2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":18.5
+			},
+			"M2":{
+				"best":28
+			},
+			"Mfinal":{
+				"best":37
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:07"
+			},
+			"GPS":{
+				"best": 1206576027
+			},
+			"z":{
+				"best":0.3
+			}
+		},
+		"GW180104m2":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":18.5
+			},
+			"M2":{
+				"best":24
+			},
+			"Mfinal":{
+				"best":37
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104n":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":20
+			},
+			"M2":{
+				"best":30
+			},
+			"Mfinal":{
+				"best":43
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.3
+			}
+		},
+		"GW180104o":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":20
+			},
+			"M2":{
+				"best":26
+			},
+			"Mfinal":{
+				"best":40
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104p":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":20
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":40
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104q":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":21.5
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":43
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104r":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":23
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":46
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.22
+			}
+		},
+		"GW180104s":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":23
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":46
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.26
+			}
+		},
+		"GW180104t":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":23
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":41
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.28
+			}
+		},
+		"GW180104u":{
+			"objType":{
+		  			"best":"BBHApril"
+			},
+			"M1":{
+				"best":23
+			},
+			"M2":{
+				"best":22
+			},
+			"Mfinal":{
+				"best":45
+			},
+			"UTC": {
+				"best": "2018-04-01T00:00:08"
+			},
+			"GPS":{
+				"best": 1206576028
+			},
+			"z":{
+				"best":0.28
+			}
+		}
+	},
+	"links": {
+		"GW150914": {
+			"003": {
+				"url": "https://gracedb.ligo.org/events/view/G184098",
+				"text": "GraceDB page",
+				"type": "web-data"
+			},
+			"002": {
+				"url": "https://losc.ligo.org/events/GW150914/",
+				"text": "Open Data page",
+				"type": "web-data"
+			},
+			"001": {
+				"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.061102",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2016) Phys. Rev. Lett. 116, 061102",
+				"type": "web-data"
+			},
+			"005": {
+				"url": "https://losc.ligo.org/s/skymapViewer/aladin/index.html#GW150914:LALI",
+				"text": "Skymap Viewer",
+				"type": "web-data"
+			},
+			"004": {
+				"url": "https://losc.ligo.org/s/events/GW150914/P1500227/LALInference_skymap.fits.gz",
+				"text": "Final Skymap",
+				"type": "web-data"
+			}
+		},
+		"LVT151012": {
+			"011": {
+				"url":"https://doi.org/10.1103/PhysRevX.6.041015",
+				"text": "PRX Paper",
+				"citation": "LIGO Scientific Collaboration & Virgo Collaboration, 2016, Phys. Rev. X 6 041015",
+				"type": "web-data"
+			},
+			"010": {
+				"url": "https://losc.ligo.org/s/skymapViewer/aladin/index.html#LVT151012:LAL1",
+				"text": "Skymap Viewer",
+				"type": "web-data"
+			},
+			"009": {
+				"url": "https://losc.ligo.org/s/events/LVT151012/P1500227/LALInference_skymap1.fits.gz",
+				"text": "Final Skymap",
+				"type": "web-data"
+			},
+			"008": {
+				"url": "https://gracedb.ligo.org/events/view/G192004",
+				"text": "GraceDB page",
+				"type": "web-data"
+			},
+			"007": {
+				"url": "https://gracedb.ligo.org/events/view/G192005",
+				"text": "GraceDB page",
+				"type": "web-data"
+			},
+			"006": {
+				"url": "https://losc.ligo.org/events/LVT151012/",
+				"text": "Open Data page",
+				"type": "web-data"
+			}
+		},
+		"GW151226": {
+			"012": {
+				"url": "http://journals.aps.org/prl/abstract/10.1103/PhysRevLett.116.241103",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2016) Phys. Rev. Lett. 116, 241103",
+				"type": "web-data"
+			},
+			"013": {
+				"url": "https://losc.ligo.org/events/GW151226/",
+				"text": "Open Data page",
+				"type": "web-data"
+			},
+			"014": {
+				"url": "https://gracedb.ligo.org/events/view/G211117",
+				"text": "GraceDB page",
+				"type": "web-data"
+			},
+			"015": {
+				"url": "https://gracedb.ligo.org/events/view/G211182",
+				"text": "GraceDB page",
+				"type": "web-data"
+			},
+			"016": {
+				"url": "https://losc.ligo.org/s/events/GW151226/P1500227/LALInference_skymap_2.fits.gz",
+				"text": "Final Skymap",
+				"type": "web-data"
+			},
+			"017": {
+				"url": "https://losc.ligo.org/s/skymapViewer/aladin/index.html#GW151226:LALI2",
+				"text": "Skymap Viewer",
+				"type": "web-data"
+			}
+		},
+		"GW170104": {
+			"022":{
+                "url": "https://journals.aps.org/pri/abstract/10.1103/PhysRevLett.118.221101",
+                "text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 118, 221101",
+                "type": "web-data"
+          			},
+			"021":{
+                "url": "%domain.losc.events%/GW170104/",
+                "text": "Open Data page",
+                "type":"web-data"
+          			},
+			"020":{
+                "url": "%domain.gracedb.events%/view/G268556",
+                "text": "GraceDB page",
+                "type": "web-data"
+          			},
+			"019":{
+                "url": "%domain.losc.store%/events/GW170104/P1500227/LALInference_skymap.fits.gz",
+                "text": "Final Skymap",
+                "type": "web-data"
+          			},
+			"018":{
+                "url": "%domain.losc.store%/skymapViewer/aladin/index.html#GW170104:LALI",
+                "text": "Skymap Viewer",
+                "type": "web-data"
+            }
+		},
+		"GW170608": {
+			"027":{
+				"url": "https://arxiv.org/abs/1711.05578",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017)",
+				"type": "web-data"
+			},
+			"028":{
+                "url": "%domain.losc.events%/GW170608/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
+		},
+		"GW170814": {
+			"023":{
+				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.141101",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119, 141101",
+				"type": "web-data"
+			},
+			"024":{
+                "url": "%domain.losc.events%/GW170814/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
+		},
+		"GW170817": {
+			"025":{
+				"url": "https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.119.161101",
+				"text": "PRL Paper",
+				"citation":"LIGO Scientific Collaboration & Virgo Collaboration (2017) Phys. Rev. Lett. 119 161101",
+				"type": "web-data"
+			},
+			"026":{
+                "url": "%domain.losc.events%/GW170817/",
+                "text": "Open Data page",
+                "type":"web-data"
+            }
+		}
+	}
+}

@@ -979,6 +979,7 @@ BHBubble.prototype.addLang = function(){
         "es":{code:"es",name:"Español (es)"},
         "fr":{code:"fr",name:"Francais (fr)"},
         "hu":{code:"hu",name:"Magyar (hu)"},
+        "it":{code:"it",name:"Italiano (fr)"},
         "or":{code:"or",name:"ଓଡ଼ିଆ (or)"},
         "pl":{code:"pl",name:"Polski (pl)"},
         "zhhk":{code:"zhhk",name:"繁體中文(香港) (zh-hk)"}
