@@ -421,148 +421,11 @@ BHBubble.prototype.filterData = function(data,filterType){
 }
 BHBubble.prototype.dataLoaded = function(){
     // check 2 data files and language file are loaded
-    if ((this.nloaded>=3) && (this.langloaded)){
+    if ((this.nloaded>=2) && (this.langloaded)){
         return(true);
     }else{
         return(false);
     }
-}
-
-BHBubble.prototype.combineGwosc = function(){
-    var bh=this;
-    data = [];
-    nametr={};
-    for (i in bh.dataGwosc){
-        dj=bh.dataGwosc[i]
-        pri=[]
-        sec=[]
-        fin=[]
-        pri={
-            name:i+'-A',
-            compType:'%data.bub.comp.bh%',
-            parentName:i,
-            BHtype:'%data.bub.type.primary%',
-        }
-        sec={
-            name:i+'-B',
-            compType:'%data.bub.comp.bh%',
-            parentName:i,
-            BHtype:'%data.bub.type.secondary%',
-        }
-        fin={
-            name:i,
-            compMass:'%data.bub.comp.none%',
-            compType:'%data.bub.comp.none%',
-            parentName:'',
-            BHtype:'%data.bub.type.final%',
-        }
-        massbfn=function(m){
-            if(m.err=='lowerbound'){return m.best}
-            else if(m.err=='lowerbound'){return m.best}
-            else if(m.lim){return 0.5*(m.lim[0]+m.lim[1])}
-            else if((m.best)&&(m.err)){return m.best}
-            else{return m[0]}
-        }
-        massefn=function(m){
-            if(m.err=="lowerbound"){return '>'+parseFloat(m.best)}
-            else if(m.err=="upperbound"){return '<'+parseFloat(m.best)}
-            else if(m.lim){return 'e'+parseFloat(Math.min.apply(Math,m.err))+'-'+
-                parseFloat(Math.max.apply(Math,m.err));}
-            else if ((m.best)&&(m.err)){return 'e'+parseFloat(m.err[1])+'-'+
-                parseFloat(m.err[0]);}
-            else{return'e'+parseFloat(m[2])+'-'+
-                parseFloat(m[1]);}
-        }
-        distfn=function(d){
-            if(d.err=="lowerbound"){return '>'+parseFloat(d.best)}
-            else if(d.err=="upperbound"){return '<'+parseFloat(d.best)}
-            else if(d.lim){return (Math.round(3.26*(Math.min.apply(Math,d.lim)/100)*100)+
-            '-'+(Math.round(3.26*(Math.max.apply(Math,d.lim)/100)*100)));}
-            else if((d.best)&&(d.err)){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
-            '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
-            else{return (Math.round(3.26*(d[0]-d[1])/100)*100)+
-                '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
-        }
-        pri.massBH=massbfn(dj.mass1);
-        pri.massBHerr=massefn(dj.mass1);
-        pri.compMass=massbfn(dj.mass2);
-        sec.massBH=massbfn(dj.mass2);
-        sec.massBHerr=massefn(dj.mass2)
-        sec.compMass=massbfn(dj.mass1);
-        fin.massBH=massbfn(dj.mfinal);
-        fin.massBHerr=massefn(dj.mfinal);
-        distance=distfn(dj.distance);
-        // }else{
-        //     pri.massBH=dj.M1[0];
-        //     pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
-        //         parseFloat(dj.M1[1]);
-        //     pri.compMass=dj.M2[0];
-        //     sec.massBH=dj.M2[0];
-        //     sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
-        //         parseFloat(dj.M2[1]);
-        //     sec.compMass=dj.M1[0];
-        //     fin.massBH=dj.Mfinal[0];
-        //     fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
-        //         parseFloat(dj.Mfinal[1]);
-        //     distance=(Math.round(3.26*(dj.DL[0]-dj.DL[1])/100)*100)+
-        //         '-'+(Math.round(3.26*(dj.DL[0]+dj.DL[2])/100)*100);
-        // }
-        if (i[0]=='G'){method='GW'}
-        else if (i[0]=='L'){method='LVT'}
-        paper='-';
-        if (bh.links[i]){
-            if (bh.links[i].DetPaper){
-                paper='<a target="_blank" href="'+
-                    bh.links[i].DetPaper.url+'">'+
-                    bh.links[i].DetPaper.text+'</a>';
-            }else{
-                for (p in bh.links[i]){
-                    if ((bh.links[i][p].text) && (bh.links[i][p].url)){
-                        if (bh.links[i][p].text.search("Paper")>=0){
-                            console.log(i,bh.links[i][p].text,bh.links[i][p].text.search("Paper"))
-                            if (bh.links[i][p].citation){
-                                paper='<a target="_blank" href="'+
-                                    bh.links[i][p].url+'">'+
-                                    bh.links[i][p].citation+'</a>';
-                            }else{
-                                aper='<a target="_blank" href="'+
-                                    bh.links[i][p].url+'">'+
-                                    bh.links[i][p].text+'</a>';
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if ((pri.massBH>=3)&&(sec.massBH>=3)){binType='%data.bub.type.bbh%';}
-        else if((pri.massBH<3)&&(sec.massBH<3)){binType='%text.gen.bns%';}
-        else {binType='%data.bub.type.nsbh%';}
-        binType='%data.bub.type.bbh%';
-        loc='%data.bub.loc.extragalactic%'
-        period='';
-        refcompmass='';
-        refcomp='';
-        refper='';
-        evs={pri:pri,sec:sec,fin:fin}
-        for (b in evs){
-            evs[b].method=method;
-            evs[b].period=period;
-            evs[b].location=loc;
-            evs[b].distance=distance;
-            evs[b].binType=binType;
-            evs[b].refbhmass=paper;
-            evs[b].refcompmass=refcompmass;
-            evs[b].refcomp=refcomp;
-            evs[b].refper=refper;
-        }
-        // if (dj.objType.best=='BBH'){
-        if (sec.massBH > 0){data.push(sec);}
-        if (fin.massBH > 0){data.push(fin);}
-        if (pri.massBH > 0){data.push(pri);}
-        // }
-    }
-    data= bh.filterData(data,bh.filterType);
-    bh.dataGw = data;
 }
 
 BHBubble.prototype.loadData = function(){
@@ -610,61 +473,203 @@ BHBubble.prototype.loadData = function(){
 
     var eventsLoaded=false;
     var gwoscLoaded=false;
-    // read in GW data and reformat
-    d3.json(this.inputFileEvents,function(error,jsonIn){
-        if (error){
-            if (bh.inputFileEvents==bh.inputFileEventsDefault){
-                alert("Fatal error loading input file: '"+bh.inputFileEvents+"'. Sorry!")
-            }else{
-                alert("Problem loading input file: '"+bh.inputFileEvents+"'. Reverting to default '"+bh.inputFileEventsDefault+"'.");
-                window.location.replace(bh.makeUrl({'eventsFile':null}));
+
+    eventsCallback = function(){
+        bh.links=bh.cat.links;
+        bh.events=[]
+        data = [];
+        nametr={};
+        for (i in bh.cat.data){
+            dj=bh.cat.data[i]
+            pri=[]
+            sec=[]
+            fin=[]
+            pri={
+                name:dj.name+'-A',
+                compType:'%data.bub.comp.bh%',
+                parentName:dj.name,
+                BHtype:'%data.bub.type.primary%',
             }
+            sec={
+                name:dj.name+'-B',
+                compType:'%data.bub.comp.bh%',
+                parentName:dj.name,
+                BHtype:'%data.bub.type.secondary%',
+            }
+            fin={
+                name:dj.name,
+                compMass:'%data.bub.comp.none%',
+                compType:'%data.bub.comp.none%',
+                parentName:'',
+                BHtype:'%data.bub.type.final%',
+            }
+            massfn=function(i,m){
+                if(bh.cat.getParamType(i,m)=='lower'){return bh.cat.getLower(i,m)}
+                else if(bh.cat.getParamType(i,m)=='upper'){return bh.cat.getUpper(i,m)}
+                else {return bh.cat.getBest(i,m)}
+            }
+            massefn=function(i,m){
+                if(bh.cat.getParamType(i,m)=='lower'){return '>'+parseFloat(bh.cat.getLower(i,m))}
+                else if(bh.cat.getParamType(i,m)=='upper'){return '<'+parseFloat(bh.cat.getUpper(i,m))}
+                else if (bh.cat.hasError(i,m)){return 'e'+parseFloat(bh.cat.getNegError(i,m))+'-'+
+                    parseFloat(bh.cat.getPosError(i,m));}
+                // else{return'e'+parseFloat(m[2])+'-'+
+                //     parseFloat(m[1]);}
+            }
+            distfn=function(d){
+                if(d.err=="lowerbound"){return '>'+parseFloat(d.best)}
+                else if(d.err=="upperbound"){return '<'+parseFloat(d.best)}
+                else if(d.lim){return (Math.round(3.26*(Math.min.apply(Math,d.lim)/100)*100)+
+                '-'+(Math.round(3.26*(Math.max.apply(Math,d.lim)/100)*100)));}
+                else if((d.best)&&(d.err)){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
+                '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
+                else{return (Math.round(3.26*(d[0]-d[1])/100)*100)+
+                    '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
+            }
+            pri.massBH=massfn(dj.name,'M1');
+            pri.massBHerr=massefn(dj.name,'M1');
+            pri.compMass=massfn(dj.name,'M2');
+            sec.massBH=massfn(dj.name,'M2');
+            sec.massBHerr=massefn(dj.name,'M2');
+            sec.compMass=massfn(dj.name,'M1');
+            fin.massBH=massfn(dj.name,'Mfinal');
+            fin.massBHerr=massefn(dj.name,'Mfinal');
+            distance=distfn(dj.DL);
+            // }else{
+            //     pri.massBH=dj.M1[0];
+            //     pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
+            //         parseFloat(dj.M1[1]);
+            //     pri.compMass=dj.M2[0];
+            //     sec.massBH=dj.M2[0];
+            //     sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
+            //         parseFloat(dj.M2[1]);
+            //     sec.compMass=dj.M1[0];
+            //     fin.massBH=dj.Mfinal[0];
+            //     fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
+            //         parseFloat(dj.Mfinal[1]);
+            //     distance=(Math.round(3.26*(dj.DL[0]-dj.DL[1])/100)*100)+
+            //         '-'+(Math.round(3.26*(dj.DL[0]+dj.DL[2])/100)*100);
+            // }
+            if (dj.name[0]=='G'){method='GW'}
+            else if (dj.name[0]=='L'){method='LVT'}
+            paper='-';
+            if (bh.links[i]){
+                if (bh.links[i].DetPaper){
+                    paper='<a target="_blank" href="'+
+                        bh.links[i].DetPaper.url+'">'+
+                        bh.links[i].DetPaper.text+'</a>';
+                }else{
+                    for (p in bh.links[i]){
+                        if ((bh.links[i][p].text) && (bh.links[i][p].url)){
+                            if (bh.links[i][p].text.search("Paper")>=0){
+                                // console.log(i,bh.links[i][p].text,bh.links[i][p].text.search("Paper"))
+                                if (bh.links[i][p].citation){
+                                    paper='<a target="_blank" href="'+
+                                        bh.links[i][p].url+'">'+
+                                        bh.links[i][p].citation+'</a>';
+                                }else{
+                                    aper='<a target="_blank" href="'+
+                                        bh.links[i][p].url+'">'+
+                                        bh.links[i][p].text+'</a>';
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if ((pri.massBH>=2)&&(sec.massBH>=2)){binType='%data.bub.type.bbh%';}
+            else if((pri.massBH<2)&&(sec.massBH<2)){binType='%text.gen.bns%';}
+            else {binType='%data.bub.type.nsbh%';}
+            // binType='%data.bub.type.bbh%';
+            loc='%data.bub.loc.extragalactic%'
+            period='';
+            refcompmass='';
+            refcomp='';
+            refper='';
+            evs={pri:pri,sec:sec,fin:fin}
+            for (b in evs){
+                evs[b].method=method;
+                evs[b].period=period;
+                evs[b].location=loc;
+                evs[b].distance=distance;
+                evs[b].binType=binType;
+                evs[b].refbhmass=paper;
+                evs[b].refcompmass=refcompmass;
+                evs[b].refcomp=refcomp;
+                evs[b].refper=refper;
+            }
+            // if (dj.objType.best=='BBH'){
+            data.push(sec);
+            data.push(fin);
+            data.push(pri);
+            // }
         }
-        if (jsonIn.data){
-            bh.dataJson=jsonIn.data;
-        }else if(jsonIn.events){
-            bh.dataJson=jsonIn.events;
-        }
-        bh.links=jsonIn.links;
+        data= bh.filterData(data,bh.filterType);
+        bh.dataGw = data;
 
         bh.nloaded++;
-        if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileEvents)}
-        //call next functions
         if (bh.dataLoaded()){
-            bh.combineGwosc();
             bh.formatData(bh.valueCol);
             bh.drawBubbles();
         }else{
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
-    });
+    }
+    bh.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':bh.inputFileEvents,gwoscFile:bh.inputFileGwosc,debug:this.debug});
 
-    d3.json(this.inputFileGwosc,function(error,jsonIn){
-        if (error){
-            if (bh.inputFileGwosc==bh.inputFileGwoscDefault){
-                alert("Fatal error loading input file: '"+bh.inputFileGwosc+"'. Sorry!")
-            }else{
-                alert("Problem loading input file: '"+bh.inputFileGwosc+"'. Reverting to default '"+bh.inputFileGwoscDefault+"'.");
-                window.location.replace(bh.makeUrl({'gwoscFile':null}));
-            }
-        }
-        if (jsonIn.data){
-            bh.dataGwosc=jsonIn.data;
-        }else if(jsonIn.events){
-            bh.dataGwosc=jsonIn.events;
-        }
-
-        bh.nloaded++;
-        if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGwosc)}
-        //call next functions
-        if (bh.dataLoaded()){
-            bh.combineGwosc();
-            bh.formatData(bh.valueCol);
-            bh.drawBubbles();
-        }else{
-            if (bh.urlVars.debug){console.log('not ready yet')}
-        }
-    });
+    // // read in GW data and reformat
+    // d3.json(this.inputFileEvents,function(error,jsonIn){
+    //     if (error){
+    //         if (bh.inputFileEvents==bh.inputFileEventsDefault){
+    //             alert("Fatal error loading input file: '"+bh.inputFileEvents+"'. Sorry!")
+    //         }else{
+    //             alert("Problem loading input file: '"+bh.inputFileEvents+"'. Reverting to default '"+bh.inputFileEventsDefault+"'.");
+    //             window.location.replace(bh.makeUrl({'eventsFile':null}));
+    //         }
+    //     }
+    //     if (jsonIn.data){
+    //         bh.dataJson=jsonIn.data;
+    //     }else if(jsonIn.events){
+    //         bh.dataJson=jsonIn.events;
+    //     }
+    //     bh.links=jsonIn.links;
+    //
+    //     bh.nloaded++;
+    //     if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileEvents)}
+    //     //call next functions
+    //     if (bh.dataLoaded()){
+    //         bh.formatData(bh.valueCol);
+    //         bh.drawBubbles();
+    //     }else{
+    //         if (bh.urlVars.debug){console.log('not ready yet')}
+    //     }
+    // });
+    //
+    // d3.json(this.inputFileGwosc,function(error,jsonIn){
+    //     if (error){
+    //         if (bh.inputFileGwosc==bh.inputFileGwoscDefault){
+    //             alert("Fatal error loading input file: '"+bh.inputFileGwosc+"'. Sorry!")
+    //         }else{
+    //             alert("Problem loading input file: '"+bh.inputFileGwosc+"'. Reverting to default '"+bh.inputFileGwoscDefault+"'.");
+    //             window.location.replace(bh.makeUrl({'gwoscFile':null}));
+    //         }
+    //     }
+    //     if (jsonIn.data){
+    //         bh.dataGwosc=jsonIn.data;
+    //     }else if(jsonIn.events){
+    //         bh.dataGwosc=jsonIn.events;
+    //     }
+    //
+    //     bh.nloaded++;
+    //     if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGwosc)}
+    //     //call next functions
+    //     if (bh.dataLoaded()){
+    //         bh.formatData(bh.valueCol);
+    //         bh.drawBubbles();
+    //     }else{
+    //         if (bh.urlVars.debug){console.log('not ready yet')}
+    //     }
+    // });
 
     // read in Xray data
     d3.csv(this.inputFileXray, function(error, data){
@@ -679,7 +684,6 @@ BHBubble.prototype.loadData = function(){
         if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileXray)}
         //call next functions
         if (bh.dataLoaded()){
-            bh.combineGwosc();
             bh.formatData(bh.valueCol);
             bh.drawBubbles();
         }else{
@@ -825,8 +829,7 @@ BHBubble.prototype.getRadius = function(d){
     if (
         ((d.BHtype=="%data.bub.type.primary%")||(d.BHtype=="%data.bub.type.secondary%"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
         ((d.BHtype=="%data.bub.type.final%"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
-    ){
-        console.log(d.name,d.r,0);return 0;}else{console.log(d.name,d.r,d.r);return d.r}
+    ){return 0;}else{return d.r}
 }
 BHBubble.prototype.getX = function(d){
     // get Y position of a BH element given a displayFilter
