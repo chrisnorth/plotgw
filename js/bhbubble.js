@@ -457,29 +457,29 @@ BHBubble.prototype.combineGwosc = function(){
             BHtype:'%data.bub.type.final%',
         }
         massbfn=function(m){
-            if((m.best)&&(m.err)){return m.best}
+            if(m.err=='lowerbound'){return m.best}
+            else if(m.err=='lowerbound'){return m.best}
             else if(m.lim){return 0.5*(m.lim[0]+m.lim[1])}
-            else if(m.lower){return m.lower}
-            else if(m.upper){return m.upper}
+            else if((m.best)&&(m.err)){return m.best}
             else{return m[0]}
         }
         massefn=function(m){
-            if((m.best)&&(m.err)){return 'e'+parseFloat(m.err[1])+'-'+
-                parseFloat(m.err[0]);}
+            if(m.err=="lowerbound"){return '>'+parseFloat(m.best)}
+            else if(m.err=="upperbound"){return '<'+parseFloat(m.best)}
             else if(m.lim){return 'e'+parseFloat(Math.min.apply(Math,m.err))+'-'+
                 parseFloat(Math.max.apply(Math,m.err));}
-            else if(m.lower){return '>'+parseFloat(m.lower)}
-            else if(m.upper){return '<'+parseFloat(m.upper)}
+            else if ((m.best)&&(m.err)){return 'e'+parseFloat(m.err[1])+'-'+
+                parseFloat(m.err[0]);}
             else{return'e'+parseFloat(m[2])+'-'+
                 parseFloat(m[1]);}
         }
         distfn=function(d){
-            if((d.best)&&(d.err)){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
-            '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
+            if(d.err=="lowerbound"){return '>'+parseFloat(d.best)}
+            else if(d.err=="upperbound"){return '<'+parseFloat(d.best)}
             else if(d.lim){return (Math.round(3.26*(Math.min.apply(Math,d.lim)/100)*100)+
             '-'+(Math.round(3.26*(Math.max.apply(Math,d.lim)/100)*100)));}
-            else if(d.lower){return '>'+parseFloat(d.lower)}
-            else if(d.upper){return '<'+parseFloat(d.upper)}
+            else if((d.best)&&(d.err)){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
+            '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
             else{return (Math.round(3.26*(d[0]-d[1])/100)*100)+
                 '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
         }
@@ -534,9 +534,12 @@ BHBubble.prototype.combineGwosc = function(){
                 }
             }
         }
+        if ((pri.massBH>=3)&&(sec.massBH>=3)){binType='%data.bub.type.bbh%';}
+        else if((pri.massBH<3)&&(sec.massBH<3)){binType='%text.gen.bns%';}
+        else {binType='%data.bub.type.nsbh%';}
         binType='%data.bub.type.bbh%';
-        period='';
         loc='%data.bub.loc.extragalactic%'
+        period='';
         refcompmass='';
         refcomp='';
         refper='';
@@ -553,9 +556,9 @@ BHBubble.prototype.combineGwosc = function(){
             evs[b].refper=refper;
         }
         // if (dj.objType.best=='BBH'){
-        data.push(sec);
-        data.push(fin);
-        data.push(pri);
+        if (sec.massBH > 0){data.push(sec);}
+        if (fin.massBH > 0){data.push(fin);}
+        if (pri.massBH > 0){data.push(pri);}
         // }
     }
     data= bh.filterData(data,bh.filterType);
@@ -695,6 +698,7 @@ BHBubble.prototype.formatData = function(valueCol){
     //bubbles needs very specific format, convert data to this.
     this.data.forEach(function(d){
         d.massBH = +d.massBH;
+        d.objType = (d.massBH > 1.5) ? "bh" : "ns";
         d.massBHsq = Math.pow(d.massBH,2);
         if (d.massBHerr[0]=='e'){
             errcode=d.massBHerr.split('e')[1];
@@ -822,7 +826,7 @@ BHBubble.prototype.getRadius = function(d){
         ((d.BHtype=="%data.bub.type.primary%")||(d.BHtype=="%data.bub.type.secondary%"))&&((bh.filterType=="noinit")||(bh.displayFilter=="noinit"))||
         ((d.BHtype=="%data.bub.type.final%"))&&((bh.filterType=="nofin")||(bh.displayFilter=="nofin"))
     ){
-        return 0;}else{return d.r}
+        console.log(d.name,d.r,0);return 0;}else{console.log(d.name,d.r,d.r);return d.r}
 }
 BHBubble.prototype.getX = function(d){
     // get Y position of a BH element given a displayFilter
@@ -846,11 +850,11 @@ BHBubble.prototype.getOpacity = function(d){
     var BHtype=d.BHtype;
     // console.log(d);
     if ((this.displayFilter=="nofin")&&(BHtype=="%data.bub.type.final%")){
-
         return 0;
     }else if((this.displayFilter=="noinit")&&((BHtype=="%data.bub.type.primary%")||BHtype=="%data.bub.type.secondary%")){
         return 0;
-    }else{return 1;}
+    }else if (d.objType=="ns"){return 0;}
+    else{return 1;}
 }
 BHBubble.prototype.drawBubbles = function(){
     // Add bubbles and legend
