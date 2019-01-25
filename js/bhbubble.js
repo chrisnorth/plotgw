@@ -421,12 +421,147 @@ BHBubble.prototype.filterData = function(data,filterType){
 }
 BHBubble.prototype.dataLoaded = function(){
     // check 2 data files and language file are loaded
-    if ((this.nloaded>=2) && (this.langloaded)){
+    if ((this.nloaded>=3) && (this.langloaded)){
         return(true);
     }else{
         return(false);
     }
 }
+
+BHBubble.prototype.combineGwosc = function(){
+    var bh=this;
+    data = [];
+    nametr={};
+    for (i in bh.dataGwosc){
+        dj=bh.dataGwosc[i]
+        pri=[]
+        sec=[]
+        fin=[]
+        pri={
+            name:i+'-A',
+            compType:'%data.bub.comp.bh%',
+            parentName:i,
+            BHtype:'%data.bub.type.primary%',
+        }
+        sec={
+            name:i+'-B',
+            compType:'%data.bub.comp.bh%',
+            parentName:i,
+            BHtype:'%data.bub.type.secondary%',
+        }
+        fin={
+            name:i,
+            compMass:'%data.bub.comp.none%',
+            compType:'%data.bub.comp.none%',
+            parentName:'',
+            BHtype:'%data.bub.type.final%',
+        }
+        massbfn=function(m){
+            if((m.best)&&(m.err)){return m.best}
+            else if(m.lim){return 0.5*(m.lim[0]+m.lim[1])}
+            else if(m.lower){return m.lower}
+            else if(m.upper){return m.upper}
+            else{return m[0]}
+        }
+        massefn=function(m){
+            if((m.best)&&(m.err)){return 'e'+parseFloat(m.err[1])+'-'+
+                parseFloat(m.err[0]);}
+            else if(m.lim){return 'e'+parseFloat(Math.min.apply(Math,m.err))+'-'+
+                parseFloat(Math.max.apply(Math,m.err));}
+            else if(m.lower){return '>'+parseFloat(m.lower)}
+            else if(m.upper){return '<'+parseFloat(m.upper)}
+            else{return'e'+parseFloat(m[2])+'-'+
+                parseFloat(m[1]);}
+        }
+        distfn=function(d){
+            if((d.best)&&(d.err)){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
+            '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
+            else if(d.lim){return (Math.round(3.26*(Math.min.apply(Math,d.lim)/100)*100)+
+            '-'+(Math.round(3.26*(Math.max.apply(Math,d.lim)/100)*100)));}
+            else if(d.lower){return '>'+parseFloat(d.lower)}
+            else if(d.upper){return '<'+parseFloat(d.upper)}
+            else{return (Math.round(3.26*(d[0]-d[1])/100)*100)+
+                '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
+        }
+        pri.massBH=massbfn(dj.mass1);
+        pri.massBHerr=massefn(dj.mass1);
+        pri.compMass=massbfn(dj.mass2);
+        sec.massBH=massbfn(dj.mass2);
+        sec.massBHerr=massefn(dj.mass2)
+        sec.compMass=massbfn(dj.mass1);
+        fin.massBH=massbfn(dj.mfinal);
+        fin.massBHerr=massefn(dj.mfinal);
+        distance=distfn(dj.distance);
+        // }else{
+        //     pri.massBH=dj.M1[0];
+        //     pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
+        //         parseFloat(dj.M1[1]);
+        //     pri.compMass=dj.M2[0];
+        //     sec.massBH=dj.M2[0];
+        //     sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
+        //         parseFloat(dj.M2[1]);
+        //     sec.compMass=dj.M1[0];
+        //     fin.massBH=dj.Mfinal[0];
+        //     fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
+        //         parseFloat(dj.Mfinal[1]);
+        //     distance=(Math.round(3.26*(dj.DL[0]-dj.DL[1])/100)*100)+
+        //         '-'+(Math.round(3.26*(dj.DL[0]+dj.DL[2])/100)*100);
+        // }
+        if (i[0]=='G'){method='GW'}
+        else if (i[0]=='L'){method='LVT'}
+        paper='-';
+        if (bh.links[i]){
+            if (bh.links[i].DetPaper){
+                paper='<a target="_blank" href="'+
+                    bh.links[i].DetPaper.url+'">'+
+                    bh.links[i].DetPaper.text+'</a>';
+            }else{
+                for (p in bh.links[i]){
+                    if ((bh.links[i][p].text) && (bh.links[i][p].url)){
+                        if (bh.links[i][p].text.search("Paper")>=0){
+                            console.log(i,bh.links[i][p].text,bh.links[i][p].text.search("Paper"))
+                            if (bh.links[i][p].citation){
+                                paper='<a target="_blank" href="'+
+                                    bh.links[i][p].url+'">'+
+                                    bh.links[i][p].citation+'</a>';
+                            }else{
+                                aper='<a target="_blank" href="'+
+                                    bh.links[i][p].url+'">'+
+                                    bh.links[i][p].text+'</a>';
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        binType='%data.bub.type.bbh%';
+        period='';
+        loc='%data.bub.loc.extragalactic%'
+        refcompmass='';
+        refcomp='';
+        refper='';
+        evs={pri:pri,sec:sec,fin:fin}
+        for (b in evs){
+            evs[b].method=method;
+            evs[b].period=period;
+            evs[b].location=loc;
+            evs[b].distance=distance;
+            evs[b].binType=binType;
+            evs[b].refbhmass=paper;
+            evs[b].refcompmass=refcompmass;
+            evs[b].refcomp=refcomp;
+            evs[b].refper=refper;
+        }
+        // if (dj.objType.best=='BBH'){
+        data.push(sec);
+        data.push(fin);
+        data.push(pri);
+        // }
+    }
+    data= bh.filterData(data,bh.filterType);
+    bh.dataGw = data;
+}
+
 BHBubble.prototype.loadData = function(){
     //load data - then call next functions
     var bh=this;
@@ -443,13 +578,22 @@ BHBubble.prototype.loadData = function(){
 
     // set input file for GW events
     this.inputFileEventsDefault="json/events.json"
+    this.inputFileGwoscDefault="gwcat/data/gwosc.json"
     if (this.langdict.hasOwnProperty('eventsFile')){
         this.inputFileEvents="json/"+this.langdict.inputFile;
     }else{
         this.inputFileEvents=this.inputFileEventsDefault;
     }
+    if (this.langdict.hasOwnProperty('gwoscFile')){
+        this.inputFileGwosc="json/"+this.langdict.gwoscFile;
+    }else{
+        this.inputFileGwosc=this.inputFileGwoscDefault;
+    }
     if (this.urlVars.eventsFile){
         this.inputFileEvents=this.urlVars.eventsFile;
+    }
+    if (this.urlVars.gwoscFile){
+        this.inputFileGwosc=this.urlVars.gwoscFile;
     }
 
     // set input file for xray binaries
@@ -461,6 +605,8 @@ BHBubble.prototype.loadData = function(){
     bh.nloaded=0
     if (this.urlVars.debug){console.log(this.inputFileEvents);}
 
+    var eventsLoaded=false;
+    var gwoscLoaded=false;
     // read in GW data and reformat
     d3.json(this.inputFileEvents,function(error,jsonIn){
         if (error){
@@ -472,167 +618,45 @@ BHBubble.prototype.loadData = function(){
             }
         }
         if (jsonIn.data){
-            dataJson=jsonIn.data;
+            bh.dataJson=jsonIn.data;
         }else if(jsonIn.events){
-            dataJson=jsonIn.events;
+            bh.dataJson=jsonIn.events;
         }
-        links=jsonIn.links;
-        data = [];
-        nametr={};
-        for (i in dataJson){
-            dj=dataJson[i]
-            pri=[]
-            sec=[]
-            fin=[]
-            pri={
-                name:i+'-A',
-                compType:'%data.bub.comp.bh%',
-                parentName:i,
-                BHtype:'%data.bub.type.primary%',
-            }
-            sec={
-                name:i+'-B',
-                compType:'%data.bub.comp.bh%',
-                parentName:i,
-                BHtype:'%data.bub.type.secondary%',
-            }
-            fin={
-                name:i,
-                compMass:'%data.bub.comp.none%',
-                compType:'%data.bub.comp.none%',
-                parentName:'',
-                BHtype:'%data.bub.type.final%',
-            }
-            massbfn=function(m){
-                if((m.best)&&(m.err)){return m.best}
-                else if(m.lim){return 0.5*(m.lim[0]+m.lim[1])}
-                else if(m.lower){return m.lower}
-                else if(m.upper){return m.upper}
-                else{return m[0]}
-            }
-            massefn=function(m){
-                if((m.best)&&(m.err)){return 'e'+parseFloat(m.err[1])+'-'+
-                    parseFloat(m.err[0]);}
-                else if(m.lim){return 'e'+parseFloat(Math.min.apply(Math,m.err))+'-'+
-                    parseFloat(Math.max.apply(Math,m.err));}
-                else if(m.lower){return '>'+parseFloat(m.lower)}
-                else if(m.upper){return '<'+parseFloat(m.upper)}
-                else{return'e'+parseFloat(m[2])+'-'+
-                    parseFloat(m[1]);}
-            }
-            distfn=function(d){
-                if((d.best)&&(d.err)){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
-                '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
-                else if(d.lim){return (Math.round(3.26*(Math.min.apply(Math,d.lim)/100)*100)+
-                '-'+(Math.round(3.26*(Math.max.apply(Math,d.lim)/100)*100)));}
-                else if(d.lower){return '>'+parseFloat(d.lower)}
-                else if(d.upper){return '<'+parseFloat(d.upper)}
-                else{return (Math.round(3.26*(d[0]-d[1])/100)*100)+
-                    '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
-            }
-            // if ((dj.M1.best)&&(dj.M1.err)){
-            //     // use M1.best, M1.err
-            //     massbfn=function(m){return m.best}
-            //     massefn=function(m){return'e'+parseFloat(m.err[1])+'-'+
-            //         parseFloat(m.err[0]);}
-            //     distfn=function(d){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
-            //         '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
-            // }if (dj.M1.lim){
-            //     // use M1.best, M1.err
-            //     massbfn=function(m){return 0.5*(m.err[0]+m.err[1])}
-            //     massefn=function(m){return'e'+parseFloat(Math.min.apply(Math,m.err))+'-'+
-            //         parseFloat(Math.max.apply(Math,m.err));}
-            //     distfn=function(d){return (Math.round(3.26*(d.best-d.err[0])/100)*100)+
-            //         '-'+(Math.round(3.26*(d.best+d.err[1])/100)*100);}
-            // }else{
-            //     massbfn=function(m){return m[0]}
-            //     massefn=function(m){return'e'+parseFloat(m[2])+'-'+
-            //         parseFloat(m[1]);}
-            //     distfn=function(d){return (Math.round(3.26*(d[0]-d[1])/100)*100)+
-            //         '-'+(Math.round(3.26*(d[0]+d[2])/100)*100);}
-            // }
-            pri.massBH=massbfn(dj.M1);
-            pri.massBHerr=massefn(dj.M1);
-            pri.compMass=massbfn(dj.M2);
-            sec.massBH=massbfn(dj.M2);
-            sec.massBHerr=massefn(dj.M2)
-            sec.compMass=massbfn(dj.M1);
-            fin.massBH=massbfn(dj.Mfinal);
-            fin.massBHerr=massefn(dj.Mfinal);
-            distance=distfn(dj.DL);
-            // }else{
-            //     pri.massBH=dj.M1[0];
-            //     pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
-            //         parseFloat(dj.M1[1]);
-            //     pri.compMass=dj.M2[0];
-            //     sec.massBH=dj.M2[0];
-            //     sec.massBHerr='e'+parseFloat(dj.M2[2])+'-'+
-            //         parseFloat(dj.M2[1]);
-            //     sec.compMass=dj.M1[0];
-            //     fin.massBH=dj.Mfinal[0];
-            //     fin.massBHerr='e'+parseFloat(dj.Mfinal[2])+'-'+
-            //         parseFloat(dj.Mfinal[1]);
-            //     distance=(Math.round(3.26*(dj.DL[0]-dj.DL[1])/100)*100)+
-            //         '-'+(Math.round(3.26*(dj.DL[0]+dj.DL[2])/100)*100);
-            // }
-            if (i[0]=='G'){method='GW'}
-            else if (i[0]=='L'){method='LVT'}
-            paper='-';
-            if (links[i]){
-                if (links[i].DetPaper){
-                    paper='<a target="_blank" href="'+
-                        links[i].DetPaper.url+'">'+
-                        links[i].DetPaper.text+'</a>';
-                }else{
-                    for (p in links[i]){
-                        if ((links[i][p].text) && (links[i][p].url)){
-                            if (links[i][p].text.search("Paper")>=0){
-                                console.log(i,links[i][p].text,links[i][p].text.search("Paper"))
-                                if (links[i][p].citation){
-                                    paper='<a target="_blank" href="'+
-                                        links[i][p].url+'">'+
-                                        links[i][p].citation+'</a>';
-                                }else{
-                                    aper='<a target="_blank" href="'+
-                                        links[i][p].url+'">'+
-                                        links[i][p].text+'</a>';
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            binType='%data.bub.type.bbh%';
-            period='';
-            loc='%data.bub.loc.extragalactic%'
-            refcompmass='';
-            refcomp='';
-            refper='';
-            evs={pri:pri,sec:sec,fin:fin}
-            for (b in evs){
-                evs[b].method=method;
-                evs[b].period=period;
-                evs[b].location=loc;
-                evs[b].distance=distance;
-                evs[b].binType=binType;
-                evs[b].refbhmass=paper;
-                evs[b].refcompmass=refcompmass;
-                evs[b].refcomp=refcomp;
-                evs[b].refper=refper;
-            }
-            if (dj.objType.best=='BBH'){
-                data.push(sec);
-                data.push(fin);
-                data.push(pri);
-            }
-        }
-        data= bh.filterData(data,bh.filterType);
-        bh.dataGw = data;
+        bh.links=jsonIn.links;
+
         bh.nloaded++;
         if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileEvents)}
         //call next functions
         if (bh.dataLoaded()){
-            bh.formatData(bh.valueCol)
+            bh.combineGwosc();
+            bh.formatData(bh.valueCol);
+            bh.drawBubbles();
+        }else{
+            if (bh.urlVars.debug){console.log('not ready yet')}
+        }
+    });
+
+    d3.json(this.inputFileGwosc,function(error,jsonIn){
+        if (error){
+            if (bh.inputFileGwosc==bh.inputFileGwoscDefault){
+                alert("Fatal error loading input file: '"+bh.inputFileGwosc+"'. Sorry!")
+            }else{
+                alert("Problem loading input file: '"+bh.inputFileGwosc+"'. Reverting to default '"+bh.inputFileGwoscDefault+"'.");
+                window.location.replace(bh.makeUrl({'gwoscFile':null}));
+            }
+        }
+        if (jsonIn.data){
+            bh.dataGwosc=jsonIn.data;
+        }else if(jsonIn.events){
+            bh.dataGwosc=jsonIn.events;
+        }
+
+        bh.nloaded++;
+        if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGwosc)}
+        //call next functions
+        if (bh.dataLoaded()){
+            bh.combineGwosc();
+            bh.formatData(bh.valueCol);
             bh.drawBubbles();
         }else{
             if (bh.urlVars.debug){console.log('not ready yet')}
@@ -652,33 +676,13 @@ BHBubble.prototype.loadData = function(){
         if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileXray)}
         //call next functions
         if (bh.dataLoaded()){
-            bh.formatData(bh.valueCol)
+            bh.combineGwosc();
+            bh.formatData(bh.valueCol);
             bh.drawBubbles();
         }else{
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     })
-    // d3.csv(this.inputFileGw, function(error, data){
-    //     if (error){
-    //         if (bh.inputFileGw==bh.inputFileGwDefault){
-    //             alert("Fatal error loading input file: '"+bh.inputFileGw+"'. Sorry!")
-    //         }else{
-    //             alert("Problem loading input file: '"+bh.inputFileGw+"'. Reverting to default '"+bh.inputFileGwDefault+"'.");
-    //             window.location.replace(bh.makeUrl({'infile':null}));
-    //         }
-    //     }
-    //     data= bh.filterData(data,bh.filterType);
-    //     bh.dataGwOld = data;
-    //     // bh.nloaded++;
-    //     if (bh.urlVars.debug){console.log('loaded: '+bh.inputFileGw)}
-    //     //call next functions
-    //     if (bh.dataLoaded()){
-    //         bh.formatData(bh.valueCol)
-    //         bh.drawBubbles();
-    //     }else{
-    //         if (bh.urlVars.debug){console.log('not ready yet')}
-    //     }
-    // })
 
 }
 BHBubble.prototype.formatData = function(valueCol){
