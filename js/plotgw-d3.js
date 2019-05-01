@@ -885,12 +885,36 @@ GWCatalogue.prototype.setScales = function(){
     this.errw = 0.01;//*xyAspect;
     this.uplow=0.1;
     this.uploh=0.1;
+    this.pValue = function(d,p) {
+        if (!d[p]){return 0}
+        else if (d[p].best!=null){return d[p].best}
+        else if (d[p].lower!=null){return d[p].lower}
+        else if (d[p].upper!=null){return d[p].upper};
+    }
+
+    this.pErr = function(d,p,maxmin) {
+        //error- -> value
+        if (!d[p]){return null}
+        else if ((maxmin=='+')){
+            if((d[p].errtype)&&(d[p].errtype=='lower')){
+                return d[p].lower;
+            }else{
+                return Math.max.apply(Math,d[p].errv);
+            }
+        }else if ((maxmin=='-')){
+            if((d[p].errtype)&&(d[p].errtype=='upper')){
+                return d[p].upper;
+            }else{
+                return Math.min.apply(Math,d[p].errv);
+            }
+        }
+    }
+
     this.xValue = function(d) {
         if (!d[gw.xvar]){return 0}
-        else if (d[gw.xvar].best!=null){return d[gw.xvar].best}
-        else if (d[gw.xvar].lower!=null){return d[gw.xvar].lower}
-        else if (d[gw.xvar].upper!=null){return d[gw.xvar].upper};
-    } // data -> value
+        else {return gw.pValue(d,gw.xvar);}
+    }
+    // data -> value
     // value -> display
     this.xScale = d3.scale.linear().range([0, this.graphWidth])
         // data -> display
@@ -899,20 +923,12 @@ GWCatalogue.prototype.setScales = function(){
     this.xErrP = function(d) {
         //error+ -> value
         if (!d[gw.xvar]){return null}
-        else if((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
-            return d[gw.xvar].lower;
-        }else{
-            return Math.max.apply(Math,d[gw.xvar].errv);
-        }
+        else{ return gw.pErr(d,gw.xvar,'+');}
     }
     this.xErrM = function(d) {
         //error- -> value
         if (!d[gw.xvar]){return null}
-        else if((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
-            return d[gw.xvar].upper;
-        }else{
-            return Math.min.apply(Math,d[gw.xvar].errv);
-        }
+        else{ return gw.pErr(d,gw.xvar,'-');}
     }
     // x error+ -> display
     this.xMapErrP = function(d) {
@@ -967,11 +983,15 @@ GWCatalogue.prototype.setScales = function(){
             .innerTickSize(-this.graphHeight);
 
     //data -> value
+    // this.yValue = function(d) {
+    //     if (!d[gw.yvar]){return 0}
+    //     else if (d[gw.yvar].best!=null){return d[gw.yvar].best}
+    //     else if (d[gw.yvar].lower!=null){return d[gw.yvar].lower}
+    //     else if (d[gw.yvar].upper!=null){return d[gw.yvar].upper};
+    // }
     this.yValue = function(d) {
         if (!d[gw.yvar]){return 0}
-        else if (d[gw.yvar].best!=null){return d[gw.yvar].best}
-        else if (d[gw.yvar].lower!=null){return d[gw.yvar].lower}
-        else if (d[gw.yvar].upper!=null){return d[gw.yvar].upper};
+        else {return gw.pValue(d,gw.yvar);}
     }
     // value -> display
     // this.yScale = d3.scale.linear().
@@ -983,21 +1003,13 @@ GWCatalogue.prototype.setScales = function(){
     this.yErrP = function(d) {
         //error- -> value
         if (!d[gw.yvar]){return null}
-        else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
-            return d[gw.yvar].lower;
-        }else{
-            return Math.max.apply(Math,d[gw.yvar].errv);
-        }
+        else{ return gw.pErr(d,gw.yvar,'+');}
     }
     //error+ -> value
     this.yErrM = function(d) {
         //error- -> value
         if (!d[gw.yvar]){return null}
-        else if((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
-            return d[gw.yvar].upper;
-        }else{
-            return Math.min.apply(Math,d[gw.yvar].errv);
-        }
+        else{ return gw.pErr(d,gw.yvar,'-');}
     }
     // y error+ -> display
     this.yMapErrP = function(d) {
@@ -2053,9 +2065,11 @@ GWCatalogue.prototype.setColour = function(newScheme){
     this.replot();
     return;
 }
-GWCatalogue.prototype.getMinMax = function(p,border=0){
+GWCatalogue.prototype.getMinMax = function(p){
     var gw = this;
     var dminmax=[Infinity,-Infinity]
+    console.log('getting min/max',p);
+    border=(gw.columns[p].border) ? gw.columns[p].border : 2;
     for (i=0;i<gw.cat.data.length;i++){
         if (gw.cat.data[i].active!=false){
             dminmax[0] = Math.min(gw.cat.getMinVal(gw.cat.data[i].name,p),dminmax[0])
@@ -2064,18 +2078,58 @@ GWCatalogue.prototype.getMinMax = function(p,border=0){
     }
     if (gw.debug){console.log('axiszero',gw.axiszero,dminmax[0])};
     if (gw.axiszero){
+        // if axiszero set, set axis min to zero unless already <0
         dminmax[0] = (dminmax[0]<0) ? dminmax[0]-border : 0;
     }else{
-        dminmax[0] = dminmax[0]-border;
+        // set to min-border
+        dminmax[0] = (dminmax[0] < 0) ? dminmax[0]-border : (dminmax[0] < border) ? 0 : dminmax[0]-border;
     }
+    // add border on to max
     dminmax[1] = dminmax[1]+border;
-    dminmax[0] = dminmax[0]<0 ? dminmax[0]-border : (gw.axiszero&&dminmax[0]<border ? 0 : dminmax[0]-border);
-    // dminmax[0] = (dminmax[0]>0)&&(dminmax[0]<border) ? 0 : dminmax[0]-border
-    // dminmax[0] = (gw.axiszero) ? 0 : dminmax[0]-border;
-    // dminmax[1] = dminmax[1]+border;
-    // if (gw.axiszero)
+    // if min<0, add on border
+    // dminmax[0] = dminmax[0]<0 ? dminmax[0]-border : (gw.axiszero&&dminmax[0]<border ? 0 : dminmax[0]-border);
+
     return dminmax;
 }
+
+// GWCatalogue.prototype.getMinMaxOuter = function (p) {
+//     // get limits of graph based on parameter p and border values
+//     var gw=this;
+//     var data=gw.cat.data;
+//     var p;
+//     border=(gw.columns[p].border) ? gw.columns[gw.yvar].border : 2;
+//     if (gw.columns[p].errcode==""){
+//         // no errors
+//         // [pMin,pMax]=gw.getMinMax(p);
+//         minval=d3.min(data, function(d){return gw.pValue(d,p)});
+//         maxval=d3.max(data, function(d){return gw.pValue(d,p)});
+//         pMin2 = (minval<0)||(!gw.axiszero) ? minval - border : 0;
+//         pMax2 = d3.max(data, function(d){return gw.pValue(d,p)})+border;
+//     }else{
+//         [pMin,pMax]=gw.getMinMax(p);
+//         pMin2 = (d3.min(data, function(d){return gw.pErr(d,p,'-')})<0)||(!gw.axiszero) ?
+//             d3.min(data, function(d){return gw.pErr(d,p,'-')}) - border : 0;
+//         pMax2 = d3.max(data, function(d){return gw.pErr(d,p,'+')})+border;
+//     }
+//     return [pMin2,pMax2];
+// }
+
+GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
+
+    var gw=this;
+    gw.xvar = xvarNew;
+    gw.yvar = yvarNew;
+
+    [xMin,xMax]=gw.getMinMax(gw.xvar);
+    gw.xScale.domain([xMin, xMax]);
+    if(this.debug){console.log('x',gw.axiszero,xMin,xMax,gw.xScale.range(),gw.xScale.domain())}
+
+    [yMin,yMax]=gw.getMinMax(gw.yvar);
+    gw.yScale.domain([yMin, yMax]);
+    if(this.debug){console.log('y',gw.axiszero,yMin,yMax,gw.yScale.range(),gw.yScale.domain())}
+    return;
+}
+
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
     var gw = this;
@@ -2090,23 +2144,27 @@ GWCatalogue.prototype.drawGraph = function(){
     // don't want dots overlapping axis, so add in buffer to data domain
     // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
     // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-    xBorder = (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2;
-    [xMin,xMax]=gw.getMinMax(gw.xvar,xBorder);
-    xMin2 = (d3.min(data,gw.xErrM)<0)||(!gw.axiszero) ? d3.min(data,gw.xErrM) - xBorder : 0;
-    xMax2 = d3.max(data,gw.xErrP)+xBorder;
-    if(this.debug){console.log('x',xMin,xMax,xMin2,xMax2)}
-    // xMax = d3.max(data, gw.xErrP)+xBorder;
-    gw.xScale.domain([xMin2, xMax2]);
 
-    yBorder = (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2;
-    [yMin,yMax]=gw.getMinMax(gw.yvar,yBorder);
-    yMin2 = (d3.min(data,gw.yErrM)<0)||(!gw.axiszero) ? d3.min(data,gw.yErrM) - yBorder : 0;
-    yMax2 = d3.max(data,gw.yErrP)+yBorder;
-    if(this.debug){console.log('y',yMin,yMax,yMin2,yMax2)}
-    gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
-    gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
-    if(this.debug){console.log('xy Ranges',xMin,xMax,yMin,yMax)}
-    gw.yScale.domain([yMin2, yMax2]);
+    // xBorder = (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2;
+    // [xMin,xMax]=gw.getMinMax(gw.xvar);
+    // xMin2 = (d3.min(data,gw.xErrM)<0)||(!gw.axiszero) ? d3.min(data,gw.xErrM) - xBorder : 0;
+    // xMax2 = d3.max(data,gw.xErrP)+xBorder;
+    // if(this.debug){console.log('x',xMin,xMax,xMin2,xMax2)}
+    // // xMax = d3.max(data, gw.xErrP)+xBorder;
+    // gw.xScale.domain([xMin2, xMax2]);
+    //
+    // yBorder = (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2;
+    // [yMin,yMax]=gw.getMinMax(gw.yvar);
+    // yMin2 = (d3.min(data,gw.yErrM)<0)||(!gw.axiszero) ? d3.min(data,gw.yErrM) - yBorder : 0;
+    // yMax2 = d3.max(data,gw.yErrP)+yBorder;
+    // if(this.debug){console.log('y',yMin,yMax,yMin2,yMax2)}
+    // gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
+    // gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
+    // if(this.debug){console.log('xy Ranges',xMin,xMax,yMin,yMax)}
+    // gw.yScale.domain([yMin2, yMax2]);
+
+    gw.setXYscales(gw.xvar,gw.yvar);
+
     if (gw.showerrors == null){gw.showerrors=true};
 
     // x-axis
@@ -2890,158 +2948,19 @@ GWCatalogue.prototype.updateLegend = function(){
     // not implemented yet
     return
 }
-GWCatalogue.prototype.updateXaxis = function(xvarNew) {
-    // update x-xais to xvarNew
-    // set global variable
-    this.xvar = (xvarNew) ? xvarNew : this.xvar;
-    var gw=this;
-    var data=gw.cat.data;
-    // d3.csv("csv/gwcat.csv", function(error, data) {
 
-        // change string (from CSV) into number format
-        // data.forEach(gw.formatData);
-
-        // don't want dots overlapping axis, so add in buffer to data domain
-        // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-        xBorder= (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2;
-        if (gw.columns[gw.xvar].errcode==""){
-            [xMin,xMax]=gw.getMinMax(this.xvar,xBorder);
-            xMin2 = (d3.min(data, gw.xValue)<0)||(!gw.axiszero) ? d3.min(data, gw.xValue) - xBorder : 0;
-            xMax2 = d3.max(data, gw.xValue)+xBorder;
-            if(this.debug){console.log('x',xMin,xMax,xMin2,xMax2)}
-            gw.xScale.domain([xMin2, xMax2]);
-        }else{
-            [xMin,xMax]=gw.getMinMax(this.xvar,xBorder);
-            xMin2 = (d3.min(data, gw.xErrM)<0)||(!gw.axiszero) ? d3.min(data, gw.xErrM) - xBorder : 0;
-            xMax2 = d3.max(data, gw.xErrP)+xBorder;
-            if(this.debug){console.log('x',xMin,xMax,xMin2,xMax2,gw.xScale.range())}
-            gw.xScale.domain([xMin2, xMax2]);
-            if(this.debug){console.log('x',xMin,xMax,xMin2,xMax2,gw.xScale.range())}
-        }
-        gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
-
-        // Select the section we want to apply our changes to
-        var svg = d3.select("body").transition();
-
-        // Move the dots
-        gw.svg.selectAll(".dot")   // change the line
-            .transition()
-            .duration(750)
-            .attr("cx", gw.xMap)
-            .style("opacity",this.dotOp);
-        // change the x axis
-        gw.svg.select(".x-axis.axis")
-            .transition()
-            .duration(750)
-            .call(gw.xAxis);
-            //   .forceX([0]);
-        gw.svg.select(".x-axis.axis-label")
-            .transition()
-            .duration(750)
-            .text(gw.getLabelUnit(gw.xvar,true));
-        // gw.svgcont.select("#x-axis-icon")
-        //     .attr("src",gw.getIcon(gw.xvar));
-        gw.svg.select(".y-axis-line.axis-line")
-            .transition()
-            .duration(750)
-            .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
-            .attr("opacity",gw.yAxLineOp);
-        data.forEach(function(d){
-            if (d.name==gw.sketchName){
-                gw.svg.select("#highlight")
-                    .transition()
-                    .duration(750)
-                    .attr("cx", gw.xMap(d))
-                    .style("opacity",gw.dotOp(d));
-            }
-        });
-        // Update error bars
-        gw.updateErrors();
-        gw.updateLegend();
-    // });
-    gw.updateUrl();
-    // window.history.pushState({},null,gw.makeUrl());
-}
-
-GWCatalogue.prototype.updateYaxis = function(yvarNew) {
-    // update y-axis to yvarNew
-    // set global variable
-    var gw=this;
-    var data=gw.cat.data;
-    this.yvar = (yvarNew) ? yvarNew : this.yvar;
-
-    // d3.csv("csv/gwcat.csv", function(error, data) {
-
-        // change string (from CSV) into number format
-        // data.forEach(gw.formatData);
-        // don't want dots overlapping axis, so add in buffer to data domain
-        // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
-        yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
-        if (gw.columns[gw.yvar].errcode==""){
-            [yMin,yMax]=this.getMinMax(this.yvar,yBorder);
-            yMin2 = (d3.min(data, gw.yValue)<0)||(!gw.axiszero) ? d3.min(data, gw.yValue) - yBorder : 0;
-            yMax2 = d3.max(data, gw.yValue)+yBorder;
-            if(this.debug){console.log('y',yMin,yMax,yMin2,yMax2)}
-            gw.yScale.domain([yMin2, yMax2]);
-            // gw.yScale.domain([yMin,yMax]);
-
-        }else{
-            [yMin,yMax]=this.getMinMax(this.yvar,yBorder);
-            yMin2 = (d3.min(data, gw.yErrM)<0)||(!gw.axiszero) ? d3.min(data, gw.yErrM) - yBorder : 0;
-            yMax2 = d3.max(data, gw.yErrP)+yBorder;
-            if(this.debug){console.log('y',yMin,yMax,yMin2,yMax2)}
-            // gw.yScale.domain([yMin, d3.max(data, gw.yErrP)+yBorder]);
-            gw.yScale.domain([yMin2,yMax2]);
-        }
-        gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
-        // Select the section we want to apply our changes to
-        // var svg = d3.select("body").transition();
-
-        // Move the dots
-        gw.svg.selectAll(".dot")   // change the line
-            .transition()
-            .duration(750)
-            .attr("cy", gw.yMap)
-            .style("opacity",this.dotOp);
-        // change the y axis
-        gw.svg.select(".y-axis.axis")
-            .transition()
-            .duration(750)
-            .call(gw.yAxis);
-        gw.svg.selectAll(".y-axis.axis-label")
-            .transition()
-            .duration(750)
-            .text(gw.getLabelUnit(gw.yvar,true));
-        gw.graphcont.select("#y-axis-icon")
-            .attr("src",gw.getIcon(gw.yvar));
-        gw.svg.select(".x-axis-line.axis-line")
-            .transition()
-            .duration(750)
-            .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
-            .attr("opacity",gw.xAxLineOp);
-        data.forEach(function(d){
-            if (d.name==gw.sketchName){
-                gw.svg.select("#highlight")
-                    .transition()
-                    .duration(750)
-                    .attr("cy", gw.yMap(d))
-                    .style("opacity",gw.dotOp(d));
-            }
-        });
-        // Update error bars
-        gw.updateErrors();
-        gw.updateLegend();
-    // });
-    gw.updateUrl()
-    // window.history.pushState({},null,gw.makeUrl());
-}
-// GWCatalogue.prototype.updateBothaxes = function(xvarNew,yvarNew) {
+// GWCatalogue.prototype.updateXaxis = function(xvarNew,duration) {
 //     // update x-xais to xvarNew
 //     // set global variable
-//     this.xvar = xvarNew;
-//     this.yvar = yvarNew;
+//     this.xvar = (xvarNew) ? xvarNew : this.xvar;
+//     dur = (duration) ? duration : 750;
 //     var gw=this;
-//     var data=gw.data;
+//     var data=gw.cat.data;
+//
+//     gw.setXYscales(gw.xvar,gw.yvar);
+//     [xMin,xMax]=this.getMinMax(this.xvar);
+//     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
+//     // az=d3.select('#axiszero')[0][0].checked;
 //     // d3.csv("csv/gwcat.csv", function(error, data) {
 //
 //         // change string (from CSV) into number format
@@ -3049,97 +2968,201 @@ GWCatalogue.prototype.updateYaxis = function(yvarNew) {
 //
 //         // don't want dots overlapping axis, so add in buffer to data domain
 //         // xScale.domain([d3.min(data, xValue)-1, d3.max(data, xValue)+1]);
-//         xBorder= (gw.columns[gw.xvar].border) ? gw.columns[gw.xvar].border : 2
-//         if (gw.columns[gw.xvar].errcode==""){
-//             xMin = (d3.min(data, gw.xValue)<0) ? d3.min(data, gw.xValue) - xBorder : 0;
-//             xMax = d3.max(data, gw.xValue)+xBorder;
-//             gw.xScale.domain([xMin, xMax]);
-//         }else{
-//             xMin = (d3.min(data, gw.xErrM)<0) ? d3.min(data, gw.xErrM) - xBorder : 0;
-//             xMax = d3.max(data, gw.xErrP)+xBorder;
-//             gw.xScale.domain([xMin, xMax]);
-//         }
-//         gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
 //
-//         yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
-//         if (gw.columns[gw.yvar].errcode==""){
-//             yMin = (d3.min(data, gw.yValue)<0) ? d3.min(data, gw.yValue) - yBorder : 0;
-//             yMax = d3.max(data, gw.yValue)+yBorder;
-//             gw.yScale.domain([yMin, yMax]);
-//         }else{
-//             yMin = (d3.min(data, gw.yErrM)<0) ? d3.min(data, gw.yErrM) - yBorder : 0;
-//             yMax = d3.max(data, gw.yErrP)+yBorder;
-//             gw.yScale.domain([yMin, yMax]);
-//         }
-//         gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
 //
 //         // Select the section we want to apply our changes to
 //         var svg = d3.select("body").transition();
 //
 //         // Move the dots
-//         gw.svg.selectAll(".dot")   // change the line
+//         gw.svg.selectAll(".dot")
 //             .transition()
-//             .duration(750)
-//             .attr("cx", gw.xMap)
-//             .attr("cy", gw.yMap)
+//             .duration(dur)
+//             .attr("cx", function(d){console.log('x',d.name,gw.xMap(d));return(gw.xScale(gw.xValue(d)));})
 //             .style("opacity",this.dotOp);
-//         gw.svg.selectAll(".xraydot")   // change the line
-//             .transition()
-//             .duration(750)
-//             .attr("cx", gw.xMap)
-//             .attr("cy", gw.yMap)
-//             .attr("opacity",function(d){return gw.getOpacity(d)})
-//
+//         // change the x axis
 //         gw.svg.select(".x-axis.axis")
 //             .transition()
-//             .duration(750)
+//             .duration(dur)
 //             .call(gw.xAxis);
 //             //   .forceX([0]);
 //         gw.svg.select(".x-axis.axis-label")
 //             .transition()
-//             .duration(750)
+//             .duration(dur)
 //             .text(gw.getLabelUnit(gw.xvar,true));
-//         gw.graphcont.select("#x-axis-icon")
-//             .attr("src",gw.getIcon(gw.xvar));
+//         // gw.svgcont.select("#x-axis-icon")
+//         //     .attr("src",gw.getIcon(gw.xvar));
 //         gw.svg.select(".y-axis-line.axis-line")
 //             .transition()
-//             .duration(750)
+//             .duration(dur)
 //             .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
 //             .attr("opacity",gw.yAxLineOp);
+//         data.forEach(function(d){
+//             if (d.name==gw.sketchName){
+//                 gw.svg.select("#highlight")
+//                     .transition()
+//                     .duration(dur)
+//                     .attr("cx", gw.xMap(d))
+//                     .style("opacity",gw.dotOp(d));
+//             }
+//         });
+//         // Update error bars
+//         gw.updateErrors();
+//         gw.updateLegend();
+//     // });
+//     gw.updateUrl();
+//     // window.history.pushState({},null,gw.makeUrl());
+// }
+//
+// GWCatalogue.prototype.updateYaxis = function(yvarNew,duration) {
+//     // update y-axis to yvarNew
+//     // set global variable
+//     var gw=this;
+//     var data=gw.cat.data;
+//     this.yvar = (yvarNew) ? yvarNew : this.yvar;
+//     dur = (duration) ? duration : 750;
+//
+//     // d3.csv("csv/gwcat.csv", function(error, data) {
+//
+//         // change string (from CSV) into number format
+//         // data.forEach(gw.formatData);
+//         // don't want dots overlapping axis, so add in buffer to data domain
+//         // yScale.domain([d3.min(data, yValue)-1, d3.max(data, yValue)+1]);
+//         yBorder= (gw.columns[gw.yvar].border) ? gw.columns[gw.yvar].border : 2
+//         if (gw.columns[gw.yvar].errcode==""){
+//             [yMin,yMax]=this.getMinMax(this.yvar);
+//             yMin2 = (d3.min(data, gw.yValue)<0)||(!gw.axiszero) ? d3.min(data, gw.yValue) - yBorder : 0;
+//             yMax2 = d3.max(data, gw.yValue)+yBorder;
+//
+//             // gw.yScale.domain([yMin,yMax]);
+//
+//         }else{
+//             [yMin,yMax]=this.getMinMax(this.yvar);
+//             yMin2 = (d3.min(data, gw.yErrM)<0)||(!gw.axiszero) ? d3.min(data, gw.yErrM) - yBorder : 0;
+//             yMax2 = d3.max(data, gw.yErrP)+yBorder;
+//             // if(this.debug){console.log('y',yMin,yMax,yMin2,yMax2)}
+//             // gw.yScale.domain([yMin, d3.max(data, gw.yErrP)+yBorder]);
+//             // gw.yScale.domain([yMin2,yMax2]);
+//         }
+//         gw.yScale.domain([yMin2, yMax2]);
+//         if(this.debug){console.log('y',gw.axiszero,yMin,yMax,yMin2,yMax2,gw.yScale.range(),gw.yScale.domain())}
+//
+//         gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
+//         // Select the section we want to apply our changes to
+//         // var svg = d3.select("body").transition();
+//
+//         // Move the dots
+//         gw.svg.selectAll(".dot")
+//             // .transition()
+//             // .duration(dur)
+//             .attr("cy", function(d){console.log('y',d.name,gw.yMap(d));return(gw.yMap(d));})
+//             .style("opacity",this.dotOp);
 //         // change the y axis
 //         gw.svg.select(".y-axis.axis")
 //             .transition()
-//             .duration(750)
+//             .duration(dur)
 //             .call(gw.yAxis);
 //         gw.svg.selectAll(".y-axis.axis-label")
 //             .transition()
-//             .duration(750)
+//             .duration(dur)
 //             .text(gw.getLabelUnit(gw.yvar,true));
 //         gw.graphcont.select("#y-axis-icon")
 //             .attr("src",gw.getIcon(gw.yvar));
 //         gw.svg.select(".x-axis-line.axis-line")
 //             .transition()
-//             .duration(750)
+//             .duration(dur)
 //             .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
 //             .attr("opacity",gw.xAxLineOp);
-//
 //         data.forEach(function(d){
 //             if (d.name==gw.sketchName){
 //                 gw.svg.select("#highlight")
 //                     .transition()
-//                     .duration(750)
-//                     .attr("cx", gw.xMap(d))
+//                     .duration(dur)
 //                     .attr("cy", gw.yMap(d))
 //                     .style("opacity",gw.dotOp(d));
 //             }
 //         });
 //         // Update error bars
 //         gw.updateErrors();
+//         gw.updateLegend();
 //     // });
-//     gw.updateUrl();
+//     gw.updateUrl()
 //     // window.history.pushState({},null,gw.makeUrl());
 // }
-//
+GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
+    // update x-xais to xvarNew
+    // set global variable
+    this.xvar = xvarNew;
+    this.yvar = yvarNew;
+    var gw=this;
+    var data=gw.cat.data;
+
+    [xMin,xMax]=gw.getMinMax(gw.xvar);
+    [yMin,yMax]=gw.getMinMax(gw.yvar);
+    gw.setXYscales(gw.xvar,gw.yvar);
+
+    gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
+    gw.xAxLineOp = (yMin < 0) ? 0.5 : 0;
+
+    // Select the section we want to apply our changes to
+    var svg = d3.select("body").transition();
+
+    // Move the dots
+    gw.svg.selectAll(".dot")   // change the line
+        .transition()
+        .duration(750)
+        .attr("cx", gw.xMap)
+        .attr("cy", gw.yMap)
+        .style("opacity",this.dotOp);
+
+    gw.svg.select(".x-axis.axis")
+        .transition()
+        .duration(750)
+        .call(gw.xAxis);
+        //   .forceX([0]);
+    gw.svg.select(".x-axis.axis-label")
+        .transition()
+        .duration(750)
+        .text(gw.getLabelUnit(gw.xvar,true));
+
+    gw.svg.select(".y-axis-line.axis-line")
+        .transition()
+        .duration(750)
+        .attr("x1",gw.xScale(0)).attr("x2",gw.xScale(0))
+        .attr("opacity",gw.yAxLineOp);
+
+    // change the y axis
+    gw.svg.select(".y-axis.axis")
+        .transition()
+        .duration(750)
+        .call(gw.yAxis);
+    gw.svg.selectAll(".y-axis.axis-label")
+        .transition()
+        .duration(750)
+        .text(gw.getLabelUnit(gw.yvar,true));
+
+    gw.svg.select(".x-axis-line.axis-line")
+        .transition()
+        .duration(750)
+        .attr("y1",gw.yScale(0)).attr("y2",gw.yScale(0))
+        .attr("opacity",gw.xAxLineOp);
+
+    data.forEach(function(d){
+        if (d.name==gw.sketchName){
+            gw.svg.select("#highlight")
+                .transition()
+                .duration(750)
+                .attr("cx", gw.xMap(d))
+                .attr("cy", gw.yMap(d))
+                .style("opacity",gw.dotOp(d));
+        }
+    });
+    // Update error bars
+    gw.updateErrors();
+    // });
+    gw.updateUrl();
+    // window.history.pushState({},null,gw.makeUrl());
+}
+
 GWCatalogue.prototype.addOptions = function(){
     // add options boxetc.
     // console.log("add options");
@@ -3172,7 +3195,7 @@ GWCatalogue.prototype.addOptions = function(){
                 document.getElementById("button-divx-"+oldXvar).classList.remove("down")
                 document.getElementById("button-divx-"+newXvar).classList.add("down")
                 this.classList.add("down");
-                gw.updateXaxis(this.name);
+                gw.updateBothAxes(newXvar,gw.yvar);
             });
             newoptinputx.onmouseover = function(e){
                 gw.showTooltip(e,this.id.split('buttonx-')[1],type="column");};
@@ -3200,7 +3223,7 @@ GWCatalogue.prototype.addOptions = function(){
                 document.getElementById("button-divy-"+oldYvar).classList.remove("down")
                 document.getElementById("button-divy-"+newYvar).classList.add("down")
                 this.classList.add("down");
-                gw.updateYaxis(this.name);
+                gw.updateBothAxes(gw.xvar,newYvar);
             });
             newoptinputy.onmouseover = function(e){
                 // console.log(this.id.split('buttony-')[1])
@@ -3231,12 +3254,11 @@ GWCatalogue.prototype.addOptions = function(){
     divdisp.appendChild(colList);
 
     d3.select("#display-options").append('div')
-        .style('display','none')
+        // .style('display','none')
         .html('<input type="checkbox" name="filterr" id="axiszero"'+(gw.axiszero ? ' checked="checked"':'')+'></input><label for="axiszero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
         .on("change",function(){
             gw.axiszero=d3.select('#axiszero')[0][0].checked;
-            gw.updateXaxis(gw.xvar);
-            gw.updateYaxis(gw.yvar);
+            gw.updateBothAxes(gw.xvar,gw.yvar);
         });
 }
 
@@ -3701,8 +3723,7 @@ GWCatalogue.prototype.updateFilters = function () {
 		}
 		this.cat.data[i].active = active;
 	}
-    this.updateXaxis();
-    this.updateYaxis();
+    this.updateBothAxes(this.xvar,this.yvar);
     this.updateErrors();
     this.moveHighlight();
 	return this;
@@ -3884,8 +3905,7 @@ GWCatalogue.prototype.makePlot = function(){
     // make plot (calls other function)
     this.setLang();
     this.drawGraph();
-    this.updateXaxis(this.xvar);
-    this.updateYaxis(this.yvar);
+    this.updateBothAxes(this.xvar,this.yvar);
     this.drawSketch();
     // this.addButtons();
     this.addOptions();
