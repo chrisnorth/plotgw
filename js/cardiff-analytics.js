@@ -15,7 +15,7 @@ window.cookieconsent_options = {"message":"This website uses cookies to gather s
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 gtag('js', new Date());
-gtag('config', 'UA-130299724-1');
+gtag('config', 'UA-130299724-2');
 
 /*
 // content below from http://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.10/cookieconsent.min.js
