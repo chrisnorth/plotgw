@@ -14,6 +14,7 @@ function GWCatalogue(inp){
     // set initial axes
     // this.init()
     var gw=this;
+    this.inp=inp;
     this.getUrlVars();
     if (this.urlVars.datasrc){this.datasrc=this.urlVars.datasrc}
     else{this.datasrc = (inp)&&(inp.datasrc) ? inp.datasrc : "gwosc"}
@@ -658,7 +659,6 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 text=gw.tl((d.FARHz.best).toPrecision(gw.columns.FARHz.sigfig) +
                 ' '+gw.columns.FARHz.unit);
                 text=text.replace('e','x10^');
-                console.log('FARHz',text);
                 return text;
             },
             sigfig:3,
@@ -1734,10 +1734,10 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.langOn=false;
     gw.toLoad=3;
-    gw.fileInEventsDefault="gwcat/data/events.json";
-    gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : gw.fileInEventsDefault;
-    gw.fileInGwoscDefault="gwcat/data/gwosc.json";
-    gw.fileInGwosc = (gw.urlVars.gwoscFile) ? gw.urlVars.gwoscFile : gw.fileInGwoscDefault;
+    gw.fileInEventsDefault="http://gwcat.cardiffgravity.org/data/events.json";
+    gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : (gw.inp.eventsFile) ? gw.inp.eventsFile : gw.fileInEventsDefault;
+    gw.fileInGwoscDefault="http://gwcat.cardiffgravity.org/data/gwosc.json";
+    gw.fileInGwosc = (gw.urlVars.gwoscFile) ? gw.urlVars.gwoscFile : (gw.inp.gwoscFile) ? gw.inp.gwoscFile : gw.fileInGwoscDefault;
 
     gw.loadLangDefault()
     gw.loadLang(this.langIn)
@@ -2016,7 +2016,6 @@ GWCatalogue.prototype.setColour = function(newScheme){
 GWCatalogue.prototype.getMinMax = function(p){
     var gw = this;
     var dminmax=[Infinity,-Infinity]
-    console.log('getting min/max',p);
     border=(gw.columns[p].border) ? gw.columns[p].border : 2;
     scale = (gw.columns[p].scale) ? gw.columns[p].scale : "";
     for (i=0;i<gw.cat.data.length;i++){

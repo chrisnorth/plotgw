@@ -20,10 +20,9 @@
     <script type="text/javascript" src="js/nouislider.min.js"></script>
     <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
     <!-- Analytics code -->
-    <!-- Global site tag (gtag.js) - Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-130299724-1"></script>
     <script type="text/javascript" src="js/cardiff-analytics.js"></script>
-    <script type="text/javascript" src="gwcat/js/gwcat.js"></script>
+    <script type="text/javascript" src="http://gwcat.cardiffgravity.org/js/gwcat.js"></script>
+    <!-- <script type="text/javascript" src="gwcat/js/gwcat.js"></script> FOR LOCAL VERSION-->
     <script type="text/javascript" src="js/plotgw-d3.js"></script>
 </head>
 <body class="colourise">
@@ -35,6 +34,8 @@
     </div>
     <script type="text/javascript">
     var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
+    // for local version:
+    // var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false,'gwoscFile':'gwcat/data/gwosc.json','eventsFile':'gwcat/data/events.json'})
     </script>
 </body>
 </html>
