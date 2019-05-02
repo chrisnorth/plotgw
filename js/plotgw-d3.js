@@ -650,6 +650,22 @@ GWCatalogue.prototype.setColumns = function(datadict){
             sigfig:2,
             unit:'%data.Erad.unit.Joule%'
         },
+        FARHz:{type:'derived',
+            depfn:function(d){return (d.FAR)},
+            namefn:function(){return(gw.columns.FAR.name)},
+            convfn:['FAR',function(x){return x/3.154e+7}],
+            strfn:function(d){
+                text=gw.tl((d.FARHz.best).toPrecision(gw.columns.FARHz.sigfig) +
+                ' '+gw.columns.FARHz.unit);
+                text=text.replace('e','x10^');
+                console.log('FARHz',text);
+                return text;
+            },
+            sigfig:3,
+            err:0,
+            unit:'%data.FAR.unit.Hz%',
+            avail:false
+        },
         date:{
             type:'derived',
             depfn:function(d){return (d.UTC)},
@@ -1092,7 +1108,7 @@ GWCatalogue.prototype.setScales = function(){
 
         datetime:{lab:["datetime"]},
         // time:{lab:["time"]},
-        FAR:{lab:["FAR"]},
+        FAR:{lab:["FAR"],labSw:["FARHz"]},
         Mchirp:{lab:["Mchirp"],
             labSw:["Mchirpkg"]},
         obsrun:{lab:["obsrun"]},
