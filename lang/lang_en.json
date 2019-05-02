@@ -28,6 +28,7 @@
  "data.chi.name": "Effective inspiral spin",
  "data.FAR.name": "False alarm rate",
  "data.FAR.unit": "yr⁻¹",
+ "data.FAR.unit.Hz": "Hz",
  "data.FAR.unit.1per": "< 1 per",
  "data.FAR.unit.yr": "yr",
  "data.FAR.unit.kyr": "thousand yr",
