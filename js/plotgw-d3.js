@@ -1792,9 +1792,9 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.langOn=false;
     gw.toLoad=3;
-    gw.fileInEventsDefault="http://gwcat.cardiffgravity.org/data/gwosc_gracedb.json";
+    gw.fileInEventsDefault="https://gwcat.cardiffgravity.org/data/gwosc_gracedb.json";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : (gw.inp.eventsFile) ? gw.inp.eventsFile : gw.fileInEventsDefault;
-    gw.fileInGwoscDefault="http://gwcat.cardiffgravity.org/data/gwosc.json";
+    gw.fileInGwoscDefault="https://gwcat.cardiffgravity.org/data/gwosc.json";
     gw.fileInGwosc = (gw.urlVars.gwoscFile) ? gw.urlVars.gwoscFile : (gw.inp.gwoscFile) ? gw.inp.gwoscFile : gw.fileInGwoscDefault;
 
     gw.loadLangDefault()
