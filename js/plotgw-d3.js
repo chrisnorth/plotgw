@@ -244,7 +244,7 @@ GWCatalogue.prototype.init = function(){
     		"options":[
     			{"id": "filt-o1", "label":"%text.plotgw.filter.observingrun.O1%", "checked": true, "value": "O1" },
     			{"id": "filt-o2", "label":"%text.plotgw.filter.observingrun.O2%", "checked": true, "value": "O2" },
-    			{"id": "filt-o3", "label":"%text.plotgw.filter.observingrun.O3%", "checked": false, "value": "O3" }
+    			{"id": "filt-o3", "label":"%text.plotgw.filter.observingrun.O3%", "checked": true, "value": "O3" }
     		]
 	    }
     }
