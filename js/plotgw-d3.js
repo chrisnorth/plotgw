@@ -1645,7 +1645,7 @@ GWCatalogue.prototype.setStyles = function(){
     }
     this.cValue = function(d) {return d.type;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = ['GW','LVT'];
+    this.styleDomains = ['GW','Candidate'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
     this.linedashes = d3.scale.ordinal().range([0,3,0]).domain(this.styleDomains);
@@ -2025,7 +2025,7 @@ GWCatalogue.prototype.setLang = function(){
             .html(this.tl(this.filters[f].name));
     }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
-        LVT:this.tl('%text.plotgw.legend.candidates%')}
+        Cand:this.tl('%text.plotgw.legend.candidates%')}
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
