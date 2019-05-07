@@ -1792,7 +1792,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.langOn=false;
     gw.toLoad=3;
-    gw.fileInEventsDefault="https://gwcat.cardiffgravity.org/data/gwosc_gracedb.json";
+    gw.fileInEventsDefault="https://gwcat.cardiffgravity.org/data/gwosc_gracedb.jsonp";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : (gw.inp.eventsFile) ? gw.inp.eventsFile : gw.fileInEventsDefault;
     gw.fileInGwoscDefault="https://gwcat.cardiffgravity.org/data/gwosc.json";
     gw.fileInGwosc = (gw.urlVars.gwoscFile) ? gw.urlVars.gwoscFile : (gw.inp.gwoscFile) ? gw.inp.gwoscFile : gw.fileInGwoscDefault;
@@ -1899,7 +1899,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     if (gw.datasrc=='gwosc'){
         gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:gw.fileInGwosc,debug:this.debug});
     }else{
-        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly});
+        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,'fileIn':gw.fileInEvents});
     }
 
 
