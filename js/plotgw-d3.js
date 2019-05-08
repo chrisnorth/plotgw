@@ -1109,6 +1109,7 @@ GWCatalogue.prototype.setScales = function(){
         return(x*this.sketchWidth*this.aspectSketch)}
     this.yScaleSk = function(y){return(y*this.sketchHeight)}
 
+
     // set black hole positions
     /* cx,cy=BH position; xicon,yicon: icon-position, scy:shadow y-coordinate
     */
@@ -1242,6 +1243,13 @@ GWCatalogue.prototype.drawSketch = function(){
         this.addMasses("Mfinal",false);
     }
 
+    // draw probability sketch
+    if (this.redraw){
+        this.addProbBars(true);
+    }else{
+        this.addProbBars(false);
+    }
+
     // add labels
     if (this.redraw){
         d3.selectAll('.labcont').style('height',this.labcontHeight);
@@ -1306,7 +1314,6 @@ GWCatalogue.prototype.drawSketch = function(){
 
 
 }
-
 GWCatalogue.prototype.addMasses = function(bh,redraw){
     // add ellipse for shadow
     gw=this;
@@ -1327,8 +1334,9 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         .attr("fill","url(#gradBH)");
     // add mass icon
     if (!redraw){
+        // drawing from sratch
         massicondiv = document.createElement('div');
-        massicondiv.className = 'icon massicon';
+        massicondiv.className = 'icon mass-sketch massicon';
         massicondiv.setAttribute("id",'icon'+bh);
         massicondiv.style.width = this.micon.w;
         massicondiv.style.height = this.micon.h;
@@ -1344,7 +1352,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         massicondiv.onmouseout = function(){gw.hideTooltip()};
         // add mass text
         masstxtdiv = document.createElement('div');
-        masstxtdiv.className = 'sketchlab mtxt';
+        masstxtdiv.className = 'sketchlab mass-sketch mtxt';
         masstxtdiv.setAttribute('id','mtxt-'+bh);
         masstxtdiv.style["font-size"] = (1.2*this.sksc)+"em";
         masstxtdiv.innerHTML = this.labBlank;
@@ -1395,18 +1403,19 @@ GWCatalogue.prototype.flyOutMasses = function(bh){
     document.getElementById("mtxt-"+bh).innerHTML = this.labBlank;
 
 };
-GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
+GWCatalogue.prototype.flyInMasses = function(d,bh,resize,delay=false){
     // fly in mass
     // bh = BH to fly in
     // resize= type of resizing animation
+    dt=(delay) ? this.flySp/2 : 0;
     if (resize=="smooth"){
         // only resize circle & shadow
         this.svgSketch.select('circle.bh-'+bh)
-            .transition().duration(this.flySp)
+            .transition().delay(dt).duration(this.flySp)
             .attr("r",this.scaleRadius(d[bh]))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
-            .transition().duration(this.flySp)
+            .transition().delay(dt).duration(this.flySp)
             .attr("rx",this.scaleRadius(d[bh]))
             .attr("ry",this.scaleRadius(d[bh],0.2));
     }else if(resize=="fly"){
@@ -1414,11 +1423,11 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(d[bh]));
         this.svgSketch.select('circle.bh-'+bh)
-            .transition().duration(this.flySp).ease("bounce")
+            .transition().delay(dt).duration(this.flySp).ease("bounce")
             .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
-            .transition().duration(this.flySp).ease("bounce")
+            .transition().delay(dt).duration(this.flySp).ease("bounce")
             .attr("rx",this.scaleRadius(d[bh]))
             .attr("ry",this.scaleRadius(d[bh],0.2));
     }else if(resize=="snap"){
@@ -1440,6 +1449,161 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         document.getElementById("mtxt-"+bh).innerHTML = this.tl(d[bh].strnoerr);
     }
 };
+GWCatalogue.prototype.addProbBars = function(redraw){
+    // add probability bars
+    var redraw;
+    gw=this;
+    // probwid=0.15;
+    probx0=0.1;
+    probx1=0.9;
+    probxgap=0.03;
+    proby0=0.9;
+    proby1=0.3;
+    this.probs=['BBH','BNS','NSBH','MassGap','Terrestrial'];
+    np=this.probs.length;
+    probwid=((probx1-probx0) - np*probxgap)/np;
+    this.probpos={left:probx0,right:probx1,width:probx1-probx0,
+        top:proby1,bottom:proby0,height:proby0-proby1,
+        barwidth:probwid,txty:proby0-probxgap,gap:probxgap};
+    for (p=0;p<this.probs.length;p++){
+        this.probpos[this.probs[p]]={
+            x:probx0 + (p+0.5)*probxgap + p*probwid,
+            y:proby0
+        }
+    }
+
+    this.scaleProbTop = function(pval,fact=1){
+        t=fact * this.sketchHeight * (this.probpos.top + (1-pval) * this.probpos.height);
+        console.log('top(',this.probpos.top,fact , this.sketchHeight , (pval) , this.probpos.height,')=',t)
+        return(t)
+    }
+    this.scaleProbHeight = function(pval,fact=1){
+        h=fact * this.sketchHeight * (pval) * this.probpos.height;
+        console.log('top(',fact , this.sketchHeight , (pval) , this.probpos.height,')=',h)
+        return(h)
+    }
+    this.svgSketch.append("line")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-x")
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.right))
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.bottom))
+        .attr("stroke-width",2)
+        .attr("stroke",this.getCol('probbar'));
+    this.svgSketch.append("line")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-y")
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.left))
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.top))
+        .attr("stroke-width",2)
+        .attr("stroke",this.getCol('probbar'));
+    ylabx=this.xScaleSk(this.probpos.left-0.05);
+    ylaby=this.yScaleSk(this.probpos.top+this.probpos.height/2);
+    xlabx=this.xScaleSk(this.probpos.left+this.probpos.width/2);
+    xlaby=this.yScaleSk(this.probpos.bottom+0.05);
+    ytg=this.svgSketch.append("g")
+        .attr("transform","translate("+ylabx+","+ylaby+")")
+    ytg.append("text")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-y-label")
+        .attr("x",0)
+        .attr("y",0)
+        .text("Probability (%)")
+        .attr("fill",this.getCol('probtxt')[1])
+        .attr("text-anchor","middle")
+        .attr("dominant-baseline","central")
+        .attr("transform","rotate(-90)")
+        .attr("font-size",(1.3*gw.sksc)+"em");
+    this.svgSketch.append("text")
+        // .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-x-label")
+        .attr("x",xlabx)
+        .attr("y",xlaby)
+        .text("Classification")
+        .attr("fill",this.getCol('probtxt')[1])
+        .attr("text-anchor","middle")
+        .attr("dominant-baseline","central")
+        .attr("font-size",(1.3*gw.sksc)+"em");
+    for (p in this.probs){
+        prob=this.probs[p];
+        this.svgSketch.append("rect")
+            .attr("class","sketch")
+            .attr("id","prob-bar-"+prob)
+            .attr("x",this.xScaleSk(this.probpos[prob].x))
+            .attr("y",this.scaleProbTop(0))
+            .attr("fill",this.getCol('probbar'))
+            .attr("width",this.xScaleSk(this.probpos.barwidth))
+            .attr("height",this.scaleProbHeight(0));
+        txtx=this.xScaleSk(this.probpos[prob].x+this.probpos.barwidth/2);
+        txty=this.yScaleSk(this.probpos.txty);
+        grp=this.svgSketch.append("g")
+            .attr("transform","translate("+txtx+","+txty+")")
+            .attr("class","sketch ptxtg")
+            .attr("id","ptxtg-"+prob)
+        grp.append("text")
+            .attr("class","sketch ptxt")
+            .attr("id","ptxt-"+prob)
+            .attr("x",0)
+            .attr("fill",this.getCol('probtxt')[0])
+            .attr("y",0)
+            .attr("text-anchor","left")
+            .attr("dominant-baseline","central")
+            .attr("transform","rotate(-90)")
+            .attr("font-size",(1.3*gw.sksc)+"em")
+            .text(prob);
+    }
+
+}
+GWCatalogue.prototype.flyOutProbBars = function(){
+    for (p in this.probs){
+        prob=this.probs[p];
+        this.svgSketch.select('#prob-bar-'+prob)
+            .transition().duration(this.flySp)
+            .attr("y",this.scaleProbTop(0))
+            .attr("height",this.scaleProbHeight(0));
+        this.svgSketch.select('#ptxt-'+prob)
+            .transition().duration(this.flySp)
+            .attr("x",this.yScaleSk(-0.7))
+        }
+}
+GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
+
+    for (p in this.probs){
+        prob=this.probs[p];
+        pval=d.objType.prob[prob];
+        if ((prob=='Terrestrial')&(pval<0.01)){ptxt=prob+' (<1%)'}
+        else{ptxt=prob+' ('+(100*pval).toFixed(0)+'%)'}
+        dt=(delay) ? this.flySp/2 : 0;
+        if (pval<=0.5){
+            ptxty=this.yScaleSk((pval*this.probpos.height));
+            pcol=1;
+        }else{ptxty=this.yScaleSk(0);pcol=0}
+        if (resize=="smooth"){
+            this.svgSketch.select('#prob-bar-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                .attr("y",this.scaleProbTop(pval))
+                .attr("height",this.scaleProbHeight(pval));
+            this.svgSketch.select('#ptxt-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                // .attr("y",this.yScaleSk(this.probpos.txty))
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt')[pcol])
+                .text(ptxt);
+        }else if(resize=="snap"){
+            this.svgSketch.select('#prob-bar-'+prob)
+                .attr("y",this.scaleProbTop(pval))
+                .attr("height",this.scaleProbHeight(pval));
+            this.svgSketch.select('#ptxt-'+prob)
+                // .attr("y",this.yScaleSk(this.probpos.txty))
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt')[pcol])
+                .text(ptxt);
+        }
+    }
+}
 GWCatalogue.prototype.switchUnits = function(){
     // switch between label units
     if (this.unitSwitch){
@@ -1512,10 +1676,14 @@ GWCatalogue.prototype.obj2hint = function(objType){
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
     if (this.redraw){
-        // resize sketch
-        this.flyInMasses(d,"M1","snap");
-        this.flyInMasses(d,"M2","snap");
-        this.flyInMasses(d,"Mfinal","snap");
+        if (d.type=='Candidate'){
+            this.flyInProbBars(d,"snap");
+        }else{
+            // resize sketch
+            this.flyInMasses(d,"M1","snap");
+            this.flyInMasses(d,"M2","snap");
+            this.flyInMasses(d,"Mfinal","snap");
+        }
         // update title
         this.sketchTitle.html(
             this.tl("%text.plotgw.information.heading% "+this.sketchName));
@@ -1524,6 +1692,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.redrawLabels();
     }else if ((this.sketchName==d["name"])){
         // clicked on currently selected datapoint
+        this.flyOutProbBars();
         this.flyOutMasses("M1");
         this.flyOutMasses("M2");
         this.flyOutMasses("Mfinal");
@@ -1539,18 +1708,30 @@ GWCatalogue.prototype.updateSketch = function(d){
     }else{
         // clicked on un-selelected datapoint
         if (d.type=='Candidate'){
+            // seleted candidate
             this.hideBHSketch();
-            if (this.d.type=='Candidate'){
+            if (!(this.d)){
+                // no current selection
+                this.showProbSketch();
+                this.flyInProbBars(d,"smooth");
+                // this.flyOutMasses("M1");
+                // this.flyOutMasses("M2");
+                // this.flyOutMasses("Mfinal");
+            }else if (this.d.type=='Candidate'){
+                // switching from candidate to candidate
                 if(this.debug){console.log('switching from Candidate to Candidate');}
-                this.d = d;
+                this.flyInProbBars(d,"smooth");
             }else{
+                // switching from detection to candidate
                 if(this.debug){console.log('switching from Detection to Candidate');}
-                // clicked on currently selected datapoint
                 this.flyOutMasses("M1");
                 this.flyOutMasses("M2");
                 this.flyOutMasses("Mfinal");
-                this.d = d;
+                this.showProbSketch(delay=true);
+                this.flyInProbBars(d,"smooth",delay=true);
+
             }
+            this.d = d;
             // update title
             this.sketchName = d["name"];
             this.sketchTitle.html("Information: "+this.sketchName+' (Candidate)');
@@ -1558,20 +1739,28 @@ GWCatalogue.prototype.updateSketch = function(d){
             //update labels
             this.redrawLabels();
         }else{
-            this.showBHSketch();
-            if ((this.sketchName=="None")||(this.sketchName=="")) {
+            // selected detection
+            if (!(this.d)) {
                 // nothing selected, so fly in
+                this.showBHSketch();
                 this.flyInMasses(d,"M1","fly");
                 this.flyInMasses(d,"M2","fly");
                 this.flyInMasses(d,"Mfinal","fly");
-                this.d = d;
+            }else if (this.d.type=='Candidate'){
+                // switching from candidate to detection
+                this.hideProbSketch()
+                this.flyOutProbBars();
+                this.showBHSketch(delay=true);
+                this.flyInMasses(d,"M1","fly",delay=true);
+                this.flyInMasses(d,"M2","fly",delay=true);
+                this.flyInMasses(d,"Mfinal","fly",delay=true);
             }else{
                 // different data selected, so resize
                 this.flyInMasses(d,"M1","smooth");
                 this.flyInMasses(d,"M2","smooth");
                 this.flyInMasses(d,"Mfinal","smooth");
-                this.d = d;
             }
+            this.d = d;
             // update title
             this.sketchName = d["name"];
             this.sketchTitle.html("Information: "+this.sketchName);
@@ -1582,16 +1771,55 @@ GWCatalogue.prototype.updateSketch = function(d){
     }
 }
 GWCatalogue.prototype.hideBHSketch = function(){
-    d3.selectAll('#sketchcontainer > .massicon')
+    d3.selectAll('.mass-sketch')
         .transition()
         .duration(750)
         .style('opacity',0)
 }
-GWCatalogue.prototype.showBHSketch = function(){
-    d3.selectAll('#sketchcontainer > .massicon')
+GWCatalogue.prototype.showBHSketch = function(delay=false){
+    dt=(delay) ? this.flySp/2 : 0;
+    d3.selectAll('.mass-sketch')
         .transition()
+        .delay(dt)
         .duration(750)
         .style('opacity',1)
+}
+GWCatalogue.prototype.hideProbSketch = function(){
+    this.svgSketch.select('#prob-sketch-x')
+        .transition().duration(this.flySp)
+        .attr("y1",this.yScaleSk(1.7))
+        .attr("y2",this.yScaleSk(1.7))
+    this.svgSketch.select('#prob-sketch-y')
+        .transition().duration(this.flySp)
+        .attr("x1",this.xScaleSk(-0.7))
+        .attr("x2",this.xScaleSk(-0.7))
+    this.svgSketch.select('#prob-sketch-x-label')
+        .transition().duration(this.flySp)
+        .attr("y",this.yScaleSk(1.7))
+    this.svgSketch.select('#prob-sketch-y-label')
+        .transition().duration(this.flySp)
+        .attr("y",this.yScaleSk(-0.7))
+}
+GWCatalogue.prototype.showProbSketch = function(delay=false){
+    dt=(delay) ? this.flySp/2 : 0;
+    ylabx=this.xScaleSk(this.probpos.left-0.05);
+    ylaby=this.yScaleSk(this.probpos.top+this.probpos.height/2);
+    xlabx=this.xScaleSk(this.probpos.left+this.probpos.width/2);
+    xlaby=this.yScaleSk(this.probpos.bottom+0.05);
+    this.svgSketch.select('#prob-sketch-x')
+        .transition().duration(this.flySp)
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.bottom))
+    this.svgSketch.select('#prob-sketch-y')
+        .transition().duration(this.flySp)
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.left))
+    this.svgSketch.select('#prob-sketch-x-label')
+        .transition().delay(dt).duration(this.flySp)
+        .attr("y",xlaby)
+    this.svgSketch.select('#prob-sketch-y-label')
+        .transition().delay(dt).duration(this.flySp)
+        .attr("y",0)
 }
 // ****************************************************************************
 // ****************************************************************************
@@ -1614,7 +1842,9 @@ GWCatalogue.prototype.setStyles = function(){
             'dotline':["#000","#555","#555"],
             'axis':"rgb(100,100,100)",
             'highlight':'#f00',
-            'tick':'#ccc'
+            'tick':'#ccc',
+            'probbar':'#333',
+            'probtxt':['#fff','#000']
         },
         'dark':{'class':'col-black','default':false,
             'label':'%text.plotgw.colour.dark%',
@@ -1627,7 +1857,9 @@ GWCatalogue.prototype.setStyles = function(){
             'dotline':["#fff","#555","#555"],
             'axis':"rgb(200,200,200)",
             'highlight':'#f00',
-            'tick':'#555'
+            'tick':'#555',
+            'probbar':'#ccc',
+            'probtxt':['#000','#fff']
         }
     }
     if (!this.colScheme){this.colScheme='light'}
