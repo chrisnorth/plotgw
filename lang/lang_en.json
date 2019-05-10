@@ -106,6 +106,7 @@
  "text.plotgw.filter.observingrun.O3":"O3",
  "text.plotgw.filter.dettype.detections":"Confirmed",
  "text.plotgw.filter.dettype.candidates":"Candidates",
+ "text.plotgw.filter.note":"<b>Warning</b>: Candidate masses error bars are indicated based purely on event classification. Location of mass markers on plot is pseudo-random and not based on any scientific estimate.",
  "tooltip.plotgw.gwosc": "Gravitational Wave Open Science Center",
  "tooltip.plotgw.paper": "Scientific Publication",
  "tooltip.plotgw.switchunits": "Switch units",

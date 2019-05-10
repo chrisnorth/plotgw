@@ -480,9 +480,14 @@ button.down{
     width:100%;
     margin-bottom:20px;
 }
-.filt-cont-label,.filt-cont{
+.filt-cont-label,.filt-cont,{
     margin-left:4%;
     width:100%;
+}
+.filter-note{
+    margin-left:4%;
+    width:100%;
+    margin-top:10px;
 }
 .filt-cont-label{
     margin-bottom: 10px;

@@ -252,8 +252,9 @@ GWCatalogue.prototype.init = function(){
     		"type":"checkbox",
     		"options":[
     			{"id": "filt-det", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
-    			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
-    		]
+    			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": false, "value": "Candidate" }
+    		],
+            "note":"%text.plotgw.filter.note%"
 	    }
     }
     this.filterr=true;
@@ -580,7 +581,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 return d.obsrun.best+'<br/>('+d.net.best+')' ;
             }
         },
-        detType:{avail:false,type:'src'},
+        detType:{avail:false,type:'src',icon:"img/tag.svg"},
         // netobs:{avail:false,type:'derived',icon:"img/obsrun.svg",
         //     namefn:function(){return(gw.columns.obsrun.name)}
         // },
@@ -1007,6 +1008,8 @@ GWCatalogue.prototype.setScales = function(){
         if (!d[gw.xvar]){return 0}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
             return gw.xMapErrP(d) - (gw.errh*gw.graphHeight)
+        }else if ((d[gw.xvar].esttype)&&(d[gw.xvar].esttype[1]=='soft')){
+            return gw.xMapErrP(d) - (gw.errw*gw.graphWidth)
         }else{
             return gw.xScale(gw.xErrP(d))
         }
@@ -1028,6 +1031,8 @@ GWCatalogue.prototype.setScales = function(){
         if (!d[gw.xvar]){return 0}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
             return gw.xMapErrM(d) + (gw.errh*gw.graphHeight)
+        }else if ((d[gw.xvar].esttype)&&(d[gw.xvar].esttype[0]=='soft')){
+            return gw.xMapErrM(d) + (gw.errw*gw.graphWidth)
         }else{
             return gw.xScale(gw.xErrM(d))
         }
@@ -1058,6 +1063,8 @@ GWCatalogue.prototype.setScales = function(){
         if (!d[gw.yvar]){return 0}
         else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
             return gw.yMapErrP(d) + (gw.errw*gw.graphWidth)
+        }else if ((d[gw.yvar].esttype)&&(d[gw.yvar].esttype[1]=='soft')){
+            return gw.yMapErrP(d) + (gw.errw*gw.graphWidth)
         }else{
             return gw.yScale(gw.yErrP(d))
         }
@@ -1078,6 +1085,8 @@ GWCatalogue.prototype.setScales = function(){
     this.yMapErrMouter = function(d) {
         if (!d[gw.yvar]){return 0}
         else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
+            return gw.yMapErrM(d) - (gw.errw*gw.graphWidth)
+        }else if ((d[gw.yvar].esttype)&&(d[gw.yvar].esttype[0]=='soft')){
             return gw.yMapErrM(d) - (gw.errw*gw.graphWidth)
         }else{
             return gw.yScale(gw.yErrM(d))
@@ -1971,12 +1980,16 @@ GWCatalogue.prototype.formatData = function(d,cols){
         mlim2={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[0.1,3]};
         m1=[Infinity,-Infinity];
         m2=[Infinity,-Infinity];
+        m1esttype=['hard','hard'];
+        m2esttype=['hard','hard'];
         for (c in d.objType.prob){
             if (d.objType.prob[c]>0.01){
                 m1[0]= (mlim1[c]) ? Math.min(m1[0],mlim1[c][0]) : m1[0];
                 m1[1]= (mlim1[c]) ? Math.max(m1[1],mlim1[c][1]) : m1[1];
+                if (m1[1]>50){m1esttype[1]='soft'}
                 m2[0]= (mlim2[c]) ? Math.min(m2[0],mlim2[c][0]) : m2[0];
                 m2[1]= (mlim2[c]) ? Math.max(m2[1],mlim2[c][1]) : m2[1];
+                if (m2[1]>50){m2esttype[1]='soft'}
             }
         }
         rand=(d.GPS.best % 3600 )/3600
@@ -1984,8 +1997,8 @@ GWCatalogue.prototype.formatData = function(d,cols){
         m1err=[m1[0]-m1b,m1[1]-m1b];
         m2b=(rand-0.5)*(([m2[1]-m2[0]])/2) + 0.5*(m2[0]+m2[1]);
         m2err=[m2[0]-m2b,m2[1]-m2b];
-        d.M1={best:m1b,est:m1err};
-        d.M2={best:m2b,est:m2err};
+        d.M1={best:m1b,est:m1err,esttype:m1esttype};
+        d.M2={best:m2b,est:m2err,esttype:m2esttype};
         // console.log(d.name,d.M1,d.M2);
     }
     for (col in gw.columns){
@@ -2338,6 +2351,8 @@ GWCatalogue.prototype.setLang = function(){
     for (f in this.filters){
         d3.select('#filt_'+f+'_label > .filter-text')
             .html(this.tl(this.filters[f].name));
+        d3.select('#filt_'+f+'_label > .filter-note')
+            .html(this.tl(this.filters[f].note));
     }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
         Cand:this.tl('%text.plotgw.legend.candidates%')}
@@ -3888,6 +3903,13 @@ GWCatalogue.prototype.addFilter = function(replot){
             }
         }
         filtdiv.appendChild(filttxtdiv);
+        if (a.note){
+            filtnote = document.createElement('div');
+            filtnote.className = "filter-note colourise";
+            filtnote.innerHTML = this.tl(a.note);
+            filtdiv.appendChild(filtnote)
+        }
+
         document.getElementById('filter-block').appendChild(filtdiv);
         if (a.type=="slider"){
             filtdata=getRange(filt)
