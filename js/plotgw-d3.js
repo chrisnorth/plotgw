@@ -226,13 +226,13 @@ GWCatalogue.prototype.init = function(){
     }
 
     this.filters = {
-        "M1":{"name":'%data.M1.name%',"step":10,"type":'slider',
+        "M1":{"name":'%data.M1.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M1.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M1.unit%", "default": 70, "value": 70 }
+            "max": { "label": "", "unit": "%data.M1.unit%", "default": 80, "value": 80 }
         },
         "M2":{"name":'%data.M2.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M2.unit%", "default": 50, "value": 50 }
+            "max": { "label": "", "unit": "%data.M2.unit%", "default": 80, "value": 80 }
         },
         "Mfinal":{"name":'%data.Mfinal.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.Mfinal.unit%", "default": 0, "value": 0 },
@@ -245,6 +245,14 @@ GWCatalogue.prototype.init = function(){
     			{"id": "filt-o1", "label":"%text.plotgw.filter.observingrun.O1%", "checked": true, "value": "O1" },
     			{"id": "filt-o2", "label":"%text.plotgw.filter.observingrun.O2%", "checked": true, "value": "O2" },
     			{"id": "filt-o3", "label":"%text.plotgw.filter.observingrun.O3%", "checked": true, "value": "O3" }
+    		]
+	    },
+        "detType": {
+            "name":'%data.dettype.name%',
+    		"type":"checkbox",
+    		"options":[
+    			{"id": "filt-det", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
+    			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
     		]
 	    }
     }
@@ -521,7 +529,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         M2:{icon:"img/secmass.svg",avail:true,type:'src'},
         Mfinal:{icon:"img/finalmass.svg",avail:true,type:'src'},
         chi:{avail:true,icon:"img/initspin.svg",
-            border:0.01,type:'src'},
+            border:0.01,type:'src',forcelog:'off'},
         af:{avail:true,icon:"img/finalspin.svg",
             border:0.01,type:'src'},
         DL:{avail:true, icon:"img/ruler.svg",
@@ -539,9 +547,13 @@ GWCatalogue.prototype.setColumns = function(datadict){
             icon:"img/time.svg",
             type:"derived",
             scale:"time",
-            border:2.6e9
+            border:2.6e9,
+            forcelog:'off',
+            forcezero:'off'
         },
-        FAR:{avail:false,type:'src',icon:"img/dice.svg",
+        FAR:{avail:true,type:'src',icon:"img/dice.svg",
+            forcelog:'on',
+            forcezero:'off',
             strfn:function(d){
                 if (1/d.FAR.best<1000){
                     strOut="%data.FAR.unit.1per%<br/>"+
@@ -568,6 +580,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 return d.obsrun.best+'<br/>('+d.net.best+')' ;
             }
         },
+        detType:{avail:false,type:'src'},
         // netobs:{avail:false,type:'derived',icon:"img/obsrun.svg",
         //     namefn:function(){return(gw.columns.obsrun.name)}
         // },
@@ -770,6 +783,7 @@ GWCatalogue.prototype.getLabelUnit = function(col,plaintext){
     }
 }
 GWCatalogue.prototype.getIcon = function(col){
+    if (!this.columns[col]){return(null);}
     if (this.columns[col].icon){
         return(this.columns[col].icon);
     }else{
@@ -1474,12 +1488,12 @@ GWCatalogue.prototype.addProbBars = function(redraw){
 
     this.scaleProbTop = function(pval,fact=1){
         t=fact * this.sketchHeight * (this.probpos.top + (1-pval) * this.probpos.height);
-        console.log('top(',this.probpos.top,fact , this.sketchHeight , (pval) , this.probpos.height,')=',t)
+        // console.log('top(',this.probpos.top,fact , this.sketchHeight , (pval) , this.probpos.height,')=',t)
         return(t)
     }
     this.scaleProbHeight = function(pval,fact=1){
         h=fact * this.sketchHeight * (pval) * this.probpos.height;
-        console.log('top(',fact , this.sketchHeight , (pval) , this.probpos.height,')=',h)
+        // console.log('top(',fact , this.sketchHeight , (pval) , this.probpos.height,')=',h)
         return(h)
     }
     this.svgSketch.append("line")
@@ -1549,11 +1563,24 @@ GWCatalogue.prototype.addProbBars = function(redraw){
             .attr("x",0)
             .attr("fill",this.getCol('probtxt')[0])
             .attr("y",0)
+            .attr("dy",(0.65*gw.sksc)+"em")
             .attr("text-anchor","left")
             .attr("dominant-baseline","central")
             .attr("transform","rotate(-90)")
             .attr("font-size",(1.3*gw.sksc)+"em")
-            .text(prob);
+            .text(this.obj2hint(prob));
+        grp.append("text")
+            .attr("class","sketch ptxt")
+            .attr("id","ptxt2-"+prob)
+            .attr("x",0)
+            .attr("fill",this.getCol('probtxt')[0])
+            .attr("y",0)
+            .attr("dy",(-0.65*gw.sksc)+"em")
+            .attr("text-anchor","left")
+            .attr("dominant-baseline","central")
+            .attr("transform","rotate(-90)")
+            .attr("font-size",(1.3*gw.sksc)+"em")
+            .text(this.obj2hint(prob,true));
     }
 
 }
@@ -1563,19 +1590,24 @@ GWCatalogue.prototype.flyOutProbBars = function(){
         this.svgSketch.select('#prob-bar-'+prob)
             .transition().duration(this.flySp)
             .attr("y",this.scaleProbTop(0))
+            .attr("fill",this.getCol("probbar"))
             .attr("height",this.scaleProbHeight(0));
         this.svgSketch.select('#ptxt-'+prob)
             .transition().duration(this.flySp)
-            .attr("x",this.yScaleSk(-0.7))
-        }
+            .attr("x",this.yScaleSk(-0.7));
+        this.svgSketch.select('#ptxt2-'+prob)
+            .transition().duration(this.flySp)
+            .attr("x",this.yScaleSk(-0.7));
+    }
 }
 GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
 
     for (p in this.probs){
         prob=this.probs[p];
         pval=d.objType.prob[prob];
-        if ((prob=='Terrestrial')&(pval<0.01)){ptxt=prob+' (<1%)'}
-        else{ptxt=prob+' ('+(100*pval).toFixed(0)+'%)'}
+        if ((pval>0)&(pval<0.01)){ptxt=this.obj2hint(prob)+' (<1%)'}
+        else{ptxt=this.obj2hint(prob)+' ('+(100*pval).toFixed(0)+'%)';}
+        ptxt2=this.obj2hint(prob,true);
         dt=(delay) ? this.flySp/2 : 0;
         if (pval<=0.5){
             ptxty=this.yScaleSk((pval*this.probpos.height));
@@ -1585,22 +1617,31 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
             this.svgSketch.select('#prob-bar-'+prob)
                 .transition().delay(dt).duration(this.flySp)
                 .attr("y",this.scaleProbTop(pval))
+                .attr("fill",this.getCol("probbars")[prob])
                 .attr("height",this.scaleProbHeight(pval));
             this.svgSketch.select('#ptxt-'+prob)
                 .transition().delay(dt).duration(this.flySp)
-                // .attr("y",this.yScaleSk(this.probpos.txty))
                 .attr("x",ptxty)
                 .attr("fill",this.getCol('probtxt')[pcol])
                 .text(ptxt);
+            this.svgSketch.select('#ptxt2-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt')[pcol])
+                .text(ptxt2);
         }else if(resize=="snap"){
             this.svgSketch.select('#prob-bar-'+prob)
                 .attr("y",this.scaleProbTop(pval))
+                .attr("fill",this.getCol("probbars")[prob])
                 .attr("height",this.scaleProbHeight(pval));
             this.svgSketch.select('#ptxt-'+prob)
-                // .attr("y",this.yScaleSk(this.probpos.txty))
                 .attr("x",ptxty)
                 .attr("fill",this.getCol('probtxt')[pcol])
                 .text(ptxt);
+            this.svgSketch.select('#ptxt2-'+prob)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt')[pcol])
+                .text(ptxt2);
         }
     }
 }
@@ -1667,27 +1708,36 @@ GWCatalogue.prototype.redrawLabels = function(){
         }
     }
 }
-GWCatalogue.prototype.obj2hint = function(objType){
-    if (objType=='BBH'){ return this.tl('%text.gen.bbh%')}
-    else if (objType=='BNS'){ return this.tl('%text.gen.bns%')}
-    else if (objType=='BHNS'){ return this.tl('%text.gen.bhns%')}
+GWCatalogue.prototype.obj2hint = function(objType,desc=false){
+    if (objType=='BBH'){
+        return (desc) ? this.tl('%text.gen.bbh.def%',true) : this.tl('%text.gen.bbh%')}
+    else if (objType=='BNS'){
+        return (desc) ? this.tl('%text.gen.bns.def%',true) : this.tl('%text.gen.bns%')}
+    else if (objType=='NSBH'){
+        return (desc) ? this.tl('%text.gen.nsbh.def%',true) : this.tl('%text.gen.nsbh%')}
+    else if (objType=='MassGap'){
+        return (desc) ? this.tl('%text.gen.massgap.def%',true) : this.tl('%text.gen.massgap%')}
+    else if (objType=='Terrestrial'){
+        return (desc) ? this.tl('%text.gen.terrestrial.def%',true) : this.tl('%text.gen.terrestrial%')}
     else {return ""}
 }
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
     if (this.redraw){
-        if (d.type=='Candidate'){
+        // redrawing what's already there
+        if (d.detType.best=='Candidate'){
             this.flyInProbBars(d,"snap");
+            this.sketchTitleHint.html("");
         }else{
             // resize sketch
             this.flyInMasses(d,"M1","snap");
             this.flyInMasses(d,"M2","snap");
             this.flyInMasses(d,"Mfinal","snap");
+            this.sketchTitleHint.html(this.obj2hint(d.objType.best));
         }
         // update title
         this.sketchTitle.html(
             this.tl("%text.plotgw.information.heading% "+this.sketchName));
-        this.sketchTitleHint.html(this.obj2hint(d.objType.best));
         // update labels
         this.redrawLabels();
     }else if ((this.sketchName==d["name"])){
@@ -1707,7 +1757,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         }
     }else{
         // clicked on un-selelected datapoint
-        if (d.type=='Candidate'){
+        if (d.detType.best=='Candidate'){
             // seleted candidate
             this.hideBHSketch();
             if (!(this.d)){
@@ -1717,7 +1767,7 @@ GWCatalogue.prototype.updateSketch = function(d){
                 // this.flyOutMasses("M1");
                 // this.flyOutMasses("M2");
                 // this.flyOutMasses("Mfinal");
-            }else if (this.d.type=='Candidate'){
+            }else if (this.d.detType.best=='Candidate'){
                 // switching from candidate to candidate
                 if(this.debug){console.log('switching from Candidate to Candidate');}
                 this.flyInProbBars(d,"smooth");
@@ -1735,18 +1785,20 @@ GWCatalogue.prototype.updateSketch = function(d){
             // update title
             this.sketchName = d["name"];
             this.sketchTitle.html("Information: "+this.sketchName+' (Candidate)');
-            this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+            this.sketchTitleHint.html("");
             //update labels
             this.redrawLabels();
         }else{
             // selected detection
             if (!(this.d)) {
                 // nothing selected, so fly in
+                this.hideProbSketch()
+                this.flyOutProbBars();
                 this.showBHSketch();
                 this.flyInMasses(d,"M1","fly");
                 this.flyInMasses(d,"M2","fly");
                 this.flyInMasses(d,"Mfinal","fly");
-            }else if (this.d.type=='Candidate'){
+            }else if (this.d.detType.best=='Candidate'){
                 // switching from candidate to detection
                 this.hideProbSketch()
                 this.flyOutProbBars();
@@ -1755,7 +1807,7 @@ GWCatalogue.prototype.updateSketch = function(d){
                 this.flyInMasses(d,"M2","fly",delay=true);
                 this.flyInMasses(d,"Mfinal","fly",delay=true);
             }else{
-                // different data selected, so resize
+                // switching from detection to detection
                 this.flyInMasses(d,"M1","smooth");
                 this.flyInMasses(d,"M2","smooth");
                 this.flyInMasses(d,"Mfinal","smooth");
@@ -1844,6 +1896,7 @@ GWCatalogue.prototype.setStyles = function(){
             'highlight':'#f00',
             'tick':'#ccc',
             'probbar':'#333',
+            'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#333333'},
             'probtxt':['#fff','#000']
         },
         'dark':{'class':'col-black','default':false,
@@ -1859,6 +1912,7 @@ GWCatalogue.prototype.setStyles = function(){
             'highlight':'#f00',
             'tick':'#555',
             'probbar':'#ccc',
+            'probbars':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',Terrestrial:'#cccccc'},
             'probtxt':['#000','#fff']
         }
     }
@@ -1875,14 +1929,15 @@ GWCatalogue.prototype.setStyles = function(){
             return this.colourList[this.colScheme].class
         }else{return ''}
     }
-    this.cValue = function(d) {return d.type;};
+    this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
     this.styleDomains = ['GW','Candidate'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,0]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3,5]).domain(this.styleDomains);
     this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
-    this.getOpacity = function(d) {return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.type) : 0)}
+    this.getOpacity = function(d) {
+        return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m-%d");
 
     this.swErr = 2;
@@ -1910,6 +1965,29 @@ GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     if (this.debug){console.log('formatData',d.name);}
     var gw=this;
+    if ((d.detType.best=='Candidate')&&(!(d.M1))&&(!(d.M2))){
+        // add estimated masses
+        mlim1={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[5,80]};
+        mlim2={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[0.1,3]};
+        m1=[Infinity,-Infinity];
+        m2=[Infinity,-Infinity];
+        for (c in d.objType.prob){
+            if (d.objType.prob[c]>0.01){
+                m1[0]= (mlim1[c]) ? Math.min(m1[0],mlim1[c][0]) : m1[0];
+                m1[1]= (mlim1[c]) ? Math.max(m1[1],mlim1[c][1]) : m1[1];
+                m2[0]= (mlim2[c]) ? Math.min(m2[0],mlim2[c][0]) : m2[0];
+                m2[1]= (mlim2[c]) ? Math.max(m2[1],mlim2[c][1]) : m2[1];
+            }
+        }
+        rand=(d.GPS.best % 3600 )/3600
+        m1b=(rand-0.5)*(([m1[1]-m1[0]])/2) + 0.5*(m1[0]+m1[1]);
+        m1err=[m1[0]-m1b,m1[1]-m1b];
+        m2b=(rand-0.5)*(([m2[1]-m2[0]])/2) + 0.5*(m2[0]+m2[1]);
+        m2err=[m2[0]-m2b,m2[1]-m2b];
+        d.M1={best:m1b,est:m1err};
+        d.M2={best:m2b,est:m2err};
+        // console.log(d.name,d.M1,d.M2);
+    }
     for (col in gw.columns){
         // console.log(col,gw.columns[col].type);
         if (gw.columns[col].type=="derived"){
@@ -1952,6 +2030,11 @@ GWCatalogue.prototype.formatData = function(d,cols){
                     [d[col].best+d[col].err[0],
                     d[col].best+d[col].err[1]];
                 d[col].errtype='normal';
+            }else if ((d[col].est)&&(d[col].est.length==2)){
+                d[col].errv =
+                    [d[col].best+d[col].est[0],
+                    d[col].best+d[col].est[1]];
+                d[col].errtype='est';
             }else if ((d[col].lim)&&(d[col].lim.length==2)){
                 d[col].errv =
                     [Math.max.apply(Math,d[col].lim),
@@ -2303,31 +2386,52 @@ GWCatalogue.prototype.setColour = function(newScheme){
     this.replot();
     return;
 }
-GWCatalogue.prototype.getMinMax = function(p){
+GWCatalogue.prototype.getMinMax = function(p,logax,zeroax){
     var gw = this;
-    var dminmax=[Infinity,-Infinity]
+    var dminmax=[Infinity,-Infinity];
     border=(gw.columns[p].border) ? gw.columns[p].border : 2;
     scale = (gw.columns[p].scale) ? gw.columns[p].scale : "";
+    dolog=logax;
+    dozero=zeroax;
+    if (gw.columns[p].forcelog){
+        dolog= (gw.columns[p].forcelog=='on') ? true : false;
+    }
+    if (gw.columns[p].forcezero){
+        dozero= (gw.columns[p].forcezero=='on') ? true : false;
+    }
+    // nolog = (gw.columns[p].forcelog) ? gw.columns[p].forcelog : false;
     for (i=0;i<gw.cat.data.length;i++){
         if (gw.cat.data[i].active!=false){
-            pmin=gw.cat.getMinVal(gw.cat.data[i].name,p);
+            if ((gw.cat.data[i][p])&&(gw.cat.data[i][p].errv)){
+                pmin=Math.min(gw.cat.data[i][p].errv[0],gw.cat.data[i][p].errv[1])
+                pmax=Math.max(gw.cat.data[i][p].errv[0],gw.cat.data[i][p].errv[1])
+            }else{
+                pmin=gw.cat.getMinVal(gw.cat.data[i].name,p);
+                pmax=gw.cat.getMaxVal(gw.cat.data[i].name,p)
+            }
             if (pmin){dminmax[0] = Math.min(pmin,dminmax[0])}
-            pmax=gw.cat.getMaxVal(gw.cat.data[i].name,p)
             if (pmax){dminmax[1] = Math.max(pmax,dminmax[1])}
         }
     }
-    if (gw.debug){console.log('axiszero',gw.axiszero,dminmax[0])};
-    if ((gw.axiszero)&&(scale!="time")){
-        // if axiszero set, set axis min to zero unless already <0
-        dminmax[0] = (dminmax[0]<0) ? dminmax[0]-border : 0;
+    if (dolog){
+        console.log(p,'log axis',dminmax)
+        dminmax[0] = Math.pow(10,Math.floor(Math.log10(dminmax[0])))
+        dminmax[1] = Math.pow(10,Math.ceil(Math.log10(dminmax[1])))
     }else{
-        // set to min-border
-        dminmax[0] = (dminmax[0] < 0) ? dminmax[0]-border : (dminmax[0] < border) ? 0 : dminmax[0]-border;
+        console.log(p,'linear axis')
+        if (gw.debug){console.log('axiszero',dozero,dminmax[0])};
+        if ((dozero)&&(scale!="time")){
+            // if axiszero set, set axis min to zero unless already <0
+            dminmax[0] = (dminmax[0]<0) ? dminmax[0]-border : 0;
+        }else{
+            // set to min-border
+            dminmax[0] = (dminmax[0] < 0) ? dminmax[0]-border : (dminmax[0] < border) ? 0 : dminmax[0]-border;
+        }
+        // add border on to max
+        dminmax[1] = dminmax[1]+border;
+        // if min<0, add on border
+        // dminmax[0] = dminmax[0]<0 ? dminmax[0]-border : (gw.axiszero&&dminmax[0]<border ? 0 : dminmax[0]-border);
     }
-    // add border on to max
-    dminmax[1] = dminmax[1]+border;
-    // if min<0, add on border
-    // dminmax[0] = dminmax[0]<0 ? dminmax[0]-border : (gw.axiszero&&dminmax[0]<border ? 0 : dminmax[0]-border);
 
     return dminmax;
 }
@@ -2338,7 +2442,7 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
     gw.xvar = xvarNew;
     gw.yvar = yvarNew;
 
-    [xMin,xMax]=gw.getMinMax(gw.xvar);
+    [xMin,xMax]=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
     // console.log('x min/max',gw.xvar,xMin,xMax);
     if ((gw.columns[gw.xvar].scale)&&(gw.columns[gw.xvar].scale='time')){
         this.xScale = d3.time.scale().range([0,gw.graphWidth])
@@ -2351,19 +2455,31 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
                 .innerTickSize(-this.graphHeight)
                 .tickFormat(gw.tickTimeFormat);
     }else{
-        this.xScale = d3.scale.linear().range([0, this.graphWidth])
-        gw.xScale.domain([xMin, xMax]);
+        dologx=this.xlog;
+        if (gw.columns[gw.xvar].forcelog){
+            dologx= (gw.columns[gw.xvar].forcelog=='on') ? true : false;
+        }
+        if (dologx){
+            this.xScale = d3.scale.log().base(10).range([0, this.graphWidth]);
+            // [xMin,xMax]=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
+            console.log(xMin,xMax);
+            this.xScale.domain([xMin, xMax]);
+            if(document.getElementById('x-axis-g')){document.getElementById('x-axis-g').classList.add('log');}
+        }else{
+            this.xScale = d3.scale.linear().range([0, this.graphWidth])
+            this.xScale.domain([xMin, xMax]);
+            if(document.getElementById('x-axis-g')){document.getElementById('x-axis-g').classList.remove('log');}
+        }
         // x axis
         this.xAxis = d3.svg.axis()
                 .scale(this.xScale)
                 .orient("bottom")
                 .innerTickSize(-this.graphHeight);
-
     }
 
     if(this.debug){console.log('x',gw.axiszero,xMin,xMax,gw.xScale.range(),gw.xScale.domain())}
 
-    [yMin,yMax]=gw.getMinMax(gw.yvar);
+    [yMin,yMax]=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
     // console.log('y min/max',gw.yvar,yMin,yMax);
     if ((gw.columns[gw.yvar].scale)&&(gw.columns[gw.yvar].scale='time')){
         this.yScale = d3.time.scale().range([gw.graphHeight,0])
@@ -2378,8 +2494,21 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
                 .tickFormat(gw.tickTimeFormat);
 
     }else{
-        this.yScale = d3.scale.linear().range([gw.graphHeight,0])
-        gw.yScale.domain([yMin, yMax]);
+        dology=this.ylog;
+        if (gw.columns[gw.yvar].forcelog){
+            dology= (gw.columns[gw.yvar].forcelog=='on') ? true : false;
+        }
+        if (dology){
+            // this.axiszero=false;
+            this.yScale = d3.scale.log().base(10).range([gw.graphHeight,0])
+            // [yMin,yMax]=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
+            this.yScale.domain([yMin, yMax]);
+            if(document.getElementById('y-axis-g')){document.getElementById('y-axis-g').classList.add('log');}
+        }else{
+            this.yScale = d3.scale.linear().range([gw.graphHeight,0])
+            this.yScale.domain([yMin, yMax]);
+            if(document.getElementById('y-axis-g')){document.getElementById('y-axis-g').classList.remove('log');}
+        }
         // y axis
         this.yAxis = d3.svg.axis()
                 .scale(this.yScale)
@@ -2400,15 +2529,25 @@ GWCatalogue.prototype.drawGraph = function(){
     data = gw.cat.data;
     if(this.debug){console.log('plotting ',gw.xvar,' vs ',gw.yvar);}
 
+    // x-axis
+    gw.svg.append("g")
+        .attr("class", "x-axis axis colourise "+gw.getColClass())
+        .attr("id","x-axis-g")
+        .attr("transform", "translate("+gw.margin.left+"," +
+            (gw.margin.top + gw.graphHeight) + ")");
+    // y-axis
+    gw.svg.append("g")
+        .attr("class", "y-axis axis colourise "+gw.getColClass())
+        .attr("id","y-axis-g")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")");
+
     gw.setXYscales(gw.xvar,gw.yvar);
 
     if (gw.showerrors == null){gw.showerrors=true};
 
-    // x-axis
-    gw.svg.append("g")
-        .attr("class", "x-axis axis colourise "+gw.getColClass())
-        .attr("transform", "translate("+gw.margin.left+"," +
-            (gw.margin.top + gw.graphHeight) + ")");
+
+    // x-axis components
     gw.svg.append("line")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
@@ -2418,6 +2557,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("stroke",gw.getCol('axis')).attr("stroke-width",5)
         .attr("opacity",gw.xAxLineOp);
     gw.svg.select(".x-axis.axis").call(gw.xAxis)
+    // console.log('xticks',gw.svg.select(".x-axis.axis"),gw.svg.select(".x-axis.axis").selectAll('.tick > text'));
     gw.svg.select(".x-axis.axis").append("text")
         .attr("class", "x-axis axis-label")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -2443,11 +2583,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("font-size",(0.8*(1+gw.scl))+"em")
         .style("fill",gw.getCol('text'));
 
-    // y-axis
-    gw.svg.append("g")
-        .attr("class", "y-axis axis colourise "+gw.getColClass())
-        .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")");
+    // y-axis components
     gw.svg.append("line")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
@@ -2641,8 +2777,8 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("opacity",function(d){return gw.getOpacity(d)})
     //   .style("fill", function(d) { return color(cValue(d));})
       .style("fill", function(d){return gw.color(gw.cValue(d));})
-      .style("stroke",function(d){return gw.linestyles(d.type);})
-      .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
+      .style("stroke",function(d){return gw.linestyles(d.detType.best);})
+      .style("stroke-dasharray",function(d){return gw.linedashes(d.detType.best);})
       .style("stroke-width",Math.min(5,2./gw.sksc))
       .on("mouseover", function(d) {
             gw.tooltip.transition()
@@ -3014,7 +3150,7 @@ GWCatalogue.prototype.initHighlight = function(d){
 }
 GWCatalogue.prototype.updateErrors = function(){
     // update error bars
-
+    var gw=this;
     if ((this.columns[this.xvar]["err"]==0)||(!this.showerrors)){
         // remove x-errors
         errX=this.svg.selectAll(".errorX-g")
@@ -3029,30 +3165,38 @@ GWCatalogue.prototype.updateErrors = function(){
         // add/update x-errors
         errX=this.svg.selectAll(".errorX-g")
             .data(this.cat.data)
+        // main x error bar
         errX.selectAll(".errorXline")
             .transition()
             .duration(750)
             .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
             .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",this.dotOp);
+            .attr("opacity",this.dotOp)
+            .attr("stroke-dasharray",function(d){
+                ls= ((d[gw.xvar])&&(d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='est')) ? gw.linedashes('Candidate') : gw.linedashes('GW');
+                return(ls);});
+        // +ve x error (top)
         errX.selectAll(".errorXp1")
             .transition()
             .duration(750)
             .attr("x1",this.xMapErrPouter).attr("x2",this.xMapErrP)
             .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
             .attr("opacity",this.dotOp);
+        // +ve x error (bottom)
         errX.selectAll(".errorXp2")
             .transition()
             .duration(750)
             .attr("x1",this.xMapErrP).attr("x2",this.xMapErrPouter)
             .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
             .attr("opacity",this.dotOp);
+        // -ve x error (top)
         errX.selectAll(".errorXm1")
             .transition()
             .duration(750)
             .attr("x1",this.xMapErrMouter).attr("x2",this.xMapErrM)
             .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
             .attr("opacity",this.dotOp);
+        // -ve x error (bottom)
         errX.selectAll(".errorXm2")
             .transition()
             .duration(750)
@@ -3075,30 +3219,38 @@ GWCatalogue.prototype.updateErrors = function(){
         // add/update y-errors
         errY=this.svg.selectAll(".errorY-g")
             .data(this.cat.data)
+        // main y error line
         errY.selectAll('.errorYline')
             .transition()
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.xMap)
             .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
-            .attr("opacity",this.dotOp);
+            .attr("opacity",this.dotOp)
+            .attr("stroke-dasharray",function(d){
+                ls= ((d[gw.yvar])&&(d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='est')) ? gw.linedashes('Candidate') : gw.linedashes('GW');
+                return(ls);});
+        // +ve y error (top)
         errY.selectAll(".errorYp1")
             .transition()
             .duration(750)
             .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
             .attr("y1",this.yMapErrPouter).attr("y2",this.yMapErrP)
             .attr("opacity",this.dotOp);
+        // +ve y error (bottom)
         errY.selectAll(".errorYp2")
             .transition()
             .duration(750)
             .attr("x1",this.xMap).attr("x2",this.yMapErrX1)
             .attr("y1",this.yMapErrP).attr("y2",this.yMapErrPouter)
             .attr("opacity",this.dotOp);
+        // -ve y error (top)
         errY.selectAll(".errorYm1")
             .transition()
             .duration(750)
             .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
             .attr("y1",this.yMapErrMouter).attr("y2",this.yMapErrM)
             .attr("opacity",this.dotOp);
+        // -ve y error (bottom)
         errY.selectAll(".errorYm2")
             .transition()
             .duration(750)
@@ -3142,8 +3294,8 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
     var gw=this;
     var data=gw.cat.data;
 
-    [xMin,xMax]=gw.getMinMax(gw.xvar);
-    [yMin,yMax]=gw.getMinMax(gw.yvar);
+    [xMin,xMax]=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
+    [yMin,yMax]=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
     gw.setXYscales(gw.xvar,gw.yvar);
 
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
@@ -3162,11 +3314,25 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
         .attr("cy", this.yMap)
         .style("opacity",this.dotOp);
 
+    function powerOfTen(d) {
+      return d / Math.pow(10, Math.ceil(Math.log(d) / Math.LN10 - 1e-12)) === 1;
+    }
     gw.svg.select(".x-axis.axis")
         .transition()
         .duration(750)
         .call(gw.xAxis);
-        //   .forceX([0]);
+    if (d3.select('#x-axis-g').attr('class').includes('log')){
+        d3.select('.axis.x-axis').selectAll('.tick text')
+            .text(null)
+            .filter(powerOfTen)
+                .text(10)
+                .attr("dy","1em")
+            .append("tspan")
+                .attr("dy", "-.7em")
+                .attr("font-size","0.7em")
+                .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
+    }
+    //   .forceX([0]);
     gw.svg.select(".x-axis.axis-label")
         .transition()
         .duration(750)
@@ -3183,6 +3349,17 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
         .transition()
         .duration(750)
         .call(gw.yAxis);
+    if (d3.select('#y-axis-g').attr('class').includes('log')){
+        d3.select('.axis.y-axis').selectAll('.tick text')
+            .text(null)
+            .filter(powerOfTen)
+                .text(10)
+                // .attr("dx","1em")
+            .append("tspan")
+                .attr("dy", "-.7em")
+                .attr("font-size","0.7em")
+                .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
+    }
     gw.svg.selectAll(".y-axis.axis-label")
         .transition()
         .duration(750)
@@ -3242,6 +3419,20 @@ GWCatalogue.prototype.addOptions = function(){
                 newXvar = this.id.split('buttonx-')[1]
                 document.getElementById("button-divx-"+oldXvar).classList.remove("down")
                 document.getElementById("button-divx-"+newXvar).classList.add("down")
+                if (gw.columns[newXvar]['forcelog']){
+                    document.getElementById("xlog").setAttribute('disabled',true);
+                    document.getElementById("xlog-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("xlog").removeAttribute('disabled');
+                    document.getElementById("xlog-lab").classList.remove("disabled");
+                }
+                if (gw.columns[newXvar]['forcezero']){
+                    document.getElementById("xzero").setAttribute('disabled',true);
+                    document.getElementById("xzero-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("xzero").removeAttribute('disabled')
+                    document.getElementById("xzero-lab").classList.remove("disabled");
+                }
                 this.classList.add("down");
                 gw.updateFilters();
                 gw.updateBothAxes(newXvar,gw.yvar);
@@ -3271,6 +3462,20 @@ GWCatalogue.prototype.addOptions = function(){
                 newYvar = this.id.split('buttony-')[1]
                 document.getElementById("button-divy-"+oldYvar).classList.remove("down")
                 document.getElementById("button-divy-"+newYvar).classList.add("down")
+                if (gw.columns[newYvar]['forcelog']){
+                    document.getElementById("ylog").setAttribute('disabled',true);
+                    document.getElementById("ylog-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("ylog").removeAttribute('disabled');
+                    document.getElementById("ylog-lab").classList.remove("disabled");
+                }
+                if (gw.columns[newYvar]['forcezero']){
+                    document.getElementById("yzero").setAttribute('disabled',true);
+                    document.getElementById("yzero-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("yzero").removeAttribute('disabled');
+                    document.getElementById("yzero-lab").classList.remove("disabled");
+                }
                 this.classList.add("down");
                 gw.updateFilters();
                 gw.updateBothAxes(gw.xvar,newYvar);
@@ -3303,11 +3508,43 @@ GWCatalogue.prototype.addOptions = function(){
 
     divdisp.appendChild(colList);
 
-    d3.select("#display-options").append('div')
+    // d3.select("#display-options").append('div')
+    //     // .style('display','none')
+    //     .html('<input type="checkbox" name="filterr" id="axiszero"'+(gw.axiszero ? ' checked="checked"':'')+'></input><label for="axiszero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+    //     .on("change",function(){
+    //         gw.axiszero=d3.select('#axiszero')[0][0].checked;
+    //         gw.updateBothAxes(gw.xvar,gw.yvar);
+    //     });
+    d3.select("#options-x").append('div')
         // .style('display','none')
-        .html('<input type="checkbox" name="filterr" id="axiszero"'+(gw.axiszero ? ' checked="checked"':'')+'></input><label for="axiszero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="xzero" id="xzero"'+(gw.xzero ? ' checked="checked"':'')+'></input><label id="xzero-lab" for="xzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
         .on("change",function(){
-            gw.axiszero=d3.select('#axiszero')[0][0].checked;
+            gw.xzero=d3.select('#xzero')[0][0].checked;
+            gw.updateBothAxes(gw.xvar,gw.yvar);
+        });
+    d3.select("#options-x").append('div')
+        // .style('display','none')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="xlog" id="xlog"'+(gw.xlog ? ' checked="checked"':'')+'></input><label id="xlog-lab" for="xlog">'+this.tl('%text.plotgw.log-axis%')+'</label>')
+        .on("change",function(){
+            gw.xlog=d3.select('#xlog')[0][0].checked;
+            gw.updateBothAxes(gw.xvar,gw.yvar);
+        });
+    d3.select("#options-y").append('div')
+        // .style('display','none')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="yzero" id="yzero"'+(gw.xzero ? ' checked="checked"':'')+'></input><label id="yzero-lab" for="yzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+        .on("change",function(){
+            gw.yzero=d3.select('#yzero')[0][0].checked;
+            gw.updateBothAxes(gw.xvar,gw.yvar);
+        });
+    d3.select("#options-y").append('div')
+        // .style('display','none')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="ylog" id="ylog"'+(gw.ylog ? ' checked="checked"':'')+'></input><label id="ylog-lab" for="ylog">'+this.tl('%text.plotgw.log-axis%')+'</label>')
+        .on("change",function(){
+            gw.ylog=d3.select('#ylog')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
         });
 }
@@ -3685,6 +3922,9 @@ GWCatalogue.prototype.updateFilters = function () {
     function inRange(i,key,range){
 		if(!gw.cat.data[i][key]) return true;
         if (gw.filterr){
+            // if (gw.cat.dataOrder[i][key].errv){
+            //     errv=gw.cat.dataOrder[i][key].errv
+            //     var valrange = [Math.min(errv[0],errv[1])]
             var valrange = [gw.cat.getMinVal(gw.cat.dataOrder[i],key),gw.cat.getMaxVal(gw.cat.dataOrder[i],key)];
         }else{
             var valrange = [gw.cat.getBest(gw.cat.dataOrder[i],key),gw.cat.getBest(gw.cat.dataOrder[i],key)];
@@ -3698,7 +3938,12 @@ GWCatalogue.prototype.updateFilters = function () {
 	}
     function isChecked(i,key){
 		if(!gw.cat.data[i][key]) return true;
-		var best = gw.cat.getBest(gw.cat.dataOrder[i],key);
+        if(gw.cat.data[i][key]['best']){
+            var best = gw.cat.getBest(gw.cat.dataOrder[i],key);
+        }else{
+            var best = gw.cat.dataOrder[i][key];
+        }
+
         // console.log('filter',i,key,best);
 		var good = 0;
 		for(var o = 0; o < gw.filters[key].options.length; o++){
