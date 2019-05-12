@@ -97,6 +97,7 @@
  "text.plotgw.help.errors": "Turn errors on and off, both in the graph and the information panel",
  "text.plotgw.help.lang": "Change the language the web-app is displayed in",
  "text.plotgw.help.share": "Share the web-app to friends and/or followers",
+ "text.plotgw.help.filter": "Filter events plotted on graph",
  "text.plotgw.help.search": "Find a specific event",
  "text.plotgw.lang.title": "Language",
  "text.plotgw.lang.text": "Chose your language from the options below",

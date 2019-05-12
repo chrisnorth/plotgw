@@ -114,6 +114,9 @@ GWCatalogue.prototype.init = function(){
             .attr("id","help-share-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
         d3.select("#help-block-icons").append("div")
+            .attr("id","help-filter-cont").attr("class","panel-cont colourise")
+            .html('<img class="panel-cont-img" src="img/filter.svg"><div class="panel-cont-text" id="help-filter-text"></div>')
+        d3.select("#help-block-icons").append("div")
             .attr("id","help-search-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/search.svg"><div class="panel-cont-text" id="help-search-text"></div>')
         d3.select("#help-outer").append("div")
@@ -3668,6 +3671,8 @@ GWCatalogue.prototype.addHelp = function(){
         .html(this.tl("%text.plotgw.help.lang%"));
     d3.select("#help-share-text")
         .html(this.tl("%text.plotgw.help.share%"));
+    d3.select("#help-filter-text")
+        .html(this.tl("%text.plotgw.help.filter%"));
     d3.select("#help-search-text")
         .html(this.tl("%text.plotgw.help.search%"));
     if (this.portrait){
