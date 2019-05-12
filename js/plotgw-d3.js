@@ -1378,8 +1378,12 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
             "<img src='"+this.micon.file[bh]+"'>"
         massicondiv.onmouseover = function(e){
             // console.log(this.id)
-            gw.showTooltip(e,this.id.split("icon")[1])}
-        massicondiv.onmouseout = function(){gw.hideTooltip()};
+            if(this.style['opacity']!="0"){
+                gw.showTooltip(e,this.id.split("icon")[1])}
+            }
+        massicondiv.onmouseout = function(){
+            if (this.style['opacity']!="0"){gw.hideTooltip()};
+        }
         // add mass text
         masstxtdiv = document.createElement('div');
         masstxtdiv.className = 'sketchlab mass-sketch mtxt';
@@ -1512,24 +1516,6 @@ GWCatalogue.prototype.addProbBars = function(redraw){
         // console.log('top(',fact , this.sketchHeight , (pval) , this.probpos.height,')=',h)
         return(h)
     }
-    this.svgSketch.append("line")
-        .attr("class","sketch prob-sketch")
-        .attr("id","prob-sketch-x")
-        .attr("x1",this.xScaleSk(this.probpos.left))
-        .attr("x2",this.xScaleSk(this.probpos.right))
-        .attr("y1",this.yScaleSk(this.probpos.bottom))
-        .attr("y2",this.yScaleSk(this.probpos.bottom))
-        .attr("stroke-width",2)
-        .attr("stroke",this.getCol('probbar'));
-    this.svgSketch.append("line")
-        .attr("class","sketch prob-sketch")
-        .attr("id","prob-sketch-y")
-        .attr("x1",this.xScaleSk(this.probpos.left))
-        .attr("x2",this.xScaleSk(this.probpos.left))
-        .attr("y1",this.yScaleSk(this.probpos.bottom))
-        .attr("y2",this.yScaleSk(this.probpos.top))
-        .attr("stroke-width",2)
-        .attr("stroke",this.getCol('probbar'));
     ylabx=this.xScaleSk(this.probpos.left-0.05);
     ylaby=this.yScaleSk(this.probpos.top+this.probpos.height/2);
     xlabx=this.xScaleSk(this.probpos.left+this.probpos.width/2);
@@ -1542,7 +1528,7 @@ GWCatalogue.prototype.addProbBars = function(redraw){
         .attr("x",0)
         .attr("y",0)
         .text("Probability (%)")
-        .attr("fill",this.getCol('probtxt')[1])
+        .attr("fill",this.getCol('probtxt'))
         .attr("text-anchor","middle")
         .attr("dominant-baseline","central")
         .attr("transform","rotate(-90)")
@@ -1553,7 +1539,7 @@ GWCatalogue.prototype.addProbBars = function(redraw){
         .attr("x",xlabx)
         .attr("y",xlaby)
         .text("Classification")
-        .attr("fill",this.getCol('probtxt')[1])
+        .attr("fill",this.getCol('probtxt'))
         .attr("text-anchor","middle")
         .attr("dominant-baseline","central")
         .attr("font-size",(1.3*gw.sksc)+"em");
@@ -1577,7 +1563,7 @@ GWCatalogue.prototype.addProbBars = function(redraw){
             .attr("class","sketch ptxt")
             .attr("id","ptxt-"+prob)
             .attr("x",0)
-            .attr("fill",this.getCol('probtxt')[0])
+            .attr("fill",this.getCol('probtxt'))
             .attr("y",0)
             .attr("dy",(0.65*gw.sksc)+"em")
             .attr("text-anchor","left")
@@ -1589,7 +1575,7 @@ GWCatalogue.prototype.addProbBars = function(redraw){
             .attr("class","sketch ptxt")
             .attr("id","ptxt2-"+prob)
             .attr("x",0)
-            .attr("fill",this.getCol('probtxt')[0])
+            .attr("fill",this.getCol('probtxt'))
             .attr("y",0)
             .attr("dy",(-0.65*gw.sksc)+"em")
             .attr("text-anchor","left")
@@ -1598,6 +1584,25 @@ GWCatalogue.prototype.addProbBars = function(redraw){
             .attr("font-size",(1.3*gw.sksc)+"em")
             .text(this.obj2hint(prob,true));
     }
+    this.svgSketch.append("line")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-x")
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.right))
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.bottom))
+        .attr("stroke-width",2)
+        .attr("stroke",this.getCol('probbar'));
+    this.svgSketch.append("line")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-y")
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.left))
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.top))
+        .attr("stroke-width",2)
+        .attr("stroke",this.getCol('probbar'));
+
 
 }
 GWCatalogue.prototype.flyOutProbBars = function(){
@@ -1627,8 +1632,7 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
         dt=(delay) ? this.flySp/2 : 0;
         if (pval<=0.5){
             ptxty=this.yScaleSk((pval*this.probpos.height));
-            pcol=1;
-        }else{ptxty=this.yScaleSk(0);pcol=0}
+        }else{ptxty=this.yScaleSk(0);}
         if (resize=="smooth"){
             this.svgSketch.select('#prob-bar-'+prob)
                 .transition().delay(dt).duration(this.flySp)
@@ -1638,12 +1642,12 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
             this.svgSketch.select('#ptxt-'+prob)
                 .transition().delay(dt).duration(this.flySp)
                 .attr("x",ptxty)
-                .attr("fill",this.getCol('probtxt')[pcol])
+                .attr("fill",this.getCol('probtxt'))
                 .text(ptxt);
             this.svgSketch.select('#ptxt2-'+prob)
                 .transition().delay(dt).duration(this.flySp)
                 .attr("x",ptxty)
-                .attr("fill",this.getCol('probtxt')[pcol])
+                .attr("fill",this.getCol('probtxt'))
                 .text(ptxt2);
         }else if(resize=="snap"){
             this.svgSketch.select('#prob-bar-'+prob)
@@ -1652,11 +1656,11 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
                 .attr("height",this.scaleProbHeight(pval));
             this.svgSketch.select('#ptxt-'+prob)
                 .attr("x",ptxty)
-                .attr("fill",this.getCol('probtxt')[pcol])
+                .attr("fill",this.getCol('probtxt'))
                 .text(ptxt);
             this.svgSketch.select('#ptxt2-'+prob)
                 .attr("x",ptxty)
-                .attr("fill",this.getCol('probtxt')[pcol])
+                .attr("fill",this.getCol('probtxt'))
                 .text(ptxt2);
         }
     }
@@ -1915,8 +1919,8 @@ GWCatalogue.prototype.setStyles = function(){
             'highlight':'#f00',
             'tick':'#ccc',
             'probbar':'#333',
-            'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#333333'},
-            'probtxt':['#fff','#000']
+            'probbars':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',Terrestrial:'#cccccc'},
+            'probtxt':'#000'
         },
         'dark':{'class':'col-black','default':false,
             'label':'%text.plotgw.colour.dark%',
@@ -1931,8 +1935,8 @@ GWCatalogue.prototype.setStyles = function(){
             'highlight':'#f00',
             'tick':'#555',
             'probbar':'#ccc',
-            'probbars':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',Terrestrial:'#cccccc'},
-            'probtxt':['#000','#fff']
+            'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#555555'},
+            'probtxt':'#fff'
         }
     }
     if (!this.colScheme){this.colScheme='light'}
