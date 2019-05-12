@@ -728,13 +728,20 @@ GWCatalogue.prototype.setColumns = function(datadict){
             depfn:function(d){return (d.opendata)},
             strfn:function(d){
                 if ((d.opendata)&&(d.opendata.url)){
-                    return gw.tl("<a target='_blank' href='"+ d.opendata.url+
-                        "'>%text.gen.gwosc%</a>");
+                    if (d.opendata.text.search('GraceDB')>=0){
+                        return gw.tl("<a target='_blank' title='"+gw.tl(d.opendata.text)+
+                            "' href='"+ d.opendata.url+
+                            "'>%text.gen.gracedb%</a>");
+                    }else{
+                        return gw.tl("<a target='_blank'title='"+gw.tl(d.opendata.text)+
+                            "'  href='"+ d.opendata.url+
+                            "'>%text.gen.gwosc%</a>");
+                    }
                 }else{
                     return(gw.labBlank);
                 }
             },
-            name:'%tooltip.plotgw.gwosc%',
+            name:'%tooltip.plotgw.opendata%',
             icon:"img/data.svg"},
         paper:{
             type:'derived',
