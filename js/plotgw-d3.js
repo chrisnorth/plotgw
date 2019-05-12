@@ -1743,7 +1743,6 @@ GWCatalogue.prototype.obj2hint = function(objType,desc=false){
 }
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
-    console.log('updating sketch from',this.d,'to',d);
     if (this.redraw){
         // redrawing what's already there
         if (d.detType.best=='Candidate'){
@@ -2443,11 +2442,11 @@ GWCatalogue.prototype.getMinMax = function(p,logax,zeroax){
         }
     }
     if (dolog){
-        console.log(p,'log axis',dminmax)
+        // console.log(p,'log axis',dminmax)
         dminmax[0] = Math.pow(10,Math.floor(Math.log10(dminmax[0])))
         dminmax[1] = Math.pow(10,Math.ceil(Math.log10(dminmax[1])))
     }else{
-        console.log(p,'linear axis')
+        // console.log(p,'linear axis')
         if (gw.debug){console.log('axiszero',dozero,dminmax[0])};
         if ((dozero)&&(scale!="time")){
             // if axiszero set, set axis min to zero unless already <0
@@ -3168,14 +3167,12 @@ GWCatalogue.prototype.moveHighlight = function(fadeOut=false){
     var gw=this;
     d=this.d;
     if (!d) {
-        console.log('fading out null',d);
         // fade out
         gw.svg.select("#highlight")
             .transition().duration(500)
             .style("opacity",0);
         return
     }else if ((d.active==false)||(fadeOut)){
-        console.log('fading out inactive',d);
         gw.svg.select("#highlight")
             .transition().duration(500)
             .style("opacity",0);
@@ -3187,7 +3184,6 @@ GWCatalogue.prototype.moveHighlight = function(fadeOut=false){
     //         // .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
     //         .style("opacity",0);
     }else{
-        console.log('moving/fading in',d);
         // fade in and move
         gw.svg.select("#highlight")
             .transition().duration(500)
@@ -3971,7 +3967,6 @@ GWCatalogue.prototype.addFilter = function(replot){
 }
 GWCatalogue.prototype.updateFilters = function () {
     var gw = this;
-    console.log('updating filters',this.d)
     selEvStatus=((this.d)&&(this.d.active)) ? this.d.active : false;
     selEvNewStatus=false;
     for(filt in this.filters){
@@ -4055,10 +4050,7 @@ GWCatalogue.prototype.updateFilters = function () {
     this.updateBothAxes(this.xvar,this.yvar);
     // update sketch if d now longer active
     if (selEvStatus!=selEvNewStatus){
-        console.log('filters updated. updating sketch',this.d)
         this.updateSketch(this.d);
-        console.log('sketch updated',this.d);
-        console.log('filters updated moving highlight',this.d)
         this.moveHighlight();
     }
     this.updateErrors();
