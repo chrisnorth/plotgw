@@ -1732,6 +1732,7 @@ GWCatalogue.prototype.obj2hint = function(objType,desc=false){
 }
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
+    console.log('updating sketch from',this.d,'to',d);
     if (this.redraw){
         // redrawing what's already there
         if (d.detType.best=='Candidate'){
@@ -1749,8 +1750,10 @@ GWCatalogue.prototype.updateSketch = function(d){
             this.tl("%text.plotgw.information.heading% "+this.sketchName));
         // update labels
         this.redrawLabels();
-    }else if ((this.sketchName==d["name"])){
+    }else if ((d==null)||(this.sketchName==d["name"])){
         // clicked on currently selected datapoint
+        this.hideProbSketch();
+        this.hideBHSketch();
         this.flyOutProbBars();
         this.flyOutMasses("M1");
         this.flyOutMasses("M2");
@@ -1809,7 +1812,7 @@ GWCatalogue.prototype.updateSketch = function(d){
                 this.flyInMasses(d,"Mfinal","fly");
             }else if (this.d.detType.best=='Candidate'){
                 // switching from candidate to detection
-                this.hideProbSketch()
+                this.hideProbSketch();
                 this.flyOutProbBars();
                 this.showBHSketch(delay=true);
                 this.flyInMasses(d,"M1","fly",delay=true);
@@ -3053,20 +3056,29 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class","hidden")
         .attr("id","search-img")
         .on("click",function(){gw.showSearch();gw.hideTooltipManual();});
-    gw.cat.data.forEach(function(d){
-        d3.select('#search-outer').append("div")
-            .attr("class","popup-list-item search-list-item")
-            .attr("id","search-list-"+d.name)
-            .html(d.name)
-            .on("click",function(){
-                if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);gw.hideSearch();}
-            });
-    })
+
+    this.populateSearchList();
     d3.select("#search-bg").on("click",function(){gw.hideSearch();});
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
     if(gw.debug){console.log('selected:',gw.selectedevent);}
 
 }
+GWCatalogue.prototype.populateSearchList = function(){
+    var gw=this;
+    d3.selectAll('.search-list-item').remove()
+    gw.cat.data
+        .filter(function(d){return d.active;})
+        .forEach(function(d){
+            d3.select('#search-outer').append("div")
+                .attr("class","popup-list-item search-list-item")
+                .attr("id","search-list-"+d.name)
+                .html(d.name)
+                .on("click",function(){
+                    if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);gw.hideSearch();}
+                });
+        })
+}
+
 GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
     var gw=this;
     if (typeof ev == "string"){
@@ -3099,16 +3111,16 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
         // d exists
         if (init){
             gw.dataIdx=evnum;
-            gw.moveHighlight(d);
             gw.updateSketch(d);
+            gw.moveHighlight();
             if(document.getElementById("search-list-"+d.name)){
                 document.getElementById("search-list-"+d.name).classList.add("current")
             }
         }else if((d.name!=gw.selectedevent)||(redraw)){
             // different to currently selected event
             gw.dataIdx=evnum;
-            gw.moveHighlight(d);
             gw.updateSketch(d);
+            gw.moveHighlight();
             if (document.getElementById("search-list-"+gw.selectedevent)){
                 document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
             }
@@ -3120,8 +3132,8 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
             }
         }else{
             // selected the same event
-            gw.moveHighlight(d);
             gw.updateSketch(d);
+            gw.moveHighlight();
             if (document.getElementById("search-list-"+gw.selectedevent)){
                 document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
             }
@@ -3133,22 +3145,38 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
         gw.dataIdx=null;
     }
     this.updateUrl();
+    this.showInfo();
 }
 GWCatalogue.prototype.selectNext = function(dir=1){
     this.selectEvent(this.dataIdx+dir)
     return(this.dataIdx)
 }
 
-GWCatalogue.prototype.moveHighlight = function(d){
+GWCatalogue.prototype.moveHighlight = function(fadeOut=false){
     // move highlight circle
     var gw=this;
-    if (!d) {return {}}
-    if ((this.sketchName==d["name"])){
+    d=this.d;
+    if (!d) {
+        console.log('fading out null',d);
         // fade out
         gw.svg.select("#highlight")
             .transition().duration(500)
-            .style("opacity",gw.dotOp(d));
+            .style("opacity",0);
+        return
+    }else if ((d.active==false)||(fadeOut)){
+        console.log('fading out inactive',d);
+        gw.svg.select("#highlight")
+            .transition().duration(500)
+            .style("opacity",0);
+    // }else if ((this.selectedevent==d["name"])){
+    //     console.log('fading out',d);
+    //     // fade out
+    //     gw.svg.select("#highlight")
+    //         .transition().duration(500)
+    //         // .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
+    //         .style("opacity",0);
     }else{
+        console.log('moving/fading in',d);
         // fade in and move
         gw.svg.select("#highlight")
             .transition().duration(500)
@@ -3563,7 +3591,13 @@ GWCatalogue.prototype.addOptions = function(){
             gw.updateBothAxes(gw.xvar,gw.yvar);
         });
 }
-
+GWCatalogue.prototype.showInfo = function(){
+    //show options
+    if (this.helpOn){this.hideHelp();}
+    if (this.langOn){this.hideLang();}
+    if (this.filterOn){this.hideFilter();}
+    if (this.optionsOn){this.hideOptions();}
+}
 GWCatalogue.prototype.showOptions = function(){
     //show options
     if (this.helpOn){this.hideHelp()}
@@ -3926,6 +3960,9 @@ GWCatalogue.prototype.addFilter = function(replot){
 }
 GWCatalogue.prototype.updateFilters = function () {
     var gw = this;
+    console.log('updating filters',this.d)
+    selEvStatus=((this.d)&&(this.d.active)) ? this.d.active : false;
+    selEvNewStatus=false;
     for(filt in this.filters){
         if(gw.debug){console.log('updating filter: ',filt);}
 		if(this.filters[filt].type == "slider"){
@@ -4002,10 +4039,21 @@ GWCatalogue.prototype.updateFilters = function () {
             active=false;
         }
 		this.cat.data[i].active = active;
+        if (this.cat.data[i].name==this.selectedevent){selEvNewStatus=active}
 	}
     this.updateBothAxes(this.xvar,this.yvar);
+    // update sketch if d now longer active
+    if (selEvStatus!=selEvNewStatus){
+        console.log('filters updated. updating sketch',this.d)
+        this.updateSketch(this.d);
+        console.log('sketch updated',this.d);
+        console.log('filters updated moving highlight',this.d)
+        this.moveHighlight();
+    }
     this.updateErrors();
-    this.moveHighlight();
+    // repopulate search list
+    this.populateSearchList();
+
 	return this;
 };
 GWCatalogue.prototype.showFilter = function(){
