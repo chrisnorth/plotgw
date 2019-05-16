@@ -79,6 +79,7 @@
  "text.plotgw.information.heading": "Information:",
  "text.plotgw.information.title": "Information Panel",
  "text.plotgw.information.subtitle": "Click on datapoints for more information",
+ "text.plotgw.unknown": "Unknown",
  "text.plotgw.horizontal-axis": "Horizontal Axis",
  "text.plotgw.vertical-axis": "Vertical Axis",
  "text.plotgw.log-axis": "Logarithmic Axis",
