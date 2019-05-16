@@ -1115,7 +1115,7 @@ GWCatalogue.prototype.setScales = function(){
     }
     this.errOp = function(d,param){
         if (this.columns[param]["err"]==0){return 0}
-        else if ((gw.showerrors)||(gw.isEst(d,param))){
+        else if (((gw.showerrors)||(gw.isEst(d,param)))&&(d.active)){
             return (gw.isEst(d,param)) ? 0.5 : 1;}
         else{return 0;}
     }
@@ -2031,10 +2031,11 @@ GWCatalogue.prototype.formatData = function(d,cols){
                 if (m2[1]>50){m2esttype[1]='soft'}
             }
         }
-        rand=(d.GPS.best % 3600 )/3600
-        m1b=(rand-0.5)*(([m1[1]-m1[0]])/2) + 0.5*(m1[0]+m1[1]);
+        rand1=(d.GPS.best % 3600 )/3600;
+        rand2=(d.GPS.best % 86400 )/86400;
+        m1b=(rand1-0.5)*(([m1[1]-m1[0]])/2) + 0.5*(m1[0]+m1[1]);
         m1err=[m1[0]-m1b,m1[1]-m1b];
-        m2b=(rand-0.5)*(([m2[1]-m2[0]])/2) + 0.5*(m2[0]+m2[1]);
+        m2b=(rand2-0.5)*(([m2[1]-m2[0]])/2) + 0.5*(m2[0]+m2[1]);
         m2err=[m2[0]-m2b,m2[1]-m2b];
         d.M1={best:m1b,est:m1err,esttype:m1esttype};
         d.M2={best:m2b,est:m2err,esttype:m2esttype};
@@ -3319,7 +3320,7 @@ GWCatalogue.prototype.updateErrors = function(){
         .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
         .attr("opacity",function(d){return gw.errOp(d,gw.yvar)})
         .attr("stroke",function(d){
-            col= ((d[gw.xvar])&&(d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='est')) ? gw.color(gw.cValue(d)) : gw.getCol('err');
+            col= (gw.isEst(d,gw.yvar)) ? gw.color(gw.cValue(d)) : gw.getCol('err');
             return(col);})
         .attr("stroke-width",function(d){
             wid= (gw.isEst(d,gw.yvar)) ? Math.min(10.,7/gw.sksc) + Math.min(10,4./gw.sksc) : gw.swErr;
