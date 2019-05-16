@@ -1942,8 +1942,8 @@ GWCatalogue.prototype.setStyles = function(){
             'grid':'#ccc','err':'#ccc',
             'BH':["rgba(255,255,255,1)","rgba(255,255,255,0)"],
             'shadow':["rgba(128,128,128,1)","rgba(64,64,64,0)"],
-            'dotfill':["#1f77b4", "#ff7f0e","#999999"],
-            'dotline':["#fff","#555","#555"],
+            'dotfill':["#1f77b4", "#ffaf0e","#999999"],
+            'dotline':["#fff","#fff","#555"],
             'axis':"rgb(200,200,200)",
             'highlight':'#f00',
             'tick':'#555',
@@ -2439,6 +2439,7 @@ GWCatalogue.prototype.setColour = function(newScheme){
     this.colScheme=newScheme;
     this.setStyles();
     this.replot();
+    this.updateBothAxes(this.xvar,this.yvar);
     return;
 }
 GWCatalogue.prototype.getMinMax = function(p,logax,zeroax){
