@@ -1114,7 +1114,8 @@ GWCatalogue.prototype.setScales = function(){
         }else{return 0}
     }
     this.errOp = function(d,param){
-        if (this.columns[param]["err"]==0){return 0}
+        if ((!d[this.xvar])||(!d[this.yvar])){return 0}
+        else if (this.columns[param]["err"]==0){return 0}
         else if (((gw.showerrors)||(gw.isEst(d,param)))&&(d.active)){
             return (gw.isEst(d,param)) ? 0.5 : 1;}
         else{return 0;}
