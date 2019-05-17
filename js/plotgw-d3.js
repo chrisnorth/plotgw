@@ -589,7 +589,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         //     namefn:function(){return(gw.columns.obsrun.name)}
         // },
         rho:{icon:"img/snr.svg",avail:true,type:'src'},
-        deltaOmega:{avail:false,type:'src'},
+        deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg'},
         Erad:{avail:true,icon:"img/energyrad.svg",
             border:0.1,type:'src'},
         lpeak:{avail:true,icon:"img/peaklum.svg",type:'src'},
