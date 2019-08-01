@@ -1977,7 +1977,7 @@ GWCatalogue.prototype.setStyles = function(){
     this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
-    this.tickTimeFormat = d3.time.format("%Y-%m-%d");
+    this.tickTimeFormat = d3.time.format("%Y-%m");
     this.isEst = function(d,param){
         return (d[param]) ? d[param].hasOwnProperty('est') : false;
     }
@@ -2507,11 +2507,17 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
     // console.log('x min/max',gw.xvar,xMin,xMax);
     if ((gw.columns[gw.xvar].scale)&&(gw.columns[gw.xvar].scale='time')){
         this.xScale = d3.time.scale().range([0,gw.graphWidth])
-        gw.xScale.domain([new Date(xMin), new Date(xMax)])
-        gw.xScale.nice(d3.time.month);
+        datexMin=new Date(xMin);
+        datexMax=new Date(xMax);
+        gw.xScale.domain([datexMin, datexMax]);
+        // set tick interval in months
+        mxdiff=(datexMax-datexMin)/(86400*30*1e3);
+        mxticks=(mxdiff > 24) ? 6 : (mxdiff < 12) ? 1 : 3;
+        gw.xScale.nice(d3.time.month,mxticks);
         // x axis
         this.xAxis = d3.svg.axis()
                 .scale(this.xScale)
+                .ticks(d3.time.month,mxticks)
                 .orient("bottom")
                 .innerTickSize(-this.graphHeight)
                 .tickFormat(gw.tickTimeFormat);
@@ -2544,11 +2550,17 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
     // console.log('y min/max',gw.yvar,yMin,yMax);
     if ((gw.columns[gw.yvar].scale)&&(gw.columns[gw.yvar].scale='time')){
         this.yScale = d3.time.scale().range([gw.graphHeight,0])
-        gw.yScale.domain([new Date(yMin), new Date(yMax)])
-        gw.yScale.nice(d3.time.month);
+        dateyMin=new Date(yMin);
+        dateyMax=new Date(yMax);
+        gw.yScale.domain([dateyMin, dateyMax])
+        // set tick interval in months
+        mydiff=(dateyMax-dateyMin)/(86400*30*1e3);
+        myticks=(mydiff > 24) ? 6 : (mydiff < 12) ? 1 : 3;
+        gw.yScale.nice(d3.time.month,myticks);
         // y axis
         this.yAxis = d3.svg.axis()
                 .scale(this.yScale)
+                .ticks(d3.time.month,myticks)
                 .orient("left")
                 // .innerTickSize(-(this.relw[1]-this.relw[0])*this.graphWidth);
                 .innerTickSize(-this.graphWidth)
