@@ -4229,7 +4229,7 @@ GWCatalogue.prototype.hideFilter = function(d) {
     this.updateUrl();
 }
 GWCatalogue.prototype.showShare = function(){
-    //show share pot
+    //show share box
     var gw=this;
     d3.select("#share-bg").style("height","100%").style("display","block");
     shareouter=d3.select('#share-outer')
@@ -4252,7 +4252,7 @@ GWCatalogue.prototype.showShare = function(){
                 gw.tl("&hashtags=%share.plotgw.twitter.hashtag%"));
 }
 GWCatalogue.prototype.hideShare = function(){
-    //show share pot
+    //hide search box
     d3.select('#share-bg').style("height",0).style("display","none");
     d3.select('#share-outer').transition()
        .duration(500)
@@ -4261,14 +4261,14 @@ GWCatalogue.prototype.hideShare = function(){
 
 }
 GWCatalogue.prototype.showSearch = function(){
-    //show share pot
+    //show search box
     var gw=this;
     d3.select("#search-bg").style("height","100%").style("display","block");
     searchouter=d3.select('#search-outer')
     searchouter.transition()
        .duration(500)
        .style("opacity",1)
-       .style("max-height",document.getElementById('svg-container').offsetHeight);
+       .style("max-height",gw.graphHeight);
     searchouter.style("top",
             document.getElementById('graphcontainer').offsetTop+
             document.getElementById('search-icon').offsetTop +
@@ -4279,7 +4279,7 @@ GWCatalogue.prototype.showSearch = function(){
             document.getElementById('search-outer').offsetWidth/2)
 }
 GWCatalogue.prototype.hideSearch = function(){
-    //show share pot
+    //hide share box
     d3.select("#search-bg").style("height","0").style("display","none");
     d3.select('#search-outer').transition()
        .duration(500)
