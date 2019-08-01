@@ -256,8 +256,9 @@ GWCatalogue.prototype.init = function(){
     		"options":[
     			{"id": "filt-det", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
     			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
-    		],
-            "note":"%text.plotgw.filter.note%"
+            ]
+    		// ],
+            // "note":"%text.plotgw.filter.note%"
 	    }
     }
     this.filterr=true;
@@ -2014,34 +2015,36 @@ GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     if (this.debug){console.log('formatData',d.name);}
     var gw=this;
-    if ((d.detType.best=='Candidate')&&(!(d.M1))&&(!(d.M2))){
-        // add estimated masses
-        mlim1={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[5,80]};
-        mlim2={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[0.1,3]};
-        m1=[Infinity,-Infinity];
-        m2=[Infinity,-Infinity];
-        m1esttype=['hard','hard'];
-        m2esttype=['hard','hard'];
-        for (c in d.objType.prob){
-            if (d.objType.prob[c]>0.01){
-                m1[0]= (mlim1[c]) ? Math.min(m1[0],mlim1[c][0]) : m1[0];
-                m1[1]= (mlim1[c]) ? Math.max(m1[1],mlim1[c][1]) : m1[1];
-                if (m1[1]>50){m1esttype[1]='soft'}
-                m2[0]= (mlim2[c]) ? Math.min(m2[0],mlim2[c][0]) : m2[0];
-                m2[1]= (mlim2[c]) ? Math.max(m2[1],mlim2[c][1]) : m2[1];
-                if (m2[1]>50){m2esttype[1]='soft'}
-            }
-        }
-        rand1=(d.GPS.best % 3600 )/3600;
-        rand2=(d.GPS.best % 86400 )/86400;
-        m1b=(rand1-0.5)*(([m1[1]-m1[0]])/2) + 0.5*(m1[0]+m1[1]);
-        m1err=[m1[0]-m1b,m1[1]-m1b];
-        m2b=(rand2-0.5)*(([m2[1]-m2[0]])/2) + 0.5*(m2[0]+m2[1]);
-        m2err=[m2[0]-m2b,m2[1]-m2b];
-        d.M1={best:m1b,est:m1err,esttype:m1esttype};
-        d.M2={best:m2b,est:m2err,esttype:m2esttype};
-        // console.log(d.name,d.M1,d.M2);
-    }
+    // code to create mass estimate (NOT USED)
+    // if ((d.detType.best=='Candidate')&&(!(d.M1))&&(!(d.M2))){
+    //     // add estimated masses
+    //     mlim1={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[5,80]};
+    //     mlim2={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[0.1,3]};
+    //     m1=[Infinity,-Infinity];
+    //     m2=[Infinity,-Infinity];
+    //     m1esttype=['hard','hard'];
+    //     m2esttype=['hard','hard'];
+    //     console.log(d)
+    //     for (c in d.objType.prob){
+    //         if (d.objType.prob[c]>0.01){
+    //             m1[0]= (mlim1[c]) ? Math.min(m1[0],mlim1[c][0]) : m1[0];
+    //             m1[1]= (mlim1[c]) ? Math.max(m1[1],mlim1[c][1]) : m1[1];
+    //             if (m1[1]>50){m1esttype[1]='soft'}
+    //             m2[0]= (mlim2[c]) ? Math.min(m2[0],mlim2[c][0]) : m2[0];
+    //             m2[1]= (mlim2[c]) ? Math.max(m2[1],mlim2[c][1]) : m2[1];
+    //             if (m2[1]>50){m2esttype[1]='soft'}
+    //         }
+    //     }
+    //     rand1=(d.GPS.best % 3600 )/3600;
+    //     rand2=(d.GPS.best % 86400 )/86400;
+    //     m1b=(rand1-0.5)*(([m1[1]-m1[0]])/2) + 0.5*(m1[0]+m1[1]);
+    //     m1err=[m1[0]-m1b,m1[1]-m1b];
+    //     m2b=(rand2-0.5)*(([m2[1]-m2[0]])/2) + 0.5*(m2[0]+m2[1]);
+    //     m2err=[m2[0]-m2b,m2[1]-m2b];
+    //     d.M1={best:m1b,est:m1err,esttype:m1esttype};
+    //     d.M2={best:m2b,est:m2err,esttype:m2esttype};
+    //     // console.log(d.name,d.M1,d.M2);
+    // }
     for (col in gw.columns){
         // console.log(col,gw.columns[col].type);
         if (gw.columns[col].type=="derived"){
