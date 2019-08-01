@@ -85,7 +85,7 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer colourise")
-            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>')
+            .html('<div id="options-gen"></div><div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>')
     }
     if (d3.select("#help-outer").empty()){
         if(this.debug){console.log('adding help-outer')}
@@ -524,6 +524,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
        icon: icon used on graph axes
        unit: unit used on graph axes (default=BLANK)
        border: force the border on axis (default=2)
+       cand: available for candidates
     */
     var gw=this;
 
@@ -538,11 +539,11 @@ GWCatalogue.prototype.setColumns = function(datadict){
         af:{avail:true,icon:"img/finalspin.svg",
             border:0.01,type:'src'},
         DL:{avail:true, icon:"img/ruler.svg",
-            border:20,type:'src'},
+            border:20,type:'src',cand:true},
         z:{avail:true,icon:"img/redshift.svg",
             border:0.01,type:'src'},
         UTC:{avail:false,type:'src',strfn:function(d){return('')}},
-        UTCdate:{avail:true,type:'derived',
+        UTCdate:{avail:true,type:'derived',cand:true,
             depfn:function(d){return (d.UTC)},
             namefn:function(){return(gw.columns.UTC.name)},
             convfn:['UTC',function(x){return new Date(x)}],
@@ -556,7 +557,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             forcelog:'off',
             forcezero:'off'
         },
-        FAR:{avail:true,type:'src',icon:"img/dice.svg",
+        FAR:{avail:true,type:'src',icon:"img/dice.svg",cand:true,
             forcelog:'on',
             forcezero:'off',
             strfn:function(d){
@@ -590,7 +591,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         //     namefn:function(){return(gw.columns.obsrun.name)}
         // },
         rho:{icon:"img/snr.svg",avail:true,type:'src'},
-        deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg'},
+        deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg',cand:true},
         Erad:{avail:true,icon:"img/energyrad.svg",
             border:0.1,type:'src'},
         lpeak:{avail:true,icon:"img/peaklum.svg",type:'src'},
@@ -3538,7 +3539,11 @@ GWCatalogue.prototype.addOptions = function(){
     for (col in gw.columns){
         if (gw.columns[col].avail){
             var newoptdivx = document.createElement('div');
-            newoptdivx.className = 'option option-x';
+            if (gw.columns[col].cand){
+                newoptdivx.className = 'option option-x cand';
+            }else{
+                newoptdivx.className = 'option option-x no-cand';
+            }
             newoptdivx.setAttribute("id","button-divx-"+col);
             divx.appendChild(newoptdivx);
             var newoptinputx = document.createElement('img');
@@ -3581,7 +3586,11 @@ GWCatalogue.prototype.addOptions = function(){
             newoptdivx.appendChild(newoptinputx);
 
             var newoptdivy = document.createElement('div');
-            newoptdivy.className = 'option option-y';
+            if (gw.columns[col].cand){
+                newoptdivy.className = 'option option-y cand';
+            }else{
+                newoptdivy.className = 'option option-y no-cand';
+            }
             newoptdivy.setAttribute("id","button-divy-"+col);
             divy.appendChild(newoptdivy);
             var newoptinputy = document.createElement('img');
@@ -3685,7 +3694,24 @@ GWCatalogue.prototype.addOptions = function(){
             gw.ylog=d3.select('#ylog')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
         });
+    d3.select("#options-gen").append('div')
+        // .style('display','none')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="limOpt" id="limOpt"'+(gw.limOpt ? ' checked="checked"':'')+'></input><label id="limOpt-lab" for="limOpt">'+this.tl('%text.plotgw.limit-options%')+'</label>')
+        .on("change",function(){
+            gw.limOpt=d3.select('#limOpt')[0][0].checked;
+            gw.limitOptions();
+        });
 }
+GWCatalogue.prototype.limitOptions = function(){
+    if (this.limOpt){
+        d3.selectAll('.option.no-cand').style('display','none');
+    }else{
+        d3.selectAll('.option.no-cand').style('display','inline-block');
+    }
+    return;
+}
+
 GWCatalogue.prototype.showInfo = function(){
     //show options
     if (this.helpOn){this.hideHelp();}
