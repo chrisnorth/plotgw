@@ -85,7 +85,16 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer colourise")
-            .html('<div id="options-gen"></div><div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>')
+            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div><div class="panel-block"><div class="panel-cont-text"><span id="preset-warn">TEXT</span>&nbsp;<span id="preset-filter-link" style="cursor:pointer;color:red">&rarr;</span></div></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
+        d3.select("#preset-options").append("div")
+            .attr("id","buttonpre-conf").attr("class","option option-pre det-only")
+            .html('<img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg">');
+        d3.select("#preset-options").append("div")
+            .attr("id","buttonpre-cand").attr("class","option option-pre cand-only")
+            .html('<img class="button button-pre" id="preset-cand-img" src="img/candidate.svg">');
+        d3.select("#preset-options").append("div")
+            .attr("id","buttonpre-all").attr("class","option option-pre allsrc")
+            .html('<img class="button button-pre" id="preset-all-img" src="img/allsources.svg">')
     }
     if (d3.select("#help-outer").empty()){
         if(this.debug){console.log('adding help-outer')}
@@ -2376,12 +2385,20 @@ GWCatalogue.prototype.setLang = function(){
         }
     }
 
+    d3.select("#options-gen > .panel-title")
+        .html(this.tl('%text.plotgw.presets%'))
+    d3.select("#preset-warn")
+        .html(this.tl('%text.plotgw.preset-warn%'))
     d3.select("#options-x > .panel-title")
         .html(this.tl('%text.plotgw.horizontal-axis%'))
     d3.select("#options-y > .panel-title")
         .html(this.tl('%text.plotgw.vertical-axis%'))
     d3.select("#display-options > .panel-title")
         .html(this.tl('%text.plotgw.display%'))
+    d3.select("#xzero-lab,#yzero-lab")
+        .html(this.tl('%text.plotgw.axiszero%'))
+    d3.select("#xlog-lab,#ylog-lab")
+        .html(this.tl('%text.plotgw.log-axis%'))
     d3.select("#options-colour")
         .html(this.tl('%text.plotgw.colour%'))
     for (c in this.colourList){
@@ -3552,9 +3569,9 @@ GWCatalogue.prototype.addOptions = function(){
         if (gw.columns[col].avail){
             var newoptdivx = document.createElement('div');
             if (gw.columns[col].cand){
-                newoptdivx.className = 'option option-x cand';
+                newoptdivx.className = 'option option-x allsrc';
             }else{
-                newoptdivx.className = 'option option-x no-cand';
+                newoptdivx.className = 'option option-x det-only';
             }
             newoptdivx.setAttribute("id","button-divx-"+col);
             divx.appendChild(newoptdivx);
@@ -3599,9 +3616,9 @@ GWCatalogue.prototype.addOptions = function(){
 
             var newoptdivy = document.createElement('div');
             if (gw.columns[col].cand){
-                newoptdivy.className = 'option option-y cand';
+                newoptdivy.className = 'option option-y allsrc';
             }else{
-                newoptdivy.className = 'option option-y no-cand';
+                newoptdivy.className = 'option option-y det-only';
             }
             newoptdivy.setAttribute("id","button-divy-"+col);
             divy.appendChild(newoptdivy);
@@ -3706,20 +3723,74 @@ GWCatalogue.prototype.addOptions = function(){
             gw.ylog=d3.select('#ylog')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
         });
-    d3.select("#options-gen").append('div')
-        // .style('display','none')
-        .attr("class","panel-block")
-        .html('<input type="checkbox" name="limOpt" id="limOpt"'+(gw.limOpt ? ' checked="checked"':'')+'></input><label id="limOpt-lab" for="limOpt">'+this.tl('%text.plotgw.limit-options%')+'</label>')
-        .on("change",function(){
-            gw.limOpt=d3.select('#limOpt')[0][0].checked;
-            gw.limitOptions();
-        });
+    // d3.select("#preset-options").append('div')
+    //     .attr("class","panel-cont")
+    //     .html('<input type="checkbox" name="limOpt" id="limOpt"'+(gw.limOpt ? ' checked="checked"':'')+'></input><label id="limOpt-lab" for="limOpt">'+this.tl('%text.plotgw.limit-options%')+'</label>')
+    //     .on("change",function(){
+    //         gw.limOpt=d3.select('#limOpt')[0][0].checked;
+    //         gw.limitOptions();
+    //     });
+    // d3.select("#preset-options").append('div')
+    //     .attr("class","panel-cont-text")
+    //     .html(this.tl("%text.plotgw.options.warn%"))
+    d3.select("#buttonpre-cand").on("click",function(){
+        d3.select("#buttonx-UTCdate")[0][0].click();
+        d3.select("#buttony-DL")[0][0].click();
+        d3.select("#filt-cand").property("checked",true);
+        d3.select("#filt-det").property("checked",false);
+        gw.updateFilters();
+        // d3.select("#limOpt").property("checked",true);
+        // gw.limitOptions();
+    }).on("mouseover",function(){
+        gw.showTooltipManual("%tooltip.plotgw.preset-cand%");
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+    d3.select("#buttonpre-conf").on("click",function(){
+        d3.select("#buttonx-M1")[0][0].click();
+        d3.select("#buttony-M2")[0][0].click();
+        // change filters
+        d3.select("#filt-cand").property("checked",false);
+        d3.select("#filt-det").property("checked",true);
+        gw.updateFilters();
+        // d3.select("#limOpt").property("checked",false);
+        // gw.limitOptions();
+    }).on("mouseover",function(){
+        gw.showTooltipManual("%tooltip.plotgw.preset-conf%");
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+    d3.select("#buttonpre-all").on("click",function(){
+        d3.select("#buttonx-UTCdate")[0][0].click();
+        d3.select("#buttony-DL")[0][0].click();
+        // change filters
+        d3.select("#filt-cand").property("checked",true);
+        d3.select("#filt-det").property("checked",true);
+        gw.updateFilters();
+        // d3.select("#limOpt").property("checked",false);
+        // gw.limitOptions();
+    }).on("mouseover",function(){
+        gw.showTooltipManual("%tooltip.plotgw.preset-all%");
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+    d3.select("#preset-filter-link").on("click",function(){
+        d3.select("#filter-icon > img")[0][0].click()
+    }).on("mouseover",function(){
+        gw.showTooltipManual("%tooltip.plotgw.goto-filter%");
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+
 }
 GWCatalogue.prototype.limitOptions = function(){
+    this.limOpt=d3.select('#limOpt')[0][0].checked
     if (this.limOpt){
-        d3.selectAll('.option.no-cand').style('display','none');
+        d3.selectAll('.option-x.det-only,.option-y.det-only')
+            .style('display','none');
     }else{
-        d3.selectAll('.option.no-cand').style('display','inline-block');
+        d3.selectAll('.option-x.det-only,.option-y.det-only')
+            .style('display','inline-block');
     }
     return;
 }

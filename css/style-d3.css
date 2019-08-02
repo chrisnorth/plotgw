@@ -391,8 +391,20 @@ button.down{
 .option button img, .option img, .filter-icon img{
     width:90%;
 }
+.option.det-only{
+    background-color:#0c0;
+    border-color: #050;
+}
+.option.cand-only{
+    background-color:#c90;
+    border-color: #550;
+}
+.option.allsrc{
+    background-color:#99f;
+    border-color: #00c;
+}
 .option.down{
-    background-color:cyan;
+    background-color:yellow;
     /*height:20%;
     top:-10px;*/
 }
@@ -479,6 +491,7 @@ button.down{
 .filter-cont{
     width:100%;
     margin-bottom:20px;
+    margin-left:5%;
 }
 .filt-cont-label,.filt-cont,{
     margin-left:4%;
