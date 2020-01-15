@@ -216,7 +216,8 @@ GWCatalogue.prototype.init = function(){
         panel:"info",
         lang:"en",
         showerrors:true,
-        selectedevent:"GW170814"
+        selectedevent:"GW170814",
+        panel:"info"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
@@ -272,32 +273,45 @@ GWCatalogue.prototype.init = function(){
     }
     this.filterr=true;
 
-    this.panels = {
-        'info':{'status':true,
-            'hide':function(){gw.hideInfo()},
-            'show':function(){gw.showInfo()}},
-        'options':{'status':false,
-            'hide':function(){gw.hideOptions()},
-            'show':function(){gw.showSettings()}},
-        'help':{'status':false,
-            'hide':function(){gw.hideHelp()},
-            'show':function(){gw.showHelp()}},
-        'lang':{'status':false,
-            'hide':function(){gw.hideLang()},
-            'show':function(){gw.showLang()}},
-        'filter':{'status':false,
-            'hide':function(){gw.hideFilter()},
-            'show':function(){gw.showFilter()}}
-    }
-    if (this.urlVars.panel){
-        for (p in this.panels){
-            if (p==this.urlVars.panel){
-                this.panels[p].status=true
-            }else{this.panels[p].status=false}
-        }
-    }
+    // this.panels = {
+    //     'info':{'status':true,
+    //         'hide':function(){gw.hideInfo()},
+    //         'show':function(){gw.showInfo()}},
+    //     'options':{'status':false,
+    //         'hide':function(){gw.hideOptions()},
+    //         'show':function(){gw.showOptions()}},
+    //     'help':{'status':false,
+    //         'hide':function(){gw.hideHelp()},
+    //         'show':function(){gw.showHelp()}},
+    //     'lang':{'status':false,
+    //         'hide':function(){gw.hideLang()},
+    //         'show':function(){gw.showLang()}},
+    //     'filter':{'status':false,
+    //         'hide':function(){gw.hideFilter()},
+    //         'show':function(){gw.showFilter()}}
+    // }
+    // if (this.urlVars.panel){
+    //     for (p in this.panels){
+    //         if (p==this.urlVars.panel){
+    //             this.panels[p].status=true
+    //         }else{this.panels[p].status=false}
+    //     }
+    // }
 
 }
+// GWCatalogue.prototype.showpanel = function (panel) {
+//     if (this.panels.panel){
+//         this.panels[panel].show()
+//         this.panels[panel].status=true
+//         for (p in this.panels){
+//             if (p!=panels){
+//                 this.panels[p].status=false
+//             }
+//         }
+//     }else{
+//
+//     }
+// };
 GWCatalogue.prototype.getUrlVars = function(){
     // Get URL and query variables
     var vars = {},hash;
@@ -371,10 +385,12 @@ GWCatalogue.prototype.getPanel = function(){
     else{return "info"}
 }
 GWCatalogue.prototype.setPanel = function(panel){
+    console.log('panel=',panel)
     if (panel=="options"){this.showOptions();}
     else if(panel=="help"){this.showHelp();}
     else if(panel=="lang"){this.showLang();}
     else if(panel=="filter"){this.showFilter();}
+    else if(panel=="info"){this.showInfo();}
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
     // translate text given dict
@@ -1982,8 +1998,8 @@ GWCatalogue.prototype.setStyles = function(){
     this.styleDomains = ['GW','Candidate'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,5]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
@@ -2294,6 +2310,8 @@ GWCatalogue.prototype.whenLoaded = function(){
     gw.orderData();
     this.setScales();
     gw.makePlot();
+    panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
+    gw.setPanel(panel)
     if(gw.debug){console.log('plotted');}
     // select a default event
 }
@@ -4433,7 +4451,6 @@ GWCatalogue.prototype.makePlot = function(){
     this.addLang(false);
     this.addFilter();
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
-    this.setPanel(panel);
     this.adjCss();
     this.selectEvent(this.selectedevent,redraw=true,init=true);
     d3.select('#copy-button').attr('data-clipboard-text',newUrl);
@@ -4458,7 +4475,8 @@ GWCatalogue.prototype.replot = function(){
     this.addHelp();
     this.adjCss();
     // this.redrawLabels();
-    this.setPanel(this.getPanel());
+    panel = this.getPanel();
+    this.setPanel(panel);
     this.cat.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.selectedevent){
