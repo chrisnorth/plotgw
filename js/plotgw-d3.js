@@ -85,16 +85,19 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer colourise")
-            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div><div class="panel-block"><div class="panel-cont-text"><span id="preset-warn">TEXT</span>&nbsp;<span id="preset-filter-link" style="cursor:pointer;color:red">&rarr;</span></div></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
+            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
         d3.select("#preset-options").append("div")
-            .attr("id","buttonpre-conf").attr("class","option option-pre det-only")
-            .html('<img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg">');
+            .attr("id","buttonpre-conf").attr("class","panel-cont")
+            .html('<div class="option option-pre det-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text" id="conf-only-text">Confirmed events only</div>');
         d3.select("#preset-options").append("div")
-            .attr("id","buttonpre-cand").attr("class","option option-pre cand-only")
-            .html('<img class="button button-pre" id="preset-cand-img" src="img/candidate.svg">');
+            .attr("id","buttonpre-cand").attr("class","panel-cont")
+            .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text" id="cand-only-text">Candidate events only</div>');
         d3.select("#preset-options").append("div")
-            .attr("id","buttonpre-all").attr("class","option option-pre allsrc")
-            .html('<img class="button button-pre" id="preset-all-img" src="img/allsources.svg">')
+            .attr("id","buttonpre-all").attr("class","panel-cont")
+            .html('<div class="option option-pre allsrc"><img class="button button-pre" id="preset-all-img" src="img/allsources.svg"></div><div class="option-pre-text" id="allsrc-text">All events</div>');
+        d3.select("#preset-options").append("div")
+            .attr("class","panel-block")
+            .html('<span id="preset-warn">TEXT</span>&nbsp;<span id="preset-filter-link" style="cursor:pointer;color:red">&rarr;</span></div>');
     }
     if (d3.select("#help-outer").empty()){
         if(this.debug){console.log('adding help-outer')}
@@ -2405,8 +2408,16 @@ GWCatalogue.prototype.setLang = function(){
 
     d3.select("#options-gen > .panel-title")
         .html(this.tl('%text.plotgw.presets%'))
+    d3.select("#conf-only-text")
+        .html(this.tl('%text.plotgw.preset-conf-only%'))
+    d3.select("#cand-only-text")
+        .html(this.tl('%text.plotgw.preset-cand-only%'))
+    d3.select("#allsrc-text")
+        .html(this.tl('%text.plotgw.preset-allsrc%'))
     d3.select("#preset-warn")
         .html(this.tl('%text.plotgw.preset-warn%'))
+    d3.select("#preset-filter-link")
+        .html(this.tl('%text.plotgw.preset-filter-link%'))
     d3.select("#options-x > .panel-title")
         .html(this.tl('%text.plotgw.horizontal-axis%'))
     d3.select("#options-y > .panel-title")

@@ -379,6 +379,12 @@ button.down{
     margin:1%;
     cursor:pointer;
 }
+.options-box .option-pre{
+    width:10%;
+}
+.options-box .option-pre-text{
+    font-size:1.3em;
+}
 .options-box.bottom .option{
     width:25%;
 }
@@ -390,6 +396,16 @@ button.down{
 }
 .option button img, .option img, .filter-icon img{
     width:90%;
+}
+.option-pre{
+    float:left;
+}
+.option-pre-text{
+    display:inline-block;
+    margin-left:4%;
+    width:75%;
+    padding-bottom:10px;
+    padding-top:10px;
 }
 .option.det-only{
     background-color:#0c0;
