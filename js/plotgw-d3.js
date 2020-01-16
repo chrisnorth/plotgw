@@ -239,6 +239,7 @@ GWCatalogue.prototype.init = function(){
         "fr":{code:"fr",name:"Français"},
         "it":{code:"it",name:"Italiano"},
         "pl":{code:"pl",name:"Polski"},
+        "or":{code:"or",name:"ଓଡ଼ିଆ"}
     }
 
     this.filters = {
@@ -431,6 +432,37 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
     // }
     return(textOut);
 }
+GWCatalogue.prototype.tName = function(textIn){
+    this.names={"GW":"%data.bub.name.GW%",
+        "LVT":"%data.bub.name.LVT%",
+        "-A":"%data.bub.name.A%",
+        "-B":"%data.bub.name.B%"}
+    rename=/([A-Z]*)([0-9]*)/;
+    tr=rename.exec(textIn)
+    textOut=gw.tl(((this.names[tr[1]])?this.names[tr[1]]:tr[1])+gw.tN(tr[2]))
+    return(textOut)
+}
+GWCatalogue.prototype.tN = function(key){
+    var systems = {
+            devanagari: 2406, tamil: 3046, kannada:  3302,
+            telugu: 3174, marathi: 2406, malayalam: 3430,
+            oriya: 2918, gurmukhi: 2662, nagari: 2534, gujarati: 2790
+        };
+    if (!systems.hasOwnProperty(this.langdict["meta.numbersystem"].toLowerCase())){return key;}
+    zero = 48; // char code for Arabic zero
+    nine = 57; // char code for Arabic nine
+    offset = (systems[this.langdict["meta.numbersystem"].toLowerCase()] || zero) - zero;
+    output = key.toString().split("");
+    l = output.length;
+
+    for (i = 0; i < l; i++) {
+        cc = output[i].charCodeAt(0);
+        if (cc >= zero && cc <= nine) {
+            output[i] = String.fromCharCode(cc + offset);
+        }
+    }
+    return output.join("");
+}
 GWCatalogue.prototype.getBest = function(item){
     if (item.best){
         return item.best;
@@ -490,6 +522,7 @@ GWCatalogue.prototype.stdlabel = function(d,src){
     }else{
         txt=d[src].best
     }
+    txt=gw.tN(txt);
     if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
     if (typeof txt == "string"){
         // replace superscripts
@@ -522,6 +555,7 @@ GWCatalogue.prototype.stdlabelNoErr = function(d,src){
     }else if((d[src].errtype)&&(d[src].errtype=='upper')){
         txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
     }
+    txt=gw.tN(txt);
     if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
     if (typeof txt == "string"){
         // replace superscripts
@@ -573,7 +607,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             depfn:function(d){return (d.UTC)},
             namefn:function(){return(gw.columns.UTC.name)},
             convfn:['UTC',function(x){return new Date(x)}],
-            strfn:function(d){return(d.UTC.best);},
+            strfn:function(d){return(gw.tN(d.UTC.best));},
             sigfig:0,
             err:0,
             icon:"img/time.svg",
@@ -590,26 +624,26 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 if (1/d.FAR.best<1000){
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",(1./d.FAR.best)
-                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$val$",gw.tN((1./d.FAR.best)
+                            .toPrecision(gw.columns.FAR.sigfig)))
                         .replace("$dur$","%data.FAR.unit.yr%");
                 }else if (1/d.FAR.best<1e6){
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",((1./d.FAR.best)/1e3)
-                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e3)
+                            .toPrecision(gw.columns.FAR.sigfig)))
                         .replace("$dur$","%data.FAR.unit.kyr%");
                 }else if (1/d.FAR.best<1e9){
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",((1./d.FAR.best)/1e6)
-                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e6)
+                            .toPrecision(gw.columns.FAR.sigfig)))
                         .replace("$dur$","%data.FAR.unit.Myr%");
                 }else{
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",((1./d.FAR.best)/1e9)
-                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e9)
+                            .toPrecision(gw.columns.FAR.sigfig)))
                         .replace("$dur$","%data.FAR.unit.Gyr%");
                 }
                 return(gw.tl(strOut));
@@ -618,7 +652,10 @@ GWCatalogue.prototype.setColumns = function(datadict){
         sigma:{avail:false,type:'src'},
         obsrun:{avail:false,type:'src',icon:"img/obsrun.svg",
             strfn:function(d){
-                return d.obsrun.best+'<br/>('+d.net.best+')' ;
+                nettxt='';
+                netlist=d.net.best.split('');
+                for (i in netlist){nettxt+=gw.tl('%text.gen.det.'+netlist[i]+'%')};
+                return gw.tl('%text.plotgw.filter.observingrun.'+d.obsrun.best+'%<br/>('+nettxt+')') ;
             }
         },
         detType:{avail:false,type:'src',icon:"img/tag.svg"},
@@ -758,8 +795,8 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 day=d.UTC.best.split('T')[0].split('-')[0];
                 month=d['UTC'].best.split('T')[0].split('-')[1];
                 year=d['UTC'].best.split('T')[0].split('-')[2];
-                time=d['UTC'].best.split('T')[1]
-                return(year+'-'+month+'-'+day+"<br/>"+time+" UT")
+                time=d['UTC'].best.split('T')[1];
+                return(gw.tN(gw.tl(year+'-'+month+'-'+day+"<br/>"+time+" %data.time.UT%")));
             },
             icon:"img/time.svg",
             name:'%data.time.name%'},
@@ -1860,7 +1897,7 @@ GWCatalogue.prototype.updateSketch = function(d){
             this.d = d;
             // update title
             this.sketchName = d["name"];
-            this.sketchTitle.html("Information: "+this.sketchName+' (Candidate)');
+            this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)+' %text.plotgw.information.candidate%'));
             this.sketchTitleHint.html("");
             //update labels
             this.redrawLabels();
@@ -1891,7 +1928,7 @@ GWCatalogue.prototype.updateSketch = function(d){
             this.d = d;
             // update title
             this.sketchName = d["name"];
-            this.sketchTitle.html("Information: "+this.sketchName);
+            this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)));
             this.sketchTitleHint.html(this.obj2hint(d.objType.best));
             //update labels
             this.redrawLabels();
@@ -2035,7 +2072,7 @@ GWCatalogue.prototype.tttext = function(d){
     xval= (this.isEst(d,this.xvar)) ? this.tl('%text.plotgw.unknown%') : this.tl(this.oneline(d[this.xvar].strnoerr))
     yval= (this.isEst(d,this.yvar)) ? this.tl('%text.plotgw.unknown%') : this.tl(this.oneline(d[this.yvar].strnoerr))
 
-    return "<span class='ttname'>"+d["name"]+"</span>"+
+    return "<span class='ttname'>"+this.tName(d["name"])+"</span>"+
     "<span class='ttpri'>"+this.tl(this.columns[this.xvar].name)+
         ": "+xval+"</span>"+
     "<span class='ttsec'>"+this.tl(this.columns[this.yvar].name) +
@@ -2455,7 +2492,7 @@ GWCatalogue.prototype.setLang = function(){
             .html(this.tl(this.filters[f].note));
     }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
-        Cand:this.tl('%text.plotgw.legend.candidates%')}
+        Candidate:this.tl('%text.plotgw.legend.candidates%')}
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
