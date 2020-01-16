@@ -270,8 +270,6 @@ GWCatalogue.prototype.init = function(){
     			{"id": "filt-det", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
     			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
             ]
-    		// ],
-            // "note":"%text.plotgw.filter.note%"
 	    }
     }
     this.filterr=true;
@@ -2407,17 +2405,17 @@ GWCatalogue.prototype.setLang = function(){
     }
 
     d3.select("#options-gen > .panel-title")
-        .html(this.tl('%text.plotgw.presets%'))
+        .html(this.tl('%text.plotgw.presets.title%'))
     d3.select("#conf-only-text")
-        .html(this.tl('%text.plotgw.preset-conf-only%'))
+        .html(this.tl('%text.plotgw.presets.conf-only%'))
     d3.select("#cand-only-text")
-        .html(this.tl('%text.plotgw.preset-cand-only%'))
+        .html(this.tl('%text.plotgw.presets.cand-only%'))
     d3.select("#allsrc-text")
-        .html(this.tl('%text.plotgw.preset-allsrc%'))
+        .html(this.tl('%text.plotgw.presets.allsrc%'))
     d3.select("#preset-warn")
-        .html(this.tl('%text.plotgw.preset-warn%'))
+        .html(this.tl('%text.plotgw.presets.filter-warn%'))
     d3.select("#preset-filter-link")
-        .html(this.tl('%text.plotgw.preset-filter-link%'))
+        .html(this.tl('%text.plotgw.presets.filter-link%'))
     d3.select("#options-x > .panel-title")
         .html(this.tl('%text.plotgw.horizontal-axis%'))
     d3.select("#options-y > .panel-title")
