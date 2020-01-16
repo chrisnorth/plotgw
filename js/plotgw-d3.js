@@ -1224,7 +1224,9 @@ GWCatalogue.prototype.setScales = function(){
     }
     //tool-top labels
     this.ttlabels = {
-        switch:"%tooltip.plotgw.switchunits%"
+        switch:"%tooltip.plotgw.switchunits%",
+        paper:"%tooltip.plotgw.paper%",
+        data:"%tooltip.plotgw.opendata%"
     };
     //text for black labels
     this.labBlank="--";
