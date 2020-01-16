@@ -588,20 +588,29 @@ GWCatalogue.prototype.setColumns = function(datadict){
             forcezero:'off',
             strfn:function(d){
                 if (1/d.FAR.best<1000){
-                    strOut="%data.FAR.unit.1per%<br/>"+
-                    (1./d.FAR.best).toPrecision(gw.columns.FAR.sigfig)+
-                    " %data.FAR.unit.yr%";
-                // }else if (1/d.FAR.best<1000){
-                //     strOut="%data.FAR.unit.1per%<br/>"+(1./d.FAR.best).toFixed(0)+
-                //     "<%data.FAR.unit.yr%";
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",(1./d.FAR.best)
+                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$dur$","%data.FAR.unit.yr%");
                 }else if (1/d.FAR.best<1e6){
-                    strOut="%data.FAR.unit.1per%<br/>"
-                    +((1./d.FAR.best)/1e3).toPrecision(gw.columns.FAR.sigfig)+
-                    " %data.FAR.unit.kyr%";
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",((1./d.FAR.best)/1e3)
+                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$dur$","%data.FAR.unit.kyr%");
+                }else if (1/d.FAR.best<1e9){
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",((1./d.FAR.best)/1e6)
+                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$dur$","%data.FAR.unit.Myr%");
                 }else{
-                    strOut="%data.FAR.unit.1per%<br/>"
-                    +((1./d.FAR.best)/1e6).toPrecision(gw.columns.FAR.sigfig)+
-                    " %data.FAR.unit.Myr%";
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",((1./d.FAR.best)/1e9)
+                            .toPrecision(gw.columns.FAR.sigfig))
+                        .replace("$dur$","%data.FAR.unit.Gyr%");
                 }
                 return(gw.tl(strOut));
             }
