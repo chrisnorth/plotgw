@@ -125,6 +125,8 @@
     "text.plotgw.presets.allsrc":{"_title":"All events","_text":"Text for preset to show all events","_type":"string"},
     "text.plotgw.presets.filter-warn":{"_title":"Preset filter warning","_text":"Text for warn that presets may change filter","_type":"string"},
     "text.plotgw.presets.filter-link":{"_title":"Link to filters","_text":"Text for link to update filters","_type":"string"},
+    "text.plotgw.options.allsrc":{"_title":"Parameters for all events","_text":"Text for list of parameters available for all events","_type":"string"},
+    "text.plotgw.options.conf-only":{"_title":"Parameters for confirmed  events only","_text":"Text for list of parameters available for confirmed events only","_type":"string"},
     "text.plotgw.horizontal-axis":{"_title":"Horizontal Axis","_text":"Heading on options pane for changing the horizontal axis variable","_type":"string"},
     "text.plotgw.vertical-axis":{"_title":"Vertical Axis","_text":"Heading on options pane for changing the vertical axis variable","_type":"string"},
     "text.plotgw.display":{"_title":"Display","_text":"Heading on options pane for display options","_type":"string"},

@@ -105,6 +105,8 @@
  "text.plotgw.presets.allsrc": "All events",
  "text.plotgw.presets.filter-warn": "Warning: filters may be updated when using these presets",
  "text.plotgw.presets.filter-link": "Update filters &rarr;",
+ "text.plotgw.options.allsrc": "Parameters for all events:",
+ "text.plotgw.options.conf-only": "Parameters for confirmed events only:",
  "text.plotgw.horizontal-axis": "Horizontal Axis",
  "text.plotgw.vertical-axis": "Vertical Axis",
  "text.plotgw.log-axis": "Logarithmic Axis",

@@ -385,6 +385,9 @@ button.down{
 .options-box .option-pre-text{
     font-size:1.3em;
 }
+.options-box .option-pre-desc{
+    font-weight:bold;
+}
 .options-box.bottom .option{
     width:25%;
 }
@@ -405,7 +408,8 @@ button.down{
     margin-left:4%;
     width:75%;
     padding-bottom:10px;
-    padding-top:10px;
+    /* padding-top:10px; */
+    font-size:1.3em;
 }
 .option.det-only{
     background-color:#0c0;

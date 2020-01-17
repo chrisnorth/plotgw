@@ -85,16 +85,16 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer colourise")
-            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
+            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons-all"></div><div class="options-buttons" id="x-buttons-conf"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons-all"></div><div class="options-buttons" id="y-buttons-conf"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-conf").attr("class","panel-cont")
-            .html('<div class="option option-pre det-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text" id="conf-only-text">Confirmed events only</div>');
+            .html('<div class="option option-pre det-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br>(<span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span>)</span></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-cand").attr("class","panel-cont")
-            .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text" id="cand-only-text">Candidate events only</div>');
+            .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="cand-only-text"></span></br>(<span id="cand-only-x-axis"></span> : <span id="cand-only-y-axis"></span>)</div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-all").attr("class","panel-cont")
-            .html('<div class="option option-pre allsrc"><img class="button button-pre" id="preset-all-img" src="img/allsources.svg"></div><div class="option-pre-text" id="allsrc-text">All events</div>');
+            .html('<div class="option option-pre allsrc"><img class="button button-pre" id="preset-all-img" src="img/allsources.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="allsrc-text"></span></br>(<span id="allsrc-x-axis"></span> : <span id="allsrc-y-axis"></span>)</div>');
         d3.select("#preset-options").append("div")
             .attr("class","panel-block")
             .html('<span id="preset-warn">TEXT</span>&nbsp;<span id="preset-filter-link" style="cursor:pointer;color:red">&rarr;</span></div>');
@@ -268,12 +268,36 @@ GWCatalogue.prototype.init = function(){
             "name":'%data.dettype.name%',
     		"type":"checkbox",
     		"options":[
-    			{"id": "filt-det", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
+    			{"id": "filt-conf", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
     			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
             ]
 	    }
     }
     this.filterr=true;
+    this.presets = {
+        "conf-only":{
+            "icon":"",
+            "x-axis":"M1",
+            "y-axis":"M2",
+            "tooltip":"%tooltip.plotgw.preset-conf%",
+            "desc":"%text.plotgw.presets.conf-only%"
+        },
+        "cand-only":{
+            "icon":"",
+            "x-axis":"UTCdate",
+            "y-axis":"FAR",
+            "tooltip":"%tooltip.plotgw.preset-cand%",
+            "desc":"%text.plotgw.presets.cand-only%"
+        },
+        "allsrc":{
+            "icon":"",
+            "x-axis":"UTCdate",
+            "y-axis":"DL",
+            "tooltip":"%tooltip.plotgw.preset-all%",
+            "desc":"%text.plotgw.presets.allsrc%"
+        }
+    }
+
 
     // this.panels = {
     //     'info':{'status':true,
@@ -2454,20 +2478,30 @@ GWCatalogue.prototype.setLang = function(){
 
     d3.select("#options-gen > .panel-title")
         .html(this.tl('%text.plotgw.presets.title%'))
-    d3.select("#conf-only-text")
-        .html(this.tl('%text.plotgw.presets.conf-only%'))
-    d3.select("#cand-only-text")
-        .html(this.tl('%text.plotgw.presets.cand-only%'))
-    d3.select("#allsrc-text")
-        .html(this.tl('%text.plotgw.presets.allsrc%'))
+    for (pre in this.presets){
+        d3.select("#"+pre+"-text")
+            .html(this.tl(this.presets[pre]["desc"]));
+        d3.select("#"+pre+"-x-axis")
+            .html(this.tl(this.columns[this.presets[pre]["x-axis"]]["name"]));
+        d3.select("#"+pre+"-y-axis")
+            .html(this.tl(this.columns[this.presets[pre]["y-axis"]]["name"]));
+    }
     d3.select("#preset-warn")
         .html(this.tl('%text.plotgw.presets.filter-warn%'))
     d3.select("#preset-filter-link")
         .html(this.tl('%text.plotgw.presets.filter-link%'))
     d3.select("#options-x > .panel-title")
         .html(this.tl('%text.plotgw.horizontal-axis%'))
+    d3.select("#x-buttons-all > .panel-block")
+        .html(this.tl('%text.plotgw.options.allsrc%'))
+    d3.select("#x-buttons-conf > .panel-block")
+        .html(this.tl('%text.plotgw.options.conf-only%'))
     d3.select("#options-y > .panel-title")
         .html(this.tl('%text.plotgw.vertical-axis%'))
+    d3.select("#y-buttons-all > .panel-block")
+        .html(this.tl('%text.plotgw.options.allsrc%'))
+    d3.select("#y-buttons-conf > .panel-block")
+        .html(this.tl('%text.plotgw.options.conf-only%'))
     d3.select("#display-options > .panel-title")
         .html(this.tl('%text.plotgw.display%'))
     d3.select("#xzero-lab,#yzero-lab")
@@ -3637,19 +3671,42 @@ GWCatalogue.prototype.addOptions = function(){
     var gw=this;
     // add buttons
     var col;
-    var divx = document.getElementById('x-buttons');
-    var divy= document.getElementById('y-buttons');
+    var divxall = document.getElementById('x-buttons-all');
+    var divxconf = document.getElementById('x-buttons-conf');
+    var divyall = document.getElementById('y-buttons-all');
+    var divyconf = document.getElementById('y-buttons-conf');
+
+    var xalltxt=document.createElement('div');
+    xalltxt.className = 'panel-block';
+    xalltxt.innerHTML = this.tl('%text.plotgw.options.allsrc%');
+    var xconftxt=document.createElement('div');
+    xconftxt.className = 'panel-block';
+    xconftxt.innerHTML = this.tl('%text.plotgw.options.conf-only%');
+
+    var yalltxt=document.createElement('div');
+    yalltxt.className = 'panel-block';
+    yalltxt.innerHTML = this.tl('%text.plotgw.options.allsrc%');
+    var yconftxt=document.createElement('div');
+    yconftxt.className = 'panel-block';
+    yconftxt.innerHTML = this.tl('%text.plotgw.options.conf-only%');
+
+    divxall.appendChild(xalltxt);
+    divxconf.appendChild(xconftxt);
+    divyall.appendChild(yalltxt);
+    divyconf.appendChild(yconftxt);
 
     for (col in gw.columns){
         if (gw.columns[col].avail){
             var newoptdivx = document.createElement('div');
+            newoptdivx.setAttribute("id","button-divx-"+col);
             if (gw.columns[col].cand){
                 newoptdivx.className = 'option option-x allsrc';
+                divxall.appendChild(newoptdivx);
             }else{
                 newoptdivx.className = 'option option-x det-only';
+                divxconf.appendChild(newoptdivx);
             }
-            newoptdivx.setAttribute("id","button-divx-"+col);
-            divx.appendChild(newoptdivx);
+
             var newoptinputx = document.createElement('img');
             newoptinputx.type = 'submit';
             newoptinputx.name = col;
@@ -3681,6 +3738,10 @@ GWCatalogue.prototype.addOptions = function(){
                     document.getElementById("xzero-lab").classList.remove("disabled");
                 }
                 this.classList.add("down");
+                if (!gw.columns[newXvar]["cand"]){
+                    // need to add in confirmed events to be able to display anything
+                    d3.select("#filt-conf").property("checked",true);
+                }
                 gw.updateFilters();
                 gw.updateBothAxes(newXvar,gw.yvar);
             });
@@ -3692,11 +3753,12 @@ GWCatalogue.prototype.addOptions = function(){
             var newoptdivy = document.createElement('div');
             if (gw.columns[col].cand){
                 newoptdivy.className = 'option option-y allsrc';
+                divyall.appendChild(newoptdivy);
             }else{
                 newoptdivy.className = 'option option-y det-only';
+                divyconf.appendChild(newoptdivy);
             }
             newoptdivy.setAttribute("id","button-divy-"+col);
-            divy.appendChild(newoptdivy);
             var newoptinputy = document.createElement('img');
             newoptinputy.type = 'submit';
             newoptinputy.name = col;
@@ -3728,6 +3790,10 @@ GWCatalogue.prototype.addOptions = function(){
                     document.getElementById("yzero-lab").classList.remove("disabled");
                 }
                 this.classList.add("down");
+                if (!gw.columns[newYvar]["cand"]){
+                    // need to add in confirmed events to be able to display anything
+                    d3.select("#filt-conf").property("checked",true);
+                }
                 gw.updateFilters();
                 gw.updateBothAxes(gw.xvar,newYvar);
             });
@@ -3808,11 +3874,25 @@ GWCatalogue.prototype.addOptions = function(){
     // d3.select("#preset-options").append('div')
     //     .attr("class","panel-cont-text")
     //     .html(this.tl("%text.plotgw.options.warn%"))
+    d3.select("#buttonpre-conf").on("click",function(){
+        d3.select("#buttonx-"+gw.presets["conf-only"]["x-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["cont-only"]["y-axis"])[0][0].click();
+        // change filters
+        d3.select("#filt-cand").property("checked",false);
+        d3.select("#filt-conf").property("checked",true);
+        gw.updateFilters();
+        // d3.select("#limOpt").property("checked",false);
+        // gw.limitOptions();
+    }).on("mouseover",function(){
+        gw.showTooltipManual(gw.presets["conf-only"]["tooltip"]);
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
     d3.select("#buttonpre-cand").on("click",function(){
-        d3.select("#buttonx-UTCdate")[0][0].click();
-        d3.select("#buttony-DL")[0][0].click();
+        d3.select("#buttonx-"+gw.presets["cand-only"]["x-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["cand-only"]["y-axis"])[0][0].click();
         d3.select("#filt-cand").property("checked",true);
-        d3.select("#filt-det").property("checked",false);
+        d3.select("#filt-conf").property("checked",false);
         gw.updateFilters();
         // d3.select("#limOpt").property("checked",true);
         // gw.limitOptions();
@@ -3821,31 +3901,17 @@ GWCatalogue.prototype.addOptions = function(){
     }).on("mouseout",function(){
         gw.hideTooltipManual();
     });
-    d3.select("#buttonpre-conf").on("click",function(){
-        d3.select("#buttonx-M1")[0][0].click();
-        d3.select("#buttony-M2")[0][0].click();
-        // change filters
-        d3.select("#filt-cand").property("checked",false);
-        d3.select("#filt-det").property("checked",true);
-        gw.updateFilters();
-        // d3.select("#limOpt").property("checked",false);
-        // gw.limitOptions();
-    }).on("mouseover",function(){
-        gw.showTooltipManual("%tooltip.plotgw.preset-conf%");
-    }).on("mouseout",function(){
-        gw.hideTooltipManual();
-    });
     d3.select("#buttonpre-all").on("click",function(){
-        d3.select("#buttonx-UTCdate")[0][0].click();
-        d3.select("#buttony-DL")[0][0].click();
+        d3.select("#buttonx-"+gw.presets["allsrc"]["x-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["allsrc"]["y-axis"])[0][0].click();
         // change filters
         d3.select("#filt-cand").property("checked",true);
-        d3.select("#filt-det").property("checked",true);
+        d3.select("#filt-conf").property("checked",true);
         gw.updateFilters();
         // d3.select("#limOpt").property("checked",false);
         // gw.limitOptions();
     }).on("mouseover",function(){
-        gw.showTooltipManual("%tooltip.plotgw.preset-all%");
+        gw.showTooltipManual(gw.presets["allsrc"]["tooltip"]);
     }).on("mouseout",function(){
         gw.hideTooltipManual();
     });
