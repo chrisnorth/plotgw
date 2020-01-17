@@ -88,7 +88,7 @@ GWCatalogue.prototype.init = function(){
             .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons-all"></div><div class="options-buttons" id="x-buttons-conf"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons-all"></div><div class="options-buttons" id="y-buttons-conf"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-conf").attr("class","panel-cont")
-            .html('<div class="option option-pre det-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br>(<span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span>)</span></div>');
+            .html('<div class="option option-pre conf-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br>(<span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span>)</span></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-cand").attr("class","panel-cont")
             .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="cand-only-text"></span></br>(<span id="cand-only-x-axis"></span> : <span id="cand-only-y-axis"></span>)</div>');
@@ -3703,7 +3703,7 @@ GWCatalogue.prototype.addOptions = function(){
                 newoptdivx.className = 'option option-x allsrc';
                 divxall.appendChild(newoptdivx);
             }else{
-                newoptdivx.className = 'option option-x det-only';
+                newoptdivx.className = 'option option-x conf-only';
                 divxconf.appendChild(newoptdivx);
             }
 
@@ -3755,7 +3755,7 @@ GWCatalogue.prototype.addOptions = function(){
                 newoptdivy.className = 'option option-y allsrc';
                 divyall.appendChild(newoptdivy);
             }else{
-                newoptdivy.className = 'option option-y det-only';
+                newoptdivy.className = 'option option-y conf-only';
                 divyconf.appendChild(newoptdivy);
             }
             newoptdivy.setAttribute("id","button-divy-"+col);
@@ -3876,7 +3876,7 @@ GWCatalogue.prototype.addOptions = function(){
     //     .html(this.tl("%text.plotgw.options.warn%"))
     d3.select("#buttonpre-conf").on("click",function(){
         d3.select("#buttonx-"+gw.presets["conf-only"]["x-axis"])[0][0].click();
-        d3.select("#buttony-"+gw.presets["cont-only"]["y-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["cand-only"]["y-axis"])[0][0].click();
         // change filters
         d3.select("#filt-cand").property("checked",false);
         d3.select("#filt-conf").property("checked",true);
@@ -3927,10 +3927,10 @@ GWCatalogue.prototype.addOptions = function(){
 GWCatalogue.prototype.limitOptions = function(){
     this.limOpt=d3.select('#limOpt')[0][0].checked
     if (this.limOpt){
-        d3.selectAll('.option-x.det-only,.option-y.det-only')
+        d3.selectAll('.option-x.conf-only,.option-y.conf-only')
             .style('display','none');
     }else{
-        d3.selectAll('.option-x.det-only,.option-y.det-only')
+        d3.selectAll('.option-x.conf-only,.option-y.conf-only')
             .style('display','inline-block');
     }
     return;

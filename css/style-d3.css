@@ -411,7 +411,7 @@ button.down{
     /* padding-top:10px; */
     font-size:1.3em;
 }
-.option.det-only{
+.option.conf-only{
     background-color:#0c0;
     border-color: #050;
 }
