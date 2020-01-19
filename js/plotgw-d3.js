@@ -1207,15 +1207,13 @@ GWCatalogue.prototype.setScales = function(){
     // this.plottable = function(d) { return (d[gw.xvar])&&(d[gw.yvar])&&(d.active);}
 
     this.dotOp = function(d) {
-        if((d[gw.xvar])&&(d[gw.yvar])&&(d.active)){
-            return ((gw.isEst(d,gw.xvar))||(gw.isEst(d,gw.yvar))) ? 0.5 : 1
-        }else{return 0}
+        if((d[gw.xvar])&&(d[gw.yvar])&&(d.active)){return(1)}
+        else{return 0}
     }
     this.errOp = function(d,param){
         if ((!d[this.xvar])||(!d[this.yvar])){return 0}
         else if (this.columns[param]["err"]==0){return 0}
-        else if (((gw.showerrors)||(gw.isEst(d,param)))&&(d.active)){
-            return (gw.isEst(d,param)) ? 0.5 : 1;}
+        else if ((gw.showerrors)&&(d.active)){return(gw.opErr)}
         else{return 0;}
     }
 
@@ -2076,9 +2074,9 @@ GWCatalogue.prototype.setStyles = function(){
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
-    this.isEst = function(d,param){
-        return (d[param]) ? d[param].hasOwnProperty('est') : false;
-    }
+    // this.isEst = function(d,param){
+    //     return (d[param]) ? d[param].hasOwnProperty('est') : false;
+    // }
     this.isSoft = function(d,param,i=0){
         if ((d[param])&&(d[param]['esttype'])){
             return (d[param]['esttype'][i]=='soft') ? true : false
@@ -2093,8 +2091,8 @@ GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
     if (this.debug){console.log(d["name"],this.columns[this.xvar].name,d[this.xvar].strnoerr,this.columns[this.yvar].name,d[this.yvar].strnoerr)}
 
-    xval= (this.isEst(d,this.xvar)) ? this.tl('%text.plotgw.unknown%') : this.tl(this.oneline(d[this.xvar].strnoerr))
-    yval= (this.isEst(d,this.yvar)) ? this.tl('%text.plotgw.unknown%') : this.tl(this.oneline(d[this.yvar].strnoerr))
+    xval= this.tl(this.oneline(d[this.xvar].strnoerr))
+    yval= this.tl(this.oneline(d[this.yvar].strnoerr))
 
     return "<span class='ttname'>"+this.tName(d["name"])+"</span>"+
     "<span class='ttpri'>"+this.tl(this.columns[this.xvar].name)+
@@ -2839,7 +2837,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMap).attr("y2",gw.yMap)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     // add top of x error bar
     errX.append("line")
         .attr("class","error errorX errorXp1")
@@ -2849,7 +2847,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     errX.append("line")
         .attr("class","error errorX errorXp2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2858,7 +2856,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     // add bottom of x error bar
     errX.append("line")
         .attr("class","error errorX errorXm1")
@@ -2868,7 +2866,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     errX.append("line")
         .attr("class","error errorX errorXm2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2877,8 +2875,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
-
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     // add y error bar
     errY=errorGroup.selectAll(".errorY-g")
         .data(data)
@@ -2894,7 +2891,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrM)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     // add top of y error bar
     errY.append("line")
         .attr("class","error errorY errorYp1")
@@ -2904,7 +2901,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrPouter).attr("y2",gw.yMapErrP)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     errY.append("line")
         .attr("class","error errorY errorYp2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2913,7 +2910,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrPouter)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     // add bottom of y error bar
     errY.append("line")
         .attr("class","error errorY errorYm1")
@@ -2923,7 +2920,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrMouter).attr("y2",gw.yMapErrM)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     errY.append("line")
         .attr("class","error errorY errorYm2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2932,7 +2929,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrMouter)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
 
     // if (!gw.showerrors){gw.toggleErrors();}
 
@@ -3383,15 +3380,8 @@ GWCatalogue.prototype.updateErrors = function(){
         .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
         .attr("y1",this.yMap).attr("y2",this.yMap)
         .attr("opacity",function(d){return gw.errOp(d,gw.xvar)})
-        .attr("stroke-width",function(d){
-            wid= (gw.isEst(d,gw.xvar)) ? Math.min(10.,7/gw.sksc) + Math.min(10,4./gw.sksc) : gw.swErr;
-            return(wid);})
-        .attr("stroke",function(d){
-            col= (gw.isEst(d,gw.xvar)) ? gw.color(gw.cValue(d)) : gw.getCol('err');
-            return(col);})
-        // .attr("stroke-dasharray",function(d){
-        //     ls= (gw.isEst(d,gw.xvar)) ? gw.linedashes('Candidate') : gw.linedashes('GW');
-        //     return(ls);});
+        .attr("stroke-width",gw.swErr)
+        .attr("stroke",gw.getCol('err'))
     // +ve x error (top)
     errX.selectAll(".errorXp1")
         .transition()
@@ -3463,18 +3453,9 @@ GWCatalogue.prototype.updateErrors = function(){
         .attr("x1",this.xMap).attr("x2",this.xMap)
         .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
         .attr("opacity",function(d){return gw.errOp(d,gw.yvar)})
-        .attr("stroke",function(d){
-            col= (gw.isEst(d,gw.yvar)) ? gw.color(gw.cValue(d)) : gw.getCol('err');
-            return(col);})
-        .attr("stroke-width",function(d){
-            wid= (gw.isEst(d,gw.yvar)) ? Math.min(10.,7/gw.sksc) + Math.min(10,4./gw.sksc) : gw.swErr;
-            return(wid);})
-        .attr("stroke",function(d){
-            col= (gw.isEst(d,gw.yvar)) ? gw.color(gw.cValue(d)) : gw.getCol('err');
-            return(col);})
-        // .attr("stroke-dasharray",function(d){
-        //     ls= ((d[gw.yvar])&&(d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='est')) ? gw.linedashes('Candidate') : gw.linedashes('GW');
-        //     return(ls);});
+        .attr("stroke",gw.getCol('err'))
+        .attr("stroke-width",gw.swErr)
+        .attr("stroke",gw.getCol('err'))
     // +ve y error (top)
     errY.selectAll(".errorYp1")
         .transition()
