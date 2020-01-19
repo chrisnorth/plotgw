@@ -206,7 +206,7 @@
  "text.bub.help.unmerge": "Schwarze Löcher nicht verschmelzen",
  "text.bub.help.showall": "Zeige alle Schwarzen Löcher",
  "text.bub.help.tech": "<p>Eigenschaften der Gravitationswellen-Quellen zeigen entweder die besten Modellwerte (Medianwerte der A-posteriori-Wahrscheinlichkeitsverteilungen) oder die 90%-Konfidenzintervalle. Alle Werte sind im Inertialsystem der Quelle angegeben (d.h. ohne Effekte kosmologischer Rotverschiebung). Weitere Details gibt es im <a target='_blank' href='http://https://gw-openscience.org/' title='GWOSC'>Gravtiational Wave Open Science Center</a>. Daten der Röntgendoppelsterne von <a target='_blank' href='https://stellarcollapse.org/bhmasses' title='Source data'>stellarcollapse.org/bhmasses</a>.</p>",
- "share.plotgw.twitter.text": "Sieh Dir diesen Katalog von Schwarzen Löchern an, die @LIGO beobachtet hat",
+ "share.plotgw.twitter.text": "Sieh Dir diesen Katalog von Schwarzen Löchern an, die @LIGO/@ego_virgo beobachtet hat",
  "share.plotgw.twitter.hashtag": "Gravitationswellen",
  "share.bub.twitter.text": "Schaut euch diese Darstellung mit allen @LIGO/@ego_virgo-Beobachtungen an",
  "share.bub.twitter.hashtag": "Gravitationswellen",
