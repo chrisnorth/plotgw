@@ -2633,7 +2633,7 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
     [xMin,xMax]=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
     // console.log('x min/max',gw.xvar,xMin,xMax);
     if ((gw.columns[gw.xvar].scale)&&(gw.columns[gw.xvar].scale='time')){
-        this.xScale = d3.time.scale().range([0,gw.graphWidth])
+        gw.xScale = d3.time.scale().range([0,gw.graphWidth])
         datexMin=new Date(xMin);
         datexMax=new Date(xMax);
         gw.xScale.domain([datexMin, datexMax]);
@@ -2641,9 +2641,10 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
         mxdiff=(datexMax-datexMin)/(86400*30*1e3);
         mxticks=(mxdiff > 24) ? 6 : (mxdiff < 12) ? 1 : 3;
         gw.xScale.nice(d3.time.month,mxticks);
+        if(document.getElementById('x-axis-g')){document.getElementById('x-axis-g').classList.remove('log');}
         // x axis
         this.xAxis = d3.svg.axis()
-                .scale(this.xScale)
+                .scale(gw.xScale)
                 .ticks(d3.time.month,mxticks)
                 .orient("bottom")
                 .innerTickSize(-this.graphHeight)
@@ -2675,7 +2676,7 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
     [yMin,yMax]=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
     // console.log('y min/max',gw.yvar,yMin,yMax);
     if ((gw.columns[gw.yvar].scale)&&(gw.columns[gw.yvar].scale='time')){
-        this.yScale = d3.time.scale().range([gw.graphHeight,0])
+        gw.yScale = d3.time.scale().range([gw.graphHeight,0])
         dateyMin=new Date(yMin);
         dateyMax=new Date(yMax);
         gw.yScale.domain([dateyMin, dateyMax])
@@ -2683,9 +2684,10 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
         mydiff=(dateyMax-dateyMin)/(86400*30*1e3);
         myticks=(mydiff > 24) ? 6 : (mydiff < 12) ? 1 : 3;
         gw.yScale.nice(d3.time.month,myticks);
+        if(document.getElementById('y-axis-g')){document.getElementById('y-axis-g').classList.remove('log');}
         // y axis
         this.yAxis = d3.svg.axis()
-                .scale(this.yScale)
+                .scale(gw.yScale)
                 .ticks(d3.time.month,myticks)
                 .orient("left")
                 // .innerTickSize(-(this.relw[1]-this.relw[0])*this.graphWidth);
