@@ -411,7 +411,6 @@ GWCatalogue.prototype.getPanel = function(){
     else{return "info"}
 }
 GWCatalogue.prototype.setPanel = function(panel){
-    console.log('panel=',panel)
     if (panel=="options"){this.showOptions();}
     else if(panel=="help"){this.showHelp();}
     else if(panel=="lang"){this.showLang();}
