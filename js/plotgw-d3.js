@@ -1679,24 +1679,36 @@ GWCatalogue.prototype.addProbBars = function(redraw){
             .attr("x",0)
             .attr("fill",this.getCol('probtxt'))
             .attr("y",0)
-            .attr("dy",(0.65*gw.sksc)+"em")
+            .attr("dy",(1.1*gw.sksc)+"em")
             .attr("text-anchor","left")
             .attr("dominant-baseline","central")
             .attr("transform","rotate(-90)")
             .attr("font-size",(1.3*gw.sksc)+"em")
-            .text(this.obj2hint(prob));
+            .text(this.obj2hint(prob,true,true));
         grp.append("text")
             .attr("class","sketch ptxt")
             .attr("id","ptxt2-"+prob)
             .attr("x",0)
             .attr("fill",this.getCol('probtxt'))
             .attr("y",0)
-            .attr("dy",(-0.65*gw.sksc)+"em")
+            .attr("dy",(-0*gw.sksc)+"em")
             .attr("text-anchor","left")
             .attr("dominant-baseline","central")
             .attr("transform","rotate(-90)")
             .attr("font-size",(1.3*gw.sksc)+"em")
             .text(this.obj2hint(prob,true));
+        grp.append("text")
+            .attr("class","sketch ptxt")
+            .attr("id","ptxt3-"+prob)
+            .attr("x",0)
+            .attr("fill",this.getCol('probtxt'))
+            .attr("y",0)
+            .attr("dy",(-1.1*gw.sksc)+"em")
+            .attr("text-anchor","left")
+            .attr("dominant-baseline","central")
+            .attr("transform","rotate(-90)")
+            .attr("font-size",(1.3*gw.sksc)+"em")
+            .text(this.obj2hint(prob));
     }
     this.svgSketch.append("line")
         .attr("class","sketch prob-sketch")
@@ -1729,10 +1741,13 @@ GWCatalogue.prototype.flyOutProbBars = function(){
             .attr("height",this.scaleProbHeight(0));
         this.svgSketch.select('#ptxt-'+prob)
             .transition().duration(this.flySp)
-            .attr("x",this.yScaleSk(-0.7));
+            .attr("x",this.yScaleSk(-1.7));
         this.svgSketch.select('#ptxt2-'+prob)
             .transition().duration(this.flySp)
-            .attr("x",this.yScaleSk(-0.7));
+            .attr("x",this.yScaleSk(-1.7));
+        this.svgSketch.select('#ptxt3-'+prob)
+            .transition().duration(this.flySp)
+            .attr("x",this.yScaleSk(-1.7));
     }
 }
 GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
@@ -1740,9 +1755,11 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
     for (p in this.probs){
         prob=this.probs[p];
         pval=d.objType.prob[prob];
-        if ((pval>0)&(pval<0.01)){ptxt=this.obj2hint(prob)+' (<1%)'}
-        else{ptxt=this.obj2hint(prob)+' ('+(100*pval).toFixed(0)+'%)';}
-        ptxt2=this.obj2hint(prob,true);
+        ptxt=this.obj2hint(prob,true,true);
+        ptxt2=this.obj2hint(prob,true)
+        ptxt3=this.obj2hint(prob);
+        if ((pval>0)&(pval<0.01)){ptxt += ' (<1%)'}
+        else{ptxt += ' ('+(100*pval).toFixed(0)+'%)';}
         dt=(delay) ? this.flySp/2 : 0;
         if (pval<=0.5){
             ptxty=this.yScaleSk((pval*this.probpos.height));
@@ -1763,6 +1780,11 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
                 .attr("x",ptxty)
                 .attr("fill",this.getCol('probtxt'))
                 .text(ptxt2);
+            this.svgSketch.select('#ptxt3-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt3);
         }else if(resize=="snap"){
             this.svgSketch.select('#prob-bar-'+prob)
                 .attr("y",this.scaleProbTop(pval))
@@ -1776,6 +1798,10 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
                 .attr("x",ptxty)
                 .attr("fill",this.getCol('probtxt'))
                 .text(ptxt2);
+            this.svgSketch.select('#ptxt3-'+prob)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt3);
         }
     }
 }
@@ -1842,17 +1868,18 @@ GWCatalogue.prototype.redrawLabels = function(){
         }
     }
 }
-GWCatalogue.prototype.obj2hint = function(objType,desc=false){
+GWCatalogue.prototype.obj2hint = function(objType,desc=false,line2=false){
     if (objType=='BBH'){
-        return (desc) ? this.tl('%text.gen.bbh.def%',true) : this.tl('%text.gen.bbh%')}
+        return (desc) ? (line2) ? this.tl('%text.gen.bbh.lab-2%') : this.tl('%text.gen.bbh.lab%') :
+         this.tl('%text.gen.bbh.def%',true)}
     else if (objType=='BNS'){
-        return (desc) ? this.tl('%text.gen.bns.def%',true) : this.tl('%text.gen.bns%')}
+        return (desc) ? ((line2) ? this.tl('%text.gen.bns.lab-2%') : this.tl('%text.gen.bns.lab%')) :  this.tl('%text.gen.bns.def%',true)}
     else if (objType=='NSBH'){
-        return (desc) ? this.tl('%text.gen.nsbh.def%',true) : this.tl('%text.gen.nsbh%')}
+        return (desc) ? ((line2) ? this.tl('%text.gen.nsbh.lab-2%') : this.tl('%text.gen.nsbh.lab%')) : this.tl('%text.gen.nsbh.def%',true)}
     else if (objType=='MassGap'){
-        return (desc) ? this.tl('%text.gen.massgap.def%',true) : this.tl('%text.gen.massgap%')}
+        return (desc) ? ((line2) ? this.tl('%text.gen.massgap.lab-2%') : this.tl('%text.gen.massgap.lab%')) : this.tl('%text.gen.massgap.def%',true)}
     else if (objType=='Terrestrial'){
-        return (desc) ? this.tl('%text.gen.terrestrial.def%',true) : this.tl('%text.gen.terrestrial%')}
+        return (desc) ? ((line2) ? this.tl('%text.gen.terrestrial.lab-2%') : this.tl('%text.gen.terrestrial.lab%')) : this.tl('%text.gen.terrestrial.def%',true)}
     else {return ""}
 }
 GWCatalogue.prototype.updateSketch = function(d){
@@ -1861,12 +1888,18 @@ GWCatalogue.prototype.updateSketch = function(d){
         // redrawing what's already there
         if (d.detType.best=='Candidate'){
             this.flyInProbBars(d,"snap");
+            this.flyOutMasses("M1");
+            this.flyOutMasses("M2");
+            this.flyOutMasses("Mfinal");
+            this.hideBHSketch();
             this.sketchTitleHint.html("");
         }else{
             // resize sketch
             this.flyInMasses(d,"M1","snap");
             this.flyInMasses(d,"M2","snap");
             this.flyInMasses(d,"Mfinal","snap");
+            this.hideProbSketch();
+            this.flyOutProbBars();
             this.sketchTitleHint.html(this.obj2hint(d.objType.best));
         }
         // update title
