@@ -568,6 +568,16 @@ button.down{
     padding-bottom:0px;
     width:70%;
 }
+canvas{
+    display:block;
+    position:absolute;
+    opacity:0.9;
+    left:0;
+    top:0;
+}
+canvas.hidden{
+    display:none;
+}
 img.share-icon{
     height:50px;
 }

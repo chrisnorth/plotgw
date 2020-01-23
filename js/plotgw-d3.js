@@ -4580,3 +4580,119 @@ GWCatalogue.prototype.replot = function(){
     gwcat.redraw=false;
     // gwcat.initButtons();
 }
+GWCatalogue.prototype.makeCanvas = function(){
+    var canvas = document.createElement('canvas');
+    canvas.setAttribute("id",'myCanvas');
+    canvas.setAttribute("width",this.svgWidth);
+    canvas.setAttribute("height",this.svgHeight);
+    document.getElementById('graphcontainer').appendChild(canvas);
+    var ctx=canvas.getContext("2d");
+    ctx.fillStyle = this.colourList[gw.colScheme]['bg'];
+    ctx.fillRect(0,0,this.svgWidth,this.svgHeight);
+    [els,xy]=this.getSvgElements();
+    for (e in els){
+        var el=els[e]['node'];
+        tl0=els[e].translate
+        var translate  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(el.getAttribute('transform'));
+        if (el.tagName=="circle"){
+            var cx=parseFloat(el.getAttribute('cx'))+tl0[0];
+            var cy=parseFloat(el.getAttribute('cy'))+tl0[1];
+            var r=parseFloat(el.getAttribute('r'));
+            if(translate){
+                cx+=parseFloat(translate[1]);
+                cy+=parseFloat(translate[2]);
+            }
+            ctx.beginPath();
+            ctx.arc(cx,cy,r,0,2*Math.PI);
+            ctx.stroke();
+        }else if(el.tagName=="line"){
+            var x1=(el.getAttribute('x1')) ? parseFloat(el.getAttribute('x1'))+tl0[0] : tl0[0];
+            var x2=(el.getAttribute('x2')) ? parseFloat(el.getAttribute('x2'))+tl0[0] : tl0[0];
+            var y1=(el.getAttribute('y1')) ? parseFloat(el.getAttribute('y1'))+tl0[1] : tl0[1];
+            var y2=(el.getAttribute('y2')) ? parseFloat(el.getAttribute('y2'))+tl0[1] : tl0[1];
+            if(translate){
+                x1+=parseFloat(translate[1]);
+                y1+=parseFloat(translate[2]);
+                x2+=parseFloat(translate[1]);
+                y2+=parseFloat(translate[2]);
+            }
+            ctx.beginPath();
+            ctx.moveTo(x1,y1);
+            ctx.lineTo(x2,y2);
+            ctx.stroke();
+        // }else if(el.tagName=="path"){
+        //
+        //     if(translate){
+        //         x1+=parseFloat(translate[1]);
+        //         y1+=parseFloat(translate[2]);
+        //         x2+=parseFloat(translate[1]);
+        //         y2+=parseFloat(translate[2]);
+        //     }
+        //     ctx.beginPath();
+        //     ctx.moveTo(x1,y1);
+        //     ctx.lineTo(x2,y2);
+        //     ctx.stroke();
+    }else if (el.tagName=="text"){
+        var x=(el.getAttribute('x')) ? parseFloat(el.getAttribute('x'))+tl0[0] : tl0[0];
+        var y=(el.getAttribute('y')) ? parseFloat(el.getAttribute('y'))+tl0[1] : tl0[1];
+        var txt=el.innerHTML;
+        ctx.fillStyle = "black";
+        ctx.fillText(txt,x,y);
+    }
+    }
+}
+GWCatalogue.prototype.getSvgElements = function(){
+    getChildNodes = function(node,els,refxy){
+        var childNodes=node.childNodes;
+        var translate  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(node.getAttribute('transform'));
+        if (translate){
+            refxy[0]+=parseFloat(translate[1]);
+            refxy[1]+=parseFloat(translate[2]);
+            console.log('translating to',translate,refxy)
+        }
+        // console.log('els',els,'nodes',childNodes);
+        // console.log(node,node.childElementCount,node.childNodes);
+        if (node.childElementCount==0){
+            console.log('skipping empty:',n,node);
+            if (translate){
+                console.log('translating back to',translate)
+                refxy[0]-=parseFloat(translate[1]);
+                refxy[1]-=parseFloat(translate[2]);
+            }
+            return([els,refxy]);
+        }else{
+            for (n in childNodes){
+                node=childNodes[n];
+                // console.log(n,node,node.tagName);
+                if (node.tagName=="g"){
+                    console.log('entering:',n,node,refxy);
+                    [els,refxy]=getChildNodes(node,els,refxy);
+                }else if((node.tagName=="line")||(node.tagName=="text")||(node.tagName=="circle")||(node.tagName=="path")){
+                    if((node.style.opacity=="0")||(node.getAttribute("opacity")=="0")){
+                        console.log('skipping opacity 0:',n,node);
+                    }else{
+                        console.log('appending:',n,node);
+                        els.push({"node":node,"translate":[refxy[0],refxy[1]]});
+                    }
+                }
+            }
+        }
+        console.log('exiting node')
+        if (translate){
+            console.log('translating back to',translate)
+            refxy[0]-=parseFloat(translate[1]);
+            refxy[1]-=parseFloat(translate[2]);
+        }
+        return([els,refxy]);
+    }
+    var els = [];
+    var xy=[0,0];
+    svgNodes = this.svg.node();
+    console.log(svgNodes);
+    [els,xy]=getChildNodes(svgNodes,els,xy);
+    return([els,xy]);
+}
+GWCatalogue.prototype.removeCanvas = function(){
+    canvas = document.getElementById("myCanvas");
+    document.getElementById("graphcontainer").removeChild(canvas);
+}
