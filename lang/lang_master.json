@@ -194,6 +194,7 @@
     "tooltip.plotgw.preset-conf":{"_title":"Tooltip: show confirmed events only","_text":"Tooltip text for preset to show confirmed events only","_type":"string"},
     "tooltip.plotgw.preset-all":{"_title":"Tooltip: show all events","_text":"Tooltip text for preset to show all events","_type":"string"},
     "tooltip.plotgw.goto-filter":{"_title":"Tooltip: go to filters panel","_text":"Tooltip text for updating filters","_type":"string"},
+    "tooltip.plotgw.save.png":{"_title":"Tooltip: Download image","_text":"Tooltip text for downloading as PNG","_type":"string"},
 
     "section.bhbubble.data":{"_title":"Data labels and units shown on bubble plot"},
     "subsection.bhbubble.names":{"_subtitle":"Prefixes and suffixes of event names","_text":"Useful for non-Roman alphabets"},

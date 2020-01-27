@@ -162,6 +162,7 @@
  "tooltip.plotgw.preset-conf": "Bestätigte Nachweise zeigen",
  "tooltip.plotgw.preset-all": "Alle Nachweise und Kandidaten zeigen",
  "tooltip.plotgw.goto-filter": "Filtereinstellungen anzeigen",
+ "text.plotgw.save.png": "Als PNG sicher",
  "data.bub.name.GW": "GW",
  "data.bub.name.S": "S",
  "data.bub.name.LVT": "LVT",

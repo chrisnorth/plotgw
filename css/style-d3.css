@@ -571,7 +571,7 @@ button.down{
 canvas{
     display:block;
     position:absolute;
-    opacity:0.9;
+    opacity:1;
     left:0;
     top:0;
 }

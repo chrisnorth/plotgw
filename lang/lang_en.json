@@ -164,6 +164,7 @@
  "tooltip.plotgw.goto-filter": "Show filters panel",
  "tooltip.plotgw.share": "Share",
  "tooltip.plotgw.search": "Search",
+ "tooltip.plotgw.save.png": "Save as PNG",
  "tooltip.plotgw.nextevent": "Next event",
  "tooltip.plotgw.prevevent": "Previous event",
  "data.bub.name.GW": "GW",

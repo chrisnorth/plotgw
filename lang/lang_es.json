@@ -166,6 +166,7 @@
  "tooltip.plotgw.preset-conf": "Mostrar detecciones confirmadas",
  "tooltip.plotgw.preset-all": "Mostrar todas las detecciones y eventos candidatos",
  "tooltip.plotgw.goto-filter": "Mostrar el panel de filtros",
+ "tooltip.plotgw.save.svg": "Guardar como PNG",
  "data.bub.name.GW": "GW",
  "data.bub.name.S": "S",
  "data.bub.name.LVT": "LVT",

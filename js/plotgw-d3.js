@@ -3277,6 +3277,22 @@ GWCatalogue.prototype.drawGraph = function(){
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
     if(gw.debug){console.log('selected:',gw.selectedevent);}
 
+    //add search button
+    this.graphcont.append("div")
+        .attr("id","download-icon")
+        .attr("class","graph-icon hidden colourise "+gw.getColClass())
+        .style({"right":gw.margin.right+8*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            gw.showTooltipManual("%tooltip.plotgw.save.png%");
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        }).append("img")
+        .attr("src","img/save.svg")
+        .attr("class","hidden")
+        .attr("id","download-img")
+        .on("click",function(){gw.makeCanvas();gw.saveCanvas();gw.removeCanvas();gw.hideTooltipManual();});
+
 }
 GWCatalogue.prototype.populateSearchList = function(){
     var gw=this;
@@ -4590,55 +4606,127 @@ GWCatalogue.prototype.makeCanvas = function(){
     ctx.fillStyle = this.colourList[gw.colScheme]['bg'];
     ctx.fillRect(0,0,this.svgWidth,this.svgHeight);
     [els,xy]=this.getSvgElements();
+    var em2px=16;
+    getem=/\s*([^\s,)]+)em/;
+    getpx=/\s*([^\s,)]+)px/;
+    function component2hex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+    function rgb2hex(r, g, b) {
+        return "#" + component2hex(r) + component2hex(g) + component2hex(b);
+    }
+    var getrgb  = /rgb\s*\(\s*([^\s,)]+)[ ,]+([^\s,)]+)[ ,]+([^\s,)]+)/;
     for (e in els){
         var el=els[e]['node'];
         tl0=els[e].translate
         var translate  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(el.getAttribute('transform'));
+        var rotate  = /rotate\(\s*([^\s,)]+)/.exec(el.getAttribute('transform'));
+        var params={};
+        params.fillcolor = window.getComputedStyle(el).getPropertyValue('fill');
+        params.linecolor = window.getComputedStyle(el).getPropertyValue('stroke');
+        params.color = window.getComputedStyle(el).getPropertyValue('color');
+        params.linewidth = parseFloat(window.getComputedStyle(el).getPropertyValue('stroke-width'));
+        params.opacity = parseFloat(window.getComputedStyle(el).getPropertyValue('opacity'));
+        // console.log('fill',fc,fcrgb,params.fillcolor);
+        // console.log('stroke',lc,lcrgb,params.linecolor);
+        // console.log('color',color,colrgb,params.color);
         if (el.tagName=="circle"){
-            var cx=parseFloat(el.getAttribute('cx'))+tl0[0];
-            var cy=parseFloat(el.getAttribute('cy'))+tl0[1];
-            var r=parseFloat(el.getAttribute('r'));
+            console.log('circle');
+            params.cx=parseFloat(el.getAttribute('cx'))+tl0[0];
+            params.cy=parseFloat(el.getAttribute('cy'))+tl0[1];
+            params.r=parseFloat(el.getAttribute('r'));
             if(translate){
-                cx+=parseFloat(translate[1]);
-                cy+=parseFloat(translate[2]);
+                params.cx+=parseFloat(translate[1]);
+                params.cy+=parseFloat(translate[2]);
             }
             ctx.beginPath();
-            ctx.arc(cx,cy,r,0,2*Math.PI);
+            ctx.fillStyle = params.fillcolor;
+            ctx.strokeStyle = params.linecolor;
+            ctx.globalAlpha = params.opacity;
+            ctx.lineWidth = params.linewidth;
+            ctx.arc(params.cx,params.cy,params.r,0,2*Math.PI);
             ctx.stroke();
+            ctx.fill();
         }else if(el.tagName=="line"){
-            var x1=(el.getAttribute('x1')) ? parseFloat(el.getAttribute('x1'))+tl0[0] : tl0[0];
-            var x2=(el.getAttribute('x2')) ? parseFloat(el.getAttribute('x2'))+tl0[0] : tl0[0];
-            var y1=(el.getAttribute('y1')) ? parseFloat(el.getAttribute('y1'))+tl0[1] : tl0[1];
-            var y2=(el.getAttribute('y2')) ? parseFloat(el.getAttribute('y2'))+tl0[1] : tl0[1];
+            console.log("line",el.classList);
+            params.x1=(el.getAttribute('x1')) ? parseFloat(el.getAttribute('x1'))+tl0[0] : tl0[0];
+            params.x2=(el.getAttribute('x2')) ? parseFloat(el.getAttribute('x2'))+tl0[0] : tl0[0];
+            params.y1=(el.getAttribute('y1')) ? parseFloat(el.getAttribute('y1'))+tl0[1] : tl0[1];
+            params.y2=(el.getAttribute('y2')) ? parseFloat(el.getAttribute('y2'))+tl0[1] : tl0[1];
+            if(translate){
+                params.x1+=parseFloat(translate[1]);
+                params.y1+=parseFloat(translate[2]);
+                params.x2+=parseFloat(translate[1]);
+                params.y2+=parseFloat(translate[2]);
+            }
+            ctx.beginPath();
+            ctx.moveTo(params.x1,params.y1);
+            ctx.lineTo(params.x2,params.y2);
+            ctx.strokeStyle = params.linecolor;
+            ctx.lineWidth = params.linewidth;
+            ctx.globalAlpha = params.opacity;
+            ctx.stroke();
+        }else if(el.tagName=="path"){
+            getpath=/M([^\s,)]+)[ ,]+([^\s,)]+)(([HV])([\d.]+)([HV])([\d.]+))/;
+            params.d=el.getAttribute('d');
             if(translate){
                 x1+=parseFloat(translate[1]);
                 y1+=parseFloat(translate[2]);
                 x2+=parseFloat(translate[1]);
                 y2+=parseFloat(translate[2]);
             }
-            ctx.beginPath();
-            ctx.moveTo(x1,y1);
-            ctx.lineTo(x2,y2);
-            ctx.stroke();
-        // }else if(el.tagName=="path"){
-        //
-        //     if(translate){
-        //         x1+=parseFloat(translate[1]);
-        //         y1+=parseFloat(translate[2]);
-        //         x2+=parseFloat(translate[1]);
-        //         y2+=parseFloat(translate[2]);
-        //     }
-        //     ctx.beginPath();
-        //     ctx.moveTo(x1,y1);
-        //     ctx.lineTo(x2,y2);
-        //     ctx.stroke();
-    }else if (el.tagName=="text"){
-        var x=(el.getAttribute('x')) ? parseFloat(el.getAttribute('x'))+tl0[0] : tl0[0];
-        var y=(el.getAttribute('y')) ? parseFloat(el.getAttribute('y'))+tl0[1] : tl0[1];
-        var txt=el.innerHTML;
-        ctx.fillStyle = "black";
-        ctx.fillText(txt,x,y);
-    }
+            ctx.save()
+            ctx.translate(tl0[0],tl0[1])
+            ctx.fillStyle = params.fillcolor;
+            ctx.strokeStyle = params.linecolor;
+            ctx.globalAlpha = params.opacity;
+            ctx.lineWidth = params.linewidth;
+            var path = new Path2D(params.d);
+            ctx.stroke(path);
+            ctx.restore();
+        }else if (el.tagName=="text"){
+            params.fontsize=parseFloat(window.getComputedStyle(el).getPropertyValue('font-size'));
+            // params.txt=el.innerHTML;
+            params.x=(el.getAttribute('x')) ? el.getAttribute('x') : 0;
+            params.y=(el.getAttribute('y')) ? el.getAttribute('y') : 0;
+            params.dx=(el.getAttribute('dx')) ? el.getAttribute('dx') : 0;
+            params.dy=(el.getAttribute('dy')) ? el.getAttribute('dy') : 0;
+            params.tl0_0=tl0[0];
+            params.tl0_1=tl0[1];
+            paramconv=['x','y','dx','dy'];
+            for (i in paramconv){
+                p=paramconv[i];
+                if (getem.exec(params[p])){
+                    params[p]=parseFloat(params[p])*em2px*params.fontsize/em2px;
+                }else{
+                    params[p]=parseFloat(params[p]);
+                }
+            }
+            var txtalign=(el.style.getPropertyValue('text-anchor')) ? el.style.getPropertyValue('text-anchor') : null;
+            params.txtalign = (txtalign=="middle") ? "center" : txtalign;
+            if(translate){
+                params.x+=parseFloat(translate[1]);
+                params.y+=parseFloat(translate[2]);
+            }
+            var txt=el.innerHTML;
+            ctx.save();
+            ctx.translate(params.tl0_0,params.tl0_1);
+            if (rotate){
+                ctx.rotate(rotate[1] * Math.PI/180);
+            }
+            ctx.translate(params.x+params.dx,params.y+params.dy);
+            ctx.textAlign = params.txtalign;
+            ctx.font = params.fontsize+"px Arial";
+            ctx.fillStyle = params.fillcolor;
+            // ctx.fillStyle = "black";
+            ctx.globalAlpha = params.opacity;
+            ctx.fillText(txt,0,0);
+            ctx.restore();
+            // console.log(txt,params.x,params.y,rotate,params.dy,params.txtalign,params.fontsize);
+            console.log(txt);
+        }
+        console.log(params);
     }
 }
 GWCatalogue.prototype.getSvgElements = function(){
@@ -4695,4 +4783,17 @@ GWCatalogue.prototype.getSvgElements = function(){
 GWCatalogue.prototype.removeCanvas = function(){
     canvas = document.getElementById("myCanvas");
     document.getElementById("graphcontainer").removeChild(canvas);
+}
+GWCatalogue.prototype.saveCanvas = function(){
+    //write download link
+    try {
+        var isFileSaverSupported = !!new Blob();
+    } catch (e) {
+        alert("blob not supported");
+    }
+
+    var canvasdl = document.getElementById('myCanvas');
+    canvasdl.toBlob(function(blob) {
+        saveAs(blob, "LIGO-Virgo_catalogue_"+gw.xvar+"_"+gw.yvar+".png");
+    });
 }
