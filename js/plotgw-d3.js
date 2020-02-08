@@ -158,7 +158,7 @@ GWCatalogue.prototype.init = function(){
             .html('<a href="https://twitter.com/intent/tweet" class="twitter-share-button" id="twitter-share-button"><img class="share-icon" src="img/twitter.png"></a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>')
         d3.select('#share-outer').append("div")
             .attr("class","fb-share-button popup-button")
-            .attr("data-href","http://chrisnorth.github.io/plotgw/")
+            .attr("data-href","https://catalog.cardiffgravity.org")
             .attr("data-layout","button")
             .attr("data-size","small")
             .attr("data-mobile-iframe","true")
@@ -1734,9 +1734,9 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.langOn=false;
     gw.toLoad=3;
-    gw.fileInEventsDefault="http://gwcat.cardiffgravity.org/data/events.json";
+    gw.fileInEventsDefault="https://gwcat.cardiffgravity.org/data/events.json";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : (gw.inp.eventsFile) ? gw.inp.eventsFile : gw.fileInEventsDefault;
-    gw.fileInGwoscDefault="http://gwcat.cardiffgravity.org/data/gwosc.json";
+    gw.fileInGwoscDefault="https://gwcat.cardiffgravity.org/data/gwosc.json";
     gw.fileInGwosc = (gw.urlVars.gwoscFile) ? gw.urlVars.gwoscFile : (gw.inp.gwoscFile) ? gw.inp.gwoscFile : gw.fileInGwoscDefault;
 
     gw.loadLangDefault()
@@ -3589,7 +3589,7 @@ GWCatalogue.prototype.writeDownloadLink = function(){
     var html = d3.select("svg.graph")
         .attr("title", "test2")
         .attr("version", 1.1)
-        .attr("xmlns", "http://www.w3.org/2000/svg")
+        .attr("xmlns", "https://www.w3.org/2000/svg")
         .node().parentNode.innerHTML;
 
     var blob = new Blob([html], {type: "image/svg+xml"});
