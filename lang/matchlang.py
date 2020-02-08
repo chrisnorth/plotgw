@@ -15,21 +15,21 @@ for o in langOld:
         if nv==ov:
             conv[o]=n
 
-print conv
+print(conv)
 
 lang='cy'
 fileInLang="../bhbubble-lang/%s.json"%lang
 langIn=json.load(io.open(fileInLang,'r'))[0]
 langConv={}
 for l in langIn:
-    if (conv.has_key(l)):
-        print l,conv[l]
+    if (l in conv):
+        print(l,conv[l])
         langConv[conv[l]]=langIn[l]
     else:
-        print "can't find %s"%l
+        print("can't find %s"%l)
 
-print langConv
+print(langConv)
 fileOutLang=io.open('../lang/lang_%s_2.json'%lang,'w',encoding='utf8')
 data= json.dumps(langConv,indent=4,ensure_ascii=False,encoding='utf8')
-fileOutLang.write(unicode(data))
+fileOutLang.write(str(data))
 fileOutLang.close()

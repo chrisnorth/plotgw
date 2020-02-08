@@ -21,7 +21,8 @@
     <!-- <script type="text/javascript" src="js/W.min.js"></script> -->
     <!-- Analytics code -->
     <script type="text/javascript" src="js/gh-analytics.js"></script>
-    <script type="text/javascript" src="http://gwcat.cardiffgravity.org/js/gwcat.js"></script>
+    <script type="text/javascript" src="https://gwcat.cardiffgravity.org/js/gwcat.js"></script>
+    <!-- <script type="text/javascript" src="/Users/chrisnorth/Cardiff/GravWaves/Outreach/GitHub/gwcat/js/gwcat.js"></script> -->
     <!-- <script type="text/javascript" src="gwcat/js/gwcat.js"></script> FOR LOCAL VERSION-->
     <script type="text/javascript" src="js/plotgw-d3.js"></script>
 </head>
@@ -33,7 +34,7 @@
     <div id="plotgw-cont" class="plotgw-container">
     </div>
     <script type="text/javascript">
-    var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false})
+    var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false,eventsFile:"https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp"})
     // for local version:
     // var gwcat = new GWCatalogue({'holderid':'plotgw-cont','clearhtml':false,'gwoscFile':'gwcat/data/gwosc.json','eventsFile':'gwcat/data/events.json'})
     </script>
