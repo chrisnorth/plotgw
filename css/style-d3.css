@@ -40,6 +40,9 @@ div#options{
 /*input{
     background-color:#fc0;
 }*/
+label.disabled{
+    color:#ccc;
+}
 button.down{
     background-color:#0cf;
     /*border-left:7px;
@@ -185,9 +188,9 @@ button.down{
     top: 0;
     left: 0;
 }
-.legend{
+/* .legend{
     display:none;
-}
+} */
 .axis path,
 .axis line {
   fill: none;
@@ -376,6 +379,15 @@ button.down{
     margin:1%;
     cursor:pointer;
 }
+.options-box .option-pre{
+    width:10%;
+}
+.options-box .option-pre-text{
+    font-size:1.3em;
+}
+.options-box .option-pre-desc{
+    font-weight:bold;
+}
 .options-box.bottom .option{
     width:25%;
 }
@@ -388,8 +400,31 @@ button.down{
 .option button img, .option img, .filter-icon img{
     width:90%;
 }
+.option-pre{
+    float:left;
+}
+.option-pre-text{
+    display:inline-block;
+    margin-left:4%;
+    width:75%;
+    padding-bottom:10px;
+    /* padding-top:10px; */
+    font-size:1.3em;
+}
+.option.conf-only{
+    background-color:#0c0;
+    border-color: #050;
+}
+.option.cand-only{
+    background-color:#c90;
+    border-color: #550;
+}
+.option.allsrc{
+    background-color:#99f;
+    border-color: #00c;
+}
 .option.down{
-    background-color:cyan;
+    background-color:yellow;
     /*height:20%;
     top:-10px;*/
 }
@@ -476,10 +511,16 @@ button.down{
 .filter-cont{
     width:100%;
     margin-bottom:20px;
+    margin-left:5%;
 }
-.filt-cont-label,.filt-cont{
+.filt-cont-label,.filt-cont,{
     margin-left:4%;
     width:100%;
+}
+.filter-note{
+    margin-left:4%;
+    width:100%;
+    margin-top:10px;
 }
 .filt-cont-label{
     margin-bottom: 10px;
@@ -526,6 +567,16 @@ button.down{
 .panel-cont.portrait,.panel-cont-text.portrait{
     padding-bottom:0px;
     width:70%;
+}
+canvas{
+    display:block;
+    position:absolute;
+    opacity:1;
+    left:0;
+    top:0;
+}
+canvas.hidden{
+    display:none;
 }
 img.share-icon{
     height:50px;
