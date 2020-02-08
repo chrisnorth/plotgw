@@ -17,7 +17,11 @@ function GWCatalogue(inp){
     this.inp=inp;
     this.getUrlVars();
     if (this.urlVars.datasrc){this.datasrc=this.urlVars.datasrc}
-    else{this.datasrc = (inp)&&(inp.datasrc) ? inp.datasrc : "gwosc"}
+    else{this.datasrc = (inp)&&(inp.datasrc) ? inp.datasrc : "local"}
+
+    if (this.urlVars.hasOwnProperty('confirmedOnly')){
+        this.confirmedOnly=JSON.parse(this.urlVars.confirmedOnly);
+    }else{this.confirmedOnly = (inp)&&(inp.hasOwnProperty('confirmedOnly')) ? JSON.parse(inp.confirmedOnly) : true}
 
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
@@ -81,7 +85,19 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer colourise")
-            .html('<div id="options-x" class="options-box"><div class="panel-title"></div><div class="options-buttons" id="x-buttons"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>')
+            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons-all"></div><div class="options-buttons" id="x-buttons-conf"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons-all"></div><div class="options-buttons" id="y-buttons-conf"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
+        d3.select("#preset-options").append("div")
+            .attr("id","buttonpre-conf").attr("class","panel-cont")
+            .html('<div class="option option-pre conf-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br>(<span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span>)</span></div>');
+        d3.select("#preset-options").append("div")
+            .attr("id","buttonpre-cand").attr("class","panel-cont")
+            .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="cand-only-text"></span></br>(<span id="cand-only-x-axis"></span> : <span id="cand-only-y-axis"></span>)</div>');
+        d3.select("#preset-options").append("div")
+            .attr("id","buttonpre-all").attr("class","panel-cont")
+            .html('<div class="option option-pre allsrc"><img class="button button-pre" id="preset-all-img" src="img/allsources.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="allsrc-text"></span></br>(<span id="allsrc-x-axis"></span> : <span id="allsrc-y-axis"></span>)</div>');
+        d3.select("#preset-options").append("div")
+            .attr("class","panel-block")
+            .html('<span id="preset-warn">TEXT</span>&nbsp;<span id="preset-filter-link" style="cursor:pointer;color:red">&rarr;</span></div>');
     }
     if (d3.select("#help-outer").empty()){
         if(this.debug){console.log('adding help-outer')}
@@ -109,6 +125,9 @@ GWCatalogue.prototype.init = function(){
         d3.select("#help-block-icons").append("div")
             .attr("id","help-share-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/share.svg"><div class="panel-cont-text" id="help-share-text"></div>')
+        d3.select("#help-block-icons").append("div")
+            .attr("id","help-filter-cont").attr("class","panel-cont colourise")
+            .html('<img class="panel-cont-img" src="img/filter.svg"><div class="panel-cont-text" id="help-filter-text"></div>')
         d3.select("#help-block-icons").append("div")
             .attr("id","help-search-cont").attr("class","panel-cont colourise")
             .html('<img class="panel-cont-img" src="img/search.svg"><div class="panel-cont-text" id="help-search-text"></div>')
@@ -200,7 +219,8 @@ GWCatalogue.prototype.init = function(){
         panel:"info",
         lang:"en",
         showerrors:true,
-        selectedevent:"GW170814"
+        selectedevent:"GW170814",
+        panel:"info"
     }
     this.xvar = (this.urlVars.x) ? this.urlVars.x : this.defaults.xvar;
     this.yvar = (this.urlVars.y) ? this.urlVars.y : this.defaults.yvar;
@@ -219,16 +239,17 @@ GWCatalogue.prototype.init = function(){
         "fr":{code:"fr",name:"Français"},
         "it":{code:"it",name:"Italiano"},
         "pl":{code:"pl",name:"Polski"},
+        "or":{code:"or",name:"ଓଡ଼ିଆ"}
     }
 
     this.filters = {
-        "M1":{"name":'%data.M1.name%',"step":10,"type":'slider',
+        "M1":{"name":'%data.M1.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M1.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M1.unit%", "default": 70, "value": 70 }
+            "max": { "label": "", "unit": "%data.M1.unit%", "default": 80, "value": 80 }
         },
         "M2":{"name":'%data.M2.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M2.unit%", "default": 50, "value": 50 }
+            "max": { "label": "", "unit": "%data.M2.unit%", "default": 80, "value": 80 }
         },
         "Mfinal":{"name":'%data.Mfinal.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.Mfinal.unit%", "default": 0, "value": 0 },
@@ -240,38 +261,83 @@ GWCatalogue.prototype.init = function(){
     		"options":[
     			{"id": "filt-o1", "label":"%text.plotgw.filter.observingrun.O1%", "checked": true, "value": "O1" },
     			{"id": "filt-o2", "label":"%text.plotgw.filter.observingrun.O2%", "checked": true, "value": "O2" },
-    			{"id": "filt-o3", "label":"%text.plotgw.filter.observingrun.O3%", "checked": false, "value": "O3" }
+    			{"id": "filt-o3", "label":"%text.plotgw.filter.observingrun.O3%", "checked": true, "value": "O3" }
     		]
+	    },
+        "detType": {
+            "name":'%data.dettype.name%',
+    		"type":"checkbox",
+    		"options":[
+    			{"id": "filt-conf", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
+    			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
+            ]
 	    }
     }
     this.filterr=true;
-
-    this.panels = {
-        'info':{'status':true,
-            'hide':function(){gw.hideInfo()},
-            'show':function(){gw.showInfo()}},
-        'options':{'status':false,
-            'hide':function(){gw.hideOptions()},
-            'show':function(){gw.showSettings()}},
-        'help':{'status':false,
-            'hide':function(){gw.hideHelp()},
-            'show':function(){gw.showHelp()}},
-        'lang':{'status':false,
-            'hide':function(){gw.hideLang()},
-            'show':function(){gw.showLang()}},
-        'filter':{'status':false,
-            'hide':function(){gw.hideFilter()},
-            'show':function(){gw.showFilter()}}
-    }
-    if (this.urlVars.panel){
-        for (p in this.panels){
-            if (p==this.urlVars.panel){
-                this.panels[p].status=true
-            }else{this.panels[p].status=false}
+    this.presets = {
+        "conf-only":{
+            "icon":"",
+            "x-axis":"M1",
+            "y-axis":"M2",
+            "tooltip":"%tooltip.plotgw.preset-conf%",
+            "desc":"%text.plotgw.presets.conf-only%"
+        },
+        "cand-only":{
+            "icon":"",
+            "x-axis":"UTCdate",
+            "y-axis":"FAR",
+            "tooltip":"%tooltip.plotgw.preset-cand%",
+            "desc":"%text.plotgw.presets.cand-only%"
+        },
+        "allsrc":{
+            "icon":"",
+            "x-axis":"UTCdate",
+            "y-axis":"DL",
+            "tooltip":"%tooltip.plotgw.preset-all%",
+            "desc":"%text.plotgw.presets.allsrc%"
         }
     }
 
+
+    // this.panels = {
+    //     'info':{'status':true,
+    //         'hide':function(){gw.hideInfo()},
+    //         'show':function(){gw.showInfo()}},
+    //     'options':{'status':false,
+    //         'hide':function(){gw.hideOptions()},
+    //         'show':function(){gw.showOptions()}},
+    //     'help':{'status':false,
+    //         'hide':function(){gw.hideHelp()},
+    //         'show':function(){gw.showHelp()}},
+    //     'lang':{'status':false,
+    //         'hide':function(){gw.hideLang()},
+    //         'show':function(){gw.showLang()}},
+    //     'filter':{'status':false,
+    //         'hide':function(){gw.hideFilter()},
+    //         'show':function(){gw.showFilter()}}
+    // }
+    // if (this.urlVars.panel){
+    //     for (p in this.panels){
+    //         if (p==this.urlVars.panel){
+    //             this.panels[p].status=true
+    //         }else{this.panels[p].status=false}
+    //     }
+    // }
+
 }
+// GWCatalogue.prototype.showpanel = function (panel) {
+//     if (this.panels.panel){
+//         this.panels[panel].show()
+//         this.panels[panel].status=true
+//         for (p in this.panels){
+//             if (p!=panels){
+//                 this.panels[p].status=false
+//             }
+//         }
+//     }else{
+//
+//     }
+// };
 GWCatalogue.prototype.getUrlVars = function(){
     // Get URL and query variables
     var vars = {},hash;
@@ -349,6 +415,7 @@ GWCatalogue.prototype.setPanel = function(panel){
     else if(panel=="help"){this.showHelp();}
     else if(panel=="lang"){this.showLang();}
     else if(panel=="filter"){this.showFilter();}
+    else if(panel=="info"){this.showInfo();}
 }
 GWCatalogue.prototype.tl = function(textIn,plaintext){
     // translate text given dict
@@ -387,6 +454,37 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
     //     textOut=textOut.replace(this.tl('%data.mass.unit.msun%',true),'M☉')
     // }
     return(textOut);
+}
+GWCatalogue.prototype.tName = function(textIn){
+    this.names={"GW":"%data.bub.name.GW%",
+        "LVT":"%data.bub.name.LVT%",
+        "-A":"%data.bub.name.A%",
+        "-B":"%data.bub.name.B%"}
+    rename=/([A-Z]*)([0-9]*)/;
+    tr=rename.exec(textIn)
+    textOut=gw.tl(((this.names[tr[1]])?this.names[tr[1]]:tr[1])+gw.tN(tr[2]))
+    return(textOut)
+}
+GWCatalogue.prototype.tN = function(key){
+    var systems = {
+            devanagari: 2406, tamil: 3046, kannada:  3302,
+            telugu: 3174, marathi: 2406, malayalam: 3430,
+            oriya: 2918, gurmukhi: 2662, nagari: 2534, gujarati: 2790
+        };
+    if (!systems.hasOwnProperty(this.langdict["meta.numbersystem"].toLowerCase())){return key;}
+    zero = 48; // char code for Arabic zero
+    nine = 57; // char code for Arabic nine
+    offset = (systems[this.langdict["meta.numbersystem"].toLowerCase()] || zero) - zero;
+    output = key.toString().split("");
+    l = output.length;
+
+    for (i = 0; i < l; i++) {
+        cc = output[i].charCodeAt(0);
+        if (cc >= zero && cc <= nine) {
+            output[i] = String.fromCharCode(cc + offset);
+        }
+    }
+    return output.join("");
 }
 GWCatalogue.prototype.getBest = function(item){
     if (item.best){
@@ -447,6 +545,7 @@ GWCatalogue.prototype.stdlabel = function(d,src){
     }else{
         txt=d[src].best
     }
+    txt=gw.tN(txt);
     if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
     if (typeof txt == "string"){
         // replace superscripts
@@ -479,6 +578,7 @@ GWCatalogue.prototype.stdlabelNoErr = function(d,src){
     }else if((d[src].errtype)&&(d[src].errtype=='upper')){
         txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
     }
+    txt=gw.tN(txt);
     if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
     if (typeof txt == "string"){
         // replace superscripts
@@ -507,6 +607,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
        icon: icon used on graph axes
        unit: unit used on graph axes (default=BLANK)
        border: force the border on axis (default=2)
+       cand: available for candidates
     */
     var gw=this;
 
@@ -517,42 +618,56 @@ GWCatalogue.prototype.setColumns = function(datadict){
         M2:{icon:"img/secmass.svg",avail:true,type:'src'},
         Mfinal:{icon:"img/finalmass.svg",avail:true,type:'src'},
         chi:{avail:true,icon:"img/initspin.svg",
-            border:0.01,type:'src'},
+            border:0.01,type:'src',forcelog:'off'},
         af:{avail:true,icon:"img/finalspin.svg",
             border:0.01,type:'src'},
         DL:{avail:true, icon:"img/ruler.svg",
-            border:20,type:'src'},
+            border:20,type:'src',cand:true},
         z:{avail:true,icon:"img/redshift.svg",
             border:0.01,type:'src'},
         UTC:{avail:false,type:'src',strfn:function(d){return('')}},
-        UTCdate:{avail:true,type:'derived',
+        UTCdate:{avail:true,type:'derived',cand:true,
             depfn:function(d){return (d.UTC)},
             namefn:function(){return(gw.columns.UTC.name)},
             convfn:['UTC',function(x){return new Date(x)}],
+            strfn:function(d){return(gw.tN(d.UTC.best));},
             sigfig:0,
             err:0,
             icon:"img/time.svg",
             type:"derived",
             scale:"time",
-            border:2.6e9
+            border:2.6e9,
+            forcelog:'off',
+            forcezero:'off'
         },
-        FAR:{avail:false,type:'src',icon:"img/dice.svg",
+        FAR:{avail:true,type:'src',icon:"img/dice.svg",cand:true,
+            forcelog:'on',
+            forcezero:'off',
             strfn:function(d){
                 if (1/d.FAR.best<1000){
-                    strOut="%data.FAR.unit.1per%<br/>"+
-                    (1./d.FAR.best).toPrecision(gw.columns.FAR.sigfig)+
-                    " %data.FAR.unit.yr%";
-                // }else if (1/d.FAR.best<1000){
-                //     strOut="%data.FAR.unit.1per%<br/>"+(1./d.FAR.best).toFixed(0)+
-                //     "<%data.FAR.unit.yr%";
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",gw.tN((1./d.FAR.best)
+                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$dur$","%data.FAR.unit.yr%");
                 }else if (1/d.FAR.best<1e6){
-                    strOut="%data.FAR.unit.1per%<br/>"
-                    +((1./d.FAR.best)/1e3).toPrecision(gw.columns.FAR.sigfig)+
-                    " %data.FAR.unit.kyr%";
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e3)
+                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$dur$","%data.FAR.unit.kyr%");
+                }else if (1/d.FAR.best<1e9){
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e6)
+                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$dur$","%data.FAR.unit.Myr%");
                 }else{
-                    strOut="%data.FAR.unit.1per%<br/>"
-                    +((1./d.FAR.best)/1e6).toPrecision(gw.columns.FAR.sigfig)+
-                    " %data.FAR.unit.Myr%";
+                    strOut=gw.tl("%data.FAR.unit.structure%")
+                        .replace("$1per$","%data.FAR.unit.1per%")
+                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e9)
+                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$dur$","%data.FAR.unit.Gyr%");
                 }
                 return(gw.tl(strOut));
             }
@@ -560,14 +675,18 @@ GWCatalogue.prototype.setColumns = function(datadict){
         sigma:{avail:false,type:'src'},
         obsrun:{avail:false,type:'src',icon:"img/obsrun.svg",
             strfn:function(d){
-                return d.obsrun.best+'<br/>('+d.net.best+')' ;
+                nettxt='';
+                netlist=d.net.best.split('');
+                for (i in netlist){nettxt+=gw.tl('%text.gen.det.'+netlist[i]+'%')};
+                return gw.tl('%text.plotgw.filter.observingrun.'+d.obsrun.best+'%<br/>('+nettxt+')') ;
             }
         },
+        detType:{avail:false,type:'src',icon:"img/tag.svg"},
         // netobs:{avail:false,type:'derived',icon:"img/obsrun.svg",
         //     namefn:function(){return(gw.columns.obsrun.name)}
         // },
         rho:{icon:"img/snr.svg",avail:true,type:'src'},
-        deltaOmega:{avail:false,type:'src'},
+        deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg',cand:true},
         Erad:{avail:true,icon:"img/energyrad.svg",
             border:0.1,type:'src'},
         lpeak:{avail:true,icon:"img/peaklum.svg",type:'src'},
@@ -699,8 +818,8 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 day=d.UTC.best.split('T')[0].split('-')[0];
                 month=d['UTC'].best.split('T')[0].split('-')[1];
                 year=d['UTC'].best.split('T')[0].split('-')[2];
-                time=d['UTC'].best.split('T')[1]
-                return(year+'-'+month+'-'+day+"<br/>"+time+" UT")
+                time=d['UTC'].best.split('T')[1];
+                return(gw.tN(gw.tl(year+'-'+month+'-'+day+"<br/>"+time+" %data.time.UT%")));
             },
             icon:"img/time.svg",
             name:'%data.time.name%'},
@@ -709,13 +828,20 @@ GWCatalogue.prototype.setColumns = function(datadict){
             depfn:function(d){return (d.opendata)},
             strfn:function(d){
                 if ((d.opendata)&&(d.opendata.url)){
-                    return gw.tl("<a target='_blank' href='"+ d.opendata.url+
-                        "'>%text.gen.gwosc%</a>");
+                    if (d.opendata.text.search('GraceDB')>=0){
+                        return gw.tl("<a target='_blank' title='"+gw.tl(d.opendata.text)+
+                            "' href='"+ d.opendata.url+
+                            "'>%text.gen.gracedb%</a>");
+                    }else{
+                        return gw.tl("<a target='_blank'title='"+gw.tl(d.opendata.text)+
+                            "'  href='"+ d.opendata.url+
+                            "'>%text.gen.gwosc%</a>");
+                    }
                 }else{
                     return(gw.labBlank);
                 }
             },
-            name:'%tooltip.plotgw.gwosc%',
+            name:'%tooltip.plotgw.opendata%',
             icon:"img/data.svg"},
         paper:{
             type:'derived',
@@ -765,6 +891,7 @@ GWCatalogue.prototype.getLabelUnit = function(col,plaintext){
     }
 }
 GWCatalogue.prototype.getIcon = function(col){
+    if (!this.columns[col]){return(null);}
     if (this.columns[col].icon){
         return(this.columns[col].icon);
     }else{
@@ -887,7 +1014,7 @@ GWCatalogue.prototype.setScales = function(){
     this.uplow=0.1;
     this.uploh=0.1;
     this.pValue = function(d,p) {
-        if (!d[p]){return 0}
+        if (!(d[p])){return 0}
         else if (d[p].best!=null){return d[p].best}
         else if (d[p].lower!=null){return d[p].lower}
         else if (d[p].upper!=null){return d[p].upper};
@@ -896,6 +1023,7 @@ GWCatalogue.prototype.setScales = function(){
     this.pErr = function(d,p,maxmin) {
         //error- -> value
         if (!d[p]){return null}
+        else if(!d[p].errtype){return null}
         else if ((maxmin=='+')){
             if((d[p].errtype)&&(d[p].errtype=='lower')){
                 return d[p].lower;
@@ -923,12 +1051,12 @@ GWCatalogue.prototype.setScales = function(){
     // x error bars
     this.xErrP = function(d) {
         //error+ -> value
-        if (!d[gw.xvar]){return null}
+        if (!d[gw.xvar]){return 0}
         else{ return gw.pErr(d,gw.xvar,'+');}
     }
     this.xErrM = function(d) {
         //error- -> value
-        if (!d[gw.xvar]){return null}
+        if (!d[gw.xvar]){return 0}
         else{ return gw.pErr(d,gw.xvar,'-');}
     }
 
@@ -939,24 +1067,41 @@ GWCatalogue.prototype.setScales = function(){
     // y error bars
     this.yErrP = function(d) {
         //error- -> value
-        if (!d[gw.yvar]){return null}
+        if (!d[gw.yvar]){return 0}
         else{ return gw.pErr(d,gw.yvar,'+');}
     }
     //error+ -> value
     this.yErrM = function(d) {
         //error- -> value
-        if (!d[gw.yvar]){return null}
+        if (!d[gw.yvar]){return 0}
         else{ return gw.pErr(d,gw.yvar,'-');}
     }
 
+    // this.updateFilters();
     this.setXYscales(gw.xvar,gw.yvar);
     // data -> display
-    this.xMap = function(d) {return gw.xScale(gw.xValue(d));}
-    this.yMap = function(d) { return gw.yScale(gw.yValue(d));}
+    this.xMap = function(d) {
+        if (!(d[gw.xvar])){
+            // console.log('xMap: no '+gw.xvar,d.name);
+            return 0;
+        }else{
+            // console.log('xMap: '+d.name+' '+gw.xvar+'=',gw.xScale(gw.xValue(d)));
+            return gw.xScale(gw.xValue(d));
+        }
+    }
+    this.yMap = function(d) {
+        if (!(d[gw.yvar])){
+            // console.log('yMap: no '+gw.yvar,d.name);
+            return 0;
+        }else{
+            // console.log('yMap: '+d.name+' '+gw.yvar+'=',gw.yScale(gw.yValue(d)));
+            return gw.yScale(gw.yValue(d));
+        }
+    }
 
     // x error+ -> display
     this.xMapErrP = function(d) {
-        if (!d[gw.xvar]){return null}
+        if (!d[gw.xvar]){return 0}
         else if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
             xval=gw.xScale(gw.xErrP(d)) + (gw.uplow*gw.graphWidth);
             if (xval>gw.graphWidth){
@@ -968,16 +1113,18 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.xMapErrPouter = function(d) {
-        if (!d[gw.xvar]){return null}
+        if (!d[gw.xvar]){return 0}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='lower')){
             return gw.xMapErrP(d) - (gw.errh*gw.graphHeight)
+        }else if ((d[gw.xvar].esttype)&&(d[gw.xvar].esttype[1]=='soft')){
+            return gw.xMapErrP(d) - (gw.errw*gw.graphWidth)
         }else{
             return gw.xScale(gw.xErrP(d))
         }
     }
     // x error- -> display
     this.xMapErrM = function(d) {
-        if (!d[gw.xvar]){return null}
+        if (!d[gw.xvar]){return 0}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
             xval=gw.xScale(gw.xErrM(d)) - (gw.uplow*gw.graphWidth);
             if (xval<0){
@@ -989,16 +1136,18 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.xMapErrMouter = function(d) {
-        if (!d[gw.xvar]){return null}
+        if (!d[gw.xvar]){return 0}
         if ((d[gw.xvar].errtype)&&(d[gw.xvar].errtype=='upper')){
             return gw.xMapErrM(d) + (gw.errh*gw.graphHeight)
+        }else if ((d[gw.xvar].esttype)&&(d[gw.xvar].esttype[0]=='soft')){
+            return gw.xMapErrM(d) + (gw.errw*gw.graphWidth)
         }else{
             return gw.xScale(gw.xErrM(d))
         }
     }
     // x error caps -> display
-    this.xMapErrY0 = function(d) { return gw.yScale(gw.yValue(d)) - (gw.errh*gw.graphHeight);}
-    this.xMapErrY1 = function(d) { return gw.yScale(gw.yValue(d)) + (gw.errh*gw.graphHeight);}
+    this.xMapErrY0 = function(d) { return (!d[gw.yvar]) ? 0 :   gw.yScale(gw.yValue(d)) - (gw.errh*gw.graphHeight);}
+    this.xMapErrY1 = function(d) { return (!d[gw.yvar]) ? 0 : gw.yScale(gw.yValue(d)) + (gw.errh*gw.graphHeight);}
 
     // value -> display
     // this.yScale = d3.scale.linear().range([this.graphHeight,0])
@@ -1007,11 +1156,11 @@ GWCatalogue.prototype.setScales = function(){
 
     // y error+ -> display
     this.yMapErrP = function(d) {
-        if (!d[gw.yvar]){return null}
+        if (!d[gw.yvar]){return 0}
         else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
             yval=gw.yScale(gw.yErrP(d)) - (gw.uploh*gw.graphHeight)
             if (yval<0){
-                yval=Math.min(0,gw.yScale(gw.yErrM(d))-2*(gw.errw*gw.graphWidth));
+                yval=Math.min(0,gw.yScale(gw.yErrM(d))-2*(gw.errh*gw.graphHeight));
             }
             return yval;
         }else{
@@ -1019,20 +1168,22 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.yMapErrPouter = function(d) {
-        if (!d[gw.yvar]){return null}
+        if (!d[gw.yvar]){return 0}
         else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='lower')){
-            return gw.yMapErrP(d) + (gw.errw*gw.graphWidth)
+            return gw.yMapErrP(d) + (gw.errh*gw.graphHeight)
+        }else if ((d[gw.yvar].esttype)&&(d[gw.yvar].esttype[1]=='soft')){
+            return gw.yMapErrP(d) + (gw.errh*gw.graphHeight)
         }else{
             return gw.yScale(gw.yErrP(d))
         }
     }
     // y error- -> display
     this.yMapErrM = function(d) {
-        if (!d[gw.yvar]){return null}
+        if (!d[gw.yvar]){return 0}
         else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
             yval=gw.yScale(gw.yErrM(d)) + (gw.uploh*gw.graphHeight);
             if (yval>gw.graphHeight){
-                yval=Math.max(gw.graphHeight,gw.yScale(gw.yErrM(d))+2*(gw.errw*gw.graphWidth));
+                yval=Math.max(gw.graphHeight,gw.yScale(gw.yErrM(d))+2*(gw.errh*gw.graphHeight));
             }
             return yval;
         }else{
@@ -1040,18 +1191,32 @@ GWCatalogue.prototype.setScales = function(){
         }
     }
     this.yMapErrMouter = function(d) {
-        if (!d[gw.yvar]){return null}
+        if (!d[gw.yvar]){return 0}
         else if ((d[gw.yvar].errtype)&&(d[gw.yvar].errtype=='upper')){
-            return gw.yMapErrM(d) - (gw.errw*gw.graphWidth)
+            return gw.yMapErrM(d) - (gw.errh*gw.graphHeight)
+        }else if ((d[gw.yvar].esttype)&&(d[gw.yvar].esttype[0]=='soft')){
+            return gw.yMapErrM(d) - (gw.errh*gw.graphHeight)
         }else{
             return gw.yScale(gw.yErrM(d))
         }
     }
     // y error caps -< display
-    this.yMapErrX0 = function(d) { return gw.xScale(gw.xValue(d)) - (gw.errw*gw.graphWidth);}
-    this.yMapErrX1 = function(d) { return gw.xScale(gw.xValue(d)) + (gw.errw*gw.graphWidth);}
+    this.yMapErrX0 = function(d) { return (!d[gw.xvar]) ? 0 : gw.xScale(gw.xValue(d)) - (gw.errh*gw.graphHeight);}
+    this.yMapErrX1 = function(d) { return (!d[gw.xvar]) ? 0 : gw.xScale(gw.xValue(d)) + (gw.errh*gw.graphHeight);}
 
-    this.dotOp = function(d) {return ((d[gw.xvar])&&(d[gw.yvar])&&(d.active)) ? 1 : 0}
+    // this.plottable = function(d) { return (d[gw.xvar])&&(d[gw.yvar])&&(d.active);}
+
+    this.dotOp = function(d) {
+        if((d[gw.xvar])&&(d[gw.yvar])&&(d.active)){return(1)}
+        else{return 0}
+    }
+    this.errOp = function(d,param){
+        if ((!d[this.xvar])||(!d[this.yvar])){return 0}
+        else if (this.columns[param]["err"]==0){return 0}
+        else if ((gw.showerrors)&&(d.active)){return(gw.opErr)}
+        else{return 0;}
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Set sketch scales
     ///////////////////////////////////////////////////////////////////////////
@@ -1084,6 +1249,7 @@ GWCatalogue.prototype.setScales = function(){
     this.xScaleSkAspect = function(x){
         return(x*this.sketchWidth*this.aspectSketch)}
     this.yScaleSk = function(y){return(y*this.sketchHeight)}
+
 
     // set black hole positions
     /* cx,cy=BH position; xicon,yicon: icon-position, scy:shadow y-coordinate
@@ -1126,7 +1292,9 @@ GWCatalogue.prototype.setScales = function(){
     }
     //tool-top labels
     this.ttlabels = {
-        switch:"%tooltip.plotgw.switchunits%"
+        switch:"%tooltip.plotgw.switchunits%",
+        paper:"%tooltip.plotgw.paper%",
+        data:"%tooltip.plotgw.opendata%"
     };
     //text for black labels
     this.labBlank="--";
@@ -1218,6 +1386,13 @@ GWCatalogue.prototype.drawSketch = function(){
         this.addMasses("Mfinal",false);
     }
 
+    // draw probability sketch
+    if (this.redraw){
+        this.addProbBars(true);
+    }else{
+        this.addProbBars(false);
+    }
+
     // add labels
     if (this.redraw){
         d3.selectAll('.labcont').style('height',this.labcontHeight);
@@ -1302,8 +1477,9 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         .attr("fill","url(#gradBH)");
     // add mass icon
     if (!redraw){
+        // drawing from sratch
         massicondiv = document.createElement('div');
-        massicondiv.className = 'icon massicon';
+        massicondiv.className = 'icon mass-sketch massicon';
         massicondiv.setAttribute("id",'icon'+bh);
         massicondiv.style.width = this.micon.w;
         massicondiv.style.height = this.micon.h;
@@ -1315,11 +1491,15 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
             "<img src='"+this.micon.file[bh]+"'>"
         massicondiv.onmouseover = function(e){
             // console.log(this.id)
-            gw.showTooltip(e,this.id.split("icon")[1])}
-        massicondiv.onmouseout = function(){gw.hideTooltip()};
+            if(this.style['opacity']!="0"){
+                gw.showTooltip(e,this.id.split("icon")[1])}
+            }
+        massicondiv.onmouseout = function(){
+            if (this.style['opacity']!="0"){gw.hideTooltip()};
+        }
         // add mass text
         masstxtdiv = document.createElement('div');
-        masstxtdiv.className = 'sketchlab mtxt';
+        masstxtdiv.className = 'sketchlab mass-sketch mtxt';
         masstxtdiv.setAttribute('id','mtxt-'+bh);
         masstxtdiv.style["font-size"] = (1.2*this.sksc)+"em";
         masstxtdiv.innerHTML = this.labBlank;
@@ -1370,18 +1550,19 @@ GWCatalogue.prototype.flyOutMasses = function(bh){
     document.getElementById("mtxt-"+bh).innerHTML = this.labBlank;
 
 };
-GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
+GWCatalogue.prototype.flyInMasses = function(d,bh,resize,delay=false){
     // fly in mass
     // bh = BH to fly in
     // resize= type of resizing animation
+    dt=(delay) ? this.flySp/2 : 0;
     if (resize=="smooth"){
         // only resize circle & shadow
         this.svgSketch.select('circle.bh-'+bh)
-            .transition().duration(this.flySp)
+            .transition().delay(dt).duration(this.flySp)
             .attr("r",this.scaleRadius(d[bh]))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
-            .transition().duration(this.flySp)
+            .transition().delay(dt).duration(this.flySp)
             .attr("rx",this.scaleRadius(d[bh]))
             .attr("ry",this.scaleRadius(d[bh],0.2));
     }else if(resize=="fly"){
@@ -1389,11 +1570,11 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         this.svgSketch.select('circle.bh-'+bh)
             .attr("r",this.scaleRadius(d[bh]));
         this.svgSketch.select('circle.bh-'+bh)
-            .transition().duration(this.flySp).ease("bounce")
+            .transition().delay(dt).duration(this.flySp).ease("bounce")
             .attr("cx",this.xScaleSk(this.bhpos[bh].cx))
             .attr("cy",this.yScaleSk(this.bhpos[bh].cy)-this.scaleRadius(d[bh]));
         this.svgSketch.select('ellipse.shadow-'+bh)
-            .transition().duration(this.flySp).ease("bounce")
+            .transition().delay(dt).duration(this.flySp).ease("bounce")
             .attr("rx",this.scaleRadius(d[bh]))
             .attr("ry",this.scaleRadius(d[bh],0.2));
     }else if(resize=="snap"){
@@ -1415,6 +1596,215 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize){
         document.getElementById("mtxt-"+bh).innerHTML = this.tl(d[bh].strnoerr);
     }
 };
+GWCatalogue.prototype.addProbBars = function(redraw){
+    // add probability bars
+    var redraw;
+    gw=this;
+    // probwid=0.15;
+    probx0=0.1;
+    probx1=0.9;
+    probxgap=0.03;
+    proby0=0.9;
+    proby1=0.3;
+    this.probs=['BBH','BNS','NSBH','MassGap','Terrestrial'];
+    np=this.probs.length;
+    probwid=((probx1-probx0) - np*probxgap)/np;
+    this.probpos={left:probx0,right:probx1,width:probx1-probx0,
+        top:proby1,bottom:proby0,height:proby0-proby1,
+        barwidth:probwid,txty:proby0-probxgap,gap:probxgap};
+    for (p=0;p<this.probs.length;p++){
+        this.probpos[this.probs[p]]={
+            x:probx0 + (p+0.5)*probxgap + p*probwid,
+            y:proby0
+        }
+    }
+
+    this.scaleProbTop = function(pval,fact=1){
+        t=fact * this.sketchHeight * (this.probpos.top + (1-pval) * this.probpos.height);
+        // console.log('top(',this.probpos.top,fact , this.sketchHeight , (pval) , this.probpos.height,')=',t)
+        return(t)
+    }
+    this.scaleProbHeight = function(pval,fact=1){
+        if (!pval){return 0}
+        h=fact * this.sketchHeight * (pval) * this.probpos.height;
+        // console.log('top(',fact , this.sketchHeight , (pval) , this.probpos.height,')=',h)
+        return(h)
+    }
+    ylabx=this.xScaleSk(this.probpos.left-0.05);
+    ylaby=this.yScaleSk(this.probpos.top+this.probpos.height/2);
+    xlabx=this.xScaleSk(this.probpos.left+this.probpos.width/2);
+    xlaby=this.yScaleSk(this.probpos.bottom+0.05);
+    ytg=this.svgSketch.append("g")
+        .attr("transform","translate("+ylabx+","+ylaby+")")
+    ytg.append("text")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-y-label")
+        .attr("x",0)
+        .attr("y",0)
+        .text("Probability (%)")
+        .attr("fill",this.getCol('probtxt'))
+        .attr("text-anchor","middle")
+        .attr("dominant-baseline","central")
+        .attr("transform","rotate(-90)")
+        .attr("font-size",(1.3*gw.sksc)+"em");
+    this.svgSketch.append("text")
+        // .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-x-label")
+        .attr("x",xlabx)
+        .attr("y",xlaby)
+        .text("Classification")
+        .attr("fill",this.getCol('probtxt'))
+        .attr("text-anchor","middle")
+        .attr("dominant-baseline","central")
+        .attr("font-size",(1.3*gw.sksc)+"em");
+    for (p in this.probs){
+        prob=this.probs[p];
+        this.svgSketch.append("rect")
+            .attr("class","sketch")
+            .attr("id","prob-bar-"+prob)
+            .attr("x",this.xScaleSk(this.probpos[prob].x))
+            .attr("y",this.scaleProbTop(0))
+            .attr("fill",this.getCol('probbar'))
+            .attr("width",this.xScaleSk(this.probpos.barwidth))
+            .attr("height",this.scaleProbHeight(0));
+        txtx=this.xScaleSk(this.probpos[prob].x+this.probpos.barwidth/2);
+        txty=this.yScaleSk(this.probpos.txty);
+        grp=this.svgSketch.append("g")
+            .attr("transform","translate("+txtx+","+txty+")")
+            .attr("class","sketch ptxtg")
+            .attr("id","ptxtg-"+prob)
+        grp.append("text")
+            .attr("class","sketch ptxt")
+            .attr("id","ptxt-"+prob)
+            .attr("x",0)
+            .attr("fill",this.getCol('probtxt'))
+            .attr("y",0)
+            .attr("dy",(1.1*gw.sksc)+"em")
+            .attr("text-anchor","left")
+            .attr("dominant-baseline","central")
+            .attr("transform","rotate(-90)")
+            .attr("font-size",(1.3*gw.sksc)+"em")
+            .text(this.obj2hint(prob,true,true));
+        grp.append("text")
+            .attr("class","sketch ptxt")
+            .attr("id","ptxt2-"+prob)
+            .attr("x",0)
+            .attr("fill",this.getCol('probtxt'))
+            .attr("y",0)
+            .attr("dy",(-0*gw.sksc)+"em")
+            .attr("text-anchor","left")
+            .attr("dominant-baseline","central")
+            .attr("transform","rotate(-90)")
+            .attr("font-size",(1.3*gw.sksc)+"em")
+            .text(this.obj2hint(prob,true));
+        grp.append("text")
+            .attr("class","sketch ptxt")
+            .attr("id","ptxt3-"+prob)
+            .attr("x",0)
+            .attr("fill",this.getCol('probtxt'))
+            .attr("y",0)
+            .attr("dy",(-1.1*gw.sksc)+"em")
+            .attr("text-anchor","left")
+            .attr("dominant-baseline","central")
+            .attr("transform","rotate(-90)")
+            .attr("font-size",(1.3*gw.sksc)+"em")
+            .text(this.obj2hint(prob));
+    }
+    this.svgSketch.append("line")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-x")
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.right))
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.bottom))
+        .attr("stroke-width",2)
+        .attr("stroke",this.getCol('probbar'));
+    this.svgSketch.append("line")
+        .attr("class","sketch prob-sketch")
+        .attr("id","prob-sketch-y")
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.left))
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.top))
+        .attr("stroke-width",2)
+        .attr("stroke",this.getCol('probbar'));
+
+
+}
+GWCatalogue.prototype.flyOutProbBars = function(){
+    for (p in this.probs){
+        prob=this.probs[p];
+        this.svgSketch.select('#prob-bar-'+prob)
+            .transition().duration(this.flySp)
+            .attr("y",this.scaleProbTop(0))
+            .attr("fill",this.getCol("probbar"))
+            .attr("height",this.scaleProbHeight(0));
+        this.svgSketch.select('#ptxt-'+prob)
+            .transition().duration(this.flySp)
+            .attr("x",this.yScaleSk(-1.7));
+        this.svgSketch.select('#ptxt2-'+prob)
+            .transition().duration(this.flySp)
+            .attr("x",this.yScaleSk(-1.7));
+        this.svgSketch.select('#ptxt3-'+prob)
+            .transition().duration(this.flySp)
+            .attr("x",this.yScaleSk(-1.7));
+    }
+}
+GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
+
+    for (p in this.probs){
+        prob=this.probs[p];
+        pval=d.objType.prob[prob];
+        ptxt=this.obj2hint(prob,true,true);
+        ptxt2=this.obj2hint(prob,true)
+        ptxt3=this.obj2hint(prob);
+        if ((pval>0)&(pval<0.01)){ptxt += ' (<1%)'}
+        else{ptxt += ' ('+(100*pval).toFixed(0)+'%)';}
+        dt=(delay) ? this.flySp/2 : 0;
+        if (pval<=0.5){
+            ptxty=this.yScaleSk((pval*this.probpos.height));
+        }else{ptxty=this.yScaleSk(0);}
+        if (resize=="smooth"){
+            this.svgSketch.select('#prob-bar-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                .attr("y",this.scaleProbTop(pval))
+                .attr("fill",this.getCol("probbars")[prob])
+                .attr("height",this.scaleProbHeight(pval));
+            this.svgSketch.select('#ptxt-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt);
+            this.svgSketch.select('#ptxt2-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt2);
+            this.svgSketch.select('#ptxt3-'+prob)
+                .transition().delay(dt).duration(this.flySp)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt3);
+        }else if(resize=="snap"){
+            this.svgSketch.select('#prob-bar-'+prob)
+                .attr("y",this.scaleProbTop(pval))
+                .attr("fill",this.getCol("probbars")[prob])
+                .attr("height",this.scaleProbHeight(pval));
+            this.svgSketch.select('#ptxt-'+prob)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt);
+            this.svgSketch.select('#ptxt2-'+prob)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt2);
+            this.svgSketch.select('#ptxt3-'+prob)
+                .attr("x",ptxty)
+                .attr("fill",this.getCol('probtxt'))
+                .text(ptxt3);
+        }
+    }
+}
 GWCatalogue.prototype.switchUnits = function(){
     // switch between label units
     if (this.unitSwitch){
@@ -1463,7 +1853,7 @@ GWCatalogue.prototype.redrawLabels = function(){
     for (m in masses){
         bh=masses[m]
         // update mass label text
-        if (this.d!=null){
+        if (this.d!=null&&this.d.hasOwnProperty(bh)){
             if (this.unitSwitch){dbh=this.d[bh+'kg']}
             else{dbh=this.d[bh]}
             document.getElementById("mtxt-"+bh)
@@ -1478,27 +1868,50 @@ GWCatalogue.prototype.redrawLabels = function(){
         }
     }
 }
-GWCatalogue.prototype.obj2hint = function(objType){
-    if (objType=='BBH'){ return this.tl('%text.gen.bbh%')}
-    else if (objType=='BNS'){ return this.tl('%text.gen.bns%')}
-    else if (objType=='BHNS'){ return this.tl('%text.gen.bhns%')}
+GWCatalogue.prototype.obj2hint = function(objType,desc=false,line2=false){
+    if (objType=='BBH'){
+        return (desc) ? (line2) ? this.tl('%text.gen.bbh.lab-2%') : this.tl('%text.gen.bbh.lab%') :
+         this.tl('%text.gen.bbh.def%',true)}
+    else if (objType=='BNS'){
+        return (desc) ? ((line2) ? this.tl('%text.gen.bns.lab-2%') : this.tl('%text.gen.bns.lab%')) :  this.tl('%text.gen.bns.def%',true)}
+    else if (objType=='NSBH'){
+        return (desc) ? ((line2) ? this.tl('%text.gen.nsbh.lab-2%') : this.tl('%text.gen.nsbh.lab%')) : this.tl('%text.gen.nsbh.def%',true)}
+    else if (objType=='MassGap'){
+        return (desc) ? ((line2) ? this.tl('%text.gen.massgap.lab-2%') : this.tl('%text.gen.massgap.lab%')) : this.tl('%text.gen.massgap.def%',true)}
+    else if (objType=='Terrestrial'){
+        return (desc) ? ((line2) ? this.tl('%text.gen.terrestrial.lab-2%') : this.tl('%text.gen.terrestrial.lab%')) : this.tl('%text.gen.terrestrial.def%',true)}
     else {return ""}
 }
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
     if (this.redraw){
-        // resize sketch
-        this.flyInMasses(d,"M1","snap");
-        this.flyInMasses(d,"M2","snap");
-        this.flyInMasses(d,"Mfinal","snap");
+        // redrawing what's already there
+        if (d.detType.best=='Candidate'){
+            this.flyInProbBars(d,"snap");
+            this.flyOutMasses("M1");
+            this.flyOutMasses("M2");
+            this.flyOutMasses("Mfinal");
+            this.hideBHSketch();
+            this.sketchTitleHint.html("");
+        }else{
+            // resize sketch
+            this.flyInMasses(d,"M1","snap");
+            this.flyInMasses(d,"M2","snap");
+            this.flyInMasses(d,"Mfinal","snap");
+            this.hideProbSketch();
+            this.flyOutProbBars();
+            this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+        }
         // update title
         this.sketchTitle.html(
             this.tl("%text.plotgw.information.heading% "+this.sketchName));
-        this.sketchTitleHint.html(this.obj2hint(d.objType.best));
         // update labels
         this.redrawLabels();
-    }else if ((this.sketchName==d["name"])){
+    }else if ((d==null)||(this.sketchName==d["name"])){
         // clicked on currently selected datapoint
+        this.hideProbSketch();
+        this.hideBHSketch();
+        this.flyOutProbBars();
         this.flyOutMasses("M1");
         this.flyOutMasses("M2");
         this.flyOutMasses("Mfinal");
@@ -1513,28 +1926,122 @@ GWCatalogue.prototype.updateSketch = function(d){
         }
     }else{
         // clicked on un-selelected datapoint
-        if ((this.sketchName=="None")||(this.sketchName=="")) {
-            // nothing selected, so fly in
-            this.flyInMasses(d,"M1","fly");
-            this.flyInMasses(d,"M2","fly");
-            this.flyInMasses(d,"Mfinal","fly");
+        if (d.detType.best=='Candidate'){
+            // seleted candidate
+            this.hideBHSketch();
+            if (!(this.d)){
+                // no current selection
+                this.showProbSketch();
+                this.flyInProbBars(d,"smooth");
+                // this.flyOutMasses("M1");
+                // this.flyOutMasses("M2");
+                // this.flyOutMasses("Mfinal");
+            }else if (this.d.detType.best=='Candidate'){
+                // switching from candidate to candidate
+                if(this.debug){console.log('switching from Candidate to Candidate');}
+                this.flyInProbBars(d,"smooth");
+            }else{
+                // switching from detection to candidate
+                if(this.debug){console.log('switching from Detection to Candidate');}
+                this.flyOutMasses("M1");
+                this.flyOutMasses("M2");
+                this.flyOutMasses("Mfinal");
+                this.showProbSketch(delay=true);
+                this.flyInProbBars(d,"smooth",delay=true);
+
+            }
             this.d = d;
+            // update title
+            this.sketchName = d["name"];
+            this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)+' %text.plotgw.information.candidate%'));
+            this.sketchTitleHint.html("");
+            //update labels
+            this.redrawLabels();
         }else{
-            // different data selected, so resize
-            this.flyInMasses(d,"M1","smooth");
-            this.flyInMasses(d,"M2","smooth");
-            this.flyInMasses(d,"Mfinal","smooth");
+            // selected detection
+            if (!(this.d)) {
+                // nothing selected, so fly in
+                this.hideProbSketch()
+                this.flyOutProbBars();
+                this.showBHSketch();
+                this.flyInMasses(d,"M1","fly");
+                this.flyInMasses(d,"M2","fly");
+                this.flyInMasses(d,"Mfinal","fly");
+            }else if (this.d.detType.best=='Candidate'){
+                // switching from candidate to detection
+                this.hideProbSketch();
+                this.flyOutProbBars();
+                this.showBHSketch(delay=true);
+                this.flyInMasses(d,"M1","fly",delay=true);
+                this.flyInMasses(d,"M2","fly",delay=true);
+                this.flyInMasses(d,"Mfinal","fly",delay=true);
+            }else{
+                // switching from detection to detection
+                this.flyInMasses(d,"M1","smooth");
+                this.flyInMasses(d,"M2","smooth");
+                this.flyInMasses(d,"Mfinal","smooth");
+            }
             this.d = d;
+            // update title
+            this.sketchName = d["name"];
+            this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)));
+            this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+            //update labels
+            this.redrawLabels();
         }
-        // update title
-        this.sketchName = d["name"];
-        this.sketchTitle.html("Information: "+this.sketchName);
-        this.sketchTitleHint.html(this.obj2hint(d.objType.best));
-        //update labels
-        this.redrawLabels();
     }
 }
-
+GWCatalogue.prototype.hideBHSketch = function(){
+    d3.selectAll('.mass-sketch')
+        .transition()
+        .duration(750)
+        .style('opacity',0)
+}
+GWCatalogue.prototype.showBHSketch = function(delay=false){
+    dt=(delay) ? this.flySp/2 : 0;
+    d3.selectAll('.mass-sketch')
+        .transition()
+        .delay(dt)
+        .duration(750)
+        .style('opacity',1)
+}
+GWCatalogue.prototype.hideProbSketch = function(){
+    this.svgSketch.select('#prob-sketch-x')
+        .transition().duration(this.flySp)
+        .attr("y1",this.yScaleSk(1.7))
+        .attr("y2",this.yScaleSk(1.7))
+    this.svgSketch.select('#prob-sketch-y')
+        .transition().duration(this.flySp)
+        .attr("x1",this.xScaleSk(-0.7))
+        .attr("x2",this.xScaleSk(-0.7))
+    this.svgSketch.select('#prob-sketch-x-label')
+        .transition().duration(this.flySp)
+        .attr("y",this.yScaleSk(1.7))
+    this.svgSketch.select('#prob-sketch-y-label')
+        .transition().duration(this.flySp)
+        .attr("y",this.yScaleSk(-0.7))
+}
+GWCatalogue.prototype.showProbSketch = function(delay=false){
+    dt=(delay) ? this.flySp/2 : 0;
+    ylabx=this.xScaleSk(this.probpos.left-0.05);
+    ylaby=this.yScaleSk(this.probpos.top+this.probpos.height/2);
+    xlabx=this.xScaleSk(this.probpos.left+this.probpos.width/2);
+    xlaby=this.yScaleSk(this.probpos.bottom+0.05);
+    this.svgSketch.select('#prob-sketch-x')
+        .transition().duration(this.flySp)
+        .attr("y1",this.yScaleSk(this.probpos.bottom))
+        .attr("y2",this.yScaleSk(this.probpos.bottom))
+    this.svgSketch.select('#prob-sketch-y')
+        .transition().duration(this.flySp)
+        .attr("x1",this.xScaleSk(this.probpos.left))
+        .attr("x2",this.xScaleSk(this.probpos.left))
+    this.svgSketch.select('#prob-sketch-x-label')
+        .transition().delay(dt).duration(this.flySp)
+        .attr("y",xlaby)
+    this.svgSketch.select('#prob-sketch-y-label')
+        .transition().delay(dt).duration(this.flySp)
+        .attr("y",0)
+}
 // ****************************************************************************
 // ****************************************************************************
 // ****************************************************************************
@@ -1556,7 +2063,10 @@ GWCatalogue.prototype.setStyles = function(){
             'dotline':["#000","#555","#555"],
             'axis':"rgb(100,100,100)",
             'highlight':'#f00',
-            'tick':'#ccc'
+            'tick':'#ccc',
+            'probbar':'#333',
+            'probbars':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',Terrestrial:'#cccccc'},
+            'probtxt':'#000'
         },
         'dark':{'class':'col-black','default':false,
             'label':'%text.plotgw.colour.dark%',
@@ -1565,11 +2075,14 @@ GWCatalogue.prototype.setStyles = function(){
             'grid':'#ccc','err':'#ccc',
             'BH':["rgba(255,255,255,1)","rgba(255,255,255,0)"],
             'shadow':["rgba(128,128,128,1)","rgba(64,64,64,0)"],
-            'dotfill':["#1f77b4", "#ff7f0e","#999999"],
-            'dotline':["#fff","#555","#555"],
+            'dotfill':["#1f77b4", "#ffaf0e","#999999"],
+            'dotline':["#fff","#fff","#555"],
             'axis':"rgb(200,200,200)",
             'highlight':'#f00',
-            'tick':'#555'
+            'tick':'#555',
+            'probbar':'#ccc',
+            'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#555555'},
+            'probtxt':'#fff'
         }
     }
     if (!this.colScheme){this.colScheme='light'}
@@ -1585,15 +2098,24 @@ GWCatalogue.prototype.setStyles = function(){
             return this.colourList[this.colScheme].class
         }else{return ''}
     }
-    this.cValue = function(d) {return d.type;};
+    this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = ['GW','LVT'];
+    this.styleDomains = ['GW','Candidate'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,0]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1,0.5]).domain(this.styleDomains);
-    this.getOpacity = function(d) {return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.type) : 0)}
-    this.tickTimeFormat = d3.time.format("%Y-%m-%d");
+    this.linedashes = d3.scale.ordinal().range([0,3]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1]).domain(this.styleDomains);
+    this.getOpacity = function(d) {
+        return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
+    this.tickTimeFormat = d3.time.format("%Y-%m");
+    // this.isEst = function(d,param){
+    //     return (d[param]) ? d[param].hasOwnProperty('est') : false;
+    // }
+    // this.isSoft = function(d,param,i=0){
+    //     if ((d[param])&&(d[param]['esttype'])){
+    //         return (d[param]['esttype'][i]=='soft') ? true : false
+    //     }else{return false}
+    // }
 
     this.swErr = 2;
     this.opErr = 0.7;
@@ -1602,11 +2124,15 @@ GWCatalogue.prototype.setStyles = function(){
 GWCatalogue.prototype.tttext = function(d){
     // graph tooltip text
     if (this.debug){console.log(d["name"],this.columns[this.xvar].name,d[this.xvar].strnoerr,this.columns[this.yvar].name,d[this.yvar].strnoerr)}
-    return "<span class='ttname'>"+d["name"]+"</span>"+
+
+    xval= this.tl(this.oneline(d[this.xvar].strnoerr))
+    yval= this.tl(this.oneline(d[this.yvar].strnoerr))
+
+    return "<span class='ttname'>"+this.tName(d["name"])+"</span>"+
     "<span class='ttpri'>"+this.tl(this.columns[this.xvar].name)+
-        ": "+this.tl(this.oneline(d[this.xvar].strnoerr))+"</span>"+
+        ": "+xval+"</span>"+
     "<span class='ttsec'>"+this.tl(this.columns[this.yvar].name) +
-        ": "+this.tl(this.oneline(d[this.yvar].strnoerr))+"</span>";
+        ": "+yval+"</span>";
 }
 GWCatalogue.prototype.orderData = function(order='GPS'){
     this.cat.data=this.cat.data.sort(function(a,b){
@@ -1620,6 +2146,36 @@ GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     if (this.debug){console.log('formatData',d.name);}
     var gw=this;
+    // code to create mass estimate (NOT USED)
+    // if ((d.detType.best=='Candidate')&&(!(d.M1))&&(!(d.M2))){
+    //     // add estimated masses
+    //     mlim1={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[5,80]};
+    //     mlim2={'BBH':[5,80],'BNS':[0.1,3],'MassGap':[3,5],'NSBH':[0.1,3]};
+    //     m1=[Infinity,-Infinity];
+    //     m2=[Infinity,-Infinity];
+    //     m1esttype=['hard','hard'];
+    //     m2esttype=['hard','hard'];
+    //     console.log(d)
+    //     for (c in d.objType.prob){
+    //         if (d.objType.prob[c]>0.01){
+    //             m1[0]= (mlim1[c]) ? Math.min(m1[0],mlim1[c][0]) : m1[0];
+    //             m1[1]= (mlim1[c]) ? Math.max(m1[1],mlim1[c][1]) : m1[1];
+    //             if (m1[1]>50){m1esttype[1]='soft'}
+    //             m2[0]= (mlim2[c]) ? Math.min(m2[0],mlim2[c][0]) : m2[0];
+    //             m2[1]= (mlim2[c]) ? Math.max(m2[1],mlim2[c][1]) : m2[1];
+    //             if (m2[1]>50){m2esttype[1]='soft'}
+    //         }
+    //     }
+    //     rand1=(d.GPS.best % 3600 )/3600;
+    //     rand2=(d.GPS.best % 86400 )/86400;
+    //     m1b=(rand1-0.5)*(([m1[1]-m1[0]])/2) + 0.5*(m1[0]+m1[1]);
+    //     m1err=[m1[0]-m1b,m1[1]-m1b];
+    //     m2b=(rand2-0.5)*(([m2[1]-m2[0]])/2) + 0.5*(m2[0]+m2[1]);
+    //     m2err=[m2[0]-m2b,m2[1]-m2b];
+    //     d.M1={best:m1b,est:m1err,esttype:m1esttype};
+    //     d.M2={best:m2b,est:m2err,esttype:m2esttype};
+    //     // console.log(d.name,d.M1,d.M2);
+    // }
     for (col in gw.columns){
         // console.log(col,gw.columns[col].type);
         if (gw.columns[col].type=="derived"){
@@ -1662,6 +2218,11 @@ GWCatalogue.prototype.formatData = function(d,cols){
                     [d[col].best+d[col].err[0],
                     d[col].best+d[col].err[1]];
                 d[col].errtype='normal';
+            }else if ((d[col].est)&&(d[col].est.length==2)){
+                d[col].errv =
+                    [d[col].best+d[col].est[0],
+                    d[col].best+d[col].est[1]];
+                d[col].errtype='est';
             }else if ((d[col].lim)&&(d[col].lim.length==2)){
                 d[col].errv =
                     [Math.max.apply(Math,d[col].lim),
@@ -1734,7 +2295,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     gw.helpOn=false;
     gw.langOn=false;
     gw.toLoad=3;
-    gw.fileInEventsDefault="https://gwcat.cardiffgravity.org/data/events.json";
+    gw.fileInEventsDefault="https://gwcat.cardiffgravity.org/data/gwosc_gracedb.jsonp";
     gw.fileInEvents = (gw.urlVars.eventsFile) ? gw.urlVars.eventsFile : (gw.inp.eventsFile) ? gw.inp.eventsFile : gw.fileInEventsDefault;
     gw.fileInGwoscDefault="https://gwcat.cardiffgravity.org/data/gwosc.json";
     gw.fileInGwosc = (gw.urlVars.gwoscFile) ? gw.urlVars.gwoscFile : (gw.inp.gwoscFile) ? gw.inp.gwoscFile : gw.fileInGwoscDefault;
@@ -1758,7 +2319,6 @@ GWCatalogue.prototype.drawGraphInit = function(){
             if (gw.debug){console.log('converting from GWOSC format');}
             newlinks={}
             for (e in this.data){
-                // console.log(e,this.data[e]);
                 if(gw.debug){console.log(e,this.data[e])}
                 if(gw.debug){console.log(e,this.links)}
                 if (this.links[e]){
@@ -1841,7 +2401,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     if (gw.datasrc=='gwosc'){
         gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:gw.fileInGwosc,debug:this.debug});
     }else{
-        gw.cat = new GWCat(eventsCallback,{'fileIn':gw.fileInEvents});
+        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,'fileIn':gw.fileInEvents});
     }
 
 
@@ -1849,11 +2409,15 @@ GWCatalogue.prototype.drawGraphInit = function(){
 GWCatalogue.prototype.whenLoaded = function(){
     var gw=this;
     gw.setColumns(gw.cat.datadict);
-    gw.cat.data.forEach(function(d){gw.formatData(d,gw.columns)});
+    gw.cat.data.forEach(function(d){
+        gw.formatData(d,gw.columns)
+    });
     // order Data
     gw.orderData();
     this.setScales();
     gw.makePlot();
+    panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
+    gw.setPanel(panel)
     if(gw.debug){console.log('plotted');}
     // select a default event
 }
@@ -1945,12 +2509,38 @@ GWCatalogue.prototype.setLang = function(){
         }
     }
 
+    d3.select("#options-gen > .panel-title")
+        .html(this.tl('%text.plotgw.presets.title%'))
+    for (pre in this.presets){
+        d3.select("#"+pre+"-text")
+            .html(this.tl(this.presets[pre]["desc"]));
+        d3.select("#"+pre+"-x-axis")
+            .html(this.tl(this.columns[this.presets[pre]["x-axis"]]["name"]));
+        d3.select("#"+pre+"-y-axis")
+            .html(this.tl(this.columns[this.presets[pre]["y-axis"]]["name"]));
+    }
+    d3.select("#preset-warn")
+        .html(this.tl('%text.plotgw.presets.filter-warn%'))
+    d3.select("#preset-filter-link")
+        .html(this.tl('%text.plotgw.presets.filter-link%'))
     d3.select("#options-x > .panel-title")
         .html(this.tl('%text.plotgw.horizontal-axis%'))
+    d3.select("#x-buttons-all > .panel-block")
+        .html(this.tl('%text.plotgw.options.allsrc%'))
+    d3.select("#x-buttons-conf > .panel-block")
+        .html(this.tl('%text.plotgw.options.conf-only%'))
     d3.select("#options-y > .panel-title")
         .html(this.tl('%text.plotgw.vertical-axis%'))
+    d3.select("#y-buttons-all > .panel-block")
+        .html(this.tl('%text.plotgw.options.allsrc%'))
+    d3.select("#y-buttons-conf > .panel-block")
+        .html(this.tl('%text.plotgw.options.conf-only%'))
     d3.select("#display-options > .panel-title")
         .html(this.tl('%text.plotgw.display%'))
+    d3.selectAll("#xzero-lab,#yzero-lab")
+        .html(this.tl('%text.plotgw.axiszero%'))
+    d3.selectAll("#xlog-lab,#ylog-lab")
+        .html(this.tl('%text.plotgw.log-axis%'))
     d3.select("#options-colour")
         .html(this.tl('%text.plotgw.colour%'))
     for (c in this.colourList){
@@ -1965,9 +2555,11 @@ GWCatalogue.prototype.setLang = function(){
     for (f in this.filters){
         d3.select('#filt_'+f+'_label > .filter-text')
             .html(this.tl(this.filters[f].name));
+        d3.select('#filt_'+f+'_label > .filter-note')
+            .html(this.tl(this.filters[f].note));
     }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
-        LVT:this.tl('%text.plotgw.legend.candidates%')}
+        Candidate:this.tl('%text.plotgw.legend.candidates%')}
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
@@ -2011,31 +2603,55 @@ GWCatalogue.prototype.setColour = function(newScheme){
     this.colScheme=newScheme;
     this.setStyles();
     this.replot();
+    this.updateBothAxes(this.xvar,this.yvar);
     return;
 }
-GWCatalogue.prototype.getMinMax = function(p){
+GWCatalogue.prototype.getMinMax = function(p,logax,zeroax){
     var gw = this;
-    var dminmax=[Infinity,-Infinity]
+    var dminmax=[Infinity,-Infinity];
     border=(gw.columns[p].border) ? gw.columns[p].border : 2;
     scale = (gw.columns[p].scale) ? gw.columns[p].scale : "";
+    dolog=logax;
+    dozero=zeroax;
+    if (gw.columns[p].forcelog){
+        dolog= (gw.columns[p].forcelog=='on') ? true : false;
+    }
+    if (gw.columns[p].forcezero){
+        dozero= (gw.columns[p].forcezero=='on') ? true : false;
+    }
+    // nolog = (gw.columns[p].forcelog) ? gw.columns[p].forcelog : false;
     for (i=0;i<gw.cat.data.length;i++){
         if (gw.cat.data[i].active!=false){
-            dminmax[0] = Math.min(gw.cat.getMinVal(gw.cat.data[i].name,p),dminmax[0])
-            dminmax[1] = Math.max(gw.cat.getMaxVal(gw.cat.data[i].name,p),dminmax[1])
+            if ((gw.cat.data[i][p])&&(gw.cat.data[i][p].errv)){
+                pmin=Math.min(gw.cat.data[i][p].errv[0],gw.cat.data[i][p].errv[1])
+                pmax=Math.max(gw.cat.data[i][p].errv[0],gw.cat.data[i][p].errv[1])
+            }else{
+                pmin=gw.cat.getMinVal(gw.cat.data[i].name,p);
+                pmax=gw.cat.getMaxVal(gw.cat.data[i].name,p)
+            }
+            if (pmin){dminmax[0] = Math.min(pmin,dminmax[0])}
+            if (pmax){dminmax[1] = Math.max(pmax,dminmax[1])}
         }
     }
-    if (gw.debug){console.log('axiszero',gw.axiszero,dminmax[0])};
-    if ((gw.axiszero)&&(scale!="time")){
-        // if axiszero set, set axis min to zero unless already <0
-        dminmax[0] = (dminmax[0]<0) ? dminmax[0]-border : 0;
+    if (dolog){
+        // console.log(p,'log axis',dminmax)
+        dminmax[0] = Math.pow(10,Math.floor(Math.log10(dminmax[0])))
+        dminmax[1] = Math.pow(10,Math.ceil(Math.log10(dminmax[1])))
     }else{
-        // set to min-border
-        dminmax[0] = (dminmax[0] < 0) ? dminmax[0]-border : (dminmax[0] < border) ? 0 : dminmax[0]-border;
+        // console.log(p,'linear axis')
+        if (gw.debug){console.log('axiszero',dozero,dminmax[0])};
+        if ((dozero)&&(scale!="time")){
+            // if axiszero set, set axis min to zero unless already <0
+            dminmax[0] = (dminmax[0]<0) ? dminmax[0]-border : 0;
+        }else{
+            // set to min-border
+            dminmax[0] = (dminmax[0] < 0) ? dminmax[0]-border : (dminmax[0] < border) ? 0 : dminmax[0]-border;
+        }
+        // add border on to max
+        dminmax[1] = dminmax[1]+border;
+        // if min<0, add on border
+        // dminmax[0] = dminmax[0]<0 ? dminmax[0]-border : (gw.axiszero&&dminmax[0]<border ? 0 : dminmax[0]-border);
     }
-    // add border on to max
-    dminmax[1] = dminmax[1]+border;
-    // if min<0, add on border
-    // dminmax[0] = dminmax[0]<0 ? dminmax[0]-border : (gw.axiszero&&dminmax[0]<border ? 0 : dminmax[0]-border);
 
     return dminmax;
 }
@@ -2046,46 +2662,86 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
     gw.xvar = xvarNew;
     gw.yvar = yvarNew;
 
-    [xMin,xMax]=gw.getMinMax(gw.xvar);
+    [xMin,xMax]=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
+    // console.log('x min/max',gw.xvar,xMin,xMax);
     if ((gw.columns[gw.xvar].scale)&&(gw.columns[gw.xvar].scale='time')){
-        this.xScale = d3.time.scale().range([0,gw.graphWidth])
-        gw.xScale.domain([new Date(xMin), new Date(xMax)])
-        gw.yScale.nice(d3.time.month);
+        gw.xScale = d3.time.scale().range([0,gw.graphWidth])
+        datexMin=new Date(xMin);
+        datexMax=new Date(xMax);
+        gw.xScale.domain([datexMin, datexMax]);
+        // set tick interval in months
+        mxdiff=(datexMax-datexMin)/(86400*30*1e3);
+        mxticks=(mxdiff > 24) ? 6 : (mxdiff < 12) ? 1 : 3;
+        gw.xScale.nice(d3.time.month,mxticks);
+        if(document.getElementById('x-axis-g')){document.getElementById('x-axis-g').classList.remove('log');}
         // x axis
         this.xAxis = d3.svg.axis()
-                .scale(this.xScale)
+                .scale(gw.xScale)
+                .ticks(d3.time.month,mxticks)
                 .orient("bottom")
                 .innerTickSize(-this.graphHeight)
                 .tickFormat(gw.tickTimeFormat);
     }else{
-        this.xScale = d3.scale.linear().range([0, this.graphWidth])
-        gw.xScale.domain([xMin, xMax]);
+        dologx=this.xlog;
+        if (gw.columns[gw.xvar].forcelog){
+            dologx= (gw.columns[gw.xvar].forcelog=='on') ? true : false;
+        }
+        if (dologx){
+            this.xScale = d3.scale.log().base(10).range([0, this.graphWidth]);
+            // [xMin,xMax]=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
+            this.xScale.domain([xMin, xMax]);
+            if(document.getElementById('x-axis-g')){document.getElementById('x-axis-g').classList.add('log');}
+        }else{
+            this.xScale = d3.scale.linear().range([0, this.graphWidth])
+            this.xScale.domain([xMin, xMax]);
+            if(document.getElementById('x-axis-g')){document.getElementById('x-axis-g').classList.remove('log');}
+        }
         // x axis
         this.xAxis = d3.svg.axis()
                 .scale(this.xScale)
                 .orient("bottom")
                 .innerTickSize(-this.graphHeight);
-
     }
 
     if(this.debug){console.log('x',gw.axiszero,xMin,xMax,gw.xScale.range(),gw.xScale.domain())}
 
-    [yMin,yMax]=gw.getMinMax(gw.yvar);
+    [yMin,yMax]=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
+    // console.log('y min/max',gw.yvar,yMin,yMax);
     if ((gw.columns[gw.yvar].scale)&&(gw.columns[gw.yvar].scale='time')){
-        this.yScale = d3.time.scale().range([gw.graphHeight,0])
-        gw.yScale.domain([new Date(yMin), new Date(yMax)])
-        gw.yScale.nice(d3.time.month);
+        gw.yScale = d3.time.scale().range([gw.graphHeight,0])
+        dateyMin=new Date(yMin);
+        dateyMax=new Date(yMax);
+        gw.yScale.domain([dateyMin, dateyMax])
+        // set tick interval in months
+        mydiff=(dateyMax-dateyMin)/(86400*30*1e3);
+        myticks=(mydiff > 24) ? 6 : (mydiff < 12) ? 1 : 3;
+        gw.yScale.nice(d3.time.month,myticks);
+        if(document.getElementById('y-axis-g')){document.getElementById('y-axis-g').classList.remove('log');}
         // y axis
         this.yAxis = d3.svg.axis()
-                .scale(this.yScale)
+                .scale(gw.yScale)
+                .ticks(d3.time.month,myticks)
                 .orient("left")
                 // .innerTickSize(-(this.relw[1]-this.relw[0])*this.graphWidth);
                 .innerTickSize(-this.graphWidth)
                 .tickFormat(gw.tickTimeFormat);
 
     }else{
-        this.yScale = d3.scale.linear().range([gw.graphHeight,0])
-        gw.yScale.domain([yMin, yMax]);
+        dology=this.ylog;
+        if (gw.columns[gw.yvar].forcelog){
+            dology= (gw.columns[gw.yvar].forcelog=='on') ? true : false;
+        }
+        if (dology){
+            // this.axiszero=false;
+            this.yScale = d3.scale.log().base(10).range([gw.graphHeight,0])
+            // [yMin,yMax]=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
+            this.yScale.domain([yMin, yMax]);
+            if(document.getElementById('y-axis-g')){document.getElementById('y-axis-g').classList.add('log');}
+        }else{
+            this.yScale = d3.scale.linear().range([gw.graphHeight,0])
+            this.yScale.domain([yMin, yMax]);
+            if(document.getElementById('y-axis-g')){document.getElementById('y-axis-g').classList.remove('log');}
+        }
         // y axis
         this.yAxis = d3.svg.axis()
                 .scale(this.yScale)
@@ -2106,15 +2762,25 @@ GWCatalogue.prototype.drawGraph = function(){
     data = gw.cat.data;
     if(this.debug){console.log('plotting ',gw.xvar,' vs ',gw.yvar);}
 
+    // x-axis
+    gw.svg.append("g")
+        .attr("class", "x-axis axis colourise "+gw.getColClass())
+        .attr("id","x-axis-g")
+        .attr("transform", "translate("+gw.margin.left+"," +
+            (gw.margin.top + gw.graphHeight) + ")");
+    // y-axis
+    gw.svg.append("g")
+        .attr("class", "y-axis axis colourise "+gw.getColClass())
+        .attr("id","y-axis-g")
+        .attr("transform", "translate("+gw.margin.left+","+
+            gw.margin.top+")");
+
     gw.setXYscales(gw.xvar,gw.yvar);
 
     if (gw.showerrors == null){gw.showerrors=true};
 
-    // x-axis
-    gw.svg.append("g")
-        .attr("class", "x-axis axis colourise "+gw.getColClass())
-        .attr("transform", "translate("+gw.margin.left+"," +
-            (gw.margin.top + gw.graphHeight) + ")");
+
+    // x-axis components
     gw.svg.append("line")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
@@ -2124,6 +2790,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("stroke",gw.getCol('axis')).attr("stroke-width",5)
         .attr("opacity",gw.xAxLineOp);
     gw.svg.select(".x-axis.axis").call(gw.xAxis)
+    // console.log('xticks',gw.svg.select(".x-axis.axis"),gw.svg.select(".x-axis.axis").selectAll('.tick > text'));
     gw.svg.select(".x-axis.axis").append("text")
         .attr("class", "x-axis axis-label")
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -2149,11 +2816,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("font-size",(0.8*(1+gw.scl))+"em")
         .style("fill",gw.getCol('text'));
 
-    // y-axis
-    gw.svg.append("g")
-        .attr("class", "y-axis axis colourise "+gw.getColClass())
-        .attr("transform", "translate("+gw.margin.left+","+
-            gw.margin.top+")");
+    // y-axis components
     gw.svg.append("line")
         .attr("transform", "translate("+gw.margin.left+","+
             gw.margin.top+")")
@@ -2210,7 +2873,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMap).attr("y2",gw.yMap)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     // add top of x error bar
     errX.append("line")
         .attr("class","error errorX errorXp1")
@@ -2220,7 +2883,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     errX.append("line")
         .attr("class","error errorX errorXp2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2229,7 +2892,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     // add bottom of x error bar
     errX.append("line")
         .attr("class","error errorX errorXm1")
@@ -2239,7 +2902,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.xMapErrY0).attr("y2",gw.yMap)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     errX.append("line")
         .attr("class","error errorX errorXm2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2248,8 +2911,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMap).attr("y2",gw.xMapErrY1)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
-
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
     // add y error bar
     errY=errorGroup.selectAll(".errorY-g")
         .data(data)
@@ -2265,7 +2927,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrM)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     // add top of y error bar
     errY.append("line")
         .attr("class","error errorY errorYp1")
@@ -2275,7 +2937,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrPouter).attr("y2",gw.yMapErrP)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     errY.append("line")
         .attr("class","error errorY errorYp2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2284,7 +2946,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrP).attr("y2",gw.yMapErrPouter)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     // add bottom of y error bar
     errY.append("line")
         .attr("class","error errorY errorYm1")
@@ -2294,7 +2956,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrMouter).attr("y2",gw.yMapErrM)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     errY.append("line")
         .attr("class","error errorY errorYm2")
         // .attr("transform", "translate("+gw.margin.left+","+
@@ -2303,7 +2965,8 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrMouter)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",gw.opErr);
+        .attr("opacity",0.1);
+        // .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
 
     // if (!gw.showerrors){gw.toggleErrors();}
 
@@ -2339,14 +3002,16 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("transform", "translate("+gw.margin.left+","+
         gw.margin.top+")")
       .attr("r", Math.min(10.,7/gw.sksc))
+      // .attr("cx", function(d){console.log('draw dotx',d.name,gw.xvar,gw.xMap(d));return gw.xMap(d);})
+      // .attr("cy", function(d){console.log('draw doty',d.name,gw.yvar,gw.yMap(d));return gw.yMap(d);})
       .attr("cx", gw.xMap)
       .attr("cy", gw.yMap)
       .attr("cursor","pointer")
       .attr("opacity",function(d){return gw.getOpacity(d)})
     //   .style("fill", function(d) { return color(cValue(d));})
       .style("fill", function(d){return gw.color(gw.cValue(d));})
-      .style("stroke",function(d){return gw.linestyles(d.type);})
-      .style("stroke-dasharray",function(d){return gw.linedashes(d.type);})
+      .style("stroke",function(d){return gw.linestyles(d.detType.best);})
+      .style("stroke-dasharray",function(d){return gw.linedashes(d.detType.best);})
       .style("stroke-width",Math.min(5,2./gw.sksc))
       .on("mouseover", function(d) {
             gw.tooltip.transition()
@@ -2566,7 +3231,7 @@ GWCatalogue.prototype.drawGraph = function(){
           //   document.getElementById("sketchcontainer").style.opacity=0.;
         }).append("img")
         .attr("src","img/filter.svg")
-        .on("click",function(){console.log('showing filter panel');gw.showFilter();});
+        .on("click",function(){gw.showFilter();});
     // this.langbg.on("click",function(){gw.hideLang();});
     this.filterouter
         .style("top","200%");
@@ -2606,20 +3271,45 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("class","hidden")
         .attr("id","search-img")
         .on("click",function(){gw.showSearch();gw.hideTooltipManual();});
-    gw.cat.data.forEach(function(d){
-        d3.select('#search-outer').append("div")
-            .attr("class","popup-list-item search-list-item")
-            .attr("id","search-list-"+d.name)
-            .html(d.name)
-            .on("click",function(){
-                if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);gw.hideSearch();}
-            });
-    })
+
+    this.populateSearchList();
     d3.select("#search-bg").on("click",function(){gw.hideSearch();});
     d3.select("#search-close").on("click",function(){gw.hideSearch();});
     if(gw.debug){console.log('selected:',gw.selectedevent);}
 
+    //add search button
+    this.graphcont.append("div")
+        .attr("id","download-icon")
+        .attr("class","graph-icon hidden colourise "+gw.getColClass())
+        .style({"right":gw.margin.right+8*(gw.margin.top+10),"top":0,"width":gw.margin.top,"height":gw.margin.top})
+        .on("mouseover",function(){
+            gw.showTooltipManual("%tooltip.plotgw.save.png%");
+        })
+        .on("mouseout",function(){
+            gw.hideTooltipManual();
+        }).append("img")
+        .attr("src","img/save.svg")
+        .attr("class","hidden")
+        .attr("id","download-img")
+        .on("click",function(){gw.makeCanvas();gw.saveCanvas();gw.removeCanvas();gw.hideTooltipManual();});
+
 }
+GWCatalogue.prototype.populateSearchList = function(){
+    var gw=this;
+    d3.selectAll('.search-list-item').remove()
+    gw.cat.data
+        .filter(function(d){return d.active;})
+        .forEach(function(d){
+            d3.select('#search-outer').append("div")
+                .attr("class","popup-list-item search-list-item")
+                .attr("id","search-list-"+d.name)
+                .html(d.name)
+                .on("click",function(){
+                    if (gw.selectedevent!=this.innerHTML){gw.selectEvent(this.innerHTML);gw.hideSearch();}
+                });
+        })
+}
+
 GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
     var gw=this;
     if (typeof ev == "string"){
@@ -2652,16 +3342,16 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
         // d exists
         if (init){
             gw.dataIdx=evnum;
-            gw.moveHighlight(d);
             gw.updateSketch(d);
+            gw.moveHighlight();
             if(document.getElementById("search-list-"+d.name)){
                 document.getElementById("search-list-"+d.name).classList.add("current")
             }
         }else if((d.name!=gw.selectedevent)||(redraw)){
             // different to currently selected event
             gw.dataIdx=evnum;
-            gw.moveHighlight(d);
             gw.updateSketch(d);
+            gw.moveHighlight();
             if (document.getElementById("search-list-"+gw.selectedevent)){
                 document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
             }
@@ -2673,8 +3363,8 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
             }
         }else{
             // selected the same event
-            gw.moveHighlight(d);
             gw.updateSketch(d);
+            gw.moveHighlight();
             if (document.getElementById("search-list-"+gw.selectedevent)){
                 document.getElementById("search-list-"+gw.selectedevent).classList.remove("current")
             }
@@ -2686,21 +3376,34 @@ GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
         gw.dataIdx=null;
     }
     this.updateUrl();
+    this.showInfo();
 }
 GWCatalogue.prototype.selectNext = function(dir=1){
     this.selectEvent(this.dataIdx+dir)
     return(this.dataIdx)
 }
 
-GWCatalogue.prototype.moveHighlight = function(d){
+GWCatalogue.prototype.moveHighlight = function(fadeOut=false){
     // move highlight circle
     var gw=this;
-    if (!d) {return {}}
-    if ((this.sketchName==d["name"])){
+    d=this.d;
+    if (!d) {
         // fade out
         gw.svg.select("#highlight")
             .transition().duration(500)
-            .style("opacity",gw.dotOp(d));
+            .style("opacity",0);
+        return
+    }else if ((d.active==false)||(fadeOut)){
+        gw.svg.select("#highlight")
+            .transition().duration(500)
+            .style("opacity",0);
+    // }else if ((this.selectedevent==d["name"])){
+    //     console.log('fading out',d);
+    //     // fade out
+    //     gw.svg.select("#highlight")
+    //         .transition().duration(500)
+    //         // .attr("cx",gw.xMap(d)).attr("cy",gw.yMap(d))
+    //         .style("opacity",0);
     }else{
         // fade in and move
         gw.svg.select("#highlight")
@@ -2718,98 +3421,106 @@ GWCatalogue.prototype.initHighlight = function(d){
 }
 GWCatalogue.prototype.updateErrors = function(){
     // update error bars
+    var gw=this;
 
-    if ((this.columns[this.xvar]["err"]==0)||(!this.showerrors)){
-        // remove x-errors
-        errX=this.svg.selectAll(".errorX-g")
-            .data(this.cat.data)
-        errX.selectAll('.errorX')
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",0);
-    }else{
-        // add/update x-errors
-        errX=this.svg.selectAll(".errorX-g")
-            .data(this.cat.data)
-        errX.selectAll(".errorXline")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
-            .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",this.dotOp);
-        errX.selectAll(".errorXp1")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMapErrPouter).attr("x2",this.xMapErrP)
-            .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
-            .attr("opacity",this.dotOp);
-        errX.selectAll(".errorXp2")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMapErrP).attr("x2",this.xMapErrPouter)
-            .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
-            .attr("opacity",this.dotOp);
-        errX.selectAll(".errorXm1")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMapErrMouter).attr("x2",this.xMapErrM)
-            .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
-            .attr("opacity",this.dotOp);
-        errX.selectAll(".errorXm2")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMapErrM).attr("x2",this.xMapErrMouter)
-            .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
-            .attr("opacity",this.dotOp);
-    }
-    if ((this.columns[this.yvar]["err"]==0)||(!this.showerrors)){
-        // remove y-errors
-        errY=this.svg.selectAll(".errorY-g")
-            .data(this.cat.data)
-        errY.selectAll('.errorY')
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.yMap).attr("y2",this.yMap)
-            .attr("opacity",0);
+    // add/update x-errors
+    errX=this.svg.selectAll(".errorX-g")
+        .data(this.cat.data)
+    // main x error bar
+    errX.selectAll(".errorXline")
+        .transition()
+        .duration(750)
+        .attr("x1",this.xMapErrP).attr("x2",this.xMapErrM)
+        .attr("y1",this.yMap).attr("y2",this.yMap)
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)})
+        .attr("stroke-width",gw.swErr)
+        .attr("stroke",gw.getCol('err'))
+    // +ve x error (top)
+    errX.selectAll(".errorXp1")
+        .transition()
+        .duration(750)
+        .attr("x1",gw.xMapErrPouter)
+        .attr("x2",gw.xMapErrP)
+        .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
+    // +ve x error (bottom)
+    errX.selectAll(".errorXp2")
+        .transition()
+        .duration(750)
+        .attr("x1",gw.xMapErrP)
+        .attr("x2",gw.xMapErrPouter)
+        .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
+    // -ve x error (top)
+    errX.selectAll(".errorXm1")
+        .transition()
+        .duration(750)
+        .attr("x1",gw.xMapErrMouter)
+        .attr("x2",gw.xMapErrM)
+        .attr("y1",this.xMapErrY0).attr("y2",this.yMap)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
+    // -ve x error (bottom)
+    errX.selectAll(".errorXm2")
+        .transition()
+        .duration(750)
+        .attr("x1",gw.xMapErrMouter)
+        .attr("x2",gw.xMapErrM)
+        .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
 
-    }else{
-        // add/update y-errors
-        errY=this.svg.selectAll(".errorY-g")
-            .data(this.cat.data)
-        errY.selectAll('.errorYline')
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.xMap)
-            .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
-            .attr("opacity",this.dotOp);
-        errY.selectAll(".errorYp1")
-            .transition()
-            .duration(750)
-            .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
-            .attr("y1",this.yMapErrPouter).attr("y2",this.yMapErrP)
-            .attr("opacity",this.dotOp);
-        errY.selectAll(".errorYp2")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.yMapErrX1)
-            .attr("y1",this.yMapErrP).attr("y2",this.yMapErrPouter)
-            .attr("opacity",this.dotOp);
-        errY.selectAll(".errorYm1")
-            .transition()
-            .duration(750)
-            .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
-            .attr("y1",this.yMapErrMouter).attr("y2",this.yMapErrM)
-            .attr("opacity",this.dotOp);
-        errY.selectAll(".errorYm2")
-            .transition()
-            .duration(750)
-            .attr("x1",this.xMap).attr("x2",this.yMapErrX1)
-            .attr("y1",this.yMapErrM).attr("y2",this.yMapErrMouter)
-            .attr("opacity",this.dotOp);
-    }
+    // add/update y-errors
+    errY=this.svg.selectAll(".errorY-g")
+        .data(this.cat.data)
+    // main y error line
+    errY.selectAll('.errorYline')
+        .transition()
+        .duration(750)
+        .attr("x1",this.xMap).attr("x2",this.xMap)
+        .attr("y1",this.yMapErrP).attr("y2",this.yMapErrM)
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)})
+        .attr("stroke",gw.getCol('err'))
+        .attr("stroke-width",gw.swErr)
+        .attr("stroke",gw.getCol('err'))
+    // +ve y error (top)
+    errY.selectAll(".errorYp1")
+        .transition()
+        .duration(750)
+        .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
+        .attr("y1",gw.yMapErrPouter)
+        .attr("y2",gw.yMapErrP)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
+    // +ve y error (bottom)
+    errY.selectAll(".errorYp2")
+        .transition()
+        .duration(750)
+        .attr("x1",this.xMap).attr("x2",this.yMapErrX1)
+        .attr("y1",gw.yMapErrP)
+        .attr("y2",gw.yMapErrPouter)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
+    // -ve y error (top)
+    errY.selectAll(".errorYm1")
+        .transition()
+        .duration(750)
+        .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
+        .attr("y1",gw.yMapErrM)
+        .attr("y2",gw.yMapErrMouter)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
+    // -ve y error (bottom)
+    errY.selectAll(".errorYm2")
+        .transition()
+        .duration(750)
+        .attr("x1",this.xMap).attr("x2",this.yMapErrX1)
+        .attr("y1",gw.yMapErrM)
+        .attr("y2",gw.yMapErrMouter)
+        .attr("stroke",gw.getCol('err'))
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
 }
 GWCatalogue.prototype.toggleErrors = function(){
     // toggle showing errors
@@ -2846,8 +3557,8 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
     var gw=this;
     var data=gw.cat.data;
 
-    [xMin,xMax]=gw.getMinMax(gw.xvar);
-    [yMin,yMax]=gw.getMinMax(gw.yvar);
+    [xMin,xMax]=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
+    [yMin,yMax]=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
     gw.setXYscales(gw.xvar,gw.yvar);
 
     gw.yAxLineOp = (xMin < 0) ? 0.5 : 0;
@@ -2855,20 +3566,36 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
 
     // Select the section we want to apply our changes to
     var svg = d3.select("body").transition();
-
     // Move the dots
-    gw.svg.selectAll(".dot")   // change the line
+    gw.svg.selectAll(".dot") // change the line
+        .data(this.cat.data)
         .transition()
         .duration(750)
-        .attr("cx", gw.xMap)
-        .attr("cy", gw.yMap)
+        // .attr("cx", function(d){console.log('update dotx',d.name,gw.xvar,gw.xMap(d));return gw.xMap(d);})
+        // .attr("cy", function(d){console.log('update doty',d.name,gw.yvar,gw.yMap(d));return gw.yMap(d);})
+        .attr("cx", this.xMap)
+        .attr("cy", this.yMap)
         .style("opacity",this.dotOp);
 
+    function powerOfTen(d) {
+      return d / Math.pow(10, Math.ceil(Math.log(d) / Math.LN10 - 1e-12)) === 1;
+    }
     gw.svg.select(".x-axis.axis")
         .transition()
         .duration(750)
         .call(gw.xAxis);
-        //   .forceX([0]);
+    if (d3.select('#x-axis-g').attr('class').includes('log')){
+        d3.select('.axis.x-axis').selectAll('.tick text')
+            .text(null)
+            .filter(powerOfTen)
+                .text(10)
+                .attr("dy","1em")
+            .append("tspan")
+                .attr("dy", "-.7em")
+                .attr("font-size","0.7em")
+                .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
+    }
+    //   .forceX([0]);
     gw.svg.select(".x-axis.axis-label")
         .transition()
         .duration(750)
@@ -2885,6 +3612,17 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
         .transition()
         .duration(750)
         .call(gw.yAxis);
+    if (d3.select('#y-axis-g').attr('class').includes('log')){
+        d3.select('.axis.y-axis').selectAll('.tick text')
+            .text(null)
+            .filter(powerOfTen)
+                .text(10)
+                // .attr("dx","1em")
+            .append("tspan")
+                .attr("dy", "-.7em")
+                .attr("font-size","0.7em")
+                .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
+    }
     gw.svg.selectAll(".y-axis.axis-label")
         .transition()
         .duration(750)
@@ -2919,15 +3657,42 @@ GWCatalogue.prototype.addOptions = function(){
     var gw=this;
     // add buttons
     var col;
-    var divx = document.getElementById('x-buttons');
-    var divy= document.getElementById('y-buttons');
+    var divxall = document.getElementById('x-buttons-all');
+    var divxconf = document.getElementById('x-buttons-conf');
+    var divyall = document.getElementById('y-buttons-all');
+    var divyconf = document.getElementById('y-buttons-conf');
+
+    var xalltxt=document.createElement('div');
+    xalltxt.className = 'panel-block';
+    xalltxt.innerHTML = this.tl('%text.plotgw.options.allsrc%');
+    var xconftxt=document.createElement('div');
+    xconftxt.className = 'panel-block';
+    xconftxt.innerHTML = this.tl('%text.plotgw.options.conf-only%');
+
+    var yalltxt=document.createElement('div');
+    yalltxt.className = 'panel-block';
+    yalltxt.innerHTML = this.tl('%text.plotgw.options.allsrc%');
+    var yconftxt=document.createElement('div');
+    yconftxt.className = 'panel-block';
+    yconftxt.innerHTML = this.tl('%text.plotgw.options.conf-only%');
+
+    divxall.appendChild(xalltxt);
+    divxconf.appendChild(xconftxt);
+    divyall.appendChild(yalltxt);
+    divyconf.appendChild(yconftxt);
 
     for (col in gw.columns){
         if (gw.columns[col].avail){
             var newoptdivx = document.createElement('div');
-            newoptdivx.className = 'option option-x';
             newoptdivx.setAttribute("id","button-divx-"+col);
-            divx.appendChild(newoptdivx);
+            if (gw.columns[col].cand){
+                newoptdivx.className = 'option option-x allsrc';
+                divxall.appendChild(newoptdivx);
+            }else{
+                newoptdivx.className = 'option option-x conf-only';
+                divxconf.appendChild(newoptdivx);
+            }
+
             var newoptinputx = document.createElement('img');
             newoptinputx.type = 'submit';
             newoptinputx.name = col;
@@ -2944,7 +3709,26 @@ GWCatalogue.prototype.addOptions = function(){
                 newXvar = this.id.split('buttonx-')[1]
                 document.getElementById("button-divx-"+oldXvar).classList.remove("down")
                 document.getElementById("button-divx-"+newXvar).classList.add("down")
+                if (gw.columns[newXvar]['forcelog']){
+                    document.getElementById("xlog").setAttribute('disabled',true);
+                    document.getElementById("xlog-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("xlog").removeAttribute('disabled');
+                    document.getElementById("xlog-lab").classList.remove("disabled");
+                }
+                if (gw.columns[newXvar]['forcezero']){
+                    document.getElementById("xzero").setAttribute('disabled',true);
+                    document.getElementById("xzero-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("xzero").removeAttribute('disabled')
+                    document.getElementById("xzero-lab").classList.remove("disabled");
+                }
                 this.classList.add("down");
+                if (!gw.columns[newXvar]["cand"]){
+                    // need to add in confirmed events to be able to display anything
+                    d3.select("#filt-conf").property("checked",true);
+                }
+                gw.updateFilters();
                 gw.updateBothAxes(newXvar,gw.yvar);
             });
             newoptinputx.onmouseover = function(e){
@@ -2953,9 +3737,14 @@ GWCatalogue.prototype.addOptions = function(){
             newoptdivx.appendChild(newoptinputx);
 
             var newoptdivy = document.createElement('div');
-            newoptdivy.className = 'option option-y';
+            if (gw.columns[col].cand){
+                newoptdivy.className = 'option option-y allsrc';
+                divyall.appendChild(newoptdivy);
+            }else{
+                newoptdivy.className = 'option option-y conf-only';
+                divyconf.appendChild(newoptdivy);
+            }
             newoptdivy.setAttribute("id","button-divy-"+col);
-            divy.appendChild(newoptdivy);
             var newoptinputy = document.createElement('img');
             newoptinputy.type = 'submit';
             newoptinputy.name = col;
@@ -2972,7 +3761,26 @@ GWCatalogue.prototype.addOptions = function(){
                 newYvar = this.id.split('buttony-')[1]
                 document.getElementById("button-divy-"+oldYvar).classList.remove("down")
                 document.getElementById("button-divy-"+newYvar).classList.add("down")
+                if (gw.columns[newYvar]['forcelog']){
+                    document.getElementById("ylog").setAttribute('disabled',true);
+                    document.getElementById("ylog-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("ylog").removeAttribute('disabled');
+                    document.getElementById("ylog-lab").classList.remove("disabled");
+                }
+                if (gw.columns[newYvar]['forcezero']){
+                    document.getElementById("yzero").setAttribute('disabled',true);
+                    document.getElementById("yzero-lab").classList.add("disabled");
+                }else{
+                    document.getElementById("yzero").removeAttribute('disabled');
+                    document.getElementById("yzero-lab").classList.remove("disabled");
+                }
                 this.classList.add("down");
+                if (!gw.columns[newYvar]["cand"]){
+                    // need to add in confirmed events to be able to display anything
+                    d3.select("#filt-conf").property("checked",true);
+                }
+                gw.updateFilters();
                 gw.updateBothAxes(gw.xvar,newYvar);
             });
             newoptinputy.onmouseover = function(e){
@@ -3003,15 +3811,124 @@ GWCatalogue.prototype.addOptions = function(){
 
     divdisp.appendChild(colList);
 
-    d3.select("#display-options").append('div')
+    // d3.select("#display-options").append('div')
+    //     // .style('display','none')
+    //     .html('<input type="checkbox" name="filterr" id="axiszero"'+(gw.axiszero ? ' checked="checked"':'')+'></input><label for="axiszero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+    //     .on("change",function(){
+    //         gw.axiszero=d3.select('#axiszero')[0][0].checked;
+    //         gw.updateBothAxes(gw.xvar,gw.yvar);
+    //     });
+    d3.select("#options-x").append('div')
         // .style('display','none')
-        .html('<input type="checkbox" name="filterr" id="axiszero"'+(gw.axiszero ? ' checked="checked"':'')+'></input><label for="axiszero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="xzero" id="xzero"'+(gw.xzero ? ' checked="checked"':'')+'></input><label id="xzero-lab" for="xzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
         .on("change",function(){
-            gw.axiszero=d3.select('#axiszero')[0][0].checked;
+            gw.xzero=d3.select('#xzero')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
         });
+    d3.select("#options-x").append('div')
+        // .style('display','none')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="xlog" id="xlog"'+(gw.xlog ? ' checked="checked"':'')+'></input><label id="xlog-lab" for="xlog">'+this.tl('%text.plotgw.log-axis%')+'</label>')
+        .on("change",function(){
+            gw.xlog=d3.select('#xlog')[0][0].checked;
+            gw.updateBothAxes(gw.xvar,gw.yvar);
+        });
+    d3.select("#options-y").append('div')
+        // .style('display','none')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="yzero" id="yzero"'+(gw.xzero ? ' checked="checked"':'')+'></input><label id="yzero-lab" for="yzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+        .on("change",function(){
+            gw.yzero=d3.select('#yzero')[0][0].checked;
+            gw.updateBothAxes(gw.xvar,gw.yvar);
+        });
+    d3.select("#options-y").append('div')
+        // .style('display','none')
+        .attr("class","panel-block")
+        .html('<input type="checkbox" name="ylog" id="ylog"'+(gw.ylog ? ' checked="checked"':'')+'></input><label id="ylog-lab" for="ylog">'+this.tl('%text.plotgw.log-axis%')+'</label>')
+        .on("change",function(){
+            gw.ylog=d3.select('#ylog')[0][0].checked;
+            gw.updateBothAxes(gw.xvar,gw.yvar);
+        });
+    // d3.select("#preset-options").append('div')
+    //     .attr("class","panel-cont")
+    //     .html('<input type="checkbox" name="limOpt" id="limOpt"'+(gw.limOpt ? ' checked="checked"':'')+'></input><label id="limOpt-lab" for="limOpt">'+this.tl('%text.plotgw.limit-options%')+'</label>')
+    //     .on("change",function(){
+    //         gw.limOpt=d3.select('#limOpt')[0][0].checked;
+    //         gw.limitOptions();
+    //     });
+    // d3.select("#preset-options").append('div')
+    //     .attr("class","panel-cont-text")
+    //     .html(this.tl("%text.plotgw.options.warn%"))
+    d3.select("#buttonpre-conf").on("click",function(){
+        d3.select("#buttonx-"+gw.presets["conf-only"]["x-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["cand-only"]["y-axis"])[0][0].click();
+        // change filters
+        d3.select("#filt-cand").property("checked",false);
+        d3.select("#filt-conf").property("checked",true);
+        gw.updateFilters();
+        // d3.select("#limOpt").property("checked",false);
+        // gw.limitOptions();
+    }).on("mouseover",function(){
+        gw.showTooltipManual(gw.presets["conf-only"]["tooltip"]);
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+    d3.select("#buttonpre-cand").on("click",function(){
+        d3.select("#buttonx-"+gw.presets["cand-only"]["x-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["cand-only"]["y-axis"])[0][0].click();
+        d3.select("#filt-cand").property("checked",true);
+        d3.select("#filt-conf").property("checked",false);
+        gw.updateFilters();
+        // d3.select("#limOpt").property("checked",true);
+        // gw.limitOptions();
+    }).on("mouseover",function(){
+        gw.showTooltipManual("%tooltip.plotgw.preset-cand%");
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+    d3.select("#buttonpre-all").on("click",function(){
+        d3.select("#buttonx-"+gw.presets["allsrc"]["x-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["allsrc"]["y-axis"])[0][0].click();
+        // change filters
+        d3.select("#filt-cand").property("checked",true);
+        d3.select("#filt-conf").property("checked",true);
+        gw.updateFilters();
+        // d3.select("#limOpt").property("checked",false);
+        // gw.limitOptions();
+    }).on("mouseover",function(){
+        gw.showTooltipManual(gw.presets["allsrc"]["tooltip"]);
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+    d3.select("#preset-filter-link").on("click",function(){
+        d3.select("#filter-icon > img")[0][0].click()
+    }).on("mouseover",function(){
+        gw.showTooltipManual("%tooltip.plotgw.goto-filter%");
+    }).on("mouseout",function(){
+        gw.hideTooltipManual();
+    });
+
+}
+GWCatalogue.prototype.limitOptions = function(){
+    this.limOpt=d3.select('#limOpt')[0][0].checked
+    if (this.limOpt){
+        d3.selectAll('.option-x.conf-only,.option-y.conf-only')
+            .style('display','none');
+    }else{
+        d3.selectAll('.option-x.conf-only,.option-y.conf-only')
+            .style('display','inline-block');
+    }
+    return;
 }
 
+GWCatalogue.prototype.showInfo = function(){
+    //show options
+    if (this.helpOn){this.hideHelp();}
+    if (this.langOn){this.hideLang();}
+    if (this.filterOn){this.hideFilter();}
+    if (this.optionsOn){this.hideOptions();}
+}
 GWCatalogue.prototype.showOptions = function(){
     //show options
     if (this.helpOn){this.hideHelp()}
@@ -3052,7 +3969,7 @@ GWCatalogue.prototype.hideOptions = function(d) {
 
     document.getElementById("options-icon").classList.add("hidden");
     document.getElementById("info-icon").classList.remove("hidden");
-    console.log(this.getPanel())
+    if (this.debug){console.log(this.getPanel())}
     this.updateUrl();
 }
 GWCatalogue.prototype.addHelp = function(){
@@ -3075,6 +3992,8 @@ GWCatalogue.prototype.addHelp = function(){
         .html(this.tl("%text.plotgw.help.lang%"));
     d3.select("#help-share-text")
         .html(this.tl("%text.plotgw.help.share%"));
+    d3.select("#help-filter-text")
+        .html(this.tl("%text.plotgw.help.filter%"));
     d3.select("#help-search-text")
         .html(this.tl("%text.plotgw.help.search%"));
     if (this.portrait){
@@ -3351,6 +4270,13 @@ GWCatalogue.prototype.addFilter = function(replot){
             }
         }
         filtdiv.appendChild(filttxtdiv);
+        if (a.note){
+            filtnote = document.createElement('div');
+            filtnote.className = "filter-note colourise";
+            filtnote.innerHTML = this.tl(a.note);
+            filtdiv.appendChild(filtnote)
+        }
+
         document.getElementById('filter-block').appendChild(filtdiv);
         if (a.type=="slider"){
             filtdata=getRange(filt)
@@ -3367,6 +4293,8 @@ GWCatalogue.prototype.addFilter = function(replot){
 }
 GWCatalogue.prototype.updateFilters = function () {
     var gw = this;
+    selEvStatus=((this.d)&&(this.d.active)) ? this.d.active : false;
+    selEvNewStatus=false;
     for(filt in this.filters){
         if(gw.debug){console.log('updating filter: ',filt);}
 		if(this.filters[filt].type == "slider"){
@@ -3385,7 +4313,14 @@ GWCatalogue.prototype.updateFilters = function () {
     function inRange(i,key,range){
 		if(!gw.cat.data[i][key]) return true;
         if (gw.filterr){
-            var valrange = [gw.cat.getMinVal(gw.cat.dataOrder[i],key),gw.cat.getMaxVal(gw.cat.dataOrder[i],key)];
+            if (gw.cat.data[i][key].errv){
+                errv=gw.cat.data[i][key].errv
+                var valrange = [Math.min(errv[0],errv[1]),
+                    Math.max(errv[0],errv[1])
+                ]
+            }else{
+                var valrange = [gw.cat.getMinVal(gw.cat.dataOrder[i],key),gw.cat.getMaxVal(gw.cat.dataOrder[i],key)];
+            }
         }else{
             var valrange = [gw.cat.getBest(gw.cat.dataOrder[i],key),gw.cat.getBest(gw.cat.dataOrder[i],key)];
         }
@@ -3398,7 +4333,13 @@ GWCatalogue.prototype.updateFilters = function () {
 	}
     function isChecked(i,key){
 		if(!gw.cat.data[i][key]) return true;
-		var best = gw.cat.getBest(gw.cat.dataOrder[i],key);
+        if(gw.cat.data[i][key]['best']){
+            var best = gw.cat.getBest(gw.cat.dataOrder[i],key);
+        }else{
+            var best = gw.cat.dataOrder[i][key];
+        }
+
+        // console.log('filter',i,key,best);
 		var good = 0;
 		for(var o = 0; o < gw.filters[key].options.length; o++){
 			if(gw.filters[key].options[o].checked){
@@ -3420,7 +4361,7 @@ GWCatalogue.prototype.updateFilters = function () {
 		active = true;
 		for(key in this.filters){
 			a = this.filters[key];
-			//console.log(key,a.type)
+			// console.log(key,a.type)
 			if(a.type == "slider"){
 				// Process each slider
 				//console.log(key,inRange(i,key,this.filters[key].slider.values))
@@ -3430,11 +4371,22 @@ GWCatalogue.prototype.updateFilters = function () {
 				if(!isChecked(i,key)) active = false;
 			}
 		}
+        if (!(this.xvar in this.cat.data[i])&&!(this.yvar in this.cat.data[i])){
+            active=false;
+        }
 		this.cat.data[i].active = active;
+        if (this.cat.data[i].name==this.selectedevent){selEvNewStatus=active}
 	}
     this.updateBothAxes(this.xvar,this.yvar);
+    // update sketch if d now longer active
+    if (selEvStatus!=selEvNewStatus){
+        this.updateSketch(this.d);
+        this.moveHighlight();
+    }
     this.updateErrors();
-    this.moveHighlight();
+    // repopulate search list
+    this.populateSearchList();
+
 	return this;
 };
 GWCatalogue.prototype.showFilter = function(){
@@ -3475,7 +4427,7 @@ GWCatalogue.prototype.hideFilter = function(d) {
     this.updateUrl();
 }
 GWCatalogue.prototype.showShare = function(){
-    //show share pot
+    //show share box
     var gw=this;
     d3.select("#share-bg").style("height","100%").style("display","block");
     shareouter=d3.select('#share-outer')
@@ -3498,7 +4450,7 @@ GWCatalogue.prototype.showShare = function(){
                 gw.tl("&hashtags=%share.plotgw.twitter.hashtag%"));
 }
 GWCatalogue.prototype.hideShare = function(){
-    //show share pot
+    //hide search box
     d3.select('#share-bg').style("height",0).style("display","none");
     d3.select('#share-outer').transition()
        .duration(500)
@@ -3507,14 +4459,14 @@ GWCatalogue.prototype.hideShare = function(){
 
 }
 GWCatalogue.prototype.showSearch = function(){
-    //show share pot
+    //show search box
     var gw=this;
     d3.select("#search-bg").style("height","100%").style("display","block");
     searchouter=d3.select('#search-outer')
     searchouter.transition()
        .duration(500)
        .style("opacity",1)
-       .style("max-height",document.getElementById('svg-container').offsetHeight);
+       .style("max-height",gw.graphHeight);
     searchouter.style("top",
             document.getElementById('graphcontainer').offsetTop+
             document.getElementById('search-icon').offsetTop +
@@ -3525,7 +4477,7 @@ GWCatalogue.prototype.showSearch = function(){
             document.getElementById('search-outer').offsetWidth/2)
 }
 GWCatalogue.prototype.hideSearch = function(){
-    //show share pot
+    //hide share box
     d3.select("#search-bg").style("height","0").style("display","none");
     d3.select('#search-outer').transition()
        .duration(500)
@@ -3608,7 +4560,6 @@ GWCatalogue.prototype.makePlot = function(){
     this.addLang(false);
     this.addFilter();
     panel = (this.urlVars.panel) ? this.urlVars.panel : this.getPanel();
-    this.setPanel(panel);
     this.adjCss();
     this.selectEvent(this.selectedevent,redraw=true,init=true);
     d3.select('#copy-button').attr('data-clipboard-text',newUrl);
@@ -3633,7 +4584,8 @@ GWCatalogue.prototype.replot = function(){
     this.addHelp();
     this.adjCss();
     // this.redrawLabels();
-    this.setPanel(this.getPanel());
+    panel = this.getPanel();
+    this.setPanel(panel);
     this.cat.data.forEach(function(d){
         // gwcat.formatData;
         if (d.name==gw.selectedevent){
@@ -3643,4 +4595,205 @@ GWCatalogue.prototype.replot = function(){
     });
     gwcat.redraw=false;
     // gwcat.initButtons();
+}
+GWCatalogue.prototype.makeCanvas = function(){
+    var canvas = document.createElement('canvas');
+    canvas.setAttribute("id",'myCanvas');
+    canvas.setAttribute("width",this.svgWidth);
+    canvas.setAttribute("height",this.svgHeight);
+    document.getElementById('graphcontainer').appendChild(canvas);
+    var ctx=canvas.getContext("2d");
+    ctx.fillStyle = this.colourList[gw.colScheme]['bg'];
+    ctx.fillRect(0,0,this.svgWidth,this.svgHeight);
+    [els,xy]=this.getSvgElements();
+    var em2px=16;
+    getem=/\s*([^\s,)]+)em/;
+    getpx=/\s*([^\s,)]+)px/;
+    function component2hex(c) {
+        var hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+    function rgb2hex(r, g, b) {
+        return "#" + component2hex(r) + component2hex(g) + component2hex(b);
+    }
+    var getrgb  = /rgb\s*\(\s*([^\s,)]+)[ ,]+([^\s,)]+)[ ,]+([^\s,)]+)/;
+    for (e in els){
+        var el=els[e]['node'];
+        tl0=els[e].translate
+        var translate  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(el.getAttribute('transform'));
+        var rotate  = /rotate\(\s*([^\s,)]+)/.exec(el.getAttribute('transform'));
+        var params={};
+        params.fillcolor = window.getComputedStyle(el).getPropertyValue('fill');
+        params.linecolor = window.getComputedStyle(el).getPropertyValue('stroke');
+        params.color = window.getComputedStyle(el).getPropertyValue('color');
+        params.linewidth = parseFloat(window.getComputedStyle(el).getPropertyValue('stroke-width'));
+        params.opacity = parseFloat(window.getComputedStyle(el).getPropertyValue('opacity'));
+        // console.log('fill',fc,fcrgb,params.fillcolor);
+        // console.log('stroke',lc,lcrgb,params.linecolor);
+        // console.log('color',color,colrgb,params.color);
+        if (el.tagName=="circle"){
+            console.log('circle');
+            params.cx=parseFloat(el.getAttribute('cx'))+tl0[0];
+            params.cy=parseFloat(el.getAttribute('cy'))+tl0[1];
+            params.r=parseFloat(el.getAttribute('r'));
+            if(translate){
+                params.cx+=parseFloat(translate[1]);
+                params.cy+=parseFloat(translate[2]);
+            }
+            ctx.beginPath();
+            ctx.fillStyle = params.fillcolor;
+            ctx.strokeStyle = params.linecolor;
+            ctx.globalAlpha = params.opacity;
+            ctx.lineWidth = params.linewidth;
+            ctx.arc(params.cx,params.cy,params.r,0,2*Math.PI);
+            ctx.stroke();
+            ctx.fill();
+        }else if(el.tagName=="line"){
+            console.log("line",el.classList);
+            params.x1=(el.getAttribute('x1')) ? parseFloat(el.getAttribute('x1'))+tl0[0] : tl0[0];
+            params.x2=(el.getAttribute('x2')) ? parseFloat(el.getAttribute('x2'))+tl0[0] : tl0[0];
+            params.y1=(el.getAttribute('y1')) ? parseFloat(el.getAttribute('y1'))+tl0[1] : tl0[1];
+            params.y2=(el.getAttribute('y2')) ? parseFloat(el.getAttribute('y2'))+tl0[1] : tl0[1];
+            if(translate){
+                params.x1+=parseFloat(translate[1]);
+                params.y1+=parseFloat(translate[2]);
+                params.x2+=parseFloat(translate[1]);
+                params.y2+=parseFloat(translate[2]);
+            }
+            ctx.beginPath();
+            ctx.moveTo(params.x1,params.y1);
+            ctx.lineTo(params.x2,params.y2);
+            ctx.strokeStyle = params.linecolor;
+            ctx.lineWidth = params.linewidth;
+            ctx.globalAlpha = params.opacity;
+            ctx.stroke();
+        }else if(el.tagName=="path"){
+            getpath=/M([^\s,)]+)[ ,]+([^\s,)]+)(([HV])([\d.]+)([HV])([\d.]+))/;
+            params.d=el.getAttribute('d');
+            if(translate){
+                x1+=parseFloat(translate[1]);
+                y1+=parseFloat(translate[2]);
+                x2+=parseFloat(translate[1]);
+                y2+=parseFloat(translate[2]);
+            }
+            ctx.save()
+            ctx.translate(tl0[0],tl0[1])
+            ctx.fillStyle = params.fillcolor;
+            ctx.strokeStyle = params.linecolor;
+            ctx.globalAlpha = params.opacity;
+            ctx.lineWidth = params.linewidth;
+            var path = new Path2D(params.d);
+            ctx.stroke(path);
+            ctx.restore();
+        }else if (el.tagName=="text"){
+            params.fontsize=parseFloat(window.getComputedStyle(el).getPropertyValue('font-size'));
+            // params.txt=el.innerHTML;
+            params.x=(el.getAttribute('x')) ? el.getAttribute('x') : 0;
+            params.y=(el.getAttribute('y')) ? el.getAttribute('y') : 0;
+            params.dx=(el.getAttribute('dx')) ? el.getAttribute('dx') : 0;
+            params.dy=(el.getAttribute('dy')) ? el.getAttribute('dy') : 0;
+            params.tl0_0=tl0[0];
+            params.tl0_1=tl0[1];
+            paramconv=['x','y','dx','dy'];
+            for (i in paramconv){
+                p=paramconv[i];
+                if (getem.exec(params[p])){
+                    params[p]=parseFloat(params[p])*em2px*params.fontsize/em2px;
+                }else{
+                    params[p]=parseFloat(params[p]);
+                }
+            }
+            var txtalign=(el.style.getPropertyValue('text-anchor')) ? el.style.getPropertyValue('text-anchor') : null;
+            params.txtalign = (txtalign=="middle") ? "center" : txtalign;
+            if(translate){
+                params.x+=parseFloat(translate[1]);
+                params.y+=parseFloat(translate[2]);
+            }
+            var txt=el.innerHTML;
+            ctx.save();
+            ctx.translate(params.tl0_0,params.tl0_1);
+            if (rotate){
+                ctx.rotate(rotate[1] * Math.PI/180);
+            }
+            ctx.translate(params.x+params.dx,params.y+params.dy);
+            ctx.textAlign = params.txtalign;
+            ctx.font = params.fontsize+"px Arial";
+            ctx.fillStyle = params.fillcolor;
+            // ctx.fillStyle = "black";
+            ctx.globalAlpha = params.opacity;
+            ctx.fillText(txt,0,0);
+            ctx.restore();
+            // console.log(txt,params.x,params.y,rotate,params.dy,params.txtalign,params.fontsize);
+            console.log(txt);
+        }
+        console.log(params);
+    }
+}
+GWCatalogue.prototype.getSvgElements = function(){
+    getChildNodes = function(node,els,refxy){
+        var childNodes=node.childNodes;
+        var translate  = /translate\(\s*([^\s,)]+)[ ,]([^\s,)]+)/.exec(node.getAttribute('transform'));
+        if (translate){
+            refxy[0]+=parseFloat(translate[1]);
+            refxy[1]+=parseFloat(translate[2]);
+            console.log('translating to',translate,refxy)
+        }
+        // console.log('els',els,'nodes',childNodes);
+        // console.log(node,node.childElementCount,node.childNodes);
+        if (node.childElementCount==0){
+            console.log('skipping empty:',n,node);
+            if (translate){
+                console.log('translating back to',translate)
+                refxy[0]-=parseFloat(translate[1]);
+                refxy[1]-=parseFloat(translate[2]);
+            }
+            return([els,refxy]);
+        }else{
+            for (n in childNodes){
+                node=childNodes[n];
+                // console.log(n,node,node.tagName);
+                if (node.tagName=="g"){
+                    console.log('entering:',n,node,refxy);
+                    [els,refxy]=getChildNodes(node,els,refxy);
+                }else if((node.tagName=="line")||(node.tagName=="text")||(node.tagName=="circle")||(node.tagName=="path")){
+                    if((node.style.opacity=="0")||(node.getAttribute("opacity")=="0")){
+                        console.log('skipping opacity 0:',n,node);
+                    }else{
+                        console.log('appending:',n,node);
+                        els.push({"node":node,"translate":[refxy[0],refxy[1]]});
+                    }
+                }
+            }
+        }
+        console.log('exiting node')
+        if (translate){
+            console.log('translating back to',translate)
+            refxy[0]-=parseFloat(translate[1]);
+            refxy[1]-=parseFloat(translate[2]);
+        }
+        return([els,refxy]);
+    }
+    var els = [];
+    var xy=[0,0];
+    svgNodes = this.svg.node();
+    console.log(svgNodes);
+    [els,xy]=getChildNodes(svgNodes,els,xy);
+    return([els,xy]);
+}
+GWCatalogue.prototype.removeCanvas = function(){
+    canvas = document.getElementById("myCanvas");
+    document.getElementById("graphcontainer").removeChild(canvas);
+}
+GWCatalogue.prototype.saveCanvas = function(){
+    //write download link
+    try {
+        var isFileSaverSupported = !!new Blob();
+    } catch (e) {
+        alert("blob not supported");
+    }
+
+    var canvasdl = document.getElementById('myCanvas');
+    canvasdl.toBlob(function(blob) {
+        saveAs(blob, "LIGO-Virgo_catalogue_"+gw.xvar+"_"+gw.yvar+".png");
+    });
 }

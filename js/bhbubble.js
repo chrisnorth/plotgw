@@ -745,8 +745,10 @@ BHBubble.prototype.formatData = function(valueCol){
                 "-B":"%data.bub.name.B%"}
             nc=bh.nameCol;
             rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
-            tr=rename.exec(d.name)
-            d[nc]=bh.tl(this.names[tr[1]]+bh.tN(tr[2])+this.names[tr[3]])
+            tr=rename.exec(d.name);
+            txtOut=this.names[tr[1]]+bh.tN(tr[2]);
+            txtOut = (tr[3]) ? txtOut + this.names[tr[3]] : txtOut;
+            d[nc]=bh.tl(txtOut)
         }
     });
     this.data = this.data.map(function(d){d.value=+d[valueCol];return d;})
