@@ -2557,6 +2557,12 @@ GWCatalogue.prototype.setLang = function(){
             .html(this.tl(this.filters[f].name));
         d3.select('#filt_'+f+'_label > .filter-note')
             .html(this.tl(this.filters[f].note));
+        if (this.filters[f].type=='checkbox'){
+            for (o in this.filters[f].options){
+                d3.select('#'+this.filters[f].options[o].id+'_label')
+                    .html(this.tl(this.filters[f].options[o].label))
+            }
+        }
     }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
         Candidate:this.tl('%text.plotgw.legend.candidates%')}
@@ -4266,7 +4272,7 @@ GWCatalogue.prototype.addFilter = function(replot){
             filttxtdiv.innerHTML += '<div class="slider"></div><span class="min">'+a.min['default']+'</span> &rarr; <span class="max"></span>'+(a.max.unit ? '<span lang="'+a.max.unit+'">'+this.tl(a.max.unit)+'</span>':'');
         }else if (a.type=="checkbox"){
             for (var i = 0; i < a.options.length; i++){
-                filttxtdiv.innerHTML += '<input type="checkbox" name="'+a.options[i].id+'" id="'+a.options[i].id+'"'+(a.options[i].checked ? ' checked="checked"':'')+'></input><label for="'+a.options[i].id+'">'+this.tl(a.options[i].label)+'</label>'
+                filttxtdiv.innerHTML += '<input type="checkbox" name="'+a.options[i].id+'" id="'+a.options[i].id+'"'+(a.options[i].checked ? ' checked="checked"':'')+'></input><label id="'+a.options[i].id+'_label" for="'+a.options[i].id+'">'+this.tl(a.options[i].label)+'</label>'
             }
         }
         filtdiv.appendChild(filttxtdiv);
