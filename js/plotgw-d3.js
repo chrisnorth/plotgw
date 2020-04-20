@@ -21,7 +21,7 @@ function GWCatalogue(inp){
 
     if (this.urlVars.hasOwnProperty('confirmedOnly')){
         this.confirmedOnly=JSON.parse(this.urlVars.confirmedOnly);
-    }else{this.confirmedOnly = (inp)&&(inp.hasOwnProperty('confirmedOnly')) ? JSON.parse(inp.confirmedOnly) : true}
+    }else{this.confirmedOnly = (inp)&&(inp.hasOwnProperty('confirmedOnly')) ? JSON.parse(inp.confirmedOnly) : false}
 
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
