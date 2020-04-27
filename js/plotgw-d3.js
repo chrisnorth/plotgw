@@ -676,9 +676,11 @@ GWCatalogue.prototype.setColumns = function(datadict){
         obsrun:{avail:false,type:'src',icon:"img/obsrun.svg",
             strfn:function(d){
                 nettxt='';
-                netlist=d.net.best.split('');
-                for (i in netlist){nettxt+=gw.tl('%text.gen.det.'+netlist[i]+'%')};
-                return gw.tl('%text.plotgw.filter.observingrun.'+d.obsrun.best+'%<br/>('+nettxt+')') ;
+                if ((d.net)&(d.net.best)){
+                    netlist=d.net.best.split('');
+                    for (i in netlist){nettxt+=gw.tl('%text.gen.det.'+netlist[i]+'%')};
+                    return gw.tl('%text.plotgw.filter.observingrun.'+d.obsrun.best+'%<br/>('+nettxt+')') ;
+                }else{return gw.tl('%text.plotgw.filter.observingrun.'+d.obsrun.best+'%');}
             }
         },
         detType:{avail:false,type:'src',icon:"img/tag.svg"},
