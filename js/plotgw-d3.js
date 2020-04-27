@@ -1237,7 +1237,9 @@ GWCatalogue.prototype.setScales = function(){
 
     // set scaleing functions for sketch
     this.scaleRadius = function(mass,fact=1){
-        if(typeof mass=="number"){
+        if(!mass){
+            return(0);
+        }else if(typeof mass=="number"){
             return(fact*0.2*this.sketchWidth*(mass/100.))
         }else if (mass.best){
             return(fact*0.2*this.sketchWidth*(mass.best/100.))
