@@ -1592,7 +1592,10 @@ GWCatalogue.prototype.flyInMasses = function(d,bh,resize,delay=false){
     };
 
     // update mass label text
-    if (this.showerrors){
+    if (!d[bh]){
+        document.getElementById("mtxt-"+bh).innerHTML = "?";
+    }
+    else if (this.showerrors){
         // console.log('error',d[bh]);
         document.getElementById("mtxt-"+bh).innerHTML = this.tl(d[bh].str);
     }else{
