@@ -2077,8 +2077,8 @@ GWCatalogue.prototype.setStyles = function(){
             'grid':'#555','err':'#555',
             'BH':["rgba(0,0,0,1)","rgba(0,0,0,0)"],
             'shadow':["rgba(128,128,128,1)","rgba(192,192,192,0)"],
-            'dotfill':["#1f77b4", "#ff7f0e","#999999"],
-            'dotline':["#000","#555","#555"],
+            'dotfill':["#1f77b4", "#ff7f0e","gray","green","blue","red","orange"],
+            'dotline':["#000","#555","#fff","#fff","#fff","#fff","#fff"],
             'axis':"rgb(100,100,100)",
             'highlight':'#f00',
             'tick':'#ccc',
@@ -2094,7 +2094,7 @@ GWCatalogue.prototype.setStyles = function(){
             'BH':["rgba(255,255,255,1)","rgba(255,255,255,0)"],
             'shadow':["rgba(128,128,128,1)","rgba(64,64,64,0)"],
             'dotfill':["#1f77b4", "#ffaf0e","#999999"],
-            'dotline':["#fff","#fff","#555"],
+            'dotline':["#fff","#fff","gray"],
             'axis':"rgb(200,200,200)",
             'highlight':'#f00',
             'tick':'#555',
@@ -2118,11 +2118,13 @@ GWCatalogue.prototype.setStyles = function(){
     }
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = ['GW','Candidate'];
+    this.styleDomains = ['GW','Candidate','Unobs','BBH','BNS','Mass Gap','NSBH'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3,0,0,0,0,0]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0,0]).domain(this.styleDomains);
+    this.squareopacity = d3.scale.ordinal().range([0,0,0.5,0.5,0.5,0.5,0.5]).domain(this.styleDomains);
+    this.legType = d3.scale.ordinal().range(['','','guide','guide','guide','guide','guide']).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
@@ -3065,11 +3067,13 @@ GWCatalogue.prototype.drawGraph = function(){
         //   add highlight to selected circle
         });
 
+    gw.updateGuides()
+    
     // draw legend
     gw.legend = gw.svg.selectAll(".legend")
       .data(gw.color.domain())
     .enter().append("g")
-      .attr("class", function(d,i){return "legend "+d;})
+      .attr("class", function(d,i){return "legend "+d+" "+gw.legType(d);})
       .attr("transform", function(d, i) { return "translate(0," +
         (i * 24) + ")"; });
 
@@ -3083,6 +3087,16 @@ GWCatalogue.prototype.drawGraph = function(){
       .style("stroke-width",Math.min(5,2./gw.sksc))
       .style("stroke",function(d){return gw.linestyles(d);})
       .attr("opacity",function(d){return gw.dotopacity(d)});
+    gw.legend.append("rect")
+      .attr("x", gw.margin.left+7.5)
+      .attr("y", gw.margin.top+12)
+      .attr("width", 18)
+      .attr("height", 18)
+      .style("fill", gw.color)
+      .style("stroke-dasharray",function(d){return gw.linedashes(d);})
+      .style("stroke-width",Math.min(5,2./gw.sksc))
+      .style("stroke",function(d){return gw.linestyles(d);})
+      .attr("opacity",function(d){return gw.showGuides()*gw.squareopacity(d)});
 
     // draw legend text
     gw.legend.append("text")
@@ -3323,6 +3337,148 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.makeCanvas();gw.saveCanvas();gw.removeCanvas();gw.hideTooltipManual();});
 
 }
+GWCatalogue.prototype.showGuides = function(){
+    var gw=this;
+    if (((gw.xvar=='M1')&(gw.yvar=='M2'))|((gw.xvar=='M2')&(gw.yvar=='M1'))){
+        return (true)
+    }else{return(false)}
+}
+GWCatalogue.prototype.updateGuides = function () {
+    // add guide lines
+    var gw=this;
+    if (gw.showGuides()){
+        var xrange=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
+        var yrange=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
+        var rng={M1:(gw.xvar=='M1')?xrange:yrange,
+            M2:(gw.xvar=='M2')?xrange:yrange,
+            maxmin:Math.max(xrange[0],yrange[0]),
+            minmax:Math.min(xrange[1],yrange[1]),
+            maxmax:Math.max(xrange[1],yrange[1])}
+        // console.log('ranges:',rng);
+        var guidelines=[
+            {name:'equal',
+                M1:[rng.maxmin,rng.minmax],
+                M2:[rng.maxmin,rng.minmax],
+                col:'red',
+                vis:true},
+            {name:'bnslim',
+                M1:[Math.max(rng.M1[0],3),Math.min(rng.M1[1],3)],
+                M2:[rng.M2[0],Math.min(rng.M2[1],3)],
+                col:'blue',
+                vis:(rng.M1[0]<=3)&(rng.M1[1]>=3)&(rng.M2[0]<3)},
+            {name:'mglim1',
+                M1:[Math.max(rng.M1[0],5),Math.min(rng.M1[1],5)],
+                M2:[rng.M2[0],Math.min(rng.M2[1],3)],
+                col:'green',
+                vis:(rng.M1[0]<=5)&(rng.M1[1]>=5)&(rng.M2[0]<5)},
+            {name:'mglim2',
+                M1:[Math.max(rng.M1[0],5),rng.M1[1]],
+                M2:[Math.min(rng.M2[1],3),Math.min(rng.M2[1],3)],
+                col:'green',
+                vis:(rng.M1[0]<=5)&(rng.M1[1]>=5)&(rng.M2[0]<5)},
+            {name:'nsbhlim',
+                M1:[Math.max(rng.M1[0],5),rng.M1[1]],
+                M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5)],
+                col:'orange',
+                vis:(rng.M2[0]<=5)&(rng.M2[1]>=5)}
+        ]
+        var polygons=[
+            {name:'none',
+                M1:[rng.maxmin,rng.minmax,rng.M1[0]],
+                M2:[rng.maxmin,rng.minmax,rng.M2[1]],
+                col:'gray',
+                vis:true},
+            {name:'bns',
+                M1:[rng.M1[0],Math.min(rng.M1[1],3),Math.min(rng.M1[1],3),rng.maxmin],
+                M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],3),rng.maxmin],
+                col:'blue',
+                vis:(rng.M1[0]<=3)&(rng.M1[1]>=3)&(rng.M2[0]<3)},
+            {name:'nsbh',
+                M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
+                M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],3),Math.min(rng.M2[1],3)],
+                col:'orange',
+                vis:(rng.M2[0]<=3)&(rng.M1[1]>=5)},
+            {name:'bbh',
+                M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],rng.minmax,rng.maxmin],
+                M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5),rng.M2[1],rng.minmax,rng.maxmin],
+                col:'green',
+                vis:(rng.M1[1]>=5)&(rng.M2[1]>=5)},
+            {name:'mg1',
+                M1:[Math.max(rng.M1[0],3),Math.min(rng.M1[1],5),Math.min(rng.M1[1],5),Math.min(rng.minmax,5),Math.max(rng.M1[0],3)],
+                M2:[rng.M2[0],rng.M2[0],Math.min(rng.minmax,5),Math.min(rng.minmax,5),Math.max(rng.M2[0],3)],
+                col:'red',
+                vis:(rng.M1[1]>=3)&(rng.M1[0]<=5)&(rng.M2[0]<=5)},
+            {name:'mg2',
+                M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
+                M2:[Math.max(rng.M2[0],3),Math.max(rng.M2[0],3),Math.min(rng.M2[1],5),Math.min(rng.M2[1],5)],
+                col:'red',
+                vis:(rng.M1[1]>=5)&(rng.M2[0]<=5)&(rng.M2[1]>=3)}
+        ]
+        for (p in polygons){
+            poly=polygons[p]
+            poly.points=''
+            for (i in poly.M1){
+                poly.points+=gw.xScale(poly[gw.xvar][i])+','+gw.yScale(poly[gw.yvar][i])+' '
+            }
+        }
+        console.log(polygons);
+        // var guideGroup = gw.svg.selectAll('.g-guides');
+        if (gw.svg.select('.g-guidelines').empty()){
+            gw.svg.insert("g",":first-child").attr("class","guide g-guidelines").attr("transform", "translate("+gw.margin.left+","+
+                gw.margin.top+")").style('opacity',1)
+            gw.svg.selectAll('.g-guidelines').selectAll('.guideline')
+                .data(guidelines)
+            .enter().append('line')
+                .attr('class','guideline')
+                // .style('stroke',function(d){return d.col})
+                .style('stroke',gw.getCol('err'))
+                .attr('stroke-width',gw.swErr)
+                .style("stroke-dasharray", ("3, 3"))
+        }
+        if (gw.svg.select('.g-guidepolys').empty()){
+            gw.svg.insert("g",":first-child").attr("class","guide g-guidepolys").attr("transform", "translate("+gw.margin.left+","+
+                gw.margin.top+")").style('opacity',1)
+            gw.svg.select('.g-guidepolys').selectAll('.guidepoly')
+                .data(polygons)
+            .enter().append('polygon')
+                .attr('class','guidepoly')
+                .attr('fill',function(d){return d.col})
+                .attr('stroke-width',gw.swErr)
+                .style("stroke-dasharray", ("3, 3"))
+                .style('opacity',0.25)
+        }
+        guides=gw.svg.select('.g-guidelines').selectAll('.guideline')
+            .data(guidelines)
+        // guides.exit().remove()
+        // guides.enter().append('line')
+        //     .attr('class','guideline')
+        guides.transition()
+            .duration(500)
+            .attr("x1",function(d){return gw.xScale(d[gw.xvar][0])})
+            .attr("x2",function(d){return gw.xScale(d[gw.xvar][1])})
+            .attr("y1",function(d){return gw.yScale(d[gw.yvar][0])})
+            .attr("y2",function(d){return gw.yScale(d[gw.yvar][1])})
+            .style('opacity',function(d){return 0.5*d.vis})
+        polys=gw.svg.select('.g-guidepolys').selectAll('.guidepoly')
+            .data(polygons)
+        // polys.exit().remove()
+        // polys.enter().append('line')
+        //     .attr('class','guideline')
+        polys.transition()
+            .duration(500)
+            .attr("points",function(d){return d.points})
+            .style('opacity',function(d){return 0.25*d.vis})
+        d3.selectAll('.guide').transition()
+            .duration(500)
+            .style('opacity',1)
+    }else{
+        d3.selectAll('.guide').transition()
+            .duration(500)
+            .style('opacity',0)
+    }
+    return
+};
+
 GWCatalogue.prototype.populateSearchList = function(){
     var gw=this;
     d3.selectAll('.search-list-item').remove()
@@ -3338,7 +3494,6 @@ GWCatalogue.prototype.populateSearchList = function(){
                 });
         })
 }
-
 GWCatalogue.prototype.selectEvent = function(ev,redraw=false,init=false){
     var gw=this;
     if (typeof ev == "string"){
@@ -3675,6 +3830,7 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
     });
     // Update error bars
     gw.updateErrors();
+    gw.updateGuides()
     // });
     gw.updateUrl();
     // window.history.pushState({},null,gw.makeUrl());
