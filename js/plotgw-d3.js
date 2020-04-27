@@ -2138,7 +2138,12 @@ GWCatalogue.prototype.tttext = function(d){
 }
 GWCatalogue.prototype.orderData = function(order='GPS'){
     this.cat.data=this.cat.data.sort(function(a,b){
-        return b[order].best - a[order].best
+        if((b[order]) & (a[order])){
+            return b[order].best - a[order].best;
+        }else{
+            return 0;
+        }
+
     });
     var dataOrder=[];
     this.cat.data.forEach(function(d){dataOrder.push(d.name);});
