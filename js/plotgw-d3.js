@@ -1907,7 +1907,12 @@ GWCatalogue.prototype.updateSketch = function(d){
             this.flyInMasses(d,"Mfinal","snap");
             this.hideProbSketch();
             this.flyOutProbBars();
-            this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+            if (d.objType){
+                this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+            }else{
+                this.sketchTitleHint.html(this.obj2hint(""));
+            }
+            
         }
         // update title
         this.sketchTitle.html(
@@ -1992,7 +1997,11 @@ GWCatalogue.prototype.updateSketch = function(d){
             // update title
             this.sketchName = d["name"];
             this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)));
-            this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+            if (d.objType){
+                this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+            }else{
+                this.sketchTitleHint.html(this.obj2hint(""));
+            }
             //update labels
             this.redrawLabels();
         }
