@@ -2,9 +2,9 @@
 import json
 import io
 import argparse
-parser=argparse.ArgumentParser(prog="checklang.py", description="Updates the gwcat-data database")
+parser=argparse.ArgumentParser(prog="checklang.py", description="Compares two language files and reports differences")
 parser.add_argument('-l','--lang', dest='lang', type=str, default='master', help='language to compare (Default = master)')
-parser.add_argument('--in', dest='inlang', type=str, default='en', help='input language to compare from  (Default = en)')
+parser.add_argument('--in', dest='inlang', type=str, default='en', help='input language to compare with (Default = en)')
 parser.add_argument('-b','--both', dest='both', action='store_true', default=False, help='check in both directions (Default = False)')
 args=parser.parse_args()
 lang=args.lang
