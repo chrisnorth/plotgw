@@ -504,12 +504,14 @@ BHBubble.prototype.loadData = function(){
                 BHtype:'%data.bub.type.final%',
             }
             massfn=function(i,m){
-                if(bh.cat.getParamType(i,m)=='lower'){return bh.cat.getLower(i,m)}
+                if (!bh.cat.getParamType(i,m)){return ""}
+                else if(bh.cat.getParamType(i,m)=='lower'){return bh.cat.getLower(i,m)}
                 else if(bh.cat.getParamType(i,m)=='upper'){return bh.cat.getUpper(i,m)}
                 else {return bh.cat.getBest(i,m)}
             }
             massefn=function(i,m){
-                if(bh.cat.getParamType(i,m)=='lower'){return '>'+parseFloat(bh.cat.getLower(i,m))}
+                if(!bh.cat.getParamType(i,m)){return ""}
+                else if(bh.cat.getParamType(i,m)=='lower'){return '>'+parseFloat(bh.cat.getLower(i,m))}
                 else if(bh.cat.getParamType(i,m)=='upper'){return '<'+parseFloat(bh.cat.getUpper(i,m))}
                 else if (bh.cat.hasError(i,m)){return 'e'+parseFloat(bh.cat.getNegError(i,m))+'-'+
                     parseFloat(bh.cat.getPosError(i,m));}
@@ -615,7 +617,7 @@ BHBubble.prototype.loadData = function(){
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     }
-    bh.cat = new GWCat(eventsCallback,{eventsFile:"https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp",debug:this.debug,confirmedOnly:true});
+    bh.cat = new GWCat(eventsCallback,{eventsFile:"https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp",confirmedOnly:true,debug:this.debug});
 
     // // read in GW data and reformat
     // d3.json(this.inputFileEvents,function(error,jsonIn){
@@ -740,7 +742,7 @@ BHBubble.prototype.formatData = function(valueCol){
             d.massBHplus = +errcode;
             d.massBHminus = +errcode;
             d.massBHstr = bh.tl("%data.bub.approx%")+' '+bh.tN(parseFloat(d.massBHplus.toFixed(1)));
-        }else{if (this.urlVars.debug){console.log('Data format err:',d.massBHerr,d);}}
+        }else{if (bh.urlVars.debug){console.log('Data format err:',d.massBHerr,d);}}
         if ((bh.nameCol!="name")&&(d.binType=='%data.bub.type.bbh%')){
             this.names={"GW":"%data.bub.name.GW%",
                 "LVT":"%data.bub.name.LVT%",
