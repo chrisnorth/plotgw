@@ -91,6 +91,8 @@
  "text.gen.terrestrial.lab-2": " ",
  "text.gen.terrestrial.def": " ",
  "text.gen.gwosc": "GWOSC",
+ "text.gen.gwtc1": "GWTC-1",
+ "text.gen.gwtc2": "GWTC-2",
  "text.gen.gracedb": "GraceDB",
  "text.gen.paper": "Publication",
  "text.gen.close": "Close",
