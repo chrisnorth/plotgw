@@ -615,7 +615,7 @@ BHBubble.prototype.loadData = function(){
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     }
-    bh.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':bh.inputFileEvents,gwoscFile:bh.inputFileGwosc,debug:this.debug});
+    bh.cat = new GWCat(eventsCallback,{eventsFile:"https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp",debug:this.debug,confirmedOnly:true});
 
     // // read in GW data and reformat
     // d3.json(this.inputFileEvents,function(error,jsonIn){
@@ -704,6 +704,9 @@ BHBubble.prototype.formatData = function(valueCol){
         d.massBH = +d.massBH;
         d.objType = (d.massBH > 1.5) ? "bh" : "ns";
         d.massBHsq = Math.pow(d.massBH,2);
+        if (!d.massBHerr){
+            d.massBHstr='?'
+        }
         if (d.massBHerr[0]=='e'){
             errcode=d.massBHerr.split('e')[1];
             errcode=errcode.split('-');
