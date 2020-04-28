@@ -2079,6 +2079,8 @@ GWCatalogue.prototype.setStyles = function(){
             'shadow':["rgba(128,128,128,1)","rgba(192,192,192,0)"],
             'dotfill':["#1f77b4", "#ff7f0e","gray","green","blue","red","orange"],
             'dotline':["#000","#555","#fff","#fff","#fff","#fff","#fff"],
+            'guideline':["#fff"],
+            'unobservable':'#eee',
             'axis':"rgb(100,100,100)",
             'highlight':'#f00',
             'tick':'#ccc',
@@ -2093,8 +2095,10 @@ GWCatalogue.prototype.setStyles = function(){
             'grid':'#ccc','err':'#ccc',
             'BH':["rgba(255,255,255,1)","rgba(255,255,255,0)"],
             'shadow':["rgba(128,128,128,1)","rgba(64,64,64,0)"],
-            'dotfill':["#1f77b4", "#ffaf0e","#999999"],
-            'dotline':["#fff","#fff","gray"],
+            'dotfill':["#1f77b4", "#ffaf0e","gray","green","blue","red","orange"],
+            'dotline':["#fff","#fff","#000","#000","#000","#000","#000"],
+            'guideline':["#000"],
+            'unobservable':'#333',
             'axis':"rgb(200,200,200)",
             'highlight':'#f00',
             'tick':'#555',
@@ -2118,13 +2122,13 @@ GWCatalogue.prototype.setStyles = function(){
     }
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = ['GW','Candidate','Unobs','BBH','BNS','Mass Gap','NSBH'];
+    this.styleDomains = ['GW','Candidate','BBH','BNS','MassGap','NSBH'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,0,0,0,0,0]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0,0]).domain(this.styleDomains);
-    this.squareopacity = d3.scale.ordinal().range([0,0,0.5,0.5,0.5,0.5,0.5]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0]).domain(this.styleDomains);
     this.legType = d3.scale.ordinal().range(['','','guide','guide','guide','guide','guide']).domain(this.styleDomains);
+    this.squareopacity = d3.scale.ordinal().range([0,0,1,1,1,1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
@@ -2590,7 +2594,11 @@ GWCatalogue.prototype.setLang = function(){
         }
     }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
-        Candidate:this.tl('%text.plotgw.legend.candidates%')}
+        Candidate:this.tl('%text.plotgw.legend.candidates%'),
+        BBH:this.tl('%text.gen.bbh%'),
+        BNS:this.tl('%text.gen.bns%'),
+        NSBH:this.tl('%text.gen.nsbh%'),
+        MassGap:this.tl('%text.gen.massgap%'),}
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
@@ -3092,10 +3100,10 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("y", gw.margin.top+12)
       .attr("width", 18)
       .attr("height", 18)
-      .style("fill", gw.color)
+      .style("fill", function(d){return gw.getCol('probbars')[d]})
       .style("stroke-dasharray",function(d){return gw.linedashes(d);})
       .style("stroke-width",Math.min(5,2./gw.sksc))
-      .style("stroke",function(d){return gw.linestyles(d);})
+      .style("stroke",function(d){return gw.getCol('guideline');})
       .attr("opacity",function(d){return gw.showGuides()*gw.squareopacity(d)});
 
     // draw legend text
@@ -3359,59 +3367,58 @@ GWCatalogue.prototype.updateGuides = function () {
             {name:'equal',
                 M1:[rng.maxmin,rng.minmax],
                 M2:[rng.maxmin,rng.minmax],
-                col:'red',
-                vis:true},
+                col:'red',vis:true,dash:gw.linedashes('BBH')},
             {name:'bnslim',
                 M1:[Math.max(rng.M1[0],3),Math.min(rng.M1[1],3)],
                 M2:[rng.M2[0],Math.min(rng.M2[1],3)],
-                col:'blue',
+                col:'blue',dash:gw.linedashes('BBH'),
                 vis:(rng.M1[0]<=3)&(rng.M1[1]>=3)&(rng.M2[0]<3)},
             {name:'mglim1',
                 M1:[Math.max(rng.M1[0],5),Math.min(rng.M1[1],5)],
                 M2:[rng.M2[0],Math.min(rng.M2[1],3)],
-                col:'green',
+                col:'green',dash:gw.linedashes('BBH'),
                 vis:(rng.M1[0]<=5)&(rng.M1[1]>=5)&(rng.M2[0]<5)},
             {name:'mglim2',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1]],
                 M2:[Math.min(rng.M2[1],3),Math.min(rng.M2[1],3)],
-                col:'green',
+                col:'green',dash:gw.linedashes('BBH'),
                 vis:(rng.M1[0]<=5)&(rng.M1[1]>=5)&(rng.M2[0]<5)},
             {name:'nsbhlim',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1]],
                 M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5)],
-                col:'orange',
+                col:'orange',dash:gw.linedashes('BBH'),
                 vis:(rng.M2[0]<=5)&(rng.M2[1]>=5)}
         ]
         var polygons=[
             {name:'none',
                 M1:[rng.maxmin,rng.minmax,rng.M1[0]],
                 M2:[rng.maxmin,rng.minmax,rng.M2[1]],
-                col:'gray',
+                col:gw.getCol('unobservable'),
                 vis:true},
             {name:'bns',
                 M1:[rng.M1[0],Math.min(rng.M1[1],3),Math.min(rng.M1[1],3),rng.maxmin],
                 M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],3),rng.maxmin],
-                col:'blue',
+                col:gw.getCol('probbars')['BNS'],
                 vis:(rng.M1[0]<=3)&(rng.M1[1]>=3)&(rng.M2[0]<3)},
             {name:'nsbh',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
                 M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],3),Math.min(rng.M2[1],3)],
-                col:'orange',
+                col:gw.getCol('probbars')['NSBH'],
                 vis:(rng.M2[0]<=3)&(rng.M1[1]>=5)},
             {name:'bbh',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],rng.minmax,rng.maxmin],
                 M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5),rng.M2[1],rng.minmax,rng.maxmin],
-                col:'green',
+                col:gw.getCol('probbars')['BBH'],
                 vis:(rng.M1[1]>=5)&(rng.M2[1]>=5)},
             {name:'mg1',
                 M1:[Math.max(rng.M1[0],3),Math.min(rng.M1[1],5),Math.min(rng.M1[1],5),Math.min(rng.minmax,5),Math.max(rng.M1[0],3)],
                 M2:[rng.M2[0],rng.M2[0],Math.min(rng.minmax,5),Math.min(rng.minmax,5),Math.max(rng.M2[0],3)],
-                col:'red',
+                col:gw.getCol('probbars')['MassGap'],
                 vis:(rng.M1[1]>=3)&(rng.M1[0]<=5)&(rng.M2[0]<=5)},
             {name:'mg2',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
                 M2:[Math.max(rng.M2[0],3),Math.max(rng.M2[0],3),Math.min(rng.M2[1],5),Math.min(rng.M2[1],5)],
-                col:'red',
+                col:gw.getCol('probbars')['MassGap'],
                 vis:(rng.M1[1]>=5)&(rng.M2[0]<=5)&(rng.M2[1]>=3)}
         ]
         for (p in polygons){
@@ -3433,7 +3440,7 @@ GWCatalogue.prototype.updateGuides = function () {
                 // .style('stroke',function(d){return d.col})
                 .style('stroke',gw.getCol('err'))
                 .attr('stroke-width',gw.swErr)
-                .style("stroke-dasharray", ("3, 3"))
+                .style("stroke-dasharray", function(d){return d.dash})
         }
         if (gw.svg.select('.g-guidepolys').empty()){
             gw.svg.insert("g",":first-child").attr("class","guide g-guidepolys").attr("transform", "translate("+gw.margin.left+","+
@@ -3444,8 +3451,7 @@ GWCatalogue.prototype.updateGuides = function () {
                 .attr('class','guidepoly')
                 .attr('fill',function(d){return d.col})
                 .attr('stroke-width',gw.swErr)
-                .style("stroke-dasharray", ("3, 3"))
-                .style('opacity',0.25)
+                .style('opacity',1)
         }
         guides=gw.svg.select('.g-guidelines').selectAll('.guideline')
             .data(guidelines)
@@ -3467,7 +3473,7 @@ GWCatalogue.prototype.updateGuides = function () {
         polys.transition()
             .duration(500)
             .attr("points",function(d){return d.points})
-            .style('opacity',function(d){return 0.25*d.vis})
+            .style('opacity',function(d){return 1*d.vis})
         d3.selectAll('.guide').transition()
             .duration(500)
             .style('opacity',1)
