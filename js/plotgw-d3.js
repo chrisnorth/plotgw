@@ -236,6 +236,7 @@ GWCatalogue.prototype.init = function(){
         "de":{code:"de",name:"Deutsch"},
         "en":{code:"en",name:"English"},
         "es":{code:"es",name:"Español"},
+        "he":{code:"he",name:"עברית"},
         "fr":{code:"fr",name:"Français"},
         "it":{code:"it",name:"Italiano"},
         "pl":{code:"pl",name:"Polski"},
@@ -2525,6 +2526,17 @@ GWCatalogue.prototype.loadLangDefault = function(){
 GWCatalogue.prototype.setLang = function(){
     // should be run before graph is made
     if (this.debug){console.log('setting',this.lang);}
+    if (this.langdict["meta.alignment"]){
+        if (this.langdict["meta.alignment"]=="right"){
+            this.dir="rtl"
+            document.dir="rtl"
+            d3.select('body').attr('dir',"rtl").attr("text-align","right")
+        }else{
+            this.dir="ltr"
+            document.dir="ltr"
+            d3.select('body').attr('dir',"ltr").attr("text-align","left")
+        }
+    }
     for (k in this.langdictDefault){
         if (!this.langdict.hasOwnProperty(k)){
             if (this.debug){console.log('TRANSLATION WARNING: using default for '+k+' ('+this.lang+')');}
@@ -2855,6 +2867,9 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("stroke",gw.getCol('axis')).attr("stroke-width",5)
         .attr("opacity",gw.yAxLineOp);
     gw.svg.select(".y-axis.axis").call(gw.yAxis)
+    // if (this.dir=="rtl"){
+    //     gw.svg.selectAll(".y-axis.axis > .tick > text").style("text-anchor","start")
+    // }
     gw.svg.select(".y-axis.axis").append("text")
         .attr("class", "y-axis axis-label")
         .attr("transform", "rotate(-90)")
@@ -2879,7 +2894,8 @@ GWCatalogue.prototype.drawGraph = function(){
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.scl))+"em")
-        .style("fill",gw.getCol('text'));
+        .style("fill",gw.getCol('text'))
+        .style("text-anchor",function(){return console.log(document.dir);(document.dir=="rtl")?"start":"end"});
 
     d3.selectAll('.tick > line')
             .style('stroke',gw.getCol('tick'))
@@ -3090,7 +3106,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("y", gw.margin.top + 21)
       .attr("dy", ".35em")
       .attr("font-size","1.2em")
-      .style("text-anchor", "start")
+      .style("text-anchor", function(){return (document.dir=="rtl")?"end":"start"})
       .style("fill",gw.getCol('text'))
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
 
