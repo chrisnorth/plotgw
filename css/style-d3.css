@@ -12,6 +12,10 @@ body.col-black{
 body.col-black a{
     color:#ffc;
 }
+body.rtl{
+    direction:rtl;
+    text-align:right;
+}
 .cc_banner{
     text-align:center
 }
@@ -175,6 +179,10 @@ button.down{
     /*padding-top:10px;*/
     display:inline-block;
     max-width:62%;
+}
+.sketchlab.info.num{
+    direction:ltr;
+    text-align: right;
 }
 .svg-container {
     display: inline-block;

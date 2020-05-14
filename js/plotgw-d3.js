@@ -550,7 +550,7 @@ GWCatalogue.prototype.stdlabel = function(d,src){
         txt=d[src].best
     }
     txt=gw.tN(txt);
-    if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
+    if(gw.columns[src].unit){txt=txt+'<br/><tspan style="direction:ltr">'+gw.columns[src].unit+'</tspan>';}
     if (typeof txt == "string"){
         // replace superscripts
         reSup=/\^(-?[0-9]*)(?=\s|$)/g
@@ -583,7 +583,7 @@ GWCatalogue.prototype.stdlabelNoErr = function(d,src){
         txt='< '+parseFloat(d[src].upper.toPrecision(gw.columns[src].sigfig))
     }
     txt=gw.tN(txt);
-    if(gw.columns[src].unit){txt=txt+'<br/>'+gw.columns[src].unit;}
+    if(gw.columns[src].unit){txt=txt+'<br/><tspan style="direction:ltr">'+gw.columns[src].unit+'</tspan>';}
     if (typeof txt == "string"){
         // replace superscripts
         reSup=/\^(-?[0-9]*)(?=\s|$)/g
@@ -891,10 +891,19 @@ GWCatalogue.prototype.getLabelUnit = function(col,plaintext){
     plaintext = plaintext || false;
     if (this.columns[col].unit){
         return(this.tl(this.columns[col].name,plaintext)+
-            ' ('+this.tl(this.columns[col].unit,plaintext)+')');
+            ' (<tspan class="ltr">'+this.tl(this.columns[col].unit,plaintext)+'</tspan>)');
     }else{
         return(this.tl(this.columns[col].name,plaintext));
     }
+}
+GWCatalogue.prototype.getUnit = function(col,plaintext,delim=['','']){
+    plaintext = plaintext || false;
+    if (this.columns[col].unit){
+        txt=delim[0]+this.tl(this.columns[col].unit,plaintext)+delim[1];
+    }else{
+        txt='';
+    }
+    return(txt);
 }
 GWCatalogue.prototype.getIcon = function(col){
     if (!this.columns[col]){return(null);}
@@ -1280,23 +1289,23 @@ GWCatalogue.prototype.setScales = function(){
     // icon: src file, label: label source, tooltip label)
     this.labels ={
 
-        datetime:{lab:["datetime"]},
+        datetime:{lab:["datetime"],'type':'txt'},
         // time:{lab:["time"]},
-        FAR:{lab:["FAR"],labSw:["FARHz"]},
+        FAR:{lab:["FAR"],labSw:["FARHz"],'type':'txt'},
         Mchirp:{lab:["Mchirp"],
-            labSw:["Mchirpkg"]},
+            labSw:["Mchirpkg"],'type':'num'},
         obsrun:{lab:["obsrun"]},
         // Mratio:{lab:["Mratio"]},
         // "typedesc":{icon:"img/blank.svg",lab:["typedesc"],
             // ttlab:"Category of detection"},
-        lpeak:{lab:["lpeakMsun"],labSw:["lpeakWatt"]},
-        Erad:{lab:["Erad"],labSw:["EradJoule"]},
-        chi:{lab:["chi"]},
-        af:{lab:["af"]},
+        lpeak:{lab:["lpeakMsun"],labSw:["lpeakWatt"],'type':'num'},
+        Erad:{lab:["Erad"],labSw:["EradJoule"],'type':'num'},
+        chi:{lab:["chi"],'type':'num'},
+        af:{lab:["af"],'type':'num'},
         DL:{lab:["DL"],
-            labSw:["DLly"]},
-        data:{icon:"img/data.svg",lab:["data"]},
-        paper:{icon:"img/paper.svg",lab:["paper"]}
+            labSw:["DLly"],'type':'num'},
+        data:{icon:"img/data.svg",lab:["data"],'type':'txt'},
+        paper:{icon:"img/paper.svg",lab:["paper"],'type':'txt'}
     }
     //tool-top labels
     this.ttlabels = {
@@ -1451,6 +1460,7 @@ GWCatalogue.prototype.drawSketch = function(){
         .attr("class","sketch-subtitle panel-subtitle colourise "+gw.getColClass())
         .attr("text-anchor","middle")
         .style("font-size",(0.75*fs)+"em")
+        .style('direction','inherit')
         .html(this.tl("%text.plotgw.information.subtitle%"));
 
     // add actions to nex/previous
@@ -1510,6 +1520,7 @@ GWCatalogue.prototype.addMasses = function(bh,redraw){
         masstxtdiv.className = 'sketchlab mass-sketch mtxt';
         masstxtdiv.setAttribute('id','mtxt-'+bh);
         masstxtdiv.style["font-size"] = (1.2*this.sksc)+"em";
+        masstxtdiv.style["direction"] = "ltr";
         masstxtdiv.innerHTML = this.labBlank;
         massicondiv.appendChild(masstxtdiv);
         document.getElementById('sketchcontainer').appendChild(massicondiv);
@@ -1534,7 +1545,8 @@ GWCatalogue.prototype.addLab = function(lab){
         gw.showTooltip(e,this.id.split("icon")[0])}
     labimgdiv.onmouseout = function(){gw.hideTooltip()};
     var labtxtdiv = document.createElement('div');
-    labtxtdiv.className = 'sketchlab info';
+    // var labclass=
+    labtxtdiv.className = 'sketchlab info'+((this.labels[lab].type=='num')?' num':'');
     labtxtdiv.setAttribute("id",lab+'txt');
     labtxtdiv.style.height = "100%";
     labtxtdiv.style["font-size"] = (1.3*gw.sksc)+"em";
@@ -1881,17 +1893,19 @@ GWCatalogue.prototype.redrawLabels = function(){
 }
 GWCatalogue.prototype.obj2hint = function(objType,desc=false,line2=false){
     if (objType=='BBH'){
-        return (desc) ? (line2) ? this.tl('%text.gen.bbh.lab-2%') : this.tl('%text.gen.bbh.lab%') :
+        txt= (desc) ? (line2) ? this.tl('%text.gen.bbh.lab-2%') : this.tl('%text.gen.bbh.lab%') :
          this.tl('%text.gen.bbh.def%',true)}
     else if (objType=='BNS'){
-        return (desc) ? ((line2) ? this.tl('%text.gen.bns.lab-2%') : this.tl('%text.gen.bns.lab%')) :  this.tl('%text.gen.bns.def%',true)}
+        txt= (desc) ? ((line2) ? this.tl('%text.gen.bns.lab-2%') : this.tl('%text.gen.bns.lab%')) :  this.tl('%text.gen.bns.def%',true)}
     else if (objType=='NSBH'){
-        return (desc) ? ((line2) ? this.tl('%text.gen.nsbh.lab-2%') : this.tl('%text.gen.nsbh.lab%')) : this.tl('%text.gen.nsbh.def%',true)}
+        txt= (desc) ? ((line2) ? this.tl('%text.gen.nsbh.lab-2%') : this.tl('%text.gen.nsbh.lab%')) : this.tl('%text.gen.nsbh.def%',true)}
     else if (objType=='MassGap'){
-        return (desc) ? ((line2) ? this.tl('%text.gen.massgap.lab-2%') : this.tl('%text.gen.massgap.lab%')) : this.tl('%text.gen.massgap.def%',true)}
+        txt= (desc) ? ((line2) ? this.tl('%text.gen.massgap.lab-2%') : this.tl('%text.gen.massgap.lab%')) : this.tl('%text.gen.massgap.def%',true)}
     else if (objType=='Terrestrial'){
-        return (desc) ? ((line2) ? this.tl('%text.gen.terrestrial.lab-2%') : this.tl('%text.gen.terrestrial.lab%')) : this.tl('%text.gen.terrestrial.def%',true)}
-    else {return ""}
+        txt= (desc) ? ((line2) ? this.tl('%text.gen.terrestrial.lab-2%') : this.tl('%text.gen.terrestrial.lab%')) : this.tl('%text.gen.terrestrial.def%',true)}
+    else {txt= ""}
+    return(txt);
+    // return('<tspan style="direction:ltr">'+txt+'</tspan>');
 }
 GWCatalogue.prototype.updateSketch = function(d){
     // update sketch based on data clicks or resize
@@ -1913,8 +1927,10 @@ GWCatalogue.prototype.updateSketch = function(d){
             this.flyOutProbBars();
             if (d.objType){
                 this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+                this.sketchTitleHint.style({'direction':'ltr'});
             }else{
                 this.sketchTitleHint.html(this.obj2hint(""));
+                this.sketchTitleHint.style({'direction':'inherit'});
             }
             
         }
@@ -1936,6 +1952,7 @@ GWCatalogue.prototype.updateSketch = function(d){
         this.sketchName="None";
         this.sketchTitle.html(this.tl("%text.plotgw.information.title%"));
         this.sketchTitleHint.html(this.tl("%text.plotgw.information.subtitle%"));
+        this.sketchTitleHint.style({'direction':'inherit'})
         // replace labels with blank text
         for (lab in this.labels){
             document.getElementById(lab+"txt").innerHTML = this.labBlank;
@@ -1970,7 +1987,13 @@ GWCatalogue.prototype.updateSketch = function(d){
             // update title
             this.sketchName = d["name"];
             this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)+' %text.plotgw.information.candidate%'));
-            this.sketchTitleHint.html("");
+            if (d.objType){
+                this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+                this.sketchTitleHint.style({'direction':'ltr'});
+            }else{
+                this.sketchTitleHint.html(this.obj2hint(""));
+                this.sketchTitleHint.style({'direction':'inherit'});
+            }
             //update labels
             this.redrawLabels();
         }else{
@@ -2003,8 +2026,10 @@ GWCatalogue.prototype.updateSketch = function(d){
             this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)));
             if (d.objType){
                 this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+                this.sketchTitleHint.style({'direction':'ltr'});
             }else{
                 this.sketchTitleHint.html(this.obj2hint(""));
+                this.sketchTitleHint.style({'direction':'inherit'});
             }
             //update labels
             this.redrawLabels();
@@ -2531,11 +2556,11 @@ GWCatalogue.prototype.setLang = function(){
         if (this.langdict["meta.alignment"]=="right"){
             this.dir="rtl"
             document.dir="rtl"
-            d3.select('body').attr('dir',"rtl").attr("text-align","right")
+            d3.select('body').classed('rtl',true);
         }else{
             this.dir="ltr"
             document.dir="ltr"
-            d3.select('body').attr('dir',"ltr").attr("text-align","left")
+            d3.select('body').classed('rtl',false);
         }
     }
     for (k in this.langdictDefault){
@@ -2841,7 +2866,13 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .style("fill",gw.getCol('text'))
-        .text(gw.getLabelUnit(gw.xvar,true));
+    gw.svg.select(".x-axis.axis > text").append('tspan')
+        .attr('class','axislab')
+        .text(gw.getLabel(gw.xvar,true));
+    gw.svg.select(".x-axis.axis > text").append('tspan')
+        .attr('class','axisunit')
+        .text(gw.getUnit(gw.xvar,true,[' (',')']))
+    
     // axis icon is div in SVG container (not SVG element)
     gw.graphcont.append("div")
         .attr("class", "x-axis axis-icon colourise "+gw.getColClass())
@@ -2880,7 +2911,12 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("text-anchor", "middle")
         .style("font-size",(1+gw.scl)+"em")
         .style("fill",gw.getCol('text'))
-        .text(gw.getLabelUnit(gw.yvar,true));
+    gw.svg.select(".y-axis.axis > text").append('tspan')
+        .attr('class','axislab')
+        .text(gw.getLabel(gw.yvar,true));
+    gw.svg.select(".y-axis.axis > text").append('tspan')
+        .attr('class','axisunit')
+        .text(gw.getUnit(gw.yvar,true,[' (',')']))
     // axis icon is div in SVG container (not SVG element)
     gw.graphcont.append("div")
         .attr("class", "y-axis axis-icon colourise "+gw.getColClass())
@@ -2896,7 +2932,7 @@ GWCatalogue.prototype.drawGraph = function(){
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.scl))+"em")
         .style("fill",gw.getCol('text'))
-        .style("text-anchor",function(){return console.log(document.dir);(document.dir=="rtl")?"start":"end"});
+        .style("text-anchor",function(){ console.log(document.dir);return(document.dir=="rtl")?"start":"end"});
 
     d3.selectAll('.tick > line')
             .style('stroke',gw.getCol('tick'))
@@ -3642,10 +3678,14 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
                 .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
     }
     //   .forceX([0]);
-    gw.svg.select(".x-axis.axis-label")
+    gw.svg.select(".x-axis.axis-label > tspan.axislab")
         .transition()
         .duration(750)
-        .text(gw.getLabelUnit(gw.xvar,true));
+        .text(gw.getLabel(gw.xvar,true));
+    gw.svg.select(".x-axis.axis-label > tspan.axisunit")
+        .transition()
+        .duration(750)
+        .text(gw.getUnit(gw.xvar,true,[' (',')']));
 
     gw.svg.select(".y-axis-line.axis-line")
         .transition()
@@ -3669,10 +3709,14 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
                 .attr("font-size","0.7em")
                 .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
     }
-    gw.svg.selectAll(".y-axis.axis-label")
+    gw.svg.select(".y-axis.axis-label  > tspan.axislab")
         .transition()
         .duration(750)
-        .text(gw.getLabelUnit(gw.yvar,true));
+        .text(gw.getLabel(gw.yvar,true));
+    gw.svg.select(".y-axis.axis-label  > tspan.axisunit")
+        .transition()
+        .duration(750)
+        .text(gw.getUnit(gw.yvar,true,[' (',')']));
 
     gw.svg.select(".x-axis-line.axis-line")
         .transition()
