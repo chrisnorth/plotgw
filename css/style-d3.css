@@ -225,6 +225,9 @@ button.down{
     text-anchor:start;
     white-space:pre;
 }
+.axisunit{
+    white-space: inherit;
+}
 body.rtl .axisunitholder{
     text-anchor:end;
 }
@@ -244,7 +247,14 @@ body.rtl .axisunitholder{
 }
 .axis .tick text{
     font-size:1.5em;
+    direction:ltr;
 }
+/* .y-axis .tick text{
+    text-anchor:end
+}
+.y-axis .tick text{
+    text-anchor:end
+} */
 .axis.col-black .tick line{
     stroke:#fff;
 }

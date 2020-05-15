@@ -2823,6 +2823,31 @@ GWCatalogue.prototype.setXYscales = function(xvarNew,yvarNew){
     if(this.debug){console.log('y',gw.axiszero,yMin,yMax,gw.yScale.range(),gw.yScale.domain())}
     return;
 }
+GWCatalogue.prototype.moveAxisLabels = function(){
+    var _gw=this;
+    var labdx=0.25*parseFloat(_gw.svg.select(".x-axis.axis > .axis-label").style('font-size'))*(_gw.svg.select(".x-axis.axis > .axis-label").html().length - _gw.svg.select(".x-axis.axis").select(".axisunit").html().length);
+    if (_gw.dir=='rtl'){labdx*=-1}
+    _gw.svg.select(".x-axis.axis > .axis-label")
+        .transition()
+        .duration(750)
+        .attr('dx',labdx+'px');
+    _gw.svg.select(".x-axis.axis").select(".axisunit")
+        .transition()
+        .duration(750)
+        .attr('dx',labdx+'px');
+        
+    var labdy=0.25*parseFloat(_gw.svg.select(".y-axis.axis > .axis-label").style('font-size'))*(_gw.svg.select(".y-axis.axis > .axis-label").html().length - _gw.svg.select(".y-axis.axis").select(".axisunit").html().length);
+    if (_gw.dir=='rtl'){labdy*=-1}
+    _gw.svg.select(".y-axis.axis > .axis-label")
+        .transition()
+        .duration(750)
+        .attr('dx',labdy+'px');
+    _gw.svg.select(".y-axis.axis").select(".axisunit")
+        .transition()
+        .duration(750)
+        .attr('dx',labdy+'px');
+    return;
+}
 
 GWCatalogue.prototype.drawGraph = function(){
     // draw graph
@@ -2928,7 +2953,10 @@ GWCatalogue.prototype.drawGraph = function(){
     gw.svg.select(".y-axis.axis").select(".axisunitholder").append('tspan')
         .attr('class','axisunit')
         .text(gw.getUnit(gw.yvar,true,[' (',') ']))
+        
+    gw.moveAxisLabels();
     // axis icon is div in SVG container (not SVG element)
+    
     gw.graphcont.append("div")
         .attr("class", "y-axis axis-icon colourise "+gw.getColClass())
         // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
@@ -2943,7 +2971,7 @@ GWCatalogue.prototype.drawGraph = function(){
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.scl))+"em")
         .style("fill",gw.getCol('text'))
-        .style("text-anchor",function(){return(document.dir=="rtl")?"start":"end"});
+        // .style("text-anchor",function(){return(document.dir=="rtl")?"start":"end"});
 
     d3.selectAll('.tick > line')
             .style('stroke',gw.getCol('tick'))
@@ -3689,13 +3717,10 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
                 .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
     }
     //   .forceX([0]);
-    gw.svg.select(".x-axis.axis-label")
-        .transition()
-        .duration(750)
-        .text(gw.getLabel(gw.xvar,true));
-    var axunit=gw.getUnit(gw.xvar,true,[' (',')']);
+    gw.svg.select(".x-axis.axis-label").text(gw.getLabel(gw.xvar,true));
     gw.svg.select(".x-axis > .axisunitholder > tspan.axisunit")
-        .text(axunit);
+        .text(gw.getUnit(gw.xvar,true,[' (',') ']));
+    
 
     gw.svg.select(".y-axis-line.axis-line")
         .transition()
@@ -3719,13 +3744,12 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
                 .attr("font-size","0.7em")
                 .text(function(d) { return Math.round(Math.log(d) / Math.LN10); });
     }
-    gw.svg.select(".y-axis.axis-label")
-        .transition()
-        .duration(750)
-        .text(gw.getLabel(gw.yvar,true));
-    var axunit=gw.getUnit(gw.yvar,true,[' (',')']);
+    gw.svg.select(".y-axis.axis-label").text(gw.getLabel(gw.yvar,true));
     gw.svg.select(".y-axis > .axisunitholder > .axisunit")
-        .text(axunit);
+        .text(gw.getUnit(gw.yvar,true,[' (',') ']));
+        
+    gw.moveAxisLabels();
+    
 
     gw.svg.select(".x-axis-line.axis-line")
         .transition()
