@@ -217,6 +217,16 @@ button.down{
 
 .axis-label{
     font-size:2em;
+    text-anchor:end;
+}
+.axisunitholder{
+    font-size:2em;
+    direction:ltr;
+    text-anchor:start;
+    white-space:pre;
+}
+body.rtl .axisunitholder{
+    text-anchor:end;
 }
 .axis-icon{
     position:absolute;
