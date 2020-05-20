@@ -730,7 +730,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
             avail:false},
         Mratio:{type:"src",
             icon:"img/massratio.svg",
-            avail:false,
+            avail:true,
             border:0.1},
         DLly:{type:'derived',
             depfn:function(d){return (d.DL)},
