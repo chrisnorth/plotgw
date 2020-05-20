@@ -300,7 +300,6 @@ GWCatalogue.prototype.init = function(){
         }
     }
 
-
     // this.panels = {
     //     'info':{'status':true,
     //         'hide':function(){gw.hideInfo()},
@@ -2116,6 +2115,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#ccc',
             'probbar':'#333',
             'probbars':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',Terrestrial:'#cccccc'},
+            'guides':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',O1:'#ffcccc',O2:'#ccffcc',O3:'#ccccff',O3b:'#ccffff'},
             'probtxt':'#000'
         },
         'dark':{'class':'col-black','default':false,
@@ -2134,6 +2134,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#555',
             'probbar':'#ccc',
             'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#555555'},
+            'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',O1:'#960000',O2:'#009600',O3:'#000096',O3b:'#009696'},
             'probtxt':'#fff'
         }
     }
@@ -2152,13 +2153,14 @@ GWCatalogue.prototype.setStyles = function(){
     }
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = ['GW','Candidate','BBH','BNS','MassGap','NSBH'];
+    this.styleDomains = ['GW','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0]).domain(this.styleDomains);
-    this.legType = d3.scale.ordinal().range(['','','guide','guide','guide','guide','guide']).domain(this.styleDomains);
-    this.squareopacity = d3.scale.ordinal().range([0,0,1,1,1,1,1]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0,0,0,0]).domain(this.styleDomains);
+    this.legType = d3.scale.ordinal().range(['','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
+    this.legPos = d3.scale.ordinal().range([0,1,2,3,4,5,2,3,4]).domain(this.styleDomains);
+    this.squareopacity = d3.scale.ordinal().range([0,0,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
@@ -2639,7 +2641,11 @@ GWCatalogue.prototype.setLang = function(){
         BBH:this.tl('%text.gen.bbh%'),
         BNS:this.tl('%text.gen.bns%'),
         NSBH:this.tl('%text.gen.nsbh%'),
-        MassGap:this.tl('%text.gen.massgap%'),}
+        MassGap:this.tl('%text.gen.massgap%'),
+        O1:this.tl('%text.plotgw.filter.observingrun.O1%'),
+        O3:this.tl('%text.plotgw.filter.observingrun.O2%'),
+        O3:this.tl('%text.plotgw.filter.observingrun.O3%'),
+    }
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
     d3.select('#lang-text')
@@ -3174,8 +3180,10 @@ GWCatalogue.prototype.drawGraph = function(){
       .data(gw.color.domain())
     .enter().append("g")
       .attr("class", function(d,i){return "legend "+d+" "+gw.legType(d);})
-      .attr("transform", function(d, i) { return "translate(0," +
-        (i * 24) + ")"; });
+      // .attr("transform", function(d, i) { return "translate(0," +
+        // (i * 24) + ")"; });
+      .attr("transform", function(d) { return "translate(0," +
+          (gw.legPos(d) * 24) + ")"; });
 
     // draw legend colored circles
     gw.legend.append("circle")
@@ -3192,11 +3200,11 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("y", gw.margin.top+12)
       .attr("width", 18)
       .attr("height", 18)
-      .style("fill", function(d){return gw.getCol('probbars')[d]})
+      .style("fill", function(d){return gw.getCol('guides')[d]})
       .style("stroke-dasharray",function(d){return gw.linedashes(d);})
       .style("stroke-width",Math.min(5,2./gw.sksc))
       .style("stroke",function(d){return gw.getCol('guideline');})
-      .attr("opacity",function(d){return gw.showGuides()*gw.squareopacity(d)});
+      .attr("opacity",function(d){return gw.squareopacity(d)});
 
     // draw legend text
     gw.legend.append("text")
@@ -3437,16 +3445,22 @@ GWCatalogue.prototype.drawGraph = function(){
         .on("click",function(){gw.makeCanvas();gw.saveCanvas();gw.removeCanvas();gw.hideTooltipManual();});
 
 }
-GWCatalogue.prototype.showGuides = function(){
+GWCatalogue.prototype.showMassGuides = function(){
     var gw=this;
     if (((gw.xvar=='M1')&(gw.yvar=='M2'))|((gw.xvar=='M2')&(gw.yvar=='M1'))){
+        return (true)
+    }else{return(false)}
+}
+GWCatalogue.prototype.showTimeGuides = function(){
+    var gw=this;
+    if ((gw.xvar=='UTCdate')|(gw.yvar=='UTCdate')){
         return (true)
     }else{return(false)}
 }
 GWCatalogue.prototype.updateGuides = function () {
     // add guide lines
     var gw=this;
-    if (gw.showGuides()){
+    if (gw.showMassGuides()){
         var xrange=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
         var yrange=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
         var rng={M1:(gw.xvar=='M1')?xrange:yrange,
@@ -3490,27 +3504,27 @@ GWCatalogue.prototype.updateGuides = function () {
             {name:'bns',
                 M1:[rng.M1[0],Math.min(rng.M1[1],3),Math.min(rng.M1[1],3),rng.maxmin],
                 M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],3),rng.maxmin],
-                col:gw.getCol('probbars')['BNS'],
+                col:gw.getCol('guides')['BNS'],
                 vis:(rng.M1[0]<=3)&(rng.M1[1]>=3)&(rng.M2[0]<3)},
             {name:'nsbh',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
                 M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],3),Math.min(rng.M2[1],3)],
-                col:gw.getCol('probbars')['NSBH'],
+                col:gw.getCol('guides')['NSBH'],
                 vis:(rng.M2[0]<=3)&(rng.M1[1]>=5)},
             {name:'bbh',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],rng.minmax,rng.maxmin],
                 M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5),rng.M2[1],rng.minmax,rng.maxmin],
-                col:gw.getCol('probbars')['BBH'],
+                col:gw.getCol('guides')['BBH'],
                 vis:(rng.M1[1]>=5)&(rng.M2[1]>=5)},
             {name:'mg1',
                 M1:[Math.max(rng.M1[0],3),Math.min(rng.M1[1],5),Math.min(rng.M1[1],5),Math.min(rng.minmax,5),Math.max(rng.M1[0],3)],
                 M2:[rng.M2[0],rng.M2[0],Math.min(rng.minmax,5),Math.min(rng.minmax,5),Math.max(rng.M2[0],3)],
-                col:gw.getCol('probbars')['MassGap'],
+                col:gw.getCol('guides')['MassGap'],
                 vis:(rng.M1[1]>=3)&(rng.M1[0]<=5)&(rng.M2[0]<=5)},
             {name:'mg2',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
                 M2:[Math.max(rng.M2[0],3),Math.max(rng.M2[0],3),Math.min(rng.M2[1],5),Math.min(rng.M2[1],5)],
-                col:gw.getCol('probbars')['MassGap'],
+                col:gw.getCol('guides')['MassGap'],
                 vis:(rng.M1[1]>=5)&(rng.M2[0]<=5)&(rng.M2[1]>=3)}
         ]
         for (p in polygons){
@@ -3520,57 +3534,126 @@ GWCatalogue.prototype.updateGuides = function () {
                 poly.points+=gw.xScale(poly[gw.xvar][i])+','+gw.yScale(poly[gw.yvar][i])+' '
             }
         }
-        console.log(polygons);
+        // console.log(polygons);
         // var guideGroup = gw.svg.selectAll('.g-guides');
-        if (gw.svg.select('.g-guidelines').empty()){
-            gw.svg.insert("g",":first-child").attr("class","guide g-guidelines").attr("transform", "translate("+gw.margin.left+","+
+        if (gw.svg.select('.g-massguidelines').empty()){
+            gw.svg.insert("g",":first-child").attr("class","guide massguide g-massguidelines").attr("transform", "translate("+gw.margin.left+","+
                 gw.margin.top+")").style('opacity',1)
-            gw.svg.selectAll('.g-guidelines').selectAll('.guideline')
+            gw.svg.selectAll('.g-massguidelines').selectAll('.massguideline')
                 .data(guidelines)
             .enter().append('line')
-                .attr('class','guideline')
+                .attr('class','massguideline')
                 // .style('stroke',function(d){return d.col})
                 .style('stroke',gw.getCol('err'))
                 .attr('stroke-width',gw.swErr)
                 .style("stroke-dasharray", function(d){return d.dash})
         }
-        if (gw.svg.select('.g-guidepolys').empty()){
-            gw.svg.insert("g",":first-child").attr("class","guide g-guidepolys").attr("transform", "translate("+gw.margin.left+","+
+        if (gw.svg.select('.g-massguidepolys').empty()){
+            gw.svg.insert("g",":first-child").attr("class","guide massguide g-massguidepolys").attr("transform", "translate("+gw.margin.left+","+
                 gw.margin.top+")").style('opacity',1)
-            gw.svg.select('.g-guidepolys').selectAll('.guidepoly')
+            gw.svg.select('.g-massguidepolys').selectAll('.massguidepoly')
                 .data(polygons)
             .enter().append('polygon')
-                .attr('class','guidepoly')
+                .attr('class','massguidepoly')
                 .attr('fill',function(d){return d.col})
                 .attr('stroke-width',gw.swErr)
                 .style('opacity',1)
         }
-        guides=gw.svg.select('.g-guidelines').selectAll('.guideline')
+        mguides=gw.svg.select('.g-massguidelines').selectAll('.massguideline')
             .data(guidelines)
         // guides.exit().remove()
         // guides.enter().append('line')
         //     .attr('class','guideline')
-        guides.transition()
+        mguides.transition()
             .duration(500)
             .attr("x1",function(d){return gw.xScale(d[gw.xvar][0])})
             .attr("x2",function(d){return gw.xScale(d[gw.xvar][1])})
             .attr("y1",function(d){return gw.yScale(d[gw.yvar][0])})
             .attr("y2",function(d){return gw.yScale(d[gw.yvar][1])})
             .style('opacity',function(d){return 0.5*d.vis})
-        polys=gw.svg.select('.g-guidepolys').selectAll('.guidepoly')
+        mpolys=gw.svg.select('.g-massguidepolys').selectAll('.massguidepoly')
             .data(polygons)
         // polys.exit().remove()
         // polys.enter().append('line')
         //     .attr('class','guideline')
-        polys.transition()
+        mpolys.transition()
             .duration(500)
             .attr("points",function(d){return d.points})
             .style('opacity',function(d){return 1*d.vis})
-        d3.selectAll('.guide').transition()
+        d3.selectAll('.massguide').transition()
             .duration(500)
             .style('opacity',1)
     }else{
-        d3.selectAll('.guide').transition()
+        d3.selectAll('.massguide').transition()
+            .duration(500)
+            .style('opacity',0)
+    }
+    
+    if (gw.showTimeGuides()){
+        var obs,axes;
+        var axes={
+            'x':{'t':(gw.xvar=='UTCdate'),r:gw.getMinMax(gw.xvar,gw.xlog,gw.xzero)},
+            'y':{'t':(gw.yvar=='UTCdate'),r:gw.getMinMax(gw.yvar,gw.ylog,gw.yzero)}
+        };
+        // for (a in axes){
+        //     if (axes[a].t){
+        //         axes[a].r[0]=new Date(axes[a].r[0]);
+        //         axes[a].r[1]=new Date(axes[a].r[1]);
+        //     }
+        // }
+        var obsruns=[
+            {'name':'O1','t0':new Date('2015-09-12T00:00:00').valueOf(),
+                't1':new Date('2016-01-19T16:00:00').valueOf(),
+                'vis':1,col:gw.getCol('guides')['O1']},
+            {'name':'O2','t0':new Date('2016-11-30T16:00:00').valueOf(),
+                't1':new Date('2017-08-25T22:00:00').valueOf(),
+                'vis':1,col:gw.getCol('guides')['O2']},
+            {'name':'O3a','t0':new Date('2019-04-01T00:00:00').valueOf(),
+                't1':new Date('2019-10-01T17:00:00').valueOf(),
+                'vis':1,col:gw.getCol('guides')['O3']},
+            {'name':'O3b','t0':new Date('2019-11-01T15:00:00').valueOf(),
+                't1':new Date('2020-03-27T17:00:00').valueOf(),
+                'vis':1,col:gw.getCol('guides')['O3']}
+        ];
+        for (o in obsruns){
+            or=obsruns[o];
+            for (a in axes){
+                ax=axes[a];
+                if (ax.t){
+                    or.vis *= ((ax.r[0]<or.t1)&(ax.r[1]>or.t0));
+                    or[a]=[Math.max(ax.r[0],or.t0),Math.max(ax.r[0],or.t0),Math.min(ax.r[1],or.t1),Math.min(ax.r[1],or.t1)];
+                }else{
+                    or[a]=[ax.r[0],ax.r[1],ax.r[1],ax.r[0]];
+                }
+            }
+            or.points='';
+            for (i in or.x){
+                or.points+=gw.xScale(or.x[i])+','+gw.yScale(or.y[i])+' '
+            }
+            console.log(or.name,or);
+        }
+        if (gw.svg.select('.g-timeguidepolys').empty()){
+            gw.svg.insert("g",":first-child").attr("class","guide timeguide g-timeguidepolys").attr("transform", "translate("+gw.margin.left+","+
+                gw.margin.top+")").style('opacity',1)
+            gw.svg.select('.g-timeguidepolys').selectAll('.timeguidepoly')
+                .data(obsruns)
+            .enter().append('polygon')
+                .attr('class','timeguidepoly')
+                .attr('fill',function(d){console.log(d.col);return d.col})
+                .attr('stroke-width',gw.swErr)
+                .style('opacity',1)
+        }
+        tguides=gw.svg.select('.g-timeguidepolys').selectAll('.timeguidepoly')
+            .data(obsruns)
+        tguides.transition()
+            .duration(500)
+            .attr("points",function(d){return d.points})
+            .style('opacity',function(d){return 0.5*d.vis})
+        d3.selectAll('.timeguide').transition()
+            .duration(500)
+            .style('opacity',1)
+    }else{
+        d3.selectAll('.timeguide').transition()
             .duration(500)
             .style('opacity',0)
     }
