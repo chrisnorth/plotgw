@@ -3892,7 +3892,7 @@ GWCatalogue.prototype.addOptions = function(){
     //     .html(this.tl("%text.plotgw.options.warn%"))
     d3.select("#buttonpre-conf").on("click",function(){
         d3.select("#buttonx-"+gw.presets["conf-only"]["x-axis"])[0][0].click();
-        d3.select("#buttony-"+gw.presets["cand-only"]["y-axis"])[0][0].click();
+        d3.select("#buttony-"+gw.presets["conf-only"]["y-axis"])[0][0].click();
         // change filters
         d3.select("#filt-cand").property("checked",false);
         d3.select("#filt-conf").property("checked",true);
