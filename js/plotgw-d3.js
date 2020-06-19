@@ -3173,8 +3173,6 @@ GWCatalogue.prototype.drawGraph = function(){
         //   add highlight to selected circle
         });
 
-    gw.updateGuides()
-    
     // draw legend
     gw.legend = gw.svg.selectAll(".legend")
       .data(gw.color.domain())
@@ -3183,7 +3181,11 @@ GWCatalogue.prototype.drawGraph = function(){
       // .attr("transform", function(d, i) { return "translate(0," +
         // (i * 24) + ")"; });
       .attr("transform", function(d) { return "translate(0," +
-          (gw.legPos(d) * 24) + ")"; });
+          (gw.legPos(d) * 24) + ")"; })
+      .attr("opacity",function(d){
+          op=(gw.legType(d)=='timeguide')?gw.showTimeGuides():(gw.legType(d)=='massguide')?gw.showMassGuides():1;
+          return(op);
+      });
 
     // draw legend colored circles
     gw.legend.append("circle")
@@ -3215,6 +3217,8 @@ GWCatalogue.prototype.drawGraph = function(){
       .style("text-anchor", function(){return (document.dir=="rtl")?"end":"start"})
       .style("fill",gw.getCol('text'))
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
+
+    gw.updateGuides()
 
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
