@@ -550,6 +550,7 @@ GWCatalogue.prototype.stdlabel = function(d,src){
     }
     txt=gw.tN(txt);
     if(gw.columns[src].unit){txt=txt+'<br/><tspan style="direction:ltr">'+gw.columns[src].unit+'</tspan>';}
+    else{txt=txt+'<br/>&nbsp;'}
     if (typeof txt == "string"){
         // replace superscripts
         reSup=/\^(-?[0-9]*)(?=\s|$)/g
@@ -836,11 +837,11 @@ GWCatalogue.prototype.setColumns = function(datadict){
                     if (d.opendata.text.search('GraceDB')>=0){
                         return gw.tl("<a target='_blank' title='"+gw.tl(d.opendata.text)+
                             "' href='"+ d.opendata.url+
-                            "'>%text.gen.gracedb%</a>");
+                            "'>%text.gen.gracedb%</a>&nbsp;");
                     }else{
                         return gw.tl("<a target='_blank'title='"+gw.tl(d.opendata.text)+
                             "'  href='"+ d.opendata.url+
-                            "'>%text.gen.gwosc%</a>");
+                            "'>%text.gen.gwosc%</a></br>&nbsp;");
                     }
                 }else{
                     return(gw.labBlank);
@@ -855,7 +856,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 if (gw.debug){console.log('PAPER',d.ref)}
                 if ((d.ref)&&(d.ref.url)){
                     return gw.tl("<a target='_blank' href='"+d.ref.url+
-                        "' title='"+d.ref.text+"'>%text.gen.paper%</a>");
+                        "' title='"+d.ref.text+"'>%text.gen.paper%</a></br>&nbsp;");
                 }else{
                     return(gw.labBlank);
                 }
@@ -1316,7 +1317,7 @@ GWCatalogue.prototype.setScales = function(){
         data:"%tooltip.plotgw.opendata%"
     };
     //text for black labels
-    this.labBlank="--";
+    this.labBlank="--</br>&nbsp;";
 }
 GWCatalogue.prototype.adjCss = function(){
     // adjust css of some elements

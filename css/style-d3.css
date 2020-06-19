@@ -182,7 +182,7 @@ button.down{
 }
 .sketchlab.info.num{
     direction:ltr;
-    text-align: right;
+    /* text-align: right; */
 }
 .svg-container {
     display: inline-block;
