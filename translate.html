@@ -32,7 +32,24 @@
                     'zhhk':'繁體中文(香港)',
 				}
 			});
+            // console.log(document.getElementById('hidecomp'));
+            $('#hidecomp').change(function(){
+                if($(this).prop('checked')){
+                    $('fieldset').each(function(fs){
+                        if ($(this).find('.fourcol input').attr('class')=='blank'){
+                            $(this).css('display','unset')
+                        }else{
+                            $(this).css('display','none')
+                        }
+                    });
+                }else{
+                    $('fieldset').each(function(fs){
+                        $(this).css('display','unset');
+                    });
+                };
+            });
 		});
+        
 	</script>
 </head>
 <body>
@@ -46,8 +63,9 @@
 			<p>This method of generating translation files is adapted (but only slightly) from the method developed by <a href="http://strudel.org.uk">Stuart Lowe</a> for the <a href="starinabox.lco.global/translate.html">Star in a Box Translation page</a>.</p>
 		</div>
         <h2>Translation Form</h2>
+        <p><input class='checkbox' id='hidecomp' type='checkbox' name='hidecomp'><label id='hidecomp-lab' for='hidecomp'>Show only empty fields</label></p>
 		<div id="form"></div>
-		<h2>Output</h2>
+        <h2>Output</h2>
 		<p>Here is the output. You should copy and paste this into an email and send it to Chris.</p>
 		<div id="output"></div>
 	</div>
