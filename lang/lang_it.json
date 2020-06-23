@@ -136,6 +136,8 @@
  "text.bub.legend.candidate": "Possibile onda gravitazionale",
  "text.bub.legend.detection": "Rivelazione di onda gravitazionale",
  "text.bub.legend.xray": "Misura ai raggi X",
+ "text.bub.legend.bh": "Buco nero",
+ "text.bub.legend.ns": "stelle di neutroni",
  "text.bub.save.svg": "Salva come SVG",
  "text.bub.footer": "Hosted by <a target='_blank' href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a>.</br>Maintained by <a target='_blank' href='http://blogs.cardiff.ac.uk/chrisnorth'>Chris North</a> on behalf of the <a target='_blank' href='http://www.ligo.org'>LIGO Scientific Collaboration</a>. Guarda la sorgente su <a target='_blank' href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>.</br>Dati sulle onde gravitazionali da <a target='_blank' href='https://gw-openscience.org' title='GWOSC'>Gravitational Wave Open Science Center</a>. Dati sulle binarie a raggi X da <a target='_blank' href='https://stellarcollapse.org/bhmasses' title='Source data'>stellarcollapse.org/bhmasses</a>.",
  "text.bub.scale": "Scala",

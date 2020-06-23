@@ -142,9 +142,10 @@ BHBubble.prototype.loadLang = function(lang){
         _bh.langloaded=true;
         // update legend
         _bh.legenddescs = {
-            1:_bh.tl("%text.bub.legend.candidate%"),
-            2:_bh.tl("%text.bub.legend.detection%"),
-            3:_bh.tl("%text.bub.legend.xray%")};
+            1:_bh.tl("%text.bub.legend.bh% (%text.gen.gravwave%)"),
+            2:_bh.tl("%text.bub.legend.ns% (%text.gen.gravwave%)"),
+            3:_bh.tl("%text.bub.legend.massgap% (%text.gen.gravwave%)"),
+            4:_bh.tl("%text.bub.legend.bh% (%text.bub.legend.xray%)")};
         if (reload){
             // replot
             _bh.replot();
@@ -254,13 +255,13 @@ BHBubble.prototype.tN = function(key){
 }
 BHBubble.prototype.init = function(){
     // initialise parameters (only called on load)
-    this.fillcolor2 = d3.scale.linear().domain([1,2,3])
-            .range([d3.rgb("#48c7e9"), d3.rgb("#67c18d"), d3.rgb('#f68d69')])
-    this.textcolor2 = d3.scale.linear().domain([1,2,3])
+    this.fillcolor2 = d3.scale.linear().domain([1,2,3,4])
+            .range([d3.rgb("#67c18d"), d3.rgb("#fff200"), d3.rgb("#7d71b4") , d3.rgb('#f68d69')])
+    this.textcolor2 = d3.scale.linear().domain([1,2,3,4])
             .range([d3.rgb("#000000"), d3.rgb("#000000"),d3.rgb('#000000')])
-    this.cVals={LVT:1,GW:2,Xray:3};
+    this.cVals={GWbh:1,GWns:2,GWmg:3,Xraybh:4};
     // var cValue = function(d){if(d.method=="GW"){return 1;}else{return 2;};};
-    this.cValue = function(d){return this.cVals[d.method]};
+    this.cValue = function(d){console.log(d.name,d.method+d.objType);return this.cVals[d.method+d.objType]};
     //define comparitor sort function(blank for null)
     this.sort = "gwfirst";
     this.valueCol='massBHsq';

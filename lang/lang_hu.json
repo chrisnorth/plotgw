@@ -210,7 +210,9 @@
  "text.bub.legend.candidate": "Gravitációs hullám jelölt",
  "text.bub.legend.detection": "Gravitációs hullám észlelés",
  "text.bub.legend.xray": "Röntgenkettős-észlelés",
-
+ "text.bub.legend.bh": "fekete lyuk",
+ "text.bub.legend.ns": "Neutroncsillag",
+ "text.bub.legend.massgap": "Tiltott tömegsáv",
  "text.bub.save.svg": "Mentés SVG formátumban",
  "text.bub.footer": "Forrás: <a href='http://www.astro.cf.ac.uk'>Cardiff University School of Physics and Astronomy</a></br>Magyar szöveg: Szölgyén Ákos, Dálya Gergely, Raffai Péter, Molnár András</br>Fejlesztő: Chris North a <a href='http://www.ligo.org'>LIGO Scientific Collaboration</a> megbízásából.</br>Forráskód megtekintése a <a href='http://www.github.com/chrisnorth/plotgw'>GitHub</a>-on.</br>A gravitációs hullámok adatainak forrása a <a target='_blank' href='https://https://gw-openscience.org' title='GWOSC'>Gravitational Wave Open Science Center</a>. A röntgenkettősök adatainak forrása: <a href='https://stellarcollapse.org/sites/default/files/table.pdf' title='Source data'>stellarcollapse.org</a>",
  "text.bub.scale": "Méret",
