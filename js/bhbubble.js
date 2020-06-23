@@ -477,48 +477,62 @@ BHBubble.prototype.loadData = function(){
     eventsCallback = function(){
         bh.links=bh.cat.links;
         bh.events=[]
-        data = [];
-        nametr={};
+        var data = [];
+        var nametr={};
         for (i in bh.cat.data){
-            dj=bh.cat.data[i]
-            pri=[]
-            sec=[]
-            fin=[]
-            pri={
+            var dj=bh.cat.data[i]
+            var pri=[]
+            var sec=[]
+            var fin=[]
+            var pri={
                 name:dj.name+'-A',
                 compType:'%data.bub.comp.bh%',
                 parentName:dj.name,
                 BHtype:'%data.bub.type.primary%',
             }
-            sec={
+            var sec={
                 name:dj.name+'-B',
                 compType:'%data.bub.comp.bh%',
                 parentName:dj.name,
                 BHtype:'%data.bub.type.secondary%',
             }
-            fin={
+            var fin={
                 name:dj.name,
                 compMass:'%data.bub.comp.none%',
                 compType:'%data.bub.comp.none%',
                 parentName:'',
                 BHtype:'%data.bub.type.final%',
             }
-            massfn=function(i,m){
-                if (!bh.cat.getParamType(i,m)){return ""}
-                else if(bh.cat.getParamType(i,m)=='lower'){return bh.cat.getLower(i,m)}
-                else if(bh.cat.getParamType(i,m)=='upper'){return bh.cat.getUpper(i,m)}
-                else {return bh.cat.getBest(i,m)}
+            var massfn=function(ev,m){
+                if (!bh.cat.getParamType(ev,m)){return ""}
+                else if(bh.cat.getParamType(ev,m)=='lower'){return bh.cat.getLower(ev,m)}
+                else if(bh.cat.getParamType(ev,m)=='upper'){return bh.cat.getUpper(ev,m)}
+                else {return bh.cat.getBest(ev,m)}
             }
-            massefn=function(i,m){
-                if(!bh.cat.getParamType(i,m)){return ""}
-                else if(bh.cat.getParamType(i,m)=='lower'){return '>'+parseFloat(bh.cat.getLower(i,m))}
-                else if(bh.cat.getParamType(i,m)=='upper'){return '<'+parseFloat(bh.cat.getUpper(i,m))}
-                else if (bh.cat.hasError(i,m)){return 'e'+parseFloat(bh.cat.getNegError(i,m))+'-'+
-                    parseFloat(bh.cat.getPosError(i,m));}
+            var massefn=function(ev,m){
+                if(!bh.cat.getParamType(ev,m)){return ""}
+                else if(bh.cat.getParamType(ev,m)=='lower'){return '>'+parseFloat(bh.cat.getLower(ev,m))}
+                else if(bh.cat.getParamType(ev,m)=='upper'){return '<'+parseFloat(bh.cat.getUpper(ev,m))}
+                else if (bh.cat.hasError(ev,m)){return 'e'+parseFloat(bh.cat.getNegError(ev,m))+'-'+
+                    parseFloat(bh.cat.getPosError(ev,m));}
                 // else{return'e'+parseFloat(m[2])+'-'+
                 //     parseFloat(m[1]);}
             }
-            distfn=function(d){
+            var distefn=function(ev){
+                if(!bh.cat.getParamType(ev,'DL')){return ""}
+                else if(bh.cat.getParamType(ev,'DL')=='lower'){return '>'+parseFloat(bh.cat.getLower(ev,'DL'))}
+                else if(bh.cat.getParamType(ev,'DL')=='upper'){return '<'+parseFloat(bh.cat.getUpper(ev,'DL'))}
+                // else if (bh.cat.hasError(ev,'DL')){
+                //     return (bh.cat.getNegError(ev,'DL')+bh.cat.getBest(ev,'DL'))+'-'+
+                //     (bh.cat.getPosError(ev,'DL')+bh.cat.getBest(ev,'DL'));}
+                else if (bh.cat.hasError(ev,'DL')){
+                    return (bh.cat.getMinVal(ev,'DL'))+'-'+
+                    (bh.cat.getMaxVal(ev,'DL'));}
+                else {return bh.cat.getBest(ev,DL)}
+                // else{return'e'+parseFloat(m[2])+'-'+
+                //     parseFloat(m[1]);}
+            }
+            var distfn=function(d){
                 if(d.err=="lowerbound"){return '>'+parseFloat(d.best)}
                 else if(d.err=="upperbound"){return '<'+parseFloat(d.best)}
                 else if(d.lim){return (Math.round(3.26*(Math.min.apply(Math,d.lim)/100)*100)+
@@ -536,7 +550,8 @@ BHBubble.prototype.loadData = function(){
             sec.compMass=massfn(dj.name,'M1');
             fin.massBH=massfn(dj.name,'Mfinal');
             fin.massBHerr=massefn(dj.name,'Mfinal');
-            distance=distfn(dj.DL);
+            distance=distefn(dj.name);
+            // console.log(i,dj.name,pri,sec,fin,distance);
             // }else{
             //     pri.massBH=dj.M1[0];
             //     pri.massBHerr='e'+parseFloat(dj.M1[2])+'-'+
@@ -554,7 +569,7 @@ BHBubble.prototype.loadData = function(){
             // }
             if (dj.name[0]=='G'){method='GW'}
             else if (dj.name[0]=='L'){method='LVT'}
-            paper='-';
+            var paper='-';
             if (bh.links[i]){
                 if (bh.links[i].DetPaper){
                     paper='<a target="_blank" href="'+
@@ -579,16 +594,18 @@ BHBubble.prototype.loadData = function(){
                     }
                 }
             }
-            if ((pri.massBH>=2)&&(sec.massBH>=2)){binType='%data.bub.type.bbh%';}
-            else if((pri.massBH<2)&&(sec.massBH<2)){binType='%text.gen.bns%';}
-            else {binType='%data.bub.type.nsbh%';}
+            var binType='';
+            if ((pri.massBH>=5)&&(sec.massBH>=5)){binType='%data.bub.type.bbh%';}
+            else if((pri.massBH<2.5)&&(sec.massBH<2.5)){binType='%text.gen.bns%';}
+            else if((pri.massBH>5)&&(sec.massBH<2.5)){binType='%text.gen.nsbh%';}
+            else {binType='%text.gen.massgap%';}
             // binType='%data.bub.type.bbh%';
-            loc='%data.bub.loc.extragalactic%'
-            period='';
-            refcompmass='';
-            refcomp='';
-            refper='';
-            evs={pri:pri,sec:sec,fin:fin}
+            var loc='%data.bub.loc.extragalactic%'
+            var period='';
+            var refcompmass='';
+            var refcomp='';
+            var refper='';
+            var evs={pri:pri,sec:sec,fin:fin}
             for (b in evs){
                 evs[b].method=method;
                 evs[b].period=period;
@@ -617,7 +634,7 @@ BHBubble.prototype.loadData = function(){
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     }
-    bh.cat = new GWCat(eventsCallback,{eventsFile:"https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp",confirmedOnly:true,debug:this.debug});
+    bh.cat = new GWCat(eventsCallback,{eventsFile:"https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp",confirmedOnly:true,debug:bh.urlVars.debug});
 
     // // read in GW data and reformat
     // d3.json(this.inputFileEvents,function(error,jsonIn){
@@ -703,8 +720,9 @@ BHBubble.prototype.formatData = function(valueCol){
     //convert numerical values from strings to numbers
     //bubbles needs very specific format, convert data to this.
     this.data.forEach(function(d){
+        var errcode;
         d.massBH = +d.massBH;
-        d.objType = (d.massBH > 1.5) ? "bh" : "ns";
+        d.objType = (d.massBH<2.5) ? "ns" : (d.massBH<5)?"mg":"bh";
         d.massBHsq = Math.pow(d.massBH,2);
         if (!d.massBHerr){
             d.massBHstr='?'
@@ -712,7 +730,7 @@ BHBubble.prototype.formatData = function(valueCol){
         if (d.massBHerr[0]=='e'){
             errcode=d.massBHerr.split('e')[1];
             errcode=errcode.split('-');
-            d.massBHplus = +errcode[0] + d.massBH;
+            d.massBHplus = +errcode[2] + d.massBH;
             d.massBHminus = -errcode[1] + d.massBH;
             d.massBHstr = bh.tN(parseFloat(d.massBHminus.toFixed(1)))+' - '+
                                 bh.tN(parseFloat(d.massBHplus.toFixed(1)));
@@ -748,10 +766,10 @@ BHBubble.prototype.formatData = function(valueCol){
                 "LVT":"%data.bub.name.LVT%",
                 "-A":"%data.bub.name.A%",
                 "-B":"%data.bub.name.B%"}
-            nc=bh.nameCol;
-            rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
-            tr=rename.exec(d.name);
-            txtOut=this.names[tr[1]]+bh.tN(tr[2]);
+            var nc=bh.nameCol;
+            var rename=/([A-Z]*)([0-9]*)([-A-Z]*)/;
+            var tr=rename.exec(d.name);
+            var txtOut=this.names[tr[1]]+bh.tN(tr[2]);
             txtOut = (tr[3]) ? txtOut + this.names[tr[3]] : txtOut;
             d[nc]=bh.tl(txtOut)
         }
@@ -863,8 +881,9 @@ BHBubble.prototype.getOpacity = function(d){
         return 0;
     }else if((this.displayFilter=="noinit")&&((BHtype=="%data.bub.type.primary%")||BHtype=="%data.bub.type.secondary%")){
         return 0;
-    }else if (d.objType=="ns"){return 0;}
-    else{return 1;}
+    // }else if (d.objType=="ns"){
+    //     return 0;
+    }else{return 1;}
 }
 BHBubble.prototype.drawBubbles = function(){
     // Add bubbles and legend
@@ -1125,7 +1144,7 @@ BHBubble.prototype.addShare = function(){
     // add click actions
     var bh=this;
     shareicon = document.getElementById('share-icon');
-    console.log('addShare')
+    // console.log('addShare')
     shareicon.addEventListener("click",function(){bh.showShare();})
     shareicon.addEventListener("mouseover",function(e){
             bh.showControlTooltip(e,"%text.gen.share%");})
