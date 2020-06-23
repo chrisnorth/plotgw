@@ -706,6 +706,9 @@ BHBubble.prototype.formatData = function(valueCol){
         d.massBH = +d.massBH;
         d.objType = (d.massBH > 1.5) ? "bh" : "ns";
         d.massBHsq = Math.pow(d.massBH,2);
+        if (!d.massBHerr){
+            d.massBHstr='?'
+        }
         if (d.massBHerr[0]=='e'){
             errcode=d.massBHerr.split('e')[1];
             errcode=errcode.split('-');

@@ -27,6 +27,7 @@
  "data.af.name": "Spin finale",
  "data.chi.name": "Spine effettivo durante spiraleggiamento",
  "data.FAR.name": "Tasso di falsi allarmi",
+ "data.FAR.unit.structure": "$1per$ $val$ $dur$",
  "data.FAR.unit": "anno⁻¹",
  "data.FAR.unit.1per": "< 1 per",
  "data.FAR.unit.yr": "anni",

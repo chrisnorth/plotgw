@@ -27,6 +27,7 @@
  "data.af.name": "Końcowy spin",
  "data.chi.name": "Efektywny spin podczas zacieśniania się układu podwójnego",
  "data.FAR.name": "Częstość fałszywego alarmu",
+ "data.FAR.unit.structure": "$1per$ $val$ $dur$",
  "data.FAR.unit": "lat⁻¹",
  "data.FAR.unit.1per": "< raz na",
  "data.FAR.unit.yr": "lat",
