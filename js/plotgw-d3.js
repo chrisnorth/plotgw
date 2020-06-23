@@ -236,7 +236,7 @@ GWCatalogue.prototype.init = function(){
         "de":{code:"de",name:"Deutsch"},
         "en":{code:"en",name:"English"},
         "es":{code:"es",name:"Español"},
-        "he":{code:"he",name:"עברית"},
+        // "he":{code:"he",name:"עברית"},
         "fr":{code:"fr",name:"Français"},
         "it":{code:"it",name:"Italiano"},
         "hu":{code:"hu",name:"Magyar"},
