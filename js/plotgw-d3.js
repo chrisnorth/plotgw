@@ -88,13 +88,13 @@ GWCatalogue.prototype.init = function(){
             .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons-all"></div><div class="options-buttons" id="x-buttons-conf"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons-all"></div><div class="options-buttons" id="y-buttons-conf"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-conf").attr("class","panel-cont")
-            .html('<div class="option option-pre conf-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br>(<span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span>)</span></div>');
+            .html('<div class="option option-pre conf-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br><span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span></span></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-cand").attr("class","panel-cont")
-            .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="cand-only-text"></span></br>(<span id="cand-only-x-axis"></span> : <span id="cand-only-y-axis"></span>)</div>');
+            .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="cand-only-text"></span></br><span id="cand-only-x-axis"></span> : <span id="cand-only-y-axis"></span></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-all").attr("class","panel-cont")
-            .html('<div class="option option-pre allsrc"><img class="button button-pre" id="preset-all-img" src="img/allsources.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="allsrc-text"></span></br>(<span id="allsrc-x-axis"></span> : <span id="allsrc-y-axis"></span>)</div>');
+            .html('<div class="option option-pre allsrc"><img class="button button-pre" id="preset-all-img" src="img/allsources.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="allsrc-text"></span></br><span id="allsrc-x-axis"></span> : <span id="allsrc-y-axis"></span></div>');
         d3.select("#preset-options").append("div")
             .attr("class","panel-block")
             .html('<span id="preset-warn">TEXT</span>&nbsp;<span id="preset-filter-link" style="cursor:pointer;color:red">&rarr;</span></div>');
