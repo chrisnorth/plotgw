@@ -443,7 +443,7 @@ BHBubble.prototype.loadData = function(){
     }
 
     // set input file for GW events
-    this.inputFileEventsDefault="json/events.json"
+    this.inputFileEventsDefault="https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp"
     this.inputFileGwoscDefault="gwcat/data/gwosc.json"
     if (this.langdict.hasOwnProperty('eventsFile')){
         this.inputFileEvents="json/"+this.langdict.inputFile;
@@ -617,7 +617,7 @@ BHBubble.prototype.loadData = function(){
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     }
-    bh.cat = new GWCat(eventsCallback,{eventsFile:"https://data.cardiffgravity.org/gwcat-data/data/gwosc_gracedb.jsonp",confirmedOnly:true,debug:this.debug});
+    bh.cat = new GWCat(eventsCallback,{eventsFile:this.inputFileEvents,confirmedOnly:true,debug:this.debug});
 
     // // read in GW data and reformat
     // d3.json(this.inputFileEvents,function(error,jsonIn){
