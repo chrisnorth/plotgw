@@ -247,15 +247,15 @@ GWCatalogue.prototype.init = function(){
     this.filters = {
         "M1":{"name":'%data.M1.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M1.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M1.unit%", "default": 80, "value": 80 }
+            "max": { "label": "", "unit": "%data.M1.unit%", "default": 100, "value": 100 }
         },
         "M2":{"name":'%data.M2.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M2.unit%", "default": 80, "value": 80 }
+            "max": { "label": "", "unit": "%data.M2.unit%", "default": 100, "value": 100 }
         },
         "Mfinal":{"name":'%data.Mfinal.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.Mfinal.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.Mfinal.unit%", "default": 100, "value": 100 }
+            "max": { "label": "", "unit": "%data.Mfinal.unit%", "default": 200, "value": 200 }
         },
         "obsrun": {
             "name":'%data.obsrun.name%',
