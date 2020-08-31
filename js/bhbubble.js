@@ -617,7 +617,7 @@ BHBubble.prototype.loadData = function(){
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     }
-    bh.cat = new GWCat(eventsCallback,{eventsFile:this.inputFileEvents,confirmedOnly:true,debug:this.debug});
+    bh.cat = new GWCat(eventsCallback,{fileIn:this.inputFileEvents,confirmedOnly:true,debug:this.debug});
 
     // // read in GW data and reformat
     // d3.json(this.inputFileEvents,function(error,jsonIn){
