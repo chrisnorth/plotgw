@@ -49,7 +49,7 @@
 		$('#translate_chooser').html(html).find('#langchoice select').bind('change',{me:this},function(e){ e.data.me.setLanguage($(this).find("option:selected").val()); });
 
 		this.setLanguage(this.lang);
-
+		$('#hidecomp').prop('checked',false)
 		return this;
 	}
 
@@ -76,6 +76,7 @@
 				}
 			});
 		});
+		$('#hidecomp').prop('checked',false);
 		return this;
 	}
 
@@ -93,12 +94,16 @@
 				// so there is something to work from.
 				console.log("Couldn't load "+lang)
 				if(lang != "en") this.loadLanguage('en',callback,lang);
+				$('#hidecomp').css('display','none');
+				$('#hidecomp-lab').css('display','unset');
 			},
 			success: function(data){
 				// Update the language code and name
 				if(data && data["meta.code"] && typeof data["meta.code"]==="string") data["meta.code"] = lang;
 				if(data && data["meta.code"] && typeof data["meta.code"]==="string") data["meta.name"] = this.langs[lang];
 				if(typeof callback==="function") callback.call(this,{data:data,lang:lang});
+				$('#hidecomp').css('display','unset');
+				$('#hidecomp-lab').css('display','unset');
 			}
 		});
 
@@ -287,7 +292,7 @@
 			// otherwise we loose arrays
 			// var objectG = JSON.parse(JSON.stringify(t.phrasebook));
 			var objectG = {}
-			console.log(objectG)
+			// console.log(objectG)
 			//loop through all of the input/textarea elements of the form
 			var el = this.find('input, textarea, select').each(function(i){
 				//ignore the submit button

@@ -13,7 +13,7 @@ window.cookieconsent_options = {"message":"This website uses cookies to gather s
     m.parentNode.insertBefore(a,m)
 })
 (window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-ga('create', 'UA-64659146-1', 'auto');
+ga('create', 'UA-83139455-3', 'auto');
 ga('send', 'pageview');
 
 /*

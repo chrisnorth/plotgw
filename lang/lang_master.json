@@ -250,6 +250,9 @@
     "text.bub.legend.candidate":{"_title":"GW Candidate","_text":"Displayed in legend","_type":"string"},
     "text.bub.legend.detection":{"_title":"GW Detection","_text":"Displayed in legend","_type":"string"},
     "text.bub.legend.xray":{"_title":"X-ray binary detecion","_text":"Displayed in legend","_type":"string"},
+    "text.bub.legend.bh":{"_title":"X-ray binary detecion","_text":"Displayed in legend","_type":"string"},
+    "text.bub.legend.ns":{"_title":"Neutron star","_text":"Displayed in legend","_type":"string"},
+    "text.bub.legend.massgap":{"_title":"Mass gap","_text":"Displayed in legend","_type":"string"},
     "text.bub.save.svg":{"_title":"Save as SVG","_text":"Label for 'Save as SVG' button (currently only visible for Roman alphabet languages)","_type":"string"},
     "text.bub.footer":{"_title":"Footer text","_text":"Text of footer, including HTML formatting (e.g. hyperlinks)","_type":"textarea","_height":"8em","_highlight":true},
 
