@@ -81,6 +81,9 @@ legend {
 	padding: 0px;
 	font-weight: bold;
 }
+input.checkbox{
+	width:auto;
+}
 input {
 	width:100%;
 	font-family: inherit;
