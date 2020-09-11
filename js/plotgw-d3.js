@@ -458,9 +458,11 @@ GWCatalogue.prototype.tl = function(textIn,plaintext){
 GWCatalogue.prototype.tName = function(textIn){
     this.names={"GW":"%data.bub.name.GW%",
         "LVT":"%data.bub.name.LVT%",
+        "A":"%data.bub.name.A%",
+        "B":"%data.bub.name.B%",
         "-A":"%data.bub.name.A%",
         "-B":"%data.bub.name.B%"}
-    rename=/([A-Z]*)([0-9]*)([a-z]*)/;
+    rename=/([A-Z]*)([0-9]*)([a-zA-Z]*)/;
     tr=rename.exec(textIn)
     textOut=gw.tl(((this.names[tr[1]])?this.names[tr[1]]:tr[1])+gw.tN(tr[2])+tr[3])
     return(textOut)
