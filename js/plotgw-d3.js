@@ -5169,4 +5169,4 @@ GWCatalogue.prototype.saveCanvas = function(){
     canvasdl.toBlob(function(blob) {
         saveAs(blob, "LIGO-Virgo_catalogue_"+gw.xvar+"_"+gw.yvar+".png");
     });
-}9
+}
