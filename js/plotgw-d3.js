@@ -5005,7 +5005,7 @@ GWCatalogue.prototype.makeCanvas = function(){
         // console.log('stroke',lc,lcrgb,params.linecolor);
         // console.log('color',color,colrgb,params.color);
         if (el.tagName=="circle"){
-            console.log('circle');
+            // console.log('circle');
             params.cx=parseFloat(el.getAttribute('cx'))+tl0[0];
             params.cy=parseFloat(el.getAttribute('cy'))+tl0[1];
             params.r=parseFloat(el.getAttribute('r'));
@@ -5022,7 +5022,7 @@ GWCatalogue.prototype.makeCanvas = function(){
             ctx.stroke();
             ctx.fill();
         }else if(el.tagName=="line"){
-            console.log("line",el.classList);
+            // console.log("line",el.classList);
             params.x1=(el.getAttribute('x1')) ? parseFloat(el.getAttribute('x1'))+tl0[0] : tl0[0];
             params.x2=(el.getAttribute('x2')) ? parseFloat(el.getAttribute('x2'))+tl0[0] : tl0[0];
             params.y1=(el.getAttribute('y1')) ? parseFloat(el.getAttribute('y1'))+tl0[1] : tl0[1];
@@ -5076,13 +5076,24 @@ GWCatalogue.prototype.makeCanvas = function(){
                     params[p]=parseFloat(params[p]);
                 }
             }
-            var txtalign=(el.style.getPropertyValue('text-anchor')) ? el.style.getPropertyValue('text-anchor') : null;
+            var txtalign=getComputedStyle(el)['text-anchor']
             params.txtalign = (txtalign=="middle") ? "center" : txtalign;
             if(translate){
                 params.x+=parseFloat(translate[1]);
                 params.y+=parseFloat(translate[2]);
             }
             var txt=el.innerHTML;
+            if (txt.search('tspan')>0){
+                elch=el.childNodes[0]
+                var txt0=txt.search('>');
+                var txt1=txt.search('</');
+                var txt=txt.substr(txt0+1,txt1-txt0-1)
+                params.x+=(elch.getAttribute('x')) ? parseFloat(elch.getAttribute('x')) : 0;
+                params.y+=(elch.getAttribute('y')) ? parseFloat(elch.getAttribute('y')) : 0;
+                params.dx+=(elch.getAttribute('dx')) ? parseFloat(elch.getAttribute('dx')) : 0;
+                params.dy+=(elch.getAttribute('dy')) ? parseFloat(elch.getAttribute('dy')) : 0;
+            }
+            if (params.txtalign){console.log(txt,params.txtalign);}
             ctx.save();
             ctx.translate(params.tl0_0,params.tl0_1);
             if (rotate){
@@ -5097,9 +5108,9 @@ GWCatalogue.prototype.makeCanvas = function(){
             ctx.fillText(txt,0,0);
             ctx.restore();
             // console.log(txt,params.x,params.y,rotate,params.dy,params.txtalign,params.fontsize);
-            console.log(txt);
+            // console.log(txt);
         }
-        console.log(params);
+        // console.log(params);
     }
 }
 GWCatalogue.prototype.getSvgElements = function(){
