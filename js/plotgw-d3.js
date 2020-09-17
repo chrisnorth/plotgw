@@ -3119,7 +3119,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("stroke-width",3)
     .append("circle")
         .attr("id","highlight")
-        .attr("class","dot-hl")
+        .attr("class","dot-hl no-canvas")
         .attr("opacity",0)
         .attr("cx",gw.xScale(0))
         .attr("cy",gw.yScale(0))
@@ -3447,7 +3447,10 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("src","img/save.svg")
         .attr("class","hidden")
         .attr("id","download-img")
-        .on("click",function(){gw.makeCanvas();gw.saveCanvas();gw.removeCanvas();gw.hideTooltipManual();});
+        .on("click",function(){gw.makeCanvas();
+            gw.saveCanvas();
+            gw.removeCanvas();
+            gw.hideTooltipManual();});
 
 }
 GWCatalogue.prototype.showMassGuides = function(){
@@ -5001,6 +5004,13 @@ GWCatalogue.prototype.makeCanvas = function(){
         params.color = window.getComputedStyle(el).getPropertyValue('color');
         params.linewidth = parseFloat(window.getComputedStyle(el).getPropertyValue('stroke-width'));
         params.opacity = parseFloat(window.getComputedStyle(el).getPropertyValue('opacity'));
+        params.dasharray=getComputedStyle(el)['stroke-dasharray'].split(' ');
+        params.dashes=[];
+        if (params.dasharray.length>0){
+            for (var n=0;n<params.dasharray.length;n++){
+                params.dashes.push(parseFloat(params.dasharray[n]));
+            }
+        }
         // console.log('fill',fc,fcrgb,params.fillcolor);
         // console.log('stroke',lc,lcrgb,params.linecolor);
         // console.log('color',color,colrgb,params.color);
@@ -5013,6 +5023,7 @@ GWCatalogue.prototype.makeCanvas = function(){
                 params.cx+=parseFloat(translate[1]);
                 params.cy+=parseFloat(translate[2]);
             }
+            ctx.save();
             ctx.beginPath();
             ctx.fillStyle = params.fillcolor;
             ctx.strokeStyle = params.linecolor;
@@ -5021,6 +5032,28 @@ GWCatalogue.prototype.makeCanvas = function(){
             ctx.arc(params.cx,params.cy,params.r,0,2*Math.PI);
             ctx.stroke();
             ctx.fill();
+            ctx.restore();
+        }else if (el.tagName=="rect"){
+            params.x=parseFloat(el.getAttribute('x'))+tl0[0];
+            params.y=parseFloat(el.getAttribute('y'))+tl0[1];
+            params.w=parseFloat(el.getAttribute('width'));
+            params.h=parseFloat(el.getAttribute('height'));
+            if(translate){
+                params.x+=parseFloat(translate[1]);
+                params.y+=parseFloat(translate[2]);
+            }
+            console.log('rect',el,params);
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = params.fillcolor;
+            ctx.strokeStyle = params.linecolor;
+            ctx.globalAlpha = params.opacity;
+            ctx.lineWidth = params.linewidth;
+            ctx.setLineDash(params.dashes);
+            ctx.rect(params.x,params.y,params.w,params.h);
+            ctx.stroke();
+            ctx.fill();
+            ctx.restore();
         }else if(el.tagName=="line"){
             // console.log("line",el.classList);
             params.x1=(el.getAttribute('x1')) ? parseFloat(el.getAttribute('x1'))+tl0[0] : tl0[0];
@@ -5033,16 +5066,54 @@ GWCatalogue.prototype.makeCanvas = function(){
                 params.x2+=parseFloat(translate[1]);
                 params.y2+=parseFloat(translate[2]);
             }
+            params.dasharray=getComputedStyle(el)['stroke-dasharray'].split(' ');
+            params.dashes=[];
+            if (params.dasharray.length>0){
+                for (var n=0;n<params.dasharray.length;n++){
+                    params.dashes.push(parseFloat(params.dasharray[n]));
+                }
+            }
+            // console.log('line',params.dasharray,params.dashes);
+            ctx.save();
             ctx.beginPath();
+            ctx.setLineDash(params.dashes);
             ctx.moveTo(params.x1,params.y1);
             ctx.lineTo(params.x2,params.y2);
             ctx.strokeStyle = params.linecolor;
             ctx.lineWidth = params.linewidth;
             ctx.globalAlpha = params.opacity;
             ctx.stroke();
+            ctx.restore();
         }else if(el.tagName=="path"){
             getpath=/M([^\s,)]+)[ ,]+([^\s,)]+)(([HV])([\d.]+)([HV])([\d.]+))/;
             params.d=el.getAttribute('d');
+            params.dasharray=getComputedStyle(el)['stroke-dasharray'];
+            params.dashes=[];
+            if (params.dasharray.length>0){
+                for (var n=0;n<params.dasharray.length;n++){
+                    params.dashes.push(parseFloat(params.dashes[n]));
+                }
+            }
+            // console.log('path',params.dasharray,params.dashes);
+            if(translate){
+                x1+=parseFloat(translate[1]);
+                y1+=parseFloat(translate[2]);
+                x2+=parseFloat(translate[1]);
+                y2+=parseFloat(translate[2]);
+            }
+            ctx.save()
+            ctx.translate(tl0[0],tl0[1])
+            ctx.beginPath();
+            ctx.fillStyle = params.fillcolor;
+            ctx.strokeStyle = params.linecolor;
+            ctx.globalAlpha = params.opacity;
+            ctx.lineWidth = params.linewidth;
+            ctx.setLineDash(params.dashes);
+            var path = new Path2D(params.d);
+            ctx.stroke(path);
+            ctx.restore();
+        }else if (el.tagName=="polygon"){
+            params.points=el.getAttribute('points').split(' ');
             if(translate){
                 x1+=parseFloat(translate[1]);
                 y1+=parseFloat(translate[2]);
@@ -5055,9 +5126,25 @@ GWCatalogue.prototype.makeCanvas = function(){
             ctx.strokeStyle = params.linecolor;
             ctx.globalAlpha = params.opacity;
             ctx.lineWidth = params.linewidth;
-            var path = new Path2D(params.d);
-            ctx.stroke(path);
+            ctx.beginPath();
+            // console.log('poly',el,params);
+            console.log(params.points)
+            for (var n=0;n<params.points.length;n++){
+                var polyx=parseFloat(params.points[n].split(',')[0]);
+                var polyy=parseFloat(params.points[n].split(',')[1]);
+                if (n==0){
+                    // console.log('moveTo',polyx,polyy)
+                    ctx.moveTo(polyx,polyy);
+                }else{
+                    // console.log('lineTo',polyx,polyy)
+                    ctx.lineTo(polyx,polyy);
+                }
+            }
+            // ctx.closePath();
+            if (params.linecolor!="none"){ctx.stroke();}
+            ctx.fill();
             ctx.restore();
+            
         }else if (el.tagName=="text"){
             params.fontsize=parseFloat(window.getComputedStyle(el).getPropertyValue('font-size'));
             // params.txt=el.innerHTML;
@@ -5093,7 +5180,7 @@ GWCatalogue.prototype.makeCanvas = function(){
                 params.dx+=(elch.getAttribute('dx')) ? parseFloat(elch.getAttribute('dx')) : 0;
                 params.dy+=(elch.getAttribute('dy')) ? parseFloat(elch.getAttribute('dy')) : 0;
             }
-            if (params.txtalign){console.log(txt,params.txtalign);}
+            // if (params.txtalign){console.log(txt,params.txtalign);}
             ctx.save();
             ctx.translate(params.tl0_0,params.tl0_1);
             if (rotate){
@@ -5120,14 +5207,14 @@ GWCatalogue.prototype.getSvgElements = function(){
         if (translate){
             refxy[0]+=parseFloat(translate[1]);
             refxy[1]+=parseFloat(translate[2]);
-            console.log('translating to',translate,refxy)
+            // console.log('translating to',translate,refxy)
         }
         // console.log('els',els,'nodes',childNodes);
         // console.log(node,node.childElementCount,node.childNodes);
         if (node.childElementCount==0){
-            console.log('skipping empty:',n,node);
+            // console.log('skipping empty:',n,node);
             if (translate){
-                console.log('translating back to',translate)
+                // console.log('translating back to',translate)
                 refxy[0]-=parseFloat(translate[1]);
                 refxy[1]-=parseFloat(translate[2]);
             }
@@ -5137,21 +5224,27 @@ GWCatalogue.prototype.getSvgElements = function(){
                 node=childNodes[n];
                 // console.log(n,node,node.tagName);
                 if (node.tagName=="g"){
-                    console.log('entering:',n,node,refxy);
-                    [els,refxy]=getChildNodes(node,els,refxy);
-                }else if((node.tagName=="line")||(node.tagName=="text")||(node.tagName=="circle")||(node.tagName=="path")){
-                    if((node.style.opacity=="0")||(node.getAttribute("opacity")=="0")){
-                        console.log('skipping opacity 0:',n,node);
+                    if(getComputedStyle(node)["opacity"]=="0"){
+                        // console.log('skipping opacity 0:',n,node);
                     }else{
-                        console.log('appending:',n,node);
+                        // console.log('entering:',n,node,refxy);
+                        [els,refxy]=getChildNodes(node,els,refxy);
+                    }
+                }else if((node.tagName=="line")||(node.tagName=="text")||(node.tagName=="circle")||(node.tagName=="path")||(node.tagName=="polygon")||(node.tagName=="rect")){
+                    if(getComputedStyle(node)["opacity"]=="0"){
+                        // console.log('skipping opacity 0:',n,node);
+                    }else if(node.classList.contains('no-canvas')){
+                        console.log('skipping no-canvas:',n,node);
+                    }else{
+                        // console.log('appending:',n,node);
                         els.push({"node":node,"translate":[refxy[0],refxy[1]]});
                     }
                 }
             }
         }
-        console.log('exiting node')
+        // console.log('exiting node')
         if (translate){
-            console.log('translating back to',translate)
+            // console.log('translating back to',translate)
             refxy[0]-=parseFloat(translate[1]);
             refxy[1]-=parseFloat(translate[2]);
         }
