@@ -2135,7 +2135,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#555',
             'probbar':'#ccc',
             'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#555555'},
-            'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',O1:'#960000',O2:'#009600',O3:'#000096',O3b:'#009696'},
+            'guides':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',O1:'#960000',O2:'#009600',O3:'#000096',O3b:'#009696'},
             'probtxt':'#fff'
         }
     }
@@ -3178,7 +3178,7 @@ GWCatalogue.prototype.drawGraph = function(){
     gw.legend = gw.svg.selectAll(".legend")
       .data(gw.color.domain())
     .enter().append("g")
-      .attr("class", function(d,i){return "legend "+d+" "+gw.legType(d);})
+      .attr("class", function(d,i){return "legend colourise "+d+" "+gw.legType(d);})
       // .attr("transform", function(d, i) { return "translate(0," +
         // (i * 24) + ")"; });
       .attr("transform", function(d) { return "translate(0," +
