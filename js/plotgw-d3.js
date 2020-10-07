@@ -2116,7 +2116,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#ccc',
             'probbar':'#333',
             'probbars':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',Terrestrial:'#cccccc'},
-            'guides':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',O1:'#ffcccc',O2:'#ccffcc',O3:'#ccccff',O3b:'#ccffff'},
+            'guides':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',O1:'#ffcccc',O2:'#ccffcc',O3:'#ccccff'},
             'probtxt':'#000'
         },
         'dark':{'class':'col-black','default':false,
@@ -2135,7 +2135,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#555',
             'probbar':'#ccc',
             'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#555555'},
-            'guides':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',O1:'#960000',O2:'#009600',O3:'#000096',O3b:'#009696'},
+            'guides':{BBH:'#000050',BNS:'#500000',NSBH:'#005000',MassGap:'#005050',O1:'#500000',O2:'#005000',O3:'#000096'},
             'probtxt':'#fff'
         }
     }
