@@ -2542,7 +2542,7 @@ GWCatalogue.prototype.loadLangDefault = function(){
     d3.json(gw.fileInLangDefault, function(error, dataIn) {
         if (error){
             console.log(error);
-            alert("Fatal error loading input file: '"+gw.fileInLang+"'. Sorry!")
+            alert("Fatal error loading input file: '"+gw.fileInLangDefault+"'. Sorry!")
         }
         if(gw.debug){console.log('loaded:',gw.fileInLangDefault);}
         for (ld in dataIn){
