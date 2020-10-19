@@ -2206,8 +2206,18 @@ GWCatalogue.prototype.orderData = function(order='GPS'){
 }
 GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
-    if (this.debug){console.log('formatData',d.name);}
+    if (this.debug){console.log('formatData',d.name,d);}
     var gw=this;
+    colscheck={'Mfinal':'upper','Erad':'lower','lpeak':'lower'};
+    for (col in colscheck){
+        if (d[col]){
+            if (!d[col].hasOwnProperty('err')&&d[col].hasOwnProperty('best')){
+                d[col][colscheck[col]]=d[col].best;
+                delete d[col].best;
+            }
+        }
+    }
+    
     // code to create mass estimate (NOT USED)
     // if ((d.detType.best=='Candidate')&&(!(d.M1))&&(!(d.M2))){
     //     // add estimated masses
