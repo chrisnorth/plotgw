@@ -2208,13 +2208,20 @@ GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     if (this.debug){console.log('formatData',d.name,d);}
     var gw=this;
-    colscheck={'Mfinal':'upper','Erad':'lower','lpeak':'lower'};
+    colscheck={'Mfinal':{'limit':'upper','alt':'Mtotal'},'Erad':{'limit':'lower'},'lpeak':{'limit':'lower'}};
     for (col in colscheck){
         if (d[col]){
             if (!d[col].hasOwnProperty('err')&&d[col].hasOwnProperty('best')){
-                d[col][colscheck[col]]=d[col].best;
+                if (this.debug){console.log('replacing',col,'for',d.name,':',d[col])}
+                d[col][colscheck[col].limit]=d[col].best;
                 delete d[col].best;
+                if (this.debug){console.log('replaced with:',d[col])}
             }
+        }else if (d[colscheck[col].alt]){
+            if (this.debug){console.log('creating',col,'for',d.name)}
+            d[col]={};
+            d[col][colscheck[col]['limit']]=d[colscheck[col].alt].best;
+            if (this.debug){console.log('replaced with:',d[col])}
         }
     }
     
