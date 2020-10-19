@@ -549,8 +549,21 @@ BHBubble.prototype.loadData = function(){
             sec.massBH=massfn(dj.name,'M2');
             sec.massBHerr=massefn(dj.name,'M2');
             sec.compMass=massfn(dj.name,'M1');
-            fin.massBH=massfn(dj.name,'Mfinal');
-            fin.massBHerr=massefn(dj.name,'Mfinal');
+            if(bh.cat.getBest(dj.name,'Mfinal')){
+                fin.massBH=massfn(dj.name,'Mfinal');
+                if (bh.cat.hasError(dj.name,'Mfinal')){
+                    fin.massBHerr=massefn(dj.name,'Mfinal');
+                }else{
+                    fin.massBHerr='<'+fin.massBH;
+                }
+            }else if(bh.cat.getBest(dj.name,'Mtotal')){
+                fin.massBH=massfn(dj.name,'Mtotal');
+                fin.massBHerr='<'+fin.massBH;
+            }else{
+                fin.massBH=massfn(dj.name,'M1')+massfn(dj.name,'M2');
+                fin.massBHerr='<'+fin.massBH;
+            }
+            console.log(dj.name,pri,sec,fin);
             distance=distefn(dj.name);
             // console.log(i,dj.name,pri,sec,fin,distance);
             // }else{
@@ -722,6 +735,7 @@ BHBubble.prototype.formatData = function(valueCol){
     //convert numerical values from strings to numbers
     //bubbles needs very specific format, convert data to this.
     this.data.forEach(function(d){
+        console.log(d)
         var errcode;
         d.massBH = +d.massBH;
         d.objType = (d.massBH<2.5) ? "ns" : (d.massBH<5)?"mg":"bh";
