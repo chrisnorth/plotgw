@@ -3861,7 +3861,7 @@ GWCatalogue.prototype.updateErrors = function(){
         .duration(750)
         .attr("x1",gw.xMapErrMouter)
         .attr("x2",gw.xMapErrM)
-        .attr("y1",this.yMap).attr("y2",this.xMapErrY1)
+        .attr("y1",this.xMapErrY1).attr("y2",this.yMap)
         .attr("stroke",gw.getCol('err'))
         .attr("opacity",function(d){return gw.errOp(d,gw.xvar)});
 
@@ -3901,8 +3901,8 @@ GWCatalogue.prototype.updateErrors = function(){
         .transition()
         .duration(750)
         .attr("x1",this.yMapErrX0).attr("x2",this.xMap)
-        .attr("y1",gw.yMapErrM)
-        .attr("y2",gw.yMapErrMouter)
+        .attr("y1",gw.yMapErrMouter)
+        .attr("y2",gw.yMapErrM)
         .attr("stroke",gw.getCol('err'))
         .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
     // -ve y error (bottom)
