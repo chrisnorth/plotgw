@@ -85,7 +85,7 @@ GWCatalogue.prototype.init = function(){
         if(this.debug){console.log('adding options-outer')}
         d3.select("#"+this.holderid).insert("div","#infoouter + *")
             .attr("id","options-outer").attr("class","panel-outer colourise")
-            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons-all"></div><div class="options-buttons" id="x-buttons-conf"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons-all"></div><div class="options-buttons" id="y-buttons-conf"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div><div class="display-buttons" id="display-options"></div></div><div id="options-close" class="panel-close"></div></div>');
+            .html('<div id="options-gen" class="options-box"><div class="panel-title">Presets</div><div class="options-buttons" id="preset-options"></div></div><div id="options-x" class="options-box"><div class="panel-title">Horizontal Axis</div><div class="options-buttons" id="x-buttons-all"></div><div class="options-buttons" id="x-buttons-conf"></div></div><div id="options-y" class="options-box"><div class="panel-title">Vertical axis</div><div class="options-buttons" id="y-buttons-all"></div><div class="options-buttons" id="y-buttons-conf"></div></div><div id="display-options" class="options-box"><div class="panel-title">Display</div></div><div id="options-close" class="panel-close"></div></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-conf").attr("class","panel-cont")
             .html('<div class="option option-pre conf-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br><span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span></span></div>');
@@ -996,6 +996,7 @@ GWCatalogue.prototype.setScales = function(){
     this.xsc = Math.min(1.0,document.getElementById(this.holderid).offsetWidth/1400.)
     this.ysc = Math.min(1.0,document.getElementById(this.holderid).offsetHeight/900.)
     this.scl = Math.min(this.xsc,this.ysc)
+    
     //sketch scale
     if (this.winAspect<1){
         // portrait
@@ -1016,6 +1017,8 @@ GWCatalogue.prototype.setScales = function(){
         d3.selectAll(".panel-cont-text")
             .attr("class","panel-cont-text landscape");
     }
+    if (!this.dotScale){this.dotScale=1}
+    this.dotSize = this.getDotScaleValue(this.dotScale)*Math.min(10.,5*gw.sksc);
     // this.sksc=this.scl
 
     //graph size & position
@@ -2155,6 +2158,27 @@ GWCatalogue.prototype.setStyles = function(){
             return this.colourList[this.colScheme].class
         }else{return ''}
     }
+    this.dotScales={
+        'small':{
+            'value':0.7,
+            'label':'%text.plotgw.dotscale.small%'},
+        'normal':{
+            'value':1.0,
+            'label':'%text.plotgw.dotscale.normal%'},
+        'large':{
+            'value':1.5,
+            'label':'%text.plotgw.dotscale.large%'}
+        }
+    this.dotScale='normal';
+    this.getDotScaleValue = function(scale){
+        if (!scale){
+            return 1.0;
+        }else if (this.dotScales[scale]){
+            return this.dotScales[scale].value;
+        }else{
+            return 1.0;
+        }
+    }
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
     this.styleDomains = ['GW','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3'];
@@ -2634,10 +2658,16 @@ GWCatalogue.prototype.setLang = function(){
         .html(this.tl('%text.plotgw.axiszero%'))
     d3.selectAll("#xlog-lab,#ylog-lab")
         .html(this.tl('%text.plotgw.log-axis%'))
-    d3.select("#options-colour")
+    d3.select("#options-colour-label")
         .html(this.tl('%text.plotgw.colour%'))
     for (c in this.colourList){
+        console.log(c,d3.select('#colour-'+c));
         d3.select('#colour-'+c).html(this.tl(this.colourList[c].label));
+    }
+    d3.select("#options-dotscale-label")
+        .html(this.tl('%text.plotgw.dotscale%'))
+    for (d in this.dotScales){
+        d3.select('#dotscale-'+d).html(this.tl(this.dotScales[d].label));
     }
     d3.select("#filterr > label")
         .html(this.tl('%text.plotgw.filter.errpr%'))
@@ -3143,7 +3173,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("opacity",0)
         .attr("cx",gw.xScale(0))
         .attr("cy",gw.yScale(0))
-        .attr("r",15)
+        .attr("r",2*gw.dotSize)
     if (gw.d){
         if(this.debug){console.log('current gwcat.d:',gw.d);}
         gw.initHighlight(gw.d);
@@ -3159,7 +3189,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("class", "dot")
       .attr("transform", "translate("+gw.margin.left+","+
         gw.margin.top+")")
-      .attr("r", Math.min(10.,7/gw.sksc))
+      .attr("r", gw.dotSize)
       // .attr("cx", function(d){console.log('draw dotx',d.name,gw.xvar,gw.xMap(d));return gw.xMap(d);})
       // .attr("cy", function(d){console.log('draw doty',d.name,gw.yvar,gw.yMap(d));return gw.yMap(d);})
       .attr("cx", gw.xMap)
@@ -3170,7 +3200,7 @@ GWCatalogue.prototype.drawGraph = function(){
       .style("fill", function(d){return gw.color(gw.cValue(d));})
       .style("stroke",function(d){return gw.linestyles(d.detType.best);})
       .style("stroke-dasharray",function(d){return gw.linedashes(d.detType.best);})
-      .style("stroke-width",Math.min(5,2./gw.sksc))
+      .style("stroke-width",Math.min(5,2.*gw.sksc))
       .on("mouseover", function(d) {
             gw.tooltip.transition()
                .duration(200)
@@ -4189,7 +4219,9 @@ GWCatalogue.prototype.addOptions = function(){
 
     // add Display buttons
     var divdisp= document.getElementById('display-options');
-    divdisp.innerHTML+='<span id="options-colour">'+this.tl('%text.plotgw.colour%')+'</span>';
+    divdisp.innerHTML+='<div class="display-option" id="options-colour"><span id="options-colour-label">'+this.tl('%text.plotgw.colour%')+'</span></div><div class="display-option" id="options-dotscale"><span id="options-dotscale-label">'+this.tl('%text.plotgw.dotscale%')+'</span></div>';
+    
+    console.log(d3.select('#options-colour'))
     var colList=document.createElement('select');
     colList.name = 'colSelect';
     colList.id = 'colSelect';
@@ -4204,8 +4236,27 @@ GWCatalogue.prototype.addOptions = function(){
         console.log(this,this.value)
         gw.setColour(this.value)
     }
-
-    divdisp.appendChild(colList);
+    document.getElementById('options-colour').append(colList);
+    
+    var dotList=document.createElement('select');
+    dotList.name = 'dotSelect';
+    dotList.id = 'dotSelect';
+    for (d in this.dotScales){
+        dotOpt=document.createElement('option');
+        dotOpt.value=d;
+        dotOpt.id="dotscale-"+d;
+        if (d==this.dotScale){
+            dotOpt.selected=true;
+        }
+        dotOpt.innerHTML=this.tl(this.dotScales[d].label);
+        dotList.appendChild(dotOpt);
+    }
+    dotList.onchange = function(){
+        console.log(this,this.value);
+        gw.dotScale=this.value;
+        gw.replot();
+    }
+    document.getElementById('options-dotscale').append(dotList);
 
     // d3.select("#display-options").append('div')
     //     // .style('display','none')
