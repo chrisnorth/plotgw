@@ -3154,8 +3154,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr("y1",gw.yMapErrM).attr("y2",gw.yMapErrMouter)
         .attr("stroke",gw.getCol('err'))
         .attr("stroke-width",gw.swErr)
-        .attr("opacity",0.1);
-        // .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
+        .attr("opacity",function(d){return gw.errOp(d,gw.yvar)});
 
     // if (!gw.showerrors){gw.toggleErrors();}
 
