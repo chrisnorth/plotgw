@@ -239,6 +239,7 @@ GWCatalogue.prototype.init = function(){
         // "he":{code:"he",name:"עברית"},
         "fr":{code:"fr",name:"Français"},
         "it":{code:"it",name:"Italiano"},
+        "gr":{code:"gr",name:"Ελληνικά"},
         "hu":{code:"hu",name:"Magyar"},
         "pl":{code:"pl",name:"Polski"},
         "or":{code:"or",name:"ଓଡ଼ିଆ"}
