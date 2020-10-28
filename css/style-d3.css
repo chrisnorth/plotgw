@@ -137,6 +137,9 @@ button.down{
     background-color:white;
     /*border:1px solid black;*/
 }
+.sketchlab.info{
+    transform:translate3d(0,-25%,0);
+}
 .sketchlab.mtxt{
     width:100%;
     font-size:1.2em;
