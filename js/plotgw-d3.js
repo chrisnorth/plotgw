@@ -2236,7 +2236,7 @@ GWCatalogue.prototype.formatData = function(d,cols){
     // generate new columns
     if (this.debug){console.log('formatData',d.name,d);}
     var gw=this;
-    colscheck={'Mfinal':{'limit':'upper','alt':'Mtotal'},'Erad':{'limit':'lower'},'lpeak':{'limit':'lower'}};
+    colscheck={'Mfinal':{'limit':'upper','alt':'Mtotal'},'af':{'limit':'upper'},'Erad':{'limit':'lower'},'lpeak':{'limit':'lower'}};
     for (col in colscheck){
         if (d[col]){
             if (!d[col].hasOwnProperty('err')&&d[col].hasOwnProperty('best')){
