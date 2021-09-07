@@ -464,9 +464,15 @@ GWCatalogue.prototype.tName = function(textIn){
         "B":"%data.bub.name.B%",
         "-A":"%data.bub.name.A%",
         "-B":"%data.bub.name.B%"}
-    rename=/([A-Z]*)([0-9]*)([a-zA-Z]*)/;
-    tr=rename.exec(textIn)
-    textOut=gw.tl(((this.names[tr[1]])?this.names[tr[1]]:tr[1])+gw.tN(tr[2])+tr[3])
+    if (textIn.search('_')>0){
+        rename=/([A-Z]*)([0-9]*)([a-zA-Z]*)(_)([0-9]*)/;
+        tr=rename.exec(textIn)
+        textOut=gw.tl(((this.names[tr[1]])?this.names[tr[1]]:tr[1])+gw.tN(tr[2])+tr[3]+((tr[4])?tr[4]:'')+((tr[5])?gw.tN(tr[5]):''))
+    }else{
+        rename=/([A-Z]*)([0-9]*)([a-zA-Z]*)/;
+        tr=rename.exec(textIn)
+        textOut=gw.tl(((this.names[tr[1]])?this.names[tr[1]]:tr[1])+gw.tN(tr[2])+tr[3])
+    }
     return(textOut)
 }
 GWCatalogue.prototype.tN = function(key){
