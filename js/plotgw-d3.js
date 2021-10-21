@@ -3524,6 +3524,14 @@ GWCatalogue.prototype.showTimeGuides = function(){
 GWCatalogue.prototype.updateGuides = function () {
     // add guide lines
     var gw=this;
+    linspace = function(a,b,n=100){
+        var linarr = [];
+        var step = (b-a)/(n-1);
+        for (var i=0;i<n;i++){
+            linarr.push(parseFloat((a + (step * i)).toFixed(2)));
+        }
+        return(linarr);
+    }
     if (gw.showMassGuides()){
         var xrange=gw.getMinMax(gw.xvar,gw.xlog,gw.xzero);
         var yrange=gw.getMinMax(gw.yvar,gw.ylog,gw.yzero);
@@ -3534,10 +3542,10 @@ GWCatalogue.prototype.updateGuides = function () {
             maxmax:Math.max(xrange[1],yrange[1])}
         // console.log('ranges:',rng);
         var guidelines=[
-            {name:'equal',
-                M1:[rng.maxmin,rng.minmax],
-                M2:[rng.maxmin,rng.minmax],
-                col:'red',vis:true,dash:gw.linedashes('BBH')},
+            // {name:'equal',
+            //     M1:[rng.maxmin,rng.minmax],
+            //     M2:[rng.maxmin,rng.minmax],
+            //     col:'red',vis:true,dash:gw.linedashes('BBH')},
             {name:'bnslim',
                 M1:[Math.max(rng.M1[0],2.5),Math.min(rng.M1[1],2.5)],
                 M2:[rng.M2[0],Math.min(rng.M2[1],2.5)],
@@ -3558,47 +3566,48 @@ GWCatalogue.prototype.updateGuides = function () {
                 M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5)],
                 col:'orange',dash:gw.linedashes('BBH'),
                 vis:(rng.M2[0]<=5)&(rng.M2[1]>=5)}
-        ]
+        ];
+        
         var polygons=[
             {name:'none',
-                M1:[rng.maxmin,rng.minmax,rng.M1[0]],
-                M2:[rng.maxmin,rng.minmax,rng.M2[1]],
-                col:gw.getCol('unobservable'),
+                M1:linspace(rng.maxmin,rng.minmax).concat([rng.M1[0],rng.M1[0]]),
+                M2:linspace(rng.maxmin,rng.minmax).concat([rng.M2[1],rng.M2[0]]),
+                col:gw.getCol('unobservable'),dash:gw.linedashes('BBH'),
                 vis:true},
             {name:'bns',
-                M1:[rng.M1[0],Math.min(rng.M1[1],2.5),Math.min(rng.M1[1],2.5),rng.maxmin],
-                M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],2.5),rng.maxmin],
-                col:gw.getCol('guides')['BNS'],
+                M1:[rng.M1[0],Math.min(rng.M1[1],2.5)].concat(linspace(Math.min(rng.M1[1],2.5),rng.maxmin)),
+                M2:[rng.M2[0],rng.M2[0]].concat(linspace(Math.min(rng.M2[1],2.5),rng.maxmin)),
+                col:gw.getCol('guides')['BNS'],dash:gw.linedashes('BBH'),strokewidth:1,
                 vis:(rng.M1[0]<=2.5)&(rng.M1[1]>=2.5)&(rng.M2[0]<2.5)},
             {name:'nsbh',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
                 M2:[rng.M2[0],rng.M2[0],Math.min(rng.M2[1],2.5),Math.min(rng.M2[1],2.5)],
-                col:gw.getCol('guides')['NSBH'],
-                vis:(rng.M2[0]<=2.5)&(rng.M1[1]>=5)},
+                col:gw.getCol('guides')['NSBH'],dash:gw.linedashes('BBH'),
+                vis:(rng.M2[0]<=2.5)&(rng.M1[1]>=5),strokewidth:1},
             {name:'bbh',
-                M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],rng.minmax,rng.maxmin],
-                M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5),rng.M2[1],rng.minmax,rng.maxmin],
-                col:gw.getCol('guides')['BBH'],
+                M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1]].concat(linspace(rng.minmax,Math.max(rng.maxmin,5))),
+                M2:[Math.max(rng.M2[0],5),Math.max(rng.M2[0],5),rng.M2[1]].concat(linspace(rng.minmax,Math.max(rng.maxmin,5))),
+                col:gw.getCol('guides')['BBH'],dash:gw.linedashes('BBH'),strokewidth:1,
                 vis:(rng.M1[1]>=5)&(rng.M2[1]>=5)},
             {name:'mg1',
-                M1:[Math.max(rng.M1[0],2.5),Math.min(rng.M1[1],5),Math.min(rng.M1[1],5),Math.min(rng.minmax,5),Math.max(rng.M1[0],2.5)],
-                M2:[rng.M2[0],rng.M2[0],Math.min(rng.minmax,5),Math.min(rng.minmax,5),Math.max(rng.M2[0],2.5)],
-                col:gw.getCol('guides')['MassGap'],
+                M1:[Math.max(rng.M1[0],2.5),Math.min(rng.M1[1],5),Math.min(rng.M1[1],5)].concat(linspace(Math.min(rng.minmax,5),Math.max(rng.M1[0],2.5))),
+                M2:[rng.M2[0],rng.M2[0],Math.min(rng.minmax,5)].concat(linspace(Math.min(rng.minmax,5),Math.max(rng.M2[0],2.5))),
+                col:gw.getCol('guides')['MassGap'],dash:gw.linedashes('BBH'),
                 vis:(rng.M1[1]>=2.5)&(rng.M1[0]<=5)&(rng.M2[0]<=5)},
             {name:'mg2',
                 M1:[Math.max(rng.M1[0],5),rng.M1[1],rng.M1[1],Math.max(rng.M1[0],5)],
                 M2:[Math.max(rng.M2[0],2.5),Math.max(rng.M2[0],2.5),Math.min(rng.M2[1],5),Math.min(rng.M2[1],5)],
-                col:gw.getCol('guides')['MassGap'],
+                col:gw.getCol('guides')['MassGap'],dash:gw.linedashes('BBH'),
                 vis:(rng.M1[1]>=5)&(rng.M2[0]<=5)&(rng.M2[1]>=2.5)}
         ]
         for (p in polygons){
-            poly=polygons[p]
-            poly.points=''
+            poly=polygons[p];
+            poly.points='';
             for (i in poly.M1){
-                poly.points+=gw.xScale(poly[gw.xvar][i])+','+gw.yScale(poly[gw.yvar][i])+' '
+                poly.points+=gw.xScale(poly[gw.xvar][i])+','+gw.yScale(poly[gw.yvar][i])+' ';
             }
         }
-        // console.log(polygons);
+        console.log('polygons',polygons);
         // var guideGroup = gw.svg.selectAll('.g-guides');
         if (gw.svg.select('.g-massguidelines').empty()){
             gw.svg.insert("g",":first-child").attr("class","guide massguide g-massguidelines").attr("transform", "translate("+gw.margin.left+","+
@@ -3620,14 +3629,13 @@ GWCatalogue.prototype.updateGuides = function () {
             .enter().append('polygon')
                 .attr('class','massguidepoly')
                 .attr('fill',function(d){return d.col})
-                .attr('stroke-width',gw.swErr)
+                // .attr('stroke',gw.getCol('err'))
+                // .attr('stroke-width',function(d){return ((d.strokewidth)?d.strokewidth:0)*gw.swErr})
+                // .style("stroke-dasharray", function(d){return d.dash})
                 .style('opacity',1)
         }
-        mguides=gw.svg.select('.g-massguidelines').selectAll('.massguideline')
+        var mguides=gw.svg.select('.g-massguidelines').selectAll('.massguideline')
             .data(guidelines)
-        // guides.exit().remove()
-        // guides.enter().append('line')
-        //     .attr('class','guideline')
         mguides.transition()
             .duration(500)
             .attr("x1",function(d){return gw.xScale(d[gw.xvar][0])})
@@ -3635,11 +3643,9 @@ GWCatalogue.prototype.updateGuides = function () {
             .attr("y1",function(d){return gw.yScale(d[gw.yvar][0])})
             .attr("y2",function(d){return gw.yScale(d[gw.yvar][1])})
             .style('opacity',function(d){return 0.5*d.vis})
-        mpolys=gw.svg.select('.g-massguidepolys').selectAll('.massguidepoly')
+        
+        var mpolys=gw.svg.select('.g-massguidepolys').selectAll('.massguidepoly')
             .data(polygons)
-        // polys.exit().remove()
-        // polys.enter().append('line')
-        //     .attr('class','guideline')
         mpolys.transition()
             .duration(500)
             .attr("points",function(d){return d.points})
