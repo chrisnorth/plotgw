@@ -2129,7 +2129,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#ccc',
             'probbar':'#333',
             'probbars':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',Terrestrial:'#cccccc'},
-            'guides':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',O1:'#ffcccc',O2:'#ccffcc',O3:'#ccccff'},
+            'guides':{BBH:'#ccccff',BNS:'#ffcccc',NSBH:'#ccffcc',MassGap:'#ccffff',O1:'#ffcccc',O2:'#ccffcc',O3a:'#ccccff',O3b:'#55cccc'},
             'probtxt':'#000'
         },
         'dark':{'class':'col-black','default':false,
@@ -2188,14 +2188,14 @@ GWCatalogue.prototype.setStyles = function(){
     }
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = ['GW','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3'];
+    this.styleDomains = ['GW','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3a','O3b'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0,0,0,0]).domain(this.styleDomains);
-    this.legType = d3.scale.ordinal().range(['','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
-    this.legPos = d3.scale.ordinal().range([0,1,2,3,4,5,2,3,4]).domain(this.styleDomains);
-    this.squareopacity = d3.scale.ordinal().range([0,0,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0,0,0,0,0]).domain(this.styleDomains);
+    this.legType = d3.scale.ordinal().range(['','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
+    this.legPos = d3.scale.ordinal().range([0,1,2,3,4,5,2,3,4,5]).domain(this.styleDomains);
+    this.squareopacity = d3.scale.ordinal().range([0,0,1,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
@@ -2701,8 +2701,9 @@ GWCatalogue.prototype.setLang = function(){
         NSBH:this.tl('%text.gen.nsbh%'),
         MassGap:this.tl('%text.gen.massgap%'),
         O1:this.tl('%text.plotgw.filter.observingrun.O1%'),
-        O3:this.tl('%text.plotgw.filter.observingrun.O2%'),
-        O3:this.tl('%text.plotgw.filter.observingrun.O3%'),
+        O2:this.tl('%text.plotgw.filter.observingrun.O2%'),
+        O3a:this.tl('%text.plotgw.filter.observingrun.O3%a'),
+        O3b:this.tl('%text.plotgw.filter.observingrun.O3%b')
     }
     d3.select('#lang-title')
         .html(this.tl('%text.plotgw.lang.title%'))
@@ -3680,10 +3681,10 @@ GWCatalogue.prototype.updateGuides = function () {
                 'vis':1,col:gw.getCol('guides')['O2']},
             {'name':'O3a','t0':new Date('2019-04-01T00:00:00').valueOf(),
                 't1':new Date('2019-10-01T17:00:00').valueOf(),
-                'vis':1,col:gw.getCol('guides')['O3']},
+                'vis':1,col:gw.getCol('guides')['O3a']},
             {'name':'O3b','t0':new Date('2019-11-01T15:00:00').valueOf(),
                 't1':new Date('2020-03-27T17:00:00').valueOf(),
-                'vis':1,col:gw.getCol('guides')['O3']}
+                'vis':1,col:gw.getCol('guides')['O3b']}
         ];
         for (o in obsruns){
             or=obsruns[o];
