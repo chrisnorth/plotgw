@@ -150,6 +150,8 @@
  "text.plotgw.filter.observingrun.O1":"O1",
  "text.plotgw.filter.observingrun.O2":"O2",
  "text.plotgw.filter.observingrun.O3":"O3",
+ "text.plotgw.filter.observingrun.O3a":"O3a",
+ "text.plotgw.filter.observingrun.O3b":"O3b",
  "text.plotgw.filter.dettype.detections":"Confirmed",
  "text.plotgw.filter.dettype.candidates":"Candidates",
  "tooltip.plotgw.gwosc": "Gravitational Wave Open Science Center",
