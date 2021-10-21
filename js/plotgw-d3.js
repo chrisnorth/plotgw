@@ -248,7 +248,7 @@ GWCatalogue.prototype.init = function(){
     this.filters = {
         "M1":{"name":'%data.M1.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M1.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M1.unit%", "default": 100, "value": 100 }
+            "max": { "label": "", "unit": "%data.M1.unit%", "default": 150, "value": 150 }
         },
         "M2":{"name":'%data.M2.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
