@@ -2514,7 +2514,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     if (gw.datasrc=='gwosc'){
         gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:gw.fileInGwosc,debug:this.debug});
     }else{
-        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,'fileIn':gw.fileInEvents});
+        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
     }
 
 
