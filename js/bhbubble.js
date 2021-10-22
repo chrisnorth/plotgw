@@ -648,7 +648,7 @@ BHBubble.prototype.loadData = function(){
             if (bh.urlVars.debug){console.log('not ready yet')}
         }
     }
-    bh.cat = new GWCat(eventsCallback,{fileIn:this.inputFileEvents,confirmedOnly:true,debug:bh.urlVars.debug});
+    bh.cat = new GWCat(eventsCallback,{fileIn:this.inputFileEvents,fileInJsonp:this.inputFileEvents,confirmedOnly:true,debug:bh.urlVars.debug});
 
 
     // // read in GW data and reformat
