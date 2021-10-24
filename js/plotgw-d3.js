@@ -252,7 +252,11 @@ GWCatalogue.prototype.init = function(){
         },
         "M2":{"name":'%data.M2.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.M2.unit%", "default": 0, "value": 0 },
-            "max": { "label": "", "unit": "%data.M2.unit%", "default": 100, "value": 100 }
+            "max": { "label": "", "unit": "%data.M2.unit%", "default": 150, "value": 150 }
+        },
+        "Mchirp":{"name":'%data.Mchirp.name%',"type":'slider',
+            "min": { "label": "", "unit": "%data.Mchirp.unit%", "default": 0, "value": 0 },
+            "max": { "label": "", "unit": "%data.Mchirp.unit%", "default": 100, "value": 100 }
         },
         "Mfinal":{"name":'%data.Mfinal.name%',"type":'slider',
             "min": { "label": "", "unit": "%data.Mfinal.unit%", "default": 0, "value": 0 },
