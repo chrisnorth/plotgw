@@ -234,14 +234,13 @@ button.down{
 body.rtl .axisunitholder{
     text-anchor:end;
 }
-.axis-icon{
+.axis-settings,.axis-filter{
     position:absolute;
-    display:none;
 }
-.axis-icon.col-black{
+.axis-settings.col-black, .axis-filter.col-black{
     background-color: white;
 }
-.axis-icon img{
+.axis-settings img,.axis-filter img{
     width:100%;
 }
 .axis .tick line {
@@ -546,11 +545,32 @@ body.rtl .axisunitholder{
     text-align:center;
 }
 .filter-cont{
-    width:100%;
+    width:95%;
     margin-bottom:20px;
     margin-left:5%;
     margin-right:5%;
 }
+.filter-cont.highlight, .options-box.highlight{
+    -webkit-animation-name: flash-animation;
+    -webkit-animation-duration: 2s;
+
+    animation-name: flash-animation;
+    animation-duration: 2s;
+    animation-timing-function: ease-in-out;
+}
+@-webkit-keyframes flash-animation {  
+    0% { background: none; }
+    25%   { background: yellow; }
+    50%   { background: yellow; }
+    100%   { background: none; }
+}
+@keyframes flash-animation {  
+    0% { background: none; }
+    25%   { background: yellow; }
+    50%   { background: yellow; }
+    100%   { background: none; }
+}
+
 .filt-cont-label,.filt-cont,{
     margin-left:4%;
     margin-right:4%;

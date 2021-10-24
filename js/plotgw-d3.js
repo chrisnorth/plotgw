@@ -270,6 +270,7 @@ GWCatalogue.prototype.init = function(){
         //         "min": {"default":-28, "value":-28, "label": "", "unit": "log(%data.skyArea.unit%)"},
         //         "max": {"default":3, "value":3, "label": "", "unit": " [log(%data.skyArea.unit%)]" }
         // },
+        "deltaOmega":{"hidden":true,"dummy":"logDeltaOmega"},
         "logDeltaOmega": {"name": "log (%data.skyArea.name%)","type":"slider","step":0.1,
                 "min": {"default":1, "value":1, "label": "", "unit": "log(%data.skyArea.unit%)"},
                 "max": {"default":5, "value":5, "label": "", "unit": " [log(%data.skyArea.unit%)]" }
@@ -1057,7 +1058,9 @@ GWCatalogue.prototype.setScales = function(){
     if (!this.dotScale){this.dotScale=1}
     this.dotSize = this.getDotScaleValue(this.dotScale)*Math.min(10.,5*gw.sksc);
     // this.sksc=this.scl
-
+    this.hasFilter = function(v){
+        return((gw.filters[v])?true:false);
+    };
     //graph size & position
     this.margin = {top: 40*this.ysc, right: 20*this.xsc, bottom: 15*(1+this.ysc), left: 45*(1+this.xsc)}
     this.graphWidth =
@@ -3009,17 +3012,75 @@ GWCatalogue.prototype.drawGraph = function(){
         .attr('class','axisunit')
         .text(gw.getUnit(gw.xvar,true,[' (',') ']))
     
-    // axis icon is div in SVG container (not SVG element)
+    // axis settings is div in SVG container (not SVG element)
     gw.graphcont.append("div")
-        .attr("class", "x-axis axis-icon colourise "+gw.getColClass())
-        // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
+        .attr("class", "x-axis axis-settings colourise "+gw.getColClass())
         .style("right", gw.margin.right)
         .style("bottom", (gw.margin.bottom+(15*gw.scl)))
         .style("width",40*gw.scl+"px")
         .style("height",40*gw.scl+"px")
     .append("img")
-        .attr("id","x-axis-icon")
-        .attr("src",gw.getIcon(gw.xvar));
+        .attr("id","x-axis-settings")
+        .attr("src","img/settings.svg")
+    .on("mouseover", function(d) {
+          gw.tooltip.transition()
+             .duration(200)
+             .style("opacity", .9);
+          gw.tooltip.html(gw.tl('%tooltip.plotgw.showoptions%'))
+             .style("left", (d3.event.pageX + 10) + "px")
+             .style("top", (d3.event.pageY-10) + "px")
+             .style("width","auto")
+             .style("height","auto");
+    })
+    .on("mouseout", function(d) {
+        gw.tooltip.transition()
+             .duration(500)
+             .style("opacity", 0);
+    })
+    .on("click", function() {
+        gw.showOptions();
+        var optxid='options-x';
+        var xTop=document.getElementById(optxid).offsetTop;
+        document.getElementById('options-outer').scrollTop=xTop;
+        d3.select('#'+optxid).classed('highlight',true);
+        setTimeout(function(){d3.select('#'+optxid).classed('highlight',false)}, 2000);
+    }); 
+    // axis settings is div in SVG container (not SVG element)
+    gw.graphcont.append("div")
+        .attr("class", "x-axis axis-filter colourise "+gw.getColClass())
+        .attr("id","x-axis-filt-div")
+        .style("right", (gw.margin.right+(40*gw.scl)))
+        .style("bottom", (gw.margin.bottom+(15*gw.scl)))
+        .style("width",40*gw.scl+"px")
+        .style("height",40*gw.scl+"px")
+        .style("opacity",function(d){return ((gw.hasFilter(gw.xvar))?1:0);})
+    .append("img")
+        .attr("id","x-axis-filter")
+        .attr("src","img/filter.svg")
+    .on("mouseover", function(d) {
+          gw.tooltip.transition()
+             .duration(200)
+             .style("opacity", .9);
+          gw.tooltip.html(gw.tl('%tooltip.plotgw.showfilter%'))
+             .style("left", (d3.event.pageX + 10) + "px")
+             .style("top", (d3.event.pageY-10) + "px")
+             .style("width","auto")
+             .style("height","auto");
+    })
+    .on("mouseout", function(d) {
+        gw.tooltip.transition()
+             .duration(500)
+             .style("opacity", 0);
+    })
+    .on("click", function() {
+        gw.showFilter();
+        var filtxid='filt_'+((gw.filters[gw.xvar].dummy)?gw.filters[gw.xvar].dummy:gw.xvar)+'_cont';
+        var fTop=document.getElementById(filtxid).offsetTop;
+        document.getElementById('filter-outer').scrollTop=fTop;
+        d3.select('#'+filtxid).classed('highlight',true);
+        setTimeout(function(){d3.select('#'+filtxid).classed('highlight',false)}, 2000);
+    });  
+        
     //scale tick font-size
     d3.selectAll(".x-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.scl))+"em")
@@ -3063,21 +3124,78 @@ GWCatalogue.prototype.drawGraph = function(){
     // axis icon is div in SVG container (not SVG element)
     
     gw.graphcont.append("div")
-        .attr("class", "y-axis axis-icon colourise "+gw.getColClass())
-        // .attr("x", (gw.relw[0]+gw.relw[1])*gw.graphWidth/2)
+        .attr("class", "y-axis axis-settings colourise "+gw.getColClass())
         .style("top", gw.margin.top)
         .style("left", (gw.margin.left-(40*gw.scl))/2.)
         .style("width",(40*gw.scl)+"px")
         .style("height",(40*gw.scl)+"px")
     .append("img")
-        .attr("id","y-axis-icon")
-        .attr("src",gw.getIcon(gw.yvar));
+        .attr("id","y-axis-settings")
+        .attr("src","img/settings.svg")
+    .on("mouseover", function(d) {
+          gw.tooltip.transition()
+             .duration(200)
+             .style("opacity", .9);
+          gw.tooltip.html(gw.tl('%tooltip.plotgw.showoptions%'))
+             .style("left", (d3.event.pageX + 10) + "px")
+             .style("top", (d3.event.pageY-10) + "px")
+             .style("width","auto")
+             .style("height","auto");
+    })
+    .on("mouseout", function(d) {
+        gw.tooltip.transition()
+             .duration(500)
+             .style("opacity", 0);
+    })
+    .on("click", function() {
+        gw.showOptions();
+        var optyid='options-y';
+        var yTop=document.getElementById(optyid).offsetTop;
+        document.getElementById('options-outer').scrollTop=yTop;
+        d3.select('#'+optyid).classed('highlight',true);
+        setTimeout(function(){d3.select('#'+optyid).classed('highlight',false)}, 2000);
+    });
+    gw.graphcont.append("div")
+        .attr("class", "y-axis axis-filter colourise "+gw.getColClass())
+        .attr("id","y-axis-filt-div")
+        .style("top", (gw.margin.top+(40*gw.scl)))
+        .style("left", (gw.margin.left-(40*gw.scl))/2.)
+        .style("width",(40*gw.scl)+"px")
+        .style("height",(40*gw.scl)+"px")
+        .style("opacity",function(d){return ((gw.hasFilter(gw.yvar))?1:0);})
+    .append("img")
+        .attr("id","y-axis-filter")
+        .attr("src","img/filter.svg")
+    .on("mouseover", function(d) {
+          gw.tooltip.transition()
+             .duration(200)
+             .style("opacity", .9);
+          gw.tooltip.html(gw.tl('%tooltip.plotgw.showfilter%'))
+             .style("left", (d3.event.pageX + 10) + "px")
+             .style("top", (d3.event.pageY-10) + "px")
+             .style("width","auto")
+             .style("height","auto");
+    })
+    .on("mouseout", function(d) {
+        gw.tooltip.transition()
+             .duration(500)
+             .style("opacity", 0);
+    })
+    .on("click", function() {
+        gw.showFilter();
+        var filtyid='filt_'+gw.yvar+'_cont';
+        var fTop=document.getElementById(filtyid).offsetTop;
+        document.getElementById('filter-outer').scrollTop=fTop;
+        d3.select('#'+filtyid).classed('highlight',true);
+        setTimeout(function(){d3.select('#'+filtyid).classed('highlight',false)}, 2000);
+    });       
+    
     //scale tick font-size
     d3.selectAll(".y-axis > .tick > text")
         .style("font-size",(0.8*(1+gw.scl))+"em")
         .style("fill",gw.getCol('text'))
         // .style("text-anchor",function(){return(document.dir=="rtl")?"start":"end"});
-
+        
     d3.selectAll('.tick > line')
             .style('stroke',gw.getCol('tick'))
             .style('opacity',1)
@@ -4065,7 +4183,10 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
     gw.svg.select(".x-axis.axis-label").text(gw.getLabel(gw.xvar,true));
     gw.svg.select(".x-axis > .axisunitholder > tspan.axisunit")
         .text(gw.getUnit(gw.xvar,true,[' (',') ']));
-    
+    d3.select('#x-axis-filt-div').style("opacity",function(){
+        console.log('#x-axis-filt-div',(gw.hasFilter(gw.xvar))?1:0);
+        return ((gw.hasFilter(gw.xvar))?1:0);
+    });
 
     gw.svg.select(".y-axis-line.axis-line")
         .transition()
@@ -4092,7 +4213,9 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
     gw.svg.select(".y-axis.axis-label").text(gw.getLabel(gw.yvar,true));
     gw.svg.select(".y-axis > .axisunitholder > .axisunit")
         .text(gw.getUnit(gw.yvar,true,[' (',') ']));
-        
+    d3.selectAll('#y-axis-filt-div').style("opacity",function(){
+        return ((gw.hasFilter(gw.yvar))?1:0);
+    });
     gw.moveAxisLabels();
     
 
@@ -4112,6 +4235,7 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
                 .style("opacity",gw.dotOp(d));
         }
     });
+    
     // Update error bars
     gw.updateErrors();
     gw.updateGuides()
@@ -4749,6 +4873,9 @@ GWCatalogue.prototype.addFilter = function(replot){
     }
     for (filt in this.filters){
         a=this.filters[filt]
+        if (a.hidden){
+            continue;
+        }
         filtdiv = document.createElement('div');
         filtdiv.className = 'filter-cont colourise';
         // filtdiv.style.height = gw.filtcontHeight;
@@ -4789,6 +4916,7 @@ GWCatalogue.prototype.addFilter = function(replot){
     document.getElementById("filter-block").addEventListener("change",function(){
         gw.updateFilters();
     })
+    
     gw.updateFilters();
 }
 GWCatalogue.prototype.updateFilters = function () {
