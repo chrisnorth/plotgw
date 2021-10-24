@@ -262,10 +262,10 @@ GWCatalogue.prototype.init = function(){
                 "min": {"default":0, "value":0, "label": "" },
                 "max": {"default":30, "value":30, "label": "" }
         },
-        "logFAR": {"name": "log (%data.FAR.name%)","type":"slider","step":0.1,
-                "min": {"default":-7, "value":-7, "label": "", "unit": "log(%data.skyArea.unit%)"},
-                "max": {"default":3, "value":3, "label": "", "unit": " [log(%data.skyArea.unit%)]" }
-        },
+        // "logFAR": {"name": "log (%data.FAR.name%)","type":"slider","step":0.1,
+        //         "min": {"default":-28, "value":-28, "label": "", "unit": "log(%data.skyArea.unit%)"},
+        //         "max": {"default":3, "value":3, "label": "", "unit": " [log(%data.skyArea.unit%)]" }
+        // },
         "logDeltaOmega": {"name": "log (%data.skyArea.name%)","type":"slider","step":0.1,
                 "min": {"default":1, "value":1, "label": "", "unit": "log(%data.skyArea.unit%)"},
                 "max": {"default":5, "value":5, "label": "", "unit": " [log(%data.skyArea.unit%)]" }
