@@ -3053,7 +3053,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("bottom", (gw.margin.bottom+(15*gw.scl)))
         .style("width",40*gw.scl+"px")
         .style("height",40*gw.scl+"px")
-        .style("opacity",function(d){return ((gw.hasFilter(gw.xvar))?1:0);})
+        .style("display",function(d){return ((gw.hasFilter(gw.xvar))?"block":"none");})
     .append("img")
         .attr("id","x-axis-filter")
         .attr("src","img/filter.svg")
@@ -3162,7 +3162,7 @@ GWCatalogue.prototype.drawGraph = function(){
         .style("left", (gw.margin.left-(40*gw.scl))/2.)
         .style("width",(40*gw.scl)+"px")
         .style("height",(40*gw.scl)+"px")
-        .style("opacity",function(d){return ((gw.hasFilter(gw.yvar))?1:0);})
+        .style("display",function(d){return ((gw.hasFilter(gw.yvar))?"display":"none");})
     .append("img")
         .attr("id","y-axis-filter")
         .attr("src","img/filter.svg")
@@ -4183,9 +4183,9 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
     gw.svg.select(".x-axis.axis-label").text(gw.getLabel(gw.xvar,true));
     gw.svg.select(".x-axis > .axisunitholder > tspan.axisunit")
         .text(gw.getUnit(gw.xvar,true,[' (',') ']));
-    d3.select('#x-axis-filt-div').style("opacity",function(){
+    d3.select('#x-axis-filt-div').style("display",function(){
         console.log('#x-axis-filt-div',(gw.hasFilter(gw.xvar))?1:0);
-        return ((gw.hasFilter(gw.xvar))?1:0);
+        return ((gw.hasFilter(gw.xvar))?"block":"none");
     });
 
     gw.svg.select(".y-axis-line.axis-line")
@@ -4213,8 +4213,8 @@ GWCatalogue.prototype.updateBothAxes = function(xvarNew,yvarNew) {
     gw.svg.select(".y-axis.axis-label").text(gw.getLabel(gw.yvar,true));
     gw.svg.select(".y-axis > .axisunitholder > .axisunit")
         .text(gw.getUnit(gw.yvar,true,[' (',') ']));
-    d3.selectAll('#y-axis-filt-div').style("opacity",function(){
-        return ((gw.hasFilter(gw.yvar))?1:0);
+    d3.selectAll('#y-axis-filt-div').style("display",function(){
+        return ((gw.hasFilter(gw.yvar))?"block":"none");
     });
     gw.moveAxisLabels();
     
