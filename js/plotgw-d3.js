@@ -3183,7 +3183,7 @@ GWCatalogue.prototype.drawGraph = function(){
     })
     .on("click", function() {
         gw.showFilter();
-        var filtyid='filt_'+gw.yvar+'_cont';
+        var filtyid='filt_'+((gw.filters[gw.yvar].dummy)?gw.filters[gw.yvar].dummy:gw.yvar)+'_cont';
         var fTop=document.getElementById(filtyid).offsetTop;
         document.getElementById('filter-outer').scrollTop=fTop;
         d3.select('#'+filtyid).classed('highlight',true);
