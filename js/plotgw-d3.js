@@ -258,6 +258,18 @@ GWCatalogue.prototype.init = function(){
             "min": { "label": "", "unit": "%data.Mfinal.unit%", "default": 0, "value": 0 },
             "max": { "label": "", "unit": "%data.Mfinal.unit%", "default": 200, "value": 200 }
         },
+        "rho": {"name": "%data.rho.name%","type":"slider",
+                "min": {"default":0, "value":0, "label": "" },
+                "max": {"default":30, "value":30, "label": "" }
+        },
+        "logFAR": {"name": "log (%data.FAR.name%)","type":"slider","step":0.1,
+                "min": {"default":-7, "value":-7, "label": "", "unit": "log(%data.skyArea.unit%)"},
+                "max": {"default":3, "value":3, "label": "", "unit": " [log(%data.skyArea.unit%)]" }
+        },
+        "logDeltaOmega": {"name": "log (%data.skyArea.name%)","type":"slider","step":0.1,
+                "min": {"default":1, "value":1, "label": "", "unit": "log(%data.skyArea.unit%)"},
+                "max": {"default":5, "value":5, "label": "", "unit": " [log(%data.skyArea.unit%)]" }
+        },
         "obsrun": {
             "name":'%data.obsrun.name%',
     		"type":"checkbox",
@@ -267,7 +279,11 @@ GWCatalogue.prototype.init = function(){
     			{"id": "filt-o3", "label":"%text.plotgw.filter.observingrun.O3%", "checked": true, "value": "O3", "contains":"true" }
     		]
 	    },
-        "detType": {
+        "UTCdate": {"name": "%data.date.name%","type":"slider","format": "date","step": 86400000,
+		        "min": { "label": "" },
+		        "max": { "label": "" }
+	   },
+       "detType": {
             "name":'%data.dettype.name%',
     		"type":"checkbox",
     		"options":[
@@ -683,6 +699,11 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 return(gw.tl(strOut));
             }
         },
+        logFAR:{type:'derived',avail:false,icon:'img/dice.svg',cand:true,
+            depfn:function(d){return (d.FAR)},
+            convfn:['FAR',function(x){return (Math.log10(x))}],
+            namefn:function(){return("log("+gw.columns.FAR.name+")")},
+            unit:'log(%data.FAR.unit%)'},
         sigma:{avail:false,type:'src'},
         obsrun:{avail:false,type:'src',icon:"img/obsrun.svg",
             strfn:function(d){
@@ -700,6 +721,11 @@ GWCatalogue.prototype.setColumns = function(datadict){
         // },
         rho:{icon:"img/snr.svg",avail:true,type:'src'},
         deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg',cand:true},
+        logDeltaOmega:{type:'derived',avail:false,icon:'img/skyarea.svg',cand:true,
+            depfn:function(d){return (d.deltaOmega)},
+            convfn:['deltaOmega',function(x){return (Math.log10(x))}],
+            namefn:function(){return("log("+gw.columns.deltaOmega.name+")")},
+            unit:'log(%data.mass.unit.kg%)'},
         Erad:{avail:true,icon:"img/energyrad.svg",
             border:0.1,type:'src'},
         lpeak:{avail:true,icon:"img/peaklum.svg",type:'src'},
@@ -4628,6 +4654,16 @@ GWCatalogue.prototype.addFilter = function(replot){
     // add filters to panel
     var gw=this;
 
+    function getDateRange(){
+		var min = new Date();
+		var max = new Date('2000');
+		for(var i = 0; i < gw.cat.data.length; i++){
+			d = new Date(gw.cat.data[i].UTC.best);
+			if(d < min) min = d;
+			if(d > max) max = d;
+		}
+		return [min,max];
+	}
     function getRange(key){
 		var a = gw.filters[key];
 		var range = {};
@@ -4811,7 +4847,7 @@ GWCatalogue.prototype.updateFilters = function () {
 				}
 			}
 		}
-		if(good == 0) return false;
+        if(good == 0) return false;
 		return true;
 	}
 
