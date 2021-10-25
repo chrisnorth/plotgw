@@ -2790,7 +2790,7 @@ GWCatalogue.prototype.getMinMax = function(p,logax,zeroax){
     border=(gw.columns[p].border) ? gw.columns[p].border : 2;
     scale = (gw.columns[p].scale) ? gw.columns[p].scale : "";
     dolog=logax;
-    dozero=zeroax;
+    dozero=(zeroax)?zeroax:true;
     if (gw.columns[p].forcelog){
         dolog= (gw.columns[p].forcelog=='on') ? true : false;
     }
@@ -4298,8 +4298,8 @@ GWCatalogue.prototype.addOptions = function(){
             if (col==this.xvar){newoptdivx.classList.add("down")};
             // newoptinputx.innerHTML = "<img src="+gw.getIcon(col)+" title='"+gw.getLabel(col)+"'>";
             newoptinputx.addEventListener('click',function(){
-                oldXvar = gw.xvar;
-                newXvar = this.id.split('buttonx-')[1]
+                var oldXvar = gw.xvar;
+                var newXvar = this.id.split('buttonx-')[1]
                 document.getElementById("button-divx-"+oldXvar).classList.remove("down")
                 document.getElementById("button-divx-"+newXvar).classList.add("down")
                 if (gw.columns[newXvar]['forcelog']){
@@ -4309,7 +4309,7 @@ GWCatalogue.prototype.addOptions = function(){
                     document.getElementById("xlog").removeAttribute('disabled');
                     document.getElementById("xlog-lab").classList.remove("disabled");
                 }
-                if (gw.columns[newXvar]['forcezero']){
+                if ((gw.columns[newXvar]['forcezero'])|(gw.xlog)){
                     document.getElementById("xzero").setAttribute('disabled',true);
                     document.getElementById("xzero-lab").classList.add("disabled");
                 }else{
@@ -4361,7 +4361,7 @@ GWCatalogue.prototype.addOptions = function(){
                     document.getElementById("ylog").removeAttribute('disabled');
                     document.getElementById("ylog-lab").classList.remove("disabled");
                 }
-                if (gw.columns[newYvar]['forcezero']){
+                if ((gw.columns[newYvar]['forcezero'])|(gw.ylog)){
                     document.getElementById("yzero").setAttribute('disabled',true);
                     document.getElementById("yzero-lab").classList.add("disabled");
                 }else{
@@ -4432,10 +4432,11 @@ GWCatalogue.prototype.addOptions = function(){
     //         gw.axiszero=d3.select('#axiszero')[0][0].checked;
     //         gw.updateBothAxes(gw.xvar,gw.yvar);
     //     });
+    if (gw.xzero==undefined){gw.xzero=false};
     d3.select("#options-x").append('div')
         // .style('display','none')
         .attr("class","panel-block")
-        .html('<input type="checkbox" name="xzero" id="xzero"'+(gw.xzero ? ' checked="checked"':'')+'></input><label id="xzero-lab" for="xzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+        .html('<input type="checkbox" name="xzero" id="xzero"'+((gw.xzero) ? ' checked="checked"':'')+'></input><label id="xzero-lab" for="xzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
         .on("change",function(){
             gw.xzero=d3.select('#xzero')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
@@ -4447,11 +4448,19 @@ GWCatalogue.prototype.addOptions = function(){
         .on("change",function(){
             gw.xlog=d3.select('#xlog')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
+            if ((gw.columns[gw.xvar]['forcezero'])|(gw.xlog)){
+                document.getElementById("xzero").setAttribute('disabled',true);
+                document.getElementById("xzero-lab").classList.add("disabled");
+            }else{
+                document.getElementById("xzero").removeAttribute('disabled');
+                document.getElementById("xzero-lab").classList.remove("disabled");
+            }
         });
+    if (gw.yzero==undefined){gw.yzero=false};
     d3.select("#options-y").append('div')
         // .style('display','none')
         .attr("class","panel-block")
-        .html('<input type="checkbox" name="yzero" id="yzero"'+(gw.xzero ? ' checked="checked"':'')+'></input><label id="yzero-lab" for="yzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
+        .html('<input type="checkbox" name="yzero" id="yzero"'+((gw.yzero) ? ' checked="checked"':'')+'></input><label id="yzero-lab" for="yzero">'+this.tl('%text.plotgw.axiszero%')+'</label>')
         .on("change",function(){
             gw.yzero=d3.select('#yzero')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
@@ -4463,6 +4472,13 @@ GWCatalogue.prototype.addOptions = function(){
         .on("change",function(){
             gw.ylog=d3.select('#ylog')[0][0].checked;
             gw.updateBothAxes(gw.xvar,gw.yvar);
+            if ((gw.columns[gw.yvar]['forcezero'])|(gw.ylog)){
+                document.getElementById("yzero").setAttribute('disabled',true);
+                document.getElementById("yzero-lab").classList.add("disabled");
+            }else{
+                document.getElementById("yzero").removeAttribute('disabled');
+                document.getElementById("yzero-lab").classList.remove("disabled");
+            }
         });
     // d3.select("#preset-options").append('div')
     //     .attr("class","panel-cont")
