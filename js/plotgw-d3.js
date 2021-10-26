@@ -264,7 +264,7 @@ GWCatalogue.prototype.init = function(){
         },
         "rho": {"name": "%data.rho.name%","type":"slider",
                 "min": {"default":0, "value":0, "label": "" },
-                "max": {"default":30, "value":30, "label": "" }
+                "max": {"default":40, "value":40, "label": "" }
         },
         // "logFAR": {"name": "log (%data.FAR.name%)","type":"slider","step":0.1,
         //         "min": {"default":-28, "value":-28, "label": "", "unit": "log(%data.skyArea.unit%)"},
