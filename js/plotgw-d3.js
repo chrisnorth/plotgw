@@ -293,7 +293,8 @@ GWCatalogue.prototype.init = function(){
     		"type":"checkbox",
     		"options":[
     			{"id": "filt-conf", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
-    			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
+    			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" },
+                {"id": "filt-marg", "label":"%text.plotgw.filter.dettype.marginal%", "checked": true, "value": "Marginal" }
             ]
 	    }
     }
@@ -2153,8 +2154,8 @@ GWCatalogue.prototype.setStyles = function(){
             'grid':'#555','err':'#555',
             'BH':["rgba(0,0,0,1)","rgba(0,0,0,0)"],
             'shadow':["rgba(128,128,128,1)","rgba(192,192,192,0)"],
-            'dotfill':["#1f77b4", "#ff7f0e","gray","green","blue","red","orange"],
-            'dotline':["#000","#555","#fff","#fff","#fff","#fff","#fff"],
+            'dotfill':["#1f77b4", "#ff7f0e","#0e7fff","gray","green","blue","red","orange"],
+            'dotline':["#000","#555","#555","#fff","#fff","#fff","#fff","#fff"],
             'guideline':["#fff"],
             'unobservable':'#eee',
             'axis':"rgb(100,100,100)",
@@ -2172,8 +2173,8 @@ GWCatalogue.prototype.setStyles = function(){
             'grid':'#ccc','err':'#ccc',
             'BH':["rgba(255,255,255,1)","rgba(255,255,255,0)"],
             'shadow':["rgba(128,128,128,1)","rgba(64,64,64,0)"],
-            'dotfill':["#1f77b4", "#ffaf0e","gray","green","blue","red","orange"],
-            'dotline':["#fff","#fff","#000","#000","#000","#000","#000"],
+            'dotfill':["#1f77b4", "#ffaf0e", "#0eafff","gray","green","blue","red","orange"],
+            'dotline':["#fff","#fff","#fff","#000","#000","#000","#000","#000"],
             'guideline':["#000"],
             'unobservable':'#333',
             'axis':"rgb(200,200,200)",
@@ -2181,7 +2182,7 @@ GWCatalogue.prototype.setStyles = function(){
             'tick':'#555',
             'probbar':'#ccc',
             'probbars':{BBH:'#000096',BNS:'#960000',NSBH:'#009600',MassGap:'#009696',Terrestrial:'#555555'},
-            'guides':{BBH:'#000050',BNS:'#500000',NSBH:'#005000',MassGap:'#005050',O1:'#500000',O2:'#005000',O3:'#000096'},
+            'guides':{BBH:'#000050',BNS:'#500000',NSBH:'#005000',MassGap:'#005050',O1:'#500000',O2:'#005000',O3a:'#000096',O3b:'#009696'},
             'probtxt':'#fff'
         }
     }
@@ -2221,14 +2222,14 @@ GWCatalogue.prototype.setStyles = function(){
     }
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
-    this.styleDomains = ['GW','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3a','O3b'];
+    this.styleDomains = ['GW','Marginal','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3a','O3b'];
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1,0,0,0,0,0,0,0,0]).domain(this.styleDomains);
-    this.legType = d3.scale.ordinal().range(['','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
-    this.legPos = d3.scale.ordinal().range([0,1,2,3,4,5,2,3,4,5]).domain(this.styleDomains);
-    this.squareopacity = d3.scale.ordinal().range([0,0,1,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
+    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
+    this.dotopacity = d3.scale.ordinal().range([1,1,1,0,0,0,0,0,0,0,0]).domain(this.styleDomains);
+    this.legType = d3.scale.ordinal().range(['','','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
+    this.legPos = d3.scale.ordinal().range([0,1,2,3,4,5,6,3,4,5,6,7]).domain(this.styleDomains);
+    this.squareopacity = d3.scale.ordinal().range([0,0,0,1,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
@@ -2729,6 +2730,7 @@ GWCatalogue.prototype.setLang = function(){
     }
     this.legenddescs = {GW:this.tl('%text.plotgw.legend.detections%'),
         Candidate:this.tl('%text.plotgw.legend.candidates%'),
+        Marginal:this.tl('%text.plotgw.legend.marginal%'),
         BBH:this.tl('%text.gen.bbh%'),
         BNS:this.tl('%text.gen.bns%'),
         NSBH:this.tl('%text.gen.nsbh%'),
