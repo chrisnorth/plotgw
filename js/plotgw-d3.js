@@ -3338,49 +3338,6 @@ GWCatalogue.prototype.drawGraph = function(){
         if(this.debug){console.log('no gwcat.d');}
     }
 
-    // draw dots
-    dotsGroup = gw.svg.append("g").attr("class","g-dots")
-    dotsGroup.selectAll(".dot")
-      .data(data)
-    .enter().append("circle")
-      .attr("class", "dot")
-      .attr("transform", "translate("+gw.margin.left+","+
-        gw.margin.top+")")
-      .attr("r", gw.dotSize)
-      // .attr("cx", function(d){console.log('draw dotx',d.name,gw.xvar,gw.xMap(d));return gw.xMap(d);})
-      // .attr("cy", function(d){console.log('draw doty',d.name,gw.yvar,gw.yMap(d));return gw.yMap(d);})
-      .attr("cx", gw.xMap)
-      .attr("cy", gw.yMap)
-      .attr("cursor","pointer")
-      .attr("opacity",function(d){return gw.getOpacity(d)})
-    //   .style("fill", function(d) { return color(cValue(d));})
-      .style("fill", function(d){return gw.color(gw.cValue(d));})
-      .style("stroke",function(d){return gw.linestyles(d.detType.best);})
-      .style("stroke-dasharray",function(d){return gw.linedashes(d.detType.best);})
-      .style("stroke-width",Math.min(5,2.*gw.sksc))
-      .on("mouseover", function(d) {
-            gw.tooltip.transition()
-               .duration(200)
-               .style("opacity", .9);
-            gw.tooltip.html(gw.tttext(d))
-               .style("left", (d3.event.pageX + 10) + "px")
-               .style("top", (d3.event.pageY-10) + "px")
-               .style("width","auto")
-               .style("height","auto");
-      })
-      .on("mouseout", function(d) {
-          gw.tooltip.transition()
-               .duration(500)
-               .style("opacity", 0);
-        //   document.getElementById("sketchcontainer").style.opacity=0.;
-      })
-      .on("click", function(d) {
-          gw.selectEvent(d)
-        //   gw.moveHighlight(d);
-        //   gw.updateSketch(d);
-        //   add highlight to selected circle
-        });
-
     // draw legend
     gw.legend = gw.svg.selectAll(".legend")
       .data(gw.color.domain())
@@ -3427,6 +3384,49 @@ GWCatalogue.prototype.drawGraph = function(){
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})
 
     gw.updateGuides()
+
+    // draw dots
+    dotsGroup = gw.svg.append("g").attr("class","g-dots")
+    dotsGroup.selectAll(".dot")
+      .data(data)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("transform", "translate("+gw.margin.left+","+
+        gw.margin.top+")")
+      .attr("r", gw.dotSize)
+      // .attr("cx", function(d){console.log('draw dotx',d.name,gw.xvar,gw.xMap(d));return gw.xMap(d);})
+      // .attr("cy", function(d){console.log('draw doty',d.name,gw.yvar,gw.yMap(d));return gw.yMap(d);})
+      .attr("cx", gw.xMap)
+      .attr("cy", gw.yMap)
+      .attr("cursor","pointer")
+      .attr("opacity",function(d){return gw.getOpacity(d)})
+    //   .style("fill", function(d) { return color(cValue(d));})
+      .style("fill", function(d){return gw.color(gw.cValue(d));})
+      .style("stroke",function(d){return gw.linestyles(d.detType.best);})
+      .style("stroke-dasharray",function(d){return gw.linedashes(d.detType.best);})
+      .style("stroke-width",Math.min(5,2.*gw.sksc))
+      .on("mouseover", function(d) {
+            gw.tooltip.transition()
+               .duration(200)
+               .style("opacity", .9);
+            gw.tooltip.html(gw.tttext(d))
+               .style("left", (d3.event.pageX + 10) + "px")
+               .style("top", (d3.event.pageY-10) + "px")
+               .style("width","auto")
+               .style("height","auto");
+      })
+      .on("mouseout", function(d) {
+          gw.tooltip.transition()
+               .duration(500)
+               .style("opacity", 0);
+        //   document.getElementById("sketchcontainer").style.opacity=0.;
+      })
+      .on("click", function(d) {
+          gw.selectEvent(d)
+        //   gw.moveHighlight(d);
+        //   gw.updateSketch(d);
+        //   add highlight to selected circle
+        });
 
     //add options icon
     optionsClass = (this.optionsOn) ? "graph-icon" : "graph-icon hidden";
