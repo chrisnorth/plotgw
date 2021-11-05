@@ -680,26 +680,26 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 if (1/d.FAR.best<1000){
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",gw.tN((1./d.FAR.best)
-                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$val$",gw.tN(parseFloat((1./d.FAR.best)
+                            .toPrecision(gw.columns.FAR.sigfig))))
                         .replace("$dur$","%data.FAR.unit.yr%");
                 }else if (1/d.FAR.best<1e6){
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e3)
-                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$val$",gw.tN(parseFloat(((1./d.FAR.best)/1e3)
+                            .toPrecision(gw.columns.FAR.sigfig))))
                         .replace("$dur$","%data.FAR.unit.kyr%");
                 }else if (1/d.FAR.best<1e9){
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e6)
-                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$val$",gw.tN(parseFloat(((1./d.FAR.best)/1e6)
+                            .toPrecision(gw.columns.FAR.sigfig))))
                         .replace("$dur$","%data.FAR.unit.Myr%");
                 }else{
                     strOut=gw.tl("%data.FAR.unit.structure%")
                         .replace("$1per$","%data.FAR.unit.1per%")
-                        .replace("$val$",gw.tN(((1./d.FAR.best)/1e9)
-                            .toPrecision(gw.columns.FAR.sigfig)))
+                        .replace("$val$",gw.tN(parseFloat(((1./d.FAR.best)/1e9)
+                            .toPrecision(gw.columns.FAR.sigfig))))
                         .replace("$dur$","%data.FAR.unit.Gyr%");
                 }
                 return(gw.tl(strOut));
