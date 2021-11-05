@@ -89,9 +89,9 @@ GWCatalogue.prototype.init = function(){
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-conf").attr("class","panel-cont")
             .html('<div class="option option-pre conf-only"><img class="button button-pre" id="preset-conf-img" src="img/confirmed.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="conf-only-text"></span></br><span id="conf-only-x-axis"></span> : <span id="conf-only-y-axis"></span></span></div>');
-        d3.select("#preset-options").append("div")
-            .attr("id","buttonpre-cand").attr("class","panel-cont")
-            .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="cand-only-text"></span></br><span id="cand-only-x-axis"></span> : <span id="cand-only-y-axis"></span></div>');
+        // d3.select("#preset-options").append("div")
+        //     .attr("id","buttonpre-cand").attr("class","panel-cont")
+        //     .html('<div class="option option-pre cand-only"><img class="button button-pre" id="preset-cand-img" src="img/candidate.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="cand-only-text"></span></br><span id="cand-only-x-axis"></span> : <span id="cand-only-y-axis"></span></div>');
         d3.select("#preset-options").append("div")
             .attr("id","buttonpre-all").attr("class","panel-cont")
             .html('<div class="option option-pre allsrc"><img class="button button-pre" id="preset-all-img" src="img/allsources.svg"></div><div class="option-pre-text"><span class="option-pre-desc" id="allsrc-text"></span></br><span id="allsrc-x-axis"></span> : <span id="allsrc-y-axis"></span></div>');
@@ -307,17 +307,17 @@ GWCatalogue.prototype.init = function(){
             "tooltip":"%tooltip.plotgw.preset-conf%",
             "desc":"%text.plotgw.presets.conf-only%"
         },
-        "cand-only":{
-            "icon":"",
-            "x-axis":"UTCdate",
-            "y-axis":"FAR",
-            "tooltip":"%tooltip.plotgw.preset-cand%",
-            "desc":"%text.plotgw.presets.cand-only%"
-        },
+        // "cand-only":{
+        //     "icon":"",
+        //     "x-axis":"UTCdate",
+        //     "y-axis":"FAR",
+        //     "tooltip":"%tooltip.plotgw.preset-cand%",
+        //     "desc":"%text.plotgw.presets.cand-only%"
+        // },
         "allsrc":{
             "icon":"",
             "x-axis":"UTCdate",
-            "y-axis":"DL",
+            "y-axis":"FAR",
             "tooltip":"%tooltip.plotgw.preset-all%",
             "desc":"%text.plotgw.presets.allsrc%"
         }
@@ -655,7 +655,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         af:{avail:true,icon:"img/finalspin.svg",
             border:0.01,type:'src'},
         DL:{avail:true, icon:"img/ruler.svg",
-            border:20,type:'src',cand:true},
+            border:20,type:'src',cand:false},
         z:{avail:true,icon:"img/redshift.svg",
             border:0.01,type:'src'},
         UTC:{avail:false,type:'src',strfn:function(d){return('')}},
@@ -726,8 +726,8 @@ GWCatalogue.prototype.setColumns = function(datadict){
         //     namefn:function(){return(gw.columns.obsrun.name)}
         // },
         rho:{icon:"img/snr.svg",avail:true,type:'src'},
-        deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg',cand:true},
-        logDeltaOmega:{type:'derived',avail:false,icon:'img/skyarea.svg',cand:true,
+        deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg'},
+        logDeltaOmega:{type:'derived',avail:false,icon:'img/skyarea.svg',
             depfn:function(d){return (d.deltaOmega)},
             convfn:['deltaOmega',function(x){return (Math.log10(x))}],
             namefn:function(){return("log("+gw.columns.deltaOmega.name+")")},
