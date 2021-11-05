@@ -725,7 +725,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
         // netobs:{avail:false,type:'derived',icon:"img/obsrun.svg",
         //     namefn:function(){return(gw.columns.obsrun.name)}
         // },
-        rho:{icon:"img/snr.svg",avail:true,type:'src'},
+        rho:{icon:"img/snr.svg",avail:true,type:'src',cand:true},
         deltaOmega:{avail:true,type:'src',icon:'img/skyarea.svg'},
         logDeltaOmega:{type:'derived',avail:false,icon:'img/skyarea.svg',
             depfn:function(d){return (d.deltaOmega)},
