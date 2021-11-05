@@ -863,7 +863,7 @@ GWCatalogue.prototype.setColumns = function(datadict){
                 day=d.UTC.best.split('T')[0].split('-')[0];
                 month=d['UTC'].best.split('T')[0].split('-')[1];
                 year=d['UTC'].best.split('T')[0].split('-')[2];
-                time=d['UTC'].best.split('T')[1];
+                time=d['UTC'].best.split('T')[1].split('.')[0];
                 return(gw.tN(gw.tl(year+'-'+month+'-'+day+"<br/>"+time+" %data.time.UT%")));
             },
             icon:"img/time.svg",
