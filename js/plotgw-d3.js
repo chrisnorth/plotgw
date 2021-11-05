@@ -5219,6 +5219,8 @@ GWCatalogue.prototype.replot = function(){
     d3.select("div#svg-container").remove()
     d3.selectAll(".graph-icon").remove()
     d3.selectAll(".axis-icon").remove()
+    d3.selectAll(".axis-settings").remove()
+    d3.selectAll(".axis-filter").remove()
     d3.selectAll(".search-list-item").remove()
     // d3.selectAll("div.labcont").remove()
     // redraw graph and sketch
