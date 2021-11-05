@@ -181,7 +181,7 @@ button.down{
     padding-right:10px;
     /*padding-top:10px;*/
     display:inline-block;
-    max-width:62%;
+    max-width:50%;
 }
 .sketchlab.info.num{
     direction:ltr;
