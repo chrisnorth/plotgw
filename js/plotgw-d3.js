@@ -2073,12 +2073,16 @@ GWCatalogue.prototype.updateSketch = function(d){
             // update title
             this.sketchName = d["name"];
             this.sketchTitle.html(this.tl("%text.plotgw.information.heading% "+this.tName(this.sketchName)));
-            if (d.objType){
-                this.sketchTitleHint.html(this.obj2hint(d.objType.best));
-                this.sketchTitleHint.style({'direction':'ltr'});
+            if (d.detType.best=='Marginal'){
+                this.sketchTitleHint.html(this.tl('%text.plotgw.information.marginal%'));
             }else{
-                this.sketchTitleHint.html(this.obj2hint(""));
-                this.sketchTitleHint.style({'direction':'inherit'});
+                if (d.objType){
+                    this.sketchTitleHint.html(this.obj2hint(d.objType.best));
+                    this.sketchTitleHint.style({'direction':'ltr'});
+                }else{
+                    this.sketchTitleHint.html(this.obj2hint(""));
+                    this.sketchTitleHint.style({'direction':'inherit'});
+                }
             }
             //update labels
             this.redrawLabels();
