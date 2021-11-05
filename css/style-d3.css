@@ -236,6 +236,7 @@ body.rtl .axisunitholder{
 }
 .axis-settings,.axis-filter{
     position:absolute;
+    cursor: pointer;
 }
 .axis-settings.col-black, .axis-filter.col-black{
     background-color: white;
