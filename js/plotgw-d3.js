@@ -24,7 +24,7 @@ function GWCatalogue(inp){
     }else{this.confirmedOnly = (inp)&&(inp.hasOwnProperty('confirmedOnly')) ? JSON.parse(inp.confirmedOnly) : false}
     if (this.urlVars.hasOwnProperty('noGraceDB')){
         this.noGraceDB=JSON.parse(this.urlVars.noGraceDB);
-    }else{this.noGraceDB = (inp)&&(inp.hasOwnProperty('noGraceDB')) ? JSON.parse(inp.noGraceDB) : false}
+    }else{this.noGraceDB = (inp)&&(inp.hasOwnProperty('noGraceDB')) ? JSON.parse(inp.noGraceDB) : true}
     if (this.urlVars.hasOwnProperty('noMarginal')){
         this.noMarginal=JSON.parse(this.urlVars.noMarginal);
     }else{this.noMarginal = (inp)&&(inp.hasOwnProperty('noMarginal')) ? JSON.parse(inp.noMarginal) : false}
