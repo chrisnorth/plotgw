@@ -22,6 +22,12 @@ function GWCatalogue(inp){
     if (this.urlVars.hasOwnProperty('confirmedOnly')){
         this.confirmedOnly=JSON.parse(this.urlVars.confirmedOnly);
     }else{this.confirmedOnly = (inp)&&(inp.hasOwnProperty('confirmedOnly')) ? JSON.parse(inp.confirmedOnly) : false}
+    if (this.urlVars.hasOwnProperty('noGraceDB')){
+        this.noGraceDB=JSON.parse(this.urlVars.noGraceDB);
+    }else{this.noGraceDB = (inp)&&(inp.hasOwnProperty('noGraceDB')) ? JSON.parse(inp.noGraceDB) : false}
+    if (this.urlVars.hasOwnProperty('noMarginal')){
+        this.noMarginal=JSON.parse(this.urlVars.noMarginal);
+    }else{this.noMarginal = (inp)&&(inp.hasOwnProperty('noMarginal')) ? JSON.parse(inp.noMarginal) : false}
 
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
@@ -2552,7 +2558,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     if (gw.datasrc=='gwosc'){
         gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:gw.fileInGwosc,debug:this.debug});
     }else{
-        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
+        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,noGraceDB:gw.noGraceDB,noMarginal:gw.noMarginal,'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
     }
 
 
