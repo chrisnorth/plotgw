@@ -103,6 +103,7 @@
  "text.gen.share.twitter": "Share on twitter",
  "text.gen.share.fb": "Share on facebook",
  "text.gen.share.copylink": "Copy link to clipboard",
+ "text.plotgw.legend.title": "Legend",
  "text.plotgw.legend.detections": "Detections",
  "text.plotgw.legend.candidates": "Candidates",
  "text.plotgw.legend.marginal": "Marginal Events",

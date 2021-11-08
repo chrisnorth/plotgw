@@ -1087,6 +1087,7 @@ GWCatalogue.prototype.setScales = function(){
         else if (d[p].lower!=null){return d[p].lower}
         else if (d[p].upper!=null){return d[p].upper};
     }
+    this.legY=0; //set initial legend Y position to zero
 
     this.pErr = function(d,p,maxmin) {
         //error- -> value
@@ -2153,7 +2154,7 @@ GWCatalogue.prototype.showProbSketch = function(delay=false){
 
 GWCatalogue.prototype.setStyles = function(){
     // setup colours and linestyles
-    var gw=this
+    var gw=this;
 
     // initialise colours
     this.colourList = {
@@ -2233,13 +2234,33 @@ GWCatalogue.prototype.setStyles = function(){
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
     this.styleDomains = ['GW','Marginal','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3a','O3b'];
+    this.legType = d3.scale.ordinal().range(['','','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
-    this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
-    this.dotopacity = d3.scale.ordinal().range([1,1,1,0,0,0,0,0,0,0,0]).domain(this.styleDomains);
-    this.legType = d3.scale.ordinal().range(['','','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
-    this.legPos = d3.scale.ordinal().range([0,1,2,3,4,5,6,3,4,5,6,7]).domain(this.styleDomains);
-    this.squareopacity = d3.scale.ordinal().range([0,0,0,1,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
+    this.linedashes = function(x){return((x=="GW")?0:3);}
+    this.dotopacity = function(x){return((gw.legType(x)=='')?1:0);}
+    this.squareopacity = function(x){return(((gw.legType(x)=='timeguide')||(gw.legType(x)=='massguide'))?1:0);}
+    this.legOpacity = function(x){
+        var op=1;
+        op=(gw.legType(x)=='timeguide')?gw.showTimeGuides():op;
+        op=(gw.legType(x)=='massguide')?gw.showMassGuides():op;
+        op=((x=='Marginal')&&((gw.noMarginal)||(gw.confirmedOnly)))?0:op;
+        op=((x=='Candidate')&&((gw.noGraceDB)||(gw.confirmedOnly)))?0:op;
+        return op;
+    }
+    // this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
+    // this.dotopacity = d3.scale.ordinal().range([1,1,1,0,0,0,0,0,0,0,0]).domain(this.styleDomains);
+    var legPosRange;
+    if (this.confirmedOnly){
+        legPosRange=[0,0,0,1,2,3,4,1,2,3,4,5];
+    }else if((this.noGraceDB)||(this.noMarginal)){
+        legPosRange=[0,1,1,2,3,4,5,2,3,4,5,6];
+    }else{
+        legPosRange=[0,1,2,3,4,5,6,3,4,5,6,7];
+    }
+    this.legPos = d3.scale.ordinal().range(legPosRange).domain(this.styleDomains);
+    this.legY = 0;
+    // this.squareopacity = d3.scale.ordinal().range([0,0,0,1,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
     this.tickTimeFormat = d3.time.format("%Y-%m");
@@ -3349,34 +3370,57 @@ GWCatalogue.prototype.drawGraph = function(){
     }
 
     // draw legend
-    gw.legend = gw.svg.selectAll(".legend")
+    gw.svg.append("g")
+        .attr("id","g-legend")
+    gw.gleg=gw.svg.select("#g-legend");
+    gw.gleg.append("text")
+      .attr("x", gw.margin.left + 7.5*gw.scl)
+      .attr("y", gw.margin.top + 21*gw.scl)
+      .attr('class','leg-title')
+      .attr("dy", ".35em")
+      .attr("font-size",function(){return (1.5*gw.scl)+"em"})
+      .style("text-anchor", function(){return (document.dir=="rtl")?"end":"start"})
+      .style("fill",gw.getCol('text'))
+      .text(function(d) {var txt=gw.tl('%text.plotgw.legend.title%');txt=(gw.gleg.classed("hide"))?txt+' >':txt+ ' v';return(txt);})
+      .on("click",function(){
+          gw.gleg.classed("hide",(gw.gleg.classed("hide"))?false:true);
+          d3.select(this).text(function(d) {var txt=gw.tl('%text.plotgw.legend.title%');txt=(gw.gleg.classed("hide"))?txt+' >':txt+ ' v';return(txt);});
+      });
+    
+        
+    gw.legend = gw.gleg.selectAll(".legend-item")
       .data(gw.color.domain())
     .enter().append("g")
-      .attr("class", function(d,i){return "legend colourise "+d+" "+gw.legType(d);})
+      .attr("class", function(d,i){return "legend-item colourise "+d+" "+gw.legType(d);})
       // .attr("transform", function(d, i) { return "translate(0," +
         // (i * 24) + ")"; });
-      .attr("transform", function(d) { return "translate(0," +
-          (gw.legPos(d) * 24) + ")"; })
-      .attr("opacity",function(d){
-          op=(gw.legType(d)=='timeguide')?gw.showTimeGuides():(gw.legType(d)=='massguide')?gw.showMassGuides():1;
-          return(op);
-      });
+      // .attr("transform", function(d) { return "translate(0," +
+      //     (gw.legPos(d) * 24) + ")"; })
+      .attr("transform", function(d) {
+          var thisY="translate(0," +((gw.legY+1) * 24*gw.scl) + ")";
+          gw.legY+=(gw.legOpacity(d)==1)?1:0;
+          // console.log('legY',d,gw.legOpacity(d),gw.legY);
+          return thisY; })
+      .attr("opacity",function(d){console.log(d,gw.legOpacity(d));return gw.legOpacity(d);});
+          // op=(gw.legType(d)=='timeguide')?gw.showTimeGuides():(gw.legType(d)=='massguide')?gw.showMassGuides():1;
+          // return(op);
+      // });
 
     // draw legend colored circles
     gw.legend.append("circle")
-      .attr("cx", gw.margin.left+16.5)
-      .attr("cy", gw.margin.top+21)
-      .attr("r", 9)
+      .attr("cx", gw.margin.left+16.5*gw.scl)
+      .attr("cy", gw.margin.top+21*gw.scl)
+      .attr("r", gw.dotSize)
       .style("fill", gw.color)
       .style("stroke-dasharray",function(d){return gw.linedashes(d);})
       .style("stroke-width",Math.min(5,2./gw.sksc))
       .style("stroke",function(d){return gw.linestyles(d);})
       .attr("opacity",function(d){return gw.dotopacity(d)});
     gw.legend.append("rect")
-      .attr("x", gw.margin.left+7.5)
-      .attr("y", gw.margin.top+12)
-      .attr("width", 18)
-      .attr("height", 18)
+      .attr("x", gw.margin.left+7.5*gw.scl)
+      .attr("y", gw.margin.top+12*gw.scl)
+      .attr("width", (4*gw.dotSize))
+      .attr("height", (4*gw.dotSize))
       .style("fill", function(d){return gw.getCol('guides')[d]})
       .style("stroke-dasharray",function(d){return gw.linedashes(d);})
       .style("stroke-width",Math.min(5,2./gw.sksc))
@@ -3385,10 +3429,10 @@ GWCatalogue.prototype.drawGraph = function(){
 
     // draw legend text
     gw.legend.append("text")
-      .attr("x", gw.margin.left + 36)
-      .attr("y", gw.margin.top + 21)
+      .attr("x", gw.margin.left + 36*gw.scl)
+      .attr("y", gw.margin.top + 21*gw.scl)
       .attr("dy", ".35em")
-      .attr("font-size","1.2em")
+      .attr("font-size",function(){return (1.2*gw.scl)+"1.2em"})
       .style("text-anchor", function(){return (document.dir=="rtl")?"end":"start"})
       .style("fill",gw.getCol('text'))
       .text(function(d) { if (gw.legenddescs[d]){return gw.legenddescs[d];}else{return d}})

@@ -264,6 +264,12 @@ body.rtl .axisunitholder{
 .axis.col-black text{
     fill:#fff;
 }
+#g-legend .leg-title{
+    cursor:pointer;
+}
+#g-legend.hide .legend-item{
+    display:none;
+}
 .tooltip {
   position: absolute;
   width: 200px;
