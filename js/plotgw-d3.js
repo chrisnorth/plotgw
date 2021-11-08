@@ -1087,8 +1087,10 @@ GWCatalogue.prototype.setScales = function(){
         else if (d[p].lower!=null){return d[p].lower}
         else if (d[p].upper!=null){return d[p].upper};
     }
-    this.legY=0; //set initial legend Y position to zero
-
+    this.legY={};
+    for (y in this.legYinit){
+        this.legY[y]=this.legYinit[y]; //set initial legend Y position
+    }
     this.pErr = function(d,p,maxmin) {
         //error- -> value
         if (!d[p]){return null}
@@ -2234,11 +2236,11 @@ GWCatalogue.prototype.setStyles = function(){
     this.cValue = function(d) {return d.detType.best;};
     this.color1 = d3.scale.category10();
     this.styleDomains = ['GW','Marginal','Candidate','BBH','BNS','MassGap','NSBH','O1','O2','O3a','O3b'];
-    this.legType = d3.scale.ordinal().range(['','','','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
+    this.legType = d3.scale.ordinal().range(['event','event','event','massguide','massguide','massguide','massguide','timeguide','timeguide','timeguide','timeguide']).domain(this.styleDomains);
     this.color = d3.scale.ordinal().range(gw.getCol('dotfill')).domain(this.styleDomains);
     this.linestyles = d3.scale.ordinal().range(gw.getCol('dotline')).domain(this.styleDomains);
     this.linedashes = function(x){return((x=="GW")?0:3);}
-    this.dotopacity = function(x){return((gw.legType(x)=='')?1:0);}
+    this.dotopacity = function(x){return((gw.legType(x)=='event')?1:0);}
     this.squareopacity = function(x){return(((gw.legType(x)=='timeguide')||(gw.legType(x)=='massguide'))?1:0);}
     this.legOpacity = function(x){
         var op=1;
@@ -2253,13 +2255,19 @@ GWCatalogue.prototype.setStyles = function(){
     var legPosRange;
     if (this.confirmedOnly){
         legPosRange=[0,0,0,1,2,3,4,1,2,3,4,5];
+        this.legYinit = {'event':0,'massguide':1,'timeguide':1};
     }else if((this.noGraceDB)||(this.noMarginal)){
         legPosRange=[0,1,1,2,3,4,5,2,3,4,5,6];
+        this.legYinit = {'event':0,'massguide':2,'timeguide':2};
     }else{
         legPosRange=[0,1,2,3,4,5,6,3,4,5,6,7];
+        this.legYinit = {'event':0,'massguide':3,'timeguide':3};
     }
     this.legPos = d3.scale.ordinal().range(legPosRange).domain(this.styleDomains);
-    this.legY = 0;
+    this.legY={};
+    for (y in this.legYinit){
+        this.legY[y]=this.legYinit[y]; //set initial legend Y position to zero
+    }
     // this.squareopacity = d3.scale.ordinal().range([0,0,0,1,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
@@ -3381,10 +3389,10 @@ GWCatalogue.prototype.drawGraph = function(){
       .attr("font-size",function(){return (1.5*gw.scl)+"em"})
       .style("text-anchor", function(){return (document.dir=="rtl")?"end":"start"})
       .style("fill",gw.getCol('text'))
-      .text(function(d) {var txt=gw.tl('%text.plotgw.legend.title%');txt=(gw.gleg.classed("hide"))?txt+' >':txt+ ' v';return(txt);})
+      .text(function(d) {var txt=gw.tl('%text.plotgw.legend.title%');txt=(gw.gleg.classed("hide"))?txt+' >':txt;return(txt);})
       .on("click",function(){
           gw.gleg.classed("hide",(gw.gleg.classed("hide"))?false:true);
-          d3.select(this).text(function(d) {var txt=gw.tl('%text.plotgw.legend.title%');txt=(gw.gleg.classed("hide"))?txt+' >':txt+ ' v';return(txt);});
+          d3.select(this).text(function(d) {var txt=gw.tl('%text.plotgw.legend.title%');txt=(gw.gleg.classed("hide"))?txt+' >':txt;return(txt);});
       });
     
         
@@ -3397,8 +3405,8 @@ GWCatalogue.prototype.drawGraph = function(){
       // .attr("transform", function(d) { return "translate(0," +
       //     (gw.legPos(d) * 24) + ")"; })
       .attr("transform", function(d) {
-          var thisY="translate(0," +((gw.legY+1) * 24*gw.scl) + ")";
-          gw.legY+=(gw.legOpacity(d)==1)?1:0;
+          var thisY="translate(0," +((gw.legY[gw.legType(d)]+1) * 24*gw.scl) + ")";
+          gw.legY[gw.legType(d)]+=1;
           // console.log('legY',d,gw.legOpacity(d),gw.legY);
           return thisY; })
       .attr("opacity",function(d){console.log(d,gw.legOpacity(d));return gw.legOpacity(d);});
