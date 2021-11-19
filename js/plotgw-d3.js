@@ -29,6 +29,11 @@ function GWCatalogue(inp){
         this.noMarginal=JSON.parse(this.urlVars.noMarginal);
     }else{this.noMarginal = (inp)&&(inp.hasOwnProperty('noMarginal')) ? JSON.parse(inp.noMarginal) : false}
 
+    if (this.confirmedOnly){
+        this.noCandidates=false;
+        this.noMarginal=false;
+    }
+
     this.holderid = (inp)&&(inp.holderid) ? inp.holderid : "plotgw-cont";
     if(this.debug){console.log('creating plot in #'+this.holderid)}
     if ((inp)&&(inp.clearhtml)){
@@ -298,9 +303,9 @@ GWCatalogue.prototype.init = function(){
             "name":'%data.dettype.name%',
     		"type":"checkbox",
     		"options":[
-    			{"id": "filt-conf", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
-    			{"id": "filt-marg", "label":"%text.plotgw.filter.dettype.marginal%", "checked": true, "value": "Marginal" },
-                {"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
+    			{"id": "filt-conf", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW","redraw":true },
+                {"id": "filt-marg", "label":"%text.plotgw.filter.dettype.marginal%", "checked": (this.noMarginal)?false:true, "value": "Marginal","redraw":true },
+                {"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": (this.noCandidates)?false:true, "value": "Candidate","redraw":true }
             ]
 	    }
     }
@@ -1835,7 +1840,8 @@ GWCatalogue.prototype.flyInProbBars = function(d,resize,delay=false){
 
     for (p in this.probs){
         prob=this.probs[p];
-        pval=d.objType.prob[prob];
+        let objType=(d.objType)?d.objType:{};
+        pval=objType.prob[prob];
         ptxt=this.obj2hint(prob,true,true);
         ptxt2=this.obj2hint(prob,true)
         ptxt3=this.obj2hint(prob);
@@ -2017,8 +2023,8 @@ GWCatalogue.prototype.updateSketch = function(d){
         }
     }else{
         // clicked on un-selelected datapoint
-        if (d.detType.best=='Candidate'){
-            // seleted candidate
+        if ((d.detType.best=='Candidate')&&(d.objType)){
+            // seleted candidate wiht objType
             this.hideBHSketch();
             if (!(this.d)){
                 // no current selection
@@ -2055,7 +2061,7 @@ GWCatalogue.prototype.updateSketch = function(d){
             //update labels
             this.redrawLabels();
         }else{
-            // selected detection
+            // selected detection or candidate without objType
             if (!(this.d)) {
                 // nothing selected, so fly in
                 this.hideProbSketch()
@@ -2246,28 +2252,32 @@ GWCatalogue.prototype.setStyles = function(){
         var op=1;
         op=(gw.legType(x)=='timeguide')?gw.showTimeGuides():op;
         op=(gw.legType(x)=='massguide')?gw.showMassGuides():op;
-        op=((x=='Marginal')&&((gw.noMarginal)||(gw.confirmedOnly)))?0:op;
-        op=((x=='Candidate')&&((gw.noCandidates)||(gw.confirmedOnly)))?0:op;
+        op=((x=='Marginal')&&((gw.noMarginal)))?0:op;
+        op=((x=='Candidate')&&((gw.noCandidates)))?0:op;
         return op;
     }
     // this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
     // this.dotopacity = d3.scale.ordinal().range([1,1,1,0,0,0,0,0,0,0,0]).domain(this.styleDomains);
     var legPosRange;
-    if (this.confirmedOnly){
-        legPosRange=[0,0,0,1,2,3,4,1,2,3,4,5];
-        this.legYinit = {'event':0,'massguide':1,'timeguide':1};
-    }else if((this.noCandidates)||(this.noMarginal)){
-        legPosRange=[0,1,1,2,3,4,5,2,3,4,5,6];
-        this.legYinit = {'event':0,'massguide':2,'timeguide':2};
-    }else{
-        legPosRange=[0,1,2,3,4,5,6,3,4,5,6,7];
-        this.legYinit = {'event':0,'massguide':3,'timeguide':3};
+    this.setLegendPos = function(){
+        if ((this.noCandidates)&&(this.noMarginal)){
+            legPosRange=[0,0,0,1,2,3,4,1,2,3,4,5];
+            this.legYinit = {'event':0,'massguide':1,'timeguide':1};
+        }else if((this.noCandidates)||(this.noMarginal)){
+            legPosRange=[0,1,1,2,3,4,5,2,3,4,5,6];
+            this.legYinit = {'event':0,'massguide':2,'timeguide':2};
+        }else{
+            legPosRange=[0,1,2,3,4,5,6,3,4,5,6,7];
+            this.legYinit = {'event':0,'massguide':3,'timeguide':3};
+        }
+        this.legPos = d3.scale.ordinal().range(legPosRange).domain(this.styleDomains);
+        this.legY={};
+        for (y in this.legYinit){
+            this.legY[y]=this.legYinit[y]; //set initial legend Y position to zero
+        }
     }
-    this.legPos = d3.scale.ordinal().range(legPosRange).domain(this.styleDomains);
-    this.legY={};
-    for (y in this.legYinit){
-        this.legY[y]=this.legYinit[y]; //set initial legend Y position to zero
-    }
+    this.setLegendPos();
+    
     // this.squareopacity = d3.scale.ordinal().range([0,0,0,1,1,1,1,1,1,1,1,1]).domain(this.styleDomains);
     this.getOpacity = function(d) {
         return (((d[gw.xvar])&&(d[gw.yvar])) ? gw.dotopacity(d.detType) : 0)}
@@ -2587,7 +2597,8 @@ GWCatalogue.prototype.drawGraphInit = function(){
     if (gw.datasrc=='gwosc'){
         gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:gw.fileInGwosc,debug:this.debug});
     }else{
-        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,noCandidates:gw.noCandidates,noMarginal:gw.noMarginal,'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
+        // gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,noCandidates:gw.noCandidates,noMarginal:gw.noMarginal,'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
+        gw.cat = new GWCat(eventsCallback,{'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
     }
 
 
@@ -4559,6 +4570,9 @@ GWCatalogue.prototype.addOptions = function(){
         d3.select("#buttony-"+gw.presets["conf-only"]["y-axis"])[0][0].click();
         // change filters
         d3.select("#filt-cand").property("checked",false);
+        gw.noCandidates=true;
+        d3.select("#filt-marg").property("checked",false);
+        gw.noCandidates=true;
         d3.select("#filt-conf").property("checked",true);
         gw.updateFilters();
         // d3.select("#limOpt").property("checked",false);
@@ -4572,6 +4586,9 @@ GWCatalogue.prototype.addOptions = function(){
         d3.select("#buttonx-"+gw.presets["cand-only"]["x-axis"])[0][0].click();
         d3.select("#buttony-"+gw.presets["cand-only"]["y-axis"])[0][0].click();
         d3.select("#filt-cand").property("checked",true);
+        gw.noCandidates=false;
+        d3.select("#filt-marg").property("checked",true);
+        gw.noCandidates=false;
         d3.select("#filt-conf").property("checked",false);
         gw.updateFilters();
         // d3.select("#limOpt").property("checked",true);
@@ -4586,6 +4603,9 @@ GWCatalogue.prototype.addOptions = function(){
         d3.select("#buttony-"+gw.presets["allsrc"]["y-axis"])[0][0].click();
         // change filters
         d3.select("#filt-cand").property("checked",true);
+        gw.noCandidates=false;
+        d3.select("#filt-marg").property("checked",true);
+        gw.noMarginal=false;
         d3.select("#filt-conf").property("checked",true);
         gw.updateFilters();
         // d3.select("#limOpt").property("checked",false);
