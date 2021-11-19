@@ -22,9 +22,9 @@ function GWCatalogue(inp){
     if (this.urlVars.hasOwnProperty('confirmedOnly')){
         this.confirmedOnly=JSON.parse(this.urlVars.confirmedOnly);
     }else{this.confirmedOnly = (inp)&&(inp.hasOwnProperty('confirmedOnly')) ? JSON.parse(inp.confirmedOnly) : false}
-    if (this.urlVars.hasOwnProperty('noGraceDB')){
-        this.noGraceDB=JSON.parse(this.urlVars.noGraceDB);
-    }else{this.noGraceDB = (inp)&&(inp.hasOwnProperty('noGraceDB')) ? JSON.parse(inp.noGraceDB) : true}
+    if (this.urlVars.hasOwnProperty('noCandidates')){
+        this.noCandidates=JSON.parse(this.urlVars.noCandidates);
+    }else{this.noCandidates = (inp)&&(inp.hasOwnProperty('noCandidates')) ? JSON.parse(inp.noCandidates) : true}
     if (this.urlVars.hasOwnProperty('noMarginal')){
         this.noMarginal=JSON.parse(this.urlVars.noMarginal);
     }else{this.noMarginal = (inp)&&(inp.hasOwnProperty('noMarginal')) ? JSON.parse(inp.noMarginal) : false}
@@ -299,8 +299,8 @@ GWCatalogue.prototype.init = function(){
     		"type":"checkbox",
     		"options":[
     			{"id": "filt-conf", "label":"%text.plotgw.filter.dettype.detections%", "checked": true, "value": "GW" },
-    			{"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" },
-                {"id": "filt-marg", "label":"%text.plotgw.filter.dettype.marginal%", "checked": true, "value": "Marginal" }
+    			{"id": "filt-marg", "label":"%text.plotgw.filter.dettype.marginal%", "checked": true, "value": "Marginal" },
+                {"id": "filt-cand", "label":"%text.plotgw.filter.dettype.candidates%", "checked": true, "value": "Candidate" }
             ]
 	    }
     }
@@ -2247,7 +2247,7 @@ GWCatalogue.prototype.setStyles = function(){
         op=(gw.legType(x)=='timeguide')?gw.showTimeGuides():op;
         op=(gw.legType(x)=='massguide')?gw.showMassGuides():op;
         op=((x=='Marginal')&&((gw.noMarginal)||(gw.confirmedOnly)))?0:op;
-        op=((x=='Candidate')&&((gw.noGraceDB)||(gw.confirmedOnly)))?0:op;
+        op=((x=='Candidate')&&((gw.noCandidates)||(gw.confirmedOnly)))?0:op;
         return op;
     }
     // this.linedashes = d3.scale.ordinal().range([0,3,3,3,3,3,3,3,3,3,3]).domain(this.styleDomains);
@@ -2256,7 +2256,7 @@ GWCatalogue.prototype.setStyles = function(){
     if (this.confirmedOnly){
         legPosRange=[0,0,0,1,2,3,4,1,2,3,4,5];
         this.legYinit = {'event':0,'massguide':1,'timeguide':1};
-    }else if((this.noGraceDB)||(this.noMarginal)){
+    }else if((this.noCandidates)||(this.noMarginal)){
         legPosRange=[0,1,1,2,3,4,5,2,3,4,5,6];
         this.legYinit = {'event':0,'massguide':2,'timeguide':2};
     }else{
@@ -2587,7 +2587,7 @@ GWCatalogue.prototype.drawGraphInit = function(){
     if (gw.datasrc=='gwosc'){
         gw.cat = new GWCat(eventsCallback,{datasrc:'gwosc','fileIn':gw.fileInEvents,gwoscFile:gw.fileInGwosc,debug:this.debug});
     }else{
-        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,noGraceDB:gw.noGraceDB,noMarginal:gw.noMarginal,'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
+        gw.cat = new GWCat(eventsCallback,{confirmedOnly:gw.confirmedOnly,noCandidates:gw.noCandidates,noMarginal:gw.noMarginal,'fileInJsonp':gw.fileInEvents,'fileIn':gw.fileInEvents});
     }
 
 
