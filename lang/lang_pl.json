@@ -72,7 +72,7 @@
  "text.plotgw.vertical-axis": "Oś pionowa",
  "text.plotgw.help.title": "Pomoc",
  "text.plotgw.help.text": "<p>Przeszukaj katalog zwartych układów podwójnych LIGO, który zawiera wszystkie odkryte do tej pory przez detektory LIGO układy czarnych dziur i gwiazd neutronowych.</p><p>Kliknij w punkty na wykresie by wyświetlić informacje o detekcjach</p>",
- "text.plotgw.help.about": "<p>Aplikacja została napisana i jest prowdzona przez <a href='http://blogs.cardiff.ac.uk/chrisnorth'>Chrisa Northa</a> (<a href='http://www.astro.cf.ac.uk/research/gravity'>Cardiff University</a>). Źródła strony są dostępne na stronie <a href='github.com/chrisnorth/plotgw'>GitHub</a>.</p>",
+ "text.plotgw.help.about": "<p>Aplikacja została napisana i jest prowdzona przez <a href='http://blogs.cardiff.ac.uk/chrisnorth'>Chrisa Northa</a> (<a href='http://www.astro.cf.ac.uk/research/gravity'>Cardiff University</a>). Źródła strony są dostępne na stronie <a href='https://github.com/cardiffgravity/plotgw'>GitHub</a>.</p>",
  "text.plotgw.help.tech": "<p>Punkty wykresu oznaczają wartości najlepszego dopasowania (mediany końcowych rozkładów prawdopodobieństwa). Błędy odpowiadają 90% przedziałom wiarygodności. Wartości odpowiadają parametrom źródła (nie są przeskalowane przesunięciem ku czerwieni). Więcej informacji znajdziesz w <a href='http://gw-openscience.org/' title='GWOSC'>Centrum Otwartych Danych Fala grawitacyjna</a></p>",
  "text.plotgw.help.info": "Pokaż informacje o wybranej detekcji",
  "text.plotgw.help.settings": "Zmień właściwości wykresu, np. osie poziome i pionowe",

@@ -129,7 +129,7 @@
  "text.plotgw.axiszero": "ଅକ୍ଷଙ୍କୁ ଶୂନରୁ ଆରମ୍ଭ କରନ୍ତୁ",
  "text.plotgw.help.title": "ସାହାର୍ଯ୍ୟ ",
  "text.plotgw.help.text": "<p>ଲାଇଗୋ-ଭିରଗୋ ପର୍ଯ୍ୟବେକ୍ଷିତ ନିଘନ ଯୁଗ୍ମ ବସ୍ତୁ ତାଲିକାକୁ ଅନ୍ୱେଷଣ କରନ୍ତୁ </p><p>ଚିତ୍ର ଉପରେ ଥିବା ଚିହ୍ନମାନଂକୁ ଟିପନ୍ତୁ ଆବିଷ୍କୃତ ଅଧିକ ତଥ୍ୟ ଜାଣିବା ପାଇଁ </p>",
- "text.plotgw.help.about": "<p>ଏହି ତଥ୍ୟଚିତ୍ରଟି ପୋଷିତ: <a target='_blank' href='http://blogs.cardiff.ac.uk/chrisnorth'>କ୍ରୀସ୍ ନର୍ଥ</a> (<a target='_blank' href='http://www.astro.cf.ac.uk/research/gravity'>କାର୍ଡିଫ୍ ବିଶ୍ଵବିଦ୍ୟାଳୟ</a>). ଉତ୍ସ ସଂହିତା: <a target='_blank' href='github.com/chrisnorth/plotgw'>ଗୀଟହବ</a>.</p>",
+ "text.plotgw.help.about": "<p>ଏହି ତଥ୍ୟଚିତ୍ରଟି ପୋଷିତ: <a target='_blank' href='http://blogs.cardiff.ac.uk/chrisnorth'>କ୍ରୀସ୍ ନର୍ଥ</a> (<a target='_blank' href='http://www.astro.cf.ac.uk/research/gravity'>କାର୍ଡିଫ୍ ବିଶ୍ଵବିଦ୍ୟାଳୟ</a>). ଉତ୍ସ ସଂହିତା: <a target='_blank' href='https://github.com/cardiffgravity/plotgw'>ଗୀଟହବ</a>.</p>",
  "text.plotgw.help.tech": "<p>ଏହି ଚିତ୍ର ଦେଖାଉଛି ସର୍ବୋତ୍ତମ ଯୋଗ୍ୟ ମାପ ମାନଂକୁ | ଅଧିକ ବିବରଣ ପାଇଁ ଦେଖନ୍ତୁ  <a target='_blank' href='http://https://gw-openscience.org/' title='GWOSC'>ମହାକର୍ଷଣ ତରଙ୍ଗ ମୁକ୍ତ ବିଜ୍ଞାନ କେଂଦ୍ର </a>.</p>",
  "text.plotgw.help.info": "ଚୟନିତ ଆବିଷ୍କାରଙ୍କ ଉପରେ ତଥ୍ୟ ଦେଖାନ୍ତୁ",
  "text.plotgw.help.settings": "ଚିତ୍ର ଉପରେ ଅନୁପ୍ରସ୍ଥ ଓ ଲମ୍ବିତ ଅକ୍ଷକୁ ବଦଳାନ୍ତୁ",

@@ -129,7 +129,7 @@
  "text.plotgw.axiszero": "Force axes to start at zero",
  "text.plotgw.help.title": "Help",
  "text.plotgw.help.text": "<p>Explore the LIGO-Virgo compact binary catalogue, which is all the mergers of Black Holes and neutron stars detected by the LIGO-Virgo detectors.</p><p>Click on the markers on the graph to show information about the various detections</p>",
- "text.plotgw.help.about": "<p>This web-app was written and is maintained by <a target='_blank' href='http://blogs.cardiff.ac.uk/chrisnorth'>Chris North</a> (<a target='_blank' href='http://www.astro.cf.ac.uk/research/gravity'>Cardiff University</a>). Source code is available on <a target='_blank' href='github.com/chrisnorth/plotgw'>GitHub</a>.</p>",
+ "text.plotgw.help.about": "<p>This web-app was written and is maintained by <a target='_blank' href='http://blogs.cardiff.ac.uk/chrisnorth'>Chris North</a> (<a target='_blank' href='http://www.astro.cf.ac.uk/research/gravity'>Cardiff University</a>). Source code is available on <a target='_blank' href='https://github.com/cardiffgravity/plotgw'>GitHub</a>.</p>",
  "text.plotgw.help.tech": "<p>The points in this graph show the best fit values, which are the medians of the posterior probability distributions. The error bars indicate the 90% credible interval. All values are in the source frame of the source (i.e. no redshifts applied). Where applicable, the uncertainties assume astrophysical priors. Further details are available at the <a target='_blank' href='http://https://gw-openscience.org/' title='GWOSC'>Gravitational Wave Open Science Center</a>.</p>",
  "text.plotgw.help.info": "Show information about the selected detection",
  "text.plotgw.help.settings": "Change the graph properties, such as the horizontal and vertical axes",
