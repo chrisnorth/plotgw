@@ -1,20 +1,21 @@
 // Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
 window.cookieconsent_options = {"message":"This website uses cookies to gather statistical data about our users’ browsing actions and patterns, and does not identify any individual. The only cookies in use on our site are for Google Analytics. By continuing to use it you consent to the use of cookies as set out in the Cardiff University <a href='http://www.cardiff.ac.uk/help/cookies'>cookie policy</a>","dismiss":"Got it!","learnMore":"More info","link":null,"theme":"dark-bottom"};
 
-(function(i,s,o,g,r,a,m){
-    i['GoogleAnalyticsObject']=r;
-    i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)
-    },
-    i[r].l=1*new Date();
-    a=s.createElement(o),m=s.getElementsByTagName(o)[0];
-    a.async=1;
-    a.src=g;
-    m.parentNode.insertBefore(a,m)
-})
-(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-ga('create', 'UA-130299724-1', 'auto');
-ga('send', 'pageview');
+// (function(i,s,o,g,r,a,m){
+//     i['GoogleAnalyticsObject']=r;
+//     i[r]=i[r]||function(){
+//         (i[r].q=i[r].q||[]).push(arguments)
+//     },
+//     i[r].l=1*new Date();
+//     a=s.createElement(o),m=s.getElementsByTagName(o)[0];
+//     a.async=1;
+//     a.src=g;
+//     m.parentNode.insertBefore(a,m)
+// })
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-130299724-2');
 
 /*
 // content below from http://cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.10/cookieconsent.min.js
